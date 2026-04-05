@@ -8,4 +8,12 @@
         <enabled>true</enabled>
         <name>Smart_Grid_Config__mdt</name>
     </customMetadataTypeAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <name>SmartGridController</name>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <name>GridQueryBuilder</name>
+    </classAccesses>
 </PermissionSet>
