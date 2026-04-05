@@ -1,7 +1,7 @@
 # Developer Story: 02 - Bulk Save & Row Error Handling
 
 ## Meta
-- **Feature**: 001-smartgrid-final
+- **Feature**: 001-smartgrid-phase0
 - **Story Link**: [US-2] Bulk Save & Error Handling
 - **Status**: IMPLEMENTED
 - **Started**: 2026-04-05

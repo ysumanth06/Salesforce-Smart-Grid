@@ -1,7 +1,7 @@
 # Developer Story: 00 - Foundation & Data Model
 
 ## Meta
-- **Feature**: 001-smartgrid-final
+- **Feature**: 001-smartgrid-phase0
 - **Story Link**: Foundation (Blocks All)
 - **Status**: REVIEW
 - **Started**: 2026-04-05

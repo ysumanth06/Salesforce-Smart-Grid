@@ -1,7 +1,7 @@
 # Developer Story: 04 - Single Dynamic Grid Filter
 
 ## Meta
-- **Feature**: 001-smartgrid-final
+- **Feature**: 001-smartgrid-phase0
 - **Story Link**: [US-4] Dynamic Single Filtering
 - **Status**: IMPLEMENTED
 - **Started**: 2026-04-05

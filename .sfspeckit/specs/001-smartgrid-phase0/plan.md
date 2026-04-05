@@ -1,7 +1,7 @@
 # Technical Implementation Plan: Salesforce Smart Grid - Phase 0
 
 ## Context
-**Feature**: 001-smartgrid-final  
+**Feature**: 001-smartgrid-phase0  
 **Target Org**: Sandbox (ISV-AppExchange Ready Architecture)  
 **API Version**: 65.0  
 **Package Path**: `force-app`

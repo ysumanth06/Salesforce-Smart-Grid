@@ -1,7 +1,7 @@
 # Feature Specification: Salesforce Smart Grid - Phase 0
 
 **Feature Number**: 001
-**Feature Slug**: 001-smartgrid-final
+**Feature Slug**: 001-smartgrid-phase0
 **API Version**: 65.0
 **Date**: 2026-04-05
 **Status**: Clarified

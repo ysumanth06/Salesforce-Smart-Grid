@@ -1,7 +1,7 @@
 # Developer Story: 03 - Column Personalization Modal
 
 ## Meta
-- **Feature**: 001-smartgrid-final
+- **Feature**: 001-smartgrid-phase0
 - **Story Link**: [US-3] Column Personalization via Picker
 - **Status**: IMPLEMENTED
 - **Started**: 2026-04-05

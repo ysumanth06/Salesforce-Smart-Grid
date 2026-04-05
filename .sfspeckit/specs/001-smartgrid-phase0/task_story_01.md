@@ -1,7 +1,7 @@
 # Developer Story: 01 - Grid Base & Read/Edit Init
 
 ## Meta
-- **Feature**: 001-smartgrid-final
+- **Feature**: 001-smartgrid-phase0
 - **Story Link**: [US-1] Inline Data Editing
 - **Status**: IMPLEMENTED
 - **Started**: 2026-04-05
