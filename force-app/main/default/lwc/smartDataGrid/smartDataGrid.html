@@ -1,5 +1,19 @@
 <template>
     <lightning-card title="Smart Data Grid">
+        <!-- Filter Bar -->
+        <template lwc:if={hasFilter}>
+            <div class="slds-p-horizontal_medium slds-p-top_small">
+                <lightning-combobox
+                    name="gridFilter"
+                    label={filterLabel}
+                    value={selectedFilterValue}
+                    options={filterOptions}
+                    onchange={handleFilterChange}
+                    variant="label-inline"
+                ></lightning-combobox>
+            </div>
+        </template>
+
         <div class="slds-m-around_medium" style="height: 400px; position: relative;">
             <template lwc:if={isLoading}>
                 <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>

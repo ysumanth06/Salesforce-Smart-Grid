@@ -2,6 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 import getGridConfig from '@salesforce/apex/SmartGridController.getGridConfig';
 import getRecords from '@salesforce/apex/SmartGridController.getRecords';
 import saveRecords from '@salesforce/apex/SmartGridController.saveRecords';
+import getPicklistValues from '@salesforce/apex/SmartGridController.getPicklistValues';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class SmartDataGrid extends LightningElement {
@@ -13,6 +14,11 @@ export default class SmartDataGrid extends LightningElement {
     @track draftValues = [];
     @track isLoading = true;
     @track errorMessage;
+
+    // Filter state
+    @track filterOptions = [];
+    @track selectedFilterValue = '';
+    _filterField;
 
     config;
     _showFieldPicker = false;
@@ -52,6 +58,12 @@ export default class SmartDataGrid extends LightningElement {
                     }));
                 }
                 this.gridColumns = columnsDef;
+
+                // Load filter picklist if configured
+                if (this.config.Default_Filter_Field__c) {
+                    this._filterField = this.config.Default_Filter_Field__c;
+                    await this.loadFilterOptions();
+                }
                 
                 // Fetch data if columns exist
                 if (this.gridColumns.length > 0) {
@@ -75,6 +87,41 @@ export default class SmartDataGrid extends LightningElement {
         }
     }
 
+    // ─── Filter Logic ───
+
+    /**
+     * Loads picklist values from Apex for the configured filter field.
+     * Populates the combobox options with an "All" entry as default.
+     */
+    async loadFilterOptions() {
+        if (!this.objectApiName || !this._filterField) return;
+
+        try {
+            const values = await getPicklistValues({
+                objectApiName: this.objectApiName,
+                fieldApiName: this._filterField
+            });
+
+            // Prepend "All" option as default
+            this.filterOptions = [
+                { label: '-- All --', value: '' },
+                ...values.map(v => ({ label: v.label, value: v.value }))
+            ];
+        } catch(e) {
+            // Non-critical: filter just won't render if it fails
+            this.filterOptions = [];
+            console.warn('Failed to load filter options:', this.reduceErrors(e));
+        }
+    }
+
+    /**
+     * Handle combobox selection change — refetch data with new filter value.
+     */
+    async handleFilterChange(event) {
+        this.selectedFilterValue = event.detail.value;
+        await this.fetchData();
+    }
+
     async fetchData() {
         if (!this.objectApiName || !this.gridColumns || this.gridColumns.length === 0) return;
 
@@ -83,10 +130,18 @@ export default class SmartDataGrid extends LightningElement {
             this.errorMessage = null;
             
             let fieldsToQuery = this.gridColumns.map(c => c.fieldName);
+
+            // Pass filter value to Apex if a filter field is configured
+            let filterValueParam = null;
+            if (this._filterField && this.selectedFilterValue) {
+                filterValueParam = this.selectedFilterValue;
+            }
+
             let response = await getRecords({
                 objectApiName: this.objectApiName,
                 fields: fieldsToQuery,
-                filterField: this.config?.Default_Filter_Field__c,
+                filterField: this._filterField || this.config?.Default_Filter_Field__c,
+                filterValue: filterValueParam,
                 sortField: this.config?.Default_Sort_Field__c,
                 recordLimit: this.config?.Record_Limit__c || 200
             });
@@ -163,12 +218,8 @@ export default class SmartDataGrid extends LightningElement {
 
     // ─── Field Picker Integration ───
 
-    /**
-     * Opens the field picker modal via the child component's @api open() method.
-     */
     openFieldPicker() {
         this._showFieldPicker = true;
-        // Use a microtask to ensure the child is rendered before calling open()
         // eslint-disable-next-line @lwc/lwc/no-async-operation
         Promise.resolve().then(() => {
             const picker = this.template.querySelector('c-smart-grid-field-picker');
@@ -178,15 +229,10 @@ export default class SmartDataGrid extends LightningElement {
         });
     }
 
-    /**
-     * Handle fieldselection event from the child smartGridFieldPicker.
-     * Builds datatable columns from the user's selections and fetches data.
-     */
     async handleFieldSelection(event) {
         const { fields, columns } = event.detail;
         this._showFieldPicker = false;
 
-        // Build datatable column definitions from picker output
         this.gridColumns = columns.map(col => ({
             label: col.label || col.field,
             fieldName: col.field,
@@ -196,26 +242,27 @@ export default class SmartDataGrid extends LightningElement {
 
         this.pickerSelectedFields = fields;
 
-        // Fetch data with the user's selected fields
         if (this.gridColumns.length > 0) {
             await this.fetchData();
         }
     }
 
-    /**
-     * Handle pickerclosed event — user cancelled the modal.
-     */
     handlePickerClosed() {
         this._showFieldPicker = false;
     }
 
     // ─── Computed Properties ───
 
-    /**
-     * Show the "no config" message only when not loading, no columns, and no picker open.
-     */
     get showNoConfigMessage() {
         return !this.gridColumns && !this.isLoading && !this._showFieldPicker;
+    }
+
+    get hasFilter() {
+        return this.filterOptions && this.filterOptions.length > 1;
+    }
+
+    get filterLabel() {
+        return `Filter by ${this._filterField || 'Field'}`;
     }
 
     // ─── Utilities ───

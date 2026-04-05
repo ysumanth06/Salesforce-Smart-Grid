@@ -31,7 +31,7 @@ public class SmartGridControllerTest {
         insert target;
         
         Test.startTest();
-        List<SObject> records = SmartGridController.getRecords('Account', new List<String>{'Name'}, null, null, 10);
+        List<SObject> records = SmartGridController.getRecords('Account', new List<String>{'Name'}, null, null, null, 10);
         Test.stopTest();
         
         System.assertEquals(1, records.size(), 'Should return 1 record');
@@ -97,5 +97,60 @@ public class SmartGridControllerTest {
         
         Integer updatedCount = [SELECT COUNT() FROM Account WHERE Name LIKE '%Updated'];
         System.assertEquals(201, updatedCount, 'All records should be updated');
+    }
+
+    @isTest
+    static void testGetPicklistValues_Valid() {
+        Test.startTest();
+        List<SmartGridController.PicklistOption> options = SmartGridController.getPicklistValues('Account', 'Industry');
+        Test.stopTest();
+        
+        System.assertNotEquals(0, options.size(), 'Should return picklist values for Account.Industry');
+        // Verify structure
+        for (SmartGridController.PicklistOption opt : options) {
+            System.assertNotEquals(null, opt.label, 'Each option should have a label');
+            System.assertNotEquals(null, opt.value, 'Each option should have a value');
+        }
+    }
+
+    @isTest
+    static void testGetPicklistValues_NonPicklistField() {
+        Test.startTest();
+        try {
+            SmartGridController.getPicklistValues('Account', 'Name');
+            System.assert(false, 'Expected exception for non-picklist field');
+        } catch(AuraHandledException e) {
+            System.assert(e.getMessage().contains('not a picklist'), 
+                'Error should indicate non-picklist field. Got: ' + e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testGetPicklistValues_NullParams() {
+        Test.startTest();
+        List<SmartGridController.PicklistOption> options = SmartGridController.getPicklistValues(null, null);
+        Test.stopTest();
+        
+        System.assertEquals(0, options.size(), 'Should return empty list for null params');
+    }
+
+    @isTest
+    static void testGetRecords_WithFilterValue() {
+        Account acc = new Account(Name='Filter Test', Industry='Technology');
+        insert acc;
+        
+        Test.startTest();
+        List<SObject> records = SmartGridController.getRecords(
+            'Account', new List<String>{'Name', 'Industry'}, 
+            'Industry', 'Technology', null, 10
+        );
+        Test.stopTest();
+        
+        System.assert(records.size() > 0, 'Should return at least the Technology record');
+        for (SObject r : records) {
+            System.assertEquals('Technology', (String)r.get('Industry'), 
+                'All returned records should have Industry = Technology');
+        }
     }
 }

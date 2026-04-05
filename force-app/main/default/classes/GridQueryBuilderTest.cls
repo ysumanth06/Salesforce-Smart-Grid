@@ -78,4 +78,58 @@ public class GridQueryBuilderTest {
         
         System.assert(query.contains('LIMIT 2000'), 'Limit should be capped at 2000');
     }
+
+    @isTest
+    static void testBuildSingleQuery_FilterValue_Positive() {
+        GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
+        req.objectApiName = 'Account';
+        req.fields = new List<String>{'Name', 'Industry'};
+        req.filterField = 'Industry';
+        req.filterValue = 'Healthcare';
+        req.recordLimit = 100;
+        
+        Test.startTest();
+        String query = GridQueryBuilder.buildSingleQuery(req);
+        Test.stopTest();
+        
+        System.assert(query.contains('WHERE Industry = \'Healthcare\''), 
+            'Query should contain WHERE clause with specific filter value. Got: ' + query);
+    }
+
+    @isTest
+    static void testBuildSingleQuery_FilterValue_SqlInjection_Negative() {
+        GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
+        req.objectApiName = 'Account';
+        req.fields = new List<String>{'Name', 'Industry'};
+        req.filterField = 'Industry';
+        req.filterValue = 'Healthcare\' OR Name != \'';
+        req.recordLimit = 100;
+        
+        Test.startTest();
+        String query = GridQueryBuilder.buildSingleQuery(req);
+        Test.stopTest();
+        
+        // The injected SQL should be escaped, not executed as-is
+        System.assert(!query.contains('OR Name'), 
+            'SQL injection should be prevented by escaping. Got: ' + query);
+        System.assert(query.contains('Healthcare'), 
+            'The filter value should still be present (escaped). Got: ' + query);
+    }
+
+    @isTest
+    static void testBuildSingleQuery_FilterFieldOnly_NoValue() {
+        GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
+        req.objectApiName = 'Account';
+        req.fields = new List<String>{'Name', 'Industry'};
+        req.filterField = 'Industry';
+        // filterValue intentionally left null
+        req.recordLimit = 100;
+        
+        Test.startTest();
+        String query = GridQueryBuilder.buildSingleQuery(req);
+        Test.stopTest();
+        
+        System.assert(query.contains('WHERE Industry != null'), 
+            'Query should fall back to != null when no filterValue. Got: ' + query);
+    }
 }

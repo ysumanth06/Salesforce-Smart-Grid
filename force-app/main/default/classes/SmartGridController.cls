@@ -45,7 +45,7 @@ public with sharing class SmartGridController {
     }
 
     @AuraEnabled
-    public static List<SObject> getRecords(String objectApiName, List<String> fields, String filterField, String sortField, Integer recordLimit) {
+    public static List<SObject> getRecords(String objectApiName, List<String> fields, String filterField, String filterValue, String sortField, Integer recordLimit) {
         if (String.isBlank(objectApiName) || fields == null || fields.isEmpty()) {
             throw new AuraHandledException('Invalid parameters: object api name and fields are required.');
         }
@@ -55,16 +55,69 @@ public with sharing class SmartGridController {
             req.objectApiName = objectApiName;
             req.fields = fields;
             req.filterField = filterField;
+            req.filterValue = filterValue;
             req.sortField = sortField;
             req.recordLimit = recordLimit;
 
             String query = GridQueryBuilder.buildSingleQuery(req);
             
-            return Database.query(query); // Enforced by WITH USER_MODE implicitly or using user mode
+            return Database.query(query);
             
         } catch(Exception e) {
             throw new AuraHandledException('Error fetching records: ' + e.getMessage());
         }
+    }
+
+    /**
+     * @description Fetches active picklist values for a given field on a given object.
+     * Used by the LWC filter combobox to dynamically populate filter options.
+     * Validates FLS before returning values.
+     * @param objectApiName The SObject API name (e.g. 'Account')
+     * @param fieldApiName The picklist field API name (e.g. 'Industry')
+     * @return List<PicklistOption> containing label/value pairs
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<PicklistOption> getPicklistValues(String objectApiName, String fieldApiName) {
+        List<PicklistOption> options = new List<PicklistOption>();
+        
+        if (String.isBlank(objectApiName) || String.isBlank(fieldApiName)) {
+            return options;
+        }
+
+        SObjectType sObjType = Schema.getGlobalDescribe().get(objectApiName);
+        if (sObjType == null) {
+            throw new AuraHandledException('Invalid object: ' + objectApiName);
+        }
+
+        Map<String, SObjectField> fieldMap = sObjType.getDescribe().fields.getMap();
+        String lowerFieldName = fieldApiName.toLowerCase();
+        
+        if (!fieldMap.containsKey(lowerFieldName)) {
+            throw new AuraHandledException('Field not found: ' + fieldApiName);
+        }
+
+        Schema.DescribeFieldResult fieldDescribe = fieldMap.get(lowerFieldName).getDescribe();
+        
+        if (!fieldDescribe.isAccessible()) {
+            throw new AuraHandledException('Field not accessible: ' + fieldApiName);
+        }
+
+        // Only return values for picklist-type fields
+        Schema.DisplayType fieldType = fieldDescribe.getType();
+        if (fieldType != Schema.DisplayType.PICKLIST && fieldType != Schema.DisplayType.MULTIPICKLIST) {
+            throw new AuraHandledException('Field is not a picklist: ' + fieldApiName);
+        }
+
+        for (Schema.PicklistEntry entry : fieldDescribe.getPicklistValues()) {
+            if (entry.isActive()) {
+                PicklistOption opt = new PicklistOption();
+                opt.label = entry.getLabel();
+                opt.value = entry.getValue();
+                options.add(opt);
+            }
+        }
+        
+        return options;
     }
 
     @AuraEnabled
@@ -126,5 +179,10 @@ public with sharing class SmartGridController {
         @AuraEnabled public Boolean isSuccess = true;
         @AuraEnabled public List<RowError> rowErrors = new List<RowError>();
         @AuraEnabled public List<String> tableErrors = new List<String>();
+    }
+
+    public class PicklistOption {
+        @AuraEnabled public String label;
+        @AuraEnabled public String value;
     }
 }

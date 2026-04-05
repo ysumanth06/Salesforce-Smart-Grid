@@ -38,9 +38,17 @@ public with sharing class GridQueryBuilder {
 
         String query = 'SELECT ' + String.join(validFields, ', ') + ' FROM ' + String.escapeSingleQuotes(req.objectApiName);
 
-        // Filter Handing
+        // Filter Handling
         if(String.isNotBlank(req.filterField) && isValidFilterField(sObjType, req.filterField)) {
-            query += ' WHERE ' + String.escapeSingleQuotes(req.filterField) + ' != null';
+            String escapedFilterField = String.escapeSingleQuotes(req.filterField);
+            if(String.isNotBlank(req.filterValue)) {
+                // Dynamic filter with specific value — escape to prevent injection
+                String escapedFilterValue = String.escapeSingleQuotes(req.filterValue);
+                query += ' WHERE ' + escapedFilterField + ' = \'' + escapedFilterValue + '\'';
+            } else {
+                // Default: just ensure the filter field is not null
+                query += ' WHERE ' + escapedFilterField + ' != null';
+            }
         }
 
         // Sort Handling
@@ -98,6 +106,9 @@ public with sharing class GridQueryBuilder {
         
         @InvocableVariable(label='Filter Field (API Name)')
         public String filterField;
+
+        @InvocableVariable(label='Filter Value')
+        public String filterValue;
         
         @InvocableVariable(label='Sort Field (API Name)')
         public String sortField;
