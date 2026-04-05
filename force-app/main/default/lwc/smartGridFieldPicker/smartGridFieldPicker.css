@@ -1,0 +1,19 @@
+/* smartGridFieldPicker — Modal Overlay Styles */
+
+/* Ensure modal renders over the parent grid */
+:host {
+    position: relative;
+    z-index: 9001;
+}
+
+/* Modal content area sizing for dual-listbox comfort */
+.slds-modal__content {
+    min-height: 300px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Error message styling */
+.slds-notify_alert {
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+}

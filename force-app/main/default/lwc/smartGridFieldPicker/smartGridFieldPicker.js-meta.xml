@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Smart Grid Field Picker</masterLabel>
+    <description>Modal child component for column personalization in Smart Data Grid. Displays accessible fields for selection via a dual listbox.</description>
+</LightningComponentBundle>

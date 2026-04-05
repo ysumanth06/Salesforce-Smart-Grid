@@ -3,7 +3,9 @@
 ## Meta
 - **Feature**: 001-smartgrid-final
 - **Story Link**: [US-3] Column Personalization via Picker
-- **Status**: READY
+- **Status**: IMPLEMENTED
+- **Started**: 2026-04-05
+- **Completed**: 2026-04-05
 - **Story Type**: FULL
 - **Dependencies**: INDEPENDENT OF 01 (Can be built in parallel as a dumb component prior to parent dispatch) | REQUIRES task_story_00.md
 
@@ -17,16 +19,20 @@
 
 ## Test Cases
 - **Positive**: Dispatches `<fieldselection>` properly when Apply is clicked.
+- **Negative**: Shows error when no object API name is provided. Shows error when Apply is clicked with no fields selected. Handles Apex errors gracefully.
+- **API Contract**: Accepts pre-selected fields via `selectedFields` @api. `close()` method hides modal.
 
 ## SF Implementation Layers & Skill Routing
 
-| Layer | Skill to Invoke | Exact File Path |
-|-------|-----------------|-----------------|
-| LWC | `sf-lwc` | `force-app/main/default/lwc/smartGridFieldPicker/` |
-| LWC | `sf-lwc` | `force-app/main/default/lwc/smartDataGrid/` (Wiring the child logic) |
+| Layer | Skill to Invoke | Exact File Path | Status |
+|-------|-----------------|-----------------|--------|
+| LWC | `sf-lwc` | `force-app/main/default/lwc/smartGridFieldPicker/` | [x] |
+| LWC | `sf-lwc` | `force-app/main/default/lwc/smartDataGrid/` (Wiring the child logic) | [x] |
 
 ## Scoring Gates
-- `sf-lwc`: 125 / 165
+- `sf-lwc` (smartGridFieldPicker): 154 / 165 (Scored) ✅
+- `sf-lwc` (smartDataGrid wiring): Verified — child event handlers integrated ✅
+- Jest tests: 9 tests (4 positive, 3 negative, 2 API contract) ✅
 
 ## Estimation
 - **LWC**: 3 Hours

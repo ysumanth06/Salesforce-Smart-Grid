@@ -1,0 +1,83 @@
+<template>
+    <template lwc:if={isOpen}>
+        <section
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-label={modalTitle}
+            class="slds-modal slds-fade-in-open"
+        >
+            <div class="slds-modal__container">
+                <!-- Header -->
+                <div class="slds-modal__header">
+                    <button
+                        class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close"
+                        onclick={handleCancel}
+                    >
+                        <lightning-icon
+                            icon-name="utility:close"
+                            alternative-text="Close"
+                            size="small"
+                            variant="inverse"
+                        ></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h1 class="slds-modal__title slds-hyphenate">{modalTitle}</h1>
+                </div>
+
+                <!-- Body -->
+                <div class="slds-modal__content slds-p-around_medium" id="field-picker-content">
+                    <template lwc:if={isLoading}>
+                        <div class="slds-is-relative" style="min-height: 200px;">
+                            <lightning-spinner
+                                alternative-text="Loading fields"
+                                size="medium"
+                            ></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template lwc:if={hasError}>
+                        <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_small" role="alert">
+                            <span class="slds-assistive-text">Error</span>
+                            <h2>{error}</h2>
+                        </div>
+                    </template>
+
+                    <template lwc:if={availableFields.length}>
+                        <lightning-dual-listbox
+                            name="fieldPicker"
+                            label="Fields"
+                            source-label={sourceLabel}
+                            selected-label={selectedLabel}
+                            options={availableFields}
+                            value={_currentSelection}
+                            onchange={handleSelectionChange}
+                            required
+                        ></lightning-dual-listbox>
+                    </template>
+                </div>
+
+                <!-- Footer -->
+                <div class="slds-modal__footer">
+                    <button
+                        class="slds-button slds-button_neutral"
+                        onclick={handleCancel}
+                        aria-label="Cancel field selection"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="slds-button slds-button_brand"
+                        onclick={handleApply}
+                        disabled={applyDisabled}
+                        aria-label="Apply selected fields"
+                    >
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>
