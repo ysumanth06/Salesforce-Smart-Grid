@@ -82,12 +82,26 @@ public with sharing class SmartGridController {
         Database.SaveResult[] saveResults = Database.update(safeRecords, false);
         
         result.isSuccess = true;
-        for (Database.SaveResult sr : saveResults) {
+        for (Integer i = 0; i < saveResults.size(); i++) {
+            Database.SaveResult sr = saveResults[i];
             if (!sr.isSuccess()) {
                 result.isSuccess = false;
+                RowError re = new RowError();
+                re.id = (String)safeRecords[i].get('Id');
+                re.title = 'Error';
+                re.messages = new List<String>();
+                re.fieldNames = new List<String>();
+                
                 for(Database.Error err : sr.getErrors()) {
-                    result.errorMessages.add(err.getMessage());
+                    re.messages.add(err.getMessage());
+                    if (err.getFields() != null) {
+                        for(String f : err.getFields()) {
+                            re.fieldNames.add(f);
+                        }
+                    }
+                    result.tableErrors.add('Row ' + re.id + ': ' + err.getMessage());
                 }
+                result.rowErrors.add(re);
             }
         }
         
@@ -101,8 +115,16 @@ public with sharing class SmartGridController {
         @AuraEnabled public Boolean isUpdateable;
     }
 
+    public class RowError {
+        @AuraEnabled public String id;
+        @AuraEnabled public String title;
+        @AuraEnabled public List<String> messages;
+        @AuraEnabled public List<String> fieldNames;
+    }
+
     public class SaveResult {
         @AuraEnabled public Boolean isSuccess = true;
-        @AuraEnabled public List<String> errorMessages = new List<String>();
+        @AuraEnabled public List<RowError> rowErrors = new List<RowError>();
+        @AuraEnabled public List<String> tableErrors = new List<String>();
     }
 }

@@ -89,6 +89,10 @@ export default class SmartDataGrid extends LightningElement {
         
         try {
             this.isLoading = true;
+            this.errorMessage = null;
+            // Clear previous table errors
+            this.template.querySelector('lightning-datatable').errors = {};
+
             let result = await saveRecords({ records: drafts });
             
             if(result && result.isSuccess) {
@@ -100,15 +104,37 @@ export default class SmartDataGrid extends LightningElement {
                 this.draftValues = [];
                 await this.fetchData();
             } else {
-                let errString = result?.errorMessages && result.errorMessages.length > 0 
-                    ? result.errorMessages.join(', ') 
-                    : 'Unknown error occurred during save.';
+                let rowErrorMap = {};
+                if (result.rowErrors && result.rowErrors.length > 0) {
+                    result.rowErrors.forEach(re => {
+                        rowErrorMap[re.id] = {
+                            title: re.title,
+                            messages: re.messages,
+                            fieldNames: re.fieldNames
+                        };
+                    });
+                }
                 
+                this.template.querySelector('lightning-datatable').errors = {
+                    rows: rowErrorMap,
+                    table: {
+                        title: 'Error Saving Records',
+                        messages: result.tableErrors || ['Some records failed to save.']
+                    }
+                };
+
                 this.dispatchEvent(new ShowToastEvent({
-                    title: 'Error Saving Records',
-                    message: errString,
-                    variant: 'error'
+                    title: 'Partial Success',
+                    message: 'Some records failed to save. Please review the errors in the table.',
+                    variant: 'warning'
                 }));
+                // Keep failed records in drafts
+                if (result.rowErrors) {
+                    let failedIds = result.rowErrors.map(e => e.id);
+                    this.draftValues = drafts.filter(draft => failedIds.includes(draft.Id));
+                }
+                // Refresh data to show successful updates
+                await this.fetchData();
             }
         } catch(e) {
             this.dispatchEvent(new ShowToastEvent({

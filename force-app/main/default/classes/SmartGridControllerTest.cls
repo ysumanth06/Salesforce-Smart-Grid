@@ -52,4 +52,50 @@ public class SmartGridControllerTest {
         Account updatedAcc = [SELECT Name FROM Account WHERE Id = :target.Id];
         System.assertEquals('Updated Acc', updatedAcc.Name, 'Name should be updated');
     }
+
+    @isTest
+    static void testSaveRecords_PartialSuccess() {
+        Account goodAcc = new Account(Name='Good Acc');
+        insert goodAcc;
+        // Invalid account to trigger failure on update
+        Account badAcc = new Account(Name='Bad Acc');
+        insert badAcc;
+        
+        goodAcc.Name = 'Updated Good Acc';
+        badAcc.Name = null; // Assuming Name is a required field on Account standard layout/DML
+        
+        Test.startTest();
+        SmartGridController.SaveResult sr = SmartGridController.saveRecords(new List<SObject>{goodAcc, badAcc});
+        Test.stopTest();
+        
+        System.assertEquals(false, sr.isSuccess, 'Save should return false for partial success');
+        System.assertEquals(1, sr.rowErrors.size(), 'There should be 1 row error');
+        System.assertEquals(badAcc.Id, sr.rowErrors[0].id, 'The error should map to the bad account ID');
+        System.assertEquals(1, sr.tableErrors.size(), 'There should be 1 table error');
+        
+        Account updatedGoodAcc = [SELECT Name FROM Account WHERE Id = :goodAcc.Id];
+        System.assertEquals('Updated Good Acc', updatedGoodAcc.Name, 'The good record should have saved successfully');
+    }
+
+    @isTest
+    static void testSaveRecords_Bulk() {
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 201; i++) {
+            accounts.add(new Account(Name = 'Bulk Acc ' + i));
+        }
+        insert accounts;
+        
+        for (Account a : accounts) {
+            a.Name = a.Name + ' Updated';
+        }
+        
+        Test.startTest();
+        SmartGridController.SaveResult sr = SmartGridController.saveRecords(accounts);
+        Test.stopTest();
+        
+        System.assert(sr.isSuccess, 'Bulk save should be successful');
+        
+        Integer updatedCount = [SELECT COUNT() FROM Account WHERE Name LIKE '%Updated'];
+        System.assertEquals(201, updatedCount, 'All records should be updated');
+    }
 }
