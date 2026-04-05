@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Grants end-user access to Smart Grid features.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>SmartGrid User</label>
+    <license>Salesforce</license>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_Config__mdt</name>
+    </customMetadataTypeAccesses>
+</PermissionSet>
