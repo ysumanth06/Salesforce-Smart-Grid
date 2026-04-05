@@ -1,0 +1,28 @@
+<template>
+    <lightning-card title="Smart Data Grid">
+        <div class="slds-m-around_medium" style="height: 400px; position: relative;">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+            <template if:true={errorMessage}>
+                <div class="slds-text-color_error slds-p-bottom_small">{errorMessage}</div>
+            </template>
+            <template if:true={gridColumns}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={gridData}
+                    columns={gridColumns}
+                    onsave={handleSave}
+                    draft-values={draftValues}>
+                </lightning-datatable>
+            </template>
+            <template if:false={gridColumns}>
+                <template if:false={isLoading}>
+                    <div class="slds-text-align_center slds-text-color_weak slds-p-around_large">
+                        No grid configuration found. Please check your setup or provide a valid Grid Config Developer Name.
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

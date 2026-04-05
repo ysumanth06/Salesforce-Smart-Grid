@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Smart Data Grid</masterLabel>
+    <description>Dynamic inline editable data grid.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__RecordPage">
+            <property name="gridConfigName" type="String" label="Grid Config Developer Name" description="Developer Name of the Smart Grid Config metadata record to load."/>
+            <property name="objectApiName" type="String" label="Default Object API Name" description="Used if no config provided (for field picker initialization)"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
