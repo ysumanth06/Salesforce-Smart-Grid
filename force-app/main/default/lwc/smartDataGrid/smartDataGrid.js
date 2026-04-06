@@ -8,6 +8,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class SmartDataGrid extends LightningElement {
     @api gridConfigName;
     @api objectApiName;
+    @api gridTitle = 'Smart Data Grid';
     
     @track gridColumns;
     @track gridData = [];
@@ -28,9 +29,13 @@ export default class SmartDataGrid extends LightningElement {
         if (this.gridConfigName) {
             this.fetchConfig();
         } else if (this.objectApiName) {
-            // No config name but has an object — trigger field picker
             this.isLoading = false;
-            this.openFieldPicker();
+            // Check cache first before prompting
+            if (this.loadCachedColumns()) {
+                this.fetchData();
+            } else {
+                this.openFieldPicker();
+            }
         } else {
             this.isLoading = false;
         }
@@ -49,13 +54,7 @@ export default class SmartDataGrid extends LightningElement {
                 if (this.config.Columns_JSON__c) {
                     let parsed = JSON.parse(this.config.Columns_JSON__c);
                     // Map to lightning-datatable structure
-                    columnsDef = parsed.map(c => ({
-                        label: c.field, // Simplistic label for phase 0 MVP
-                        fieldName: c.field,
-                        type: 'text', 
-                        editable: c.editable,
-                        initialWidth: c.width
-                    }));
+                    columnsDef = parsed.map(c => this.formatColumn(c));
                 }
                 this.gridColumns = columnsDef;
 
@@ -145,7 +144,17 @@ export default class SmartDataGrid extends LightningElement {
                 sortField: this.config?.Default_Sort_Field__c,
                 recordLimit: this.config?.Record_Limit__c || 200
             });
-            this.gridData = response;
+            
+            // Auto-generate URL properties for lightning-datatable 'url' columns
+            this.gridData = response.map(row => {
+                let mappedRow = { ...row };
+                Object.keys(mappedRow).forEach(key => {
+                    if (key === 'Id' || key.endsWith('Id')) {
+                        mappedRow[key + '_Url'] = `/${mappedRow[key]}`;
+                    }
+                });
+                return mappedRow;
+            });
         } catch(e) {
             this.errorMessage = 'Error loading records: ' + this.reduceErrors(e);
         } finally {
@@ -218,6 +227,23 @@ export default class SmartDataGrid extends LightningElement {
 
     // ─── Field Picker Integration ───
 
+    loadCachedColumns() {
+        if (!this.objectApiName) return false;
+        try {
+            const cacheKey = `smartGridCols_${this.objectApiName}`;
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                this.gridColumns = parsed.columns;
+                this.pickerSelectedFields = parsed.fields;
+                return true;
+            }
+        } catch (e) {
+            console.warn('Failed to load cached columns:', e);
+        }
+        return false;
+    }
+
     openFieldPicker() {
         this._showFieldPicker = true;
         // eslint-disable-next-line @lwc/lwc/no-async-operation
@@ -233,14 +259,22 @@ export default class SmartDataGrid extends LightningElement {
         const { fields, columns } = event.detail;
         this._showFieldPicker = false;
 
-        this.gridColumns = columns.map(col => ({
-            label: col.label || col.field,
-            fieldName: col.field,
-            type: 'text',
-            editable: col.editable !== false
-        }));
+        this.gridColumns = columns.map(col => this.formatColumn(col));
 
         this.pickerSelectedFields = fields;
+
+        // Cache the selection
+        try {
+            if (this.objectApiName) {
+                const cacheKey = `smartGridCols_${this.objectApiName}`;
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    columns: this.gridColumns,
+                    fields: this.pickerSelectedFields
+                }));
+            }
+        } catch (e) {
+            console.warn('Failed to save columns to cache:', e);
+        }
 
         if (this.gridColumns.length > 0) {
             await this.fetchData();
@@ -266,6 +300,30 @@ export default class SmartDataGrid extends LightningElement {
     }
 
     // ─── Utilities ───
+
+    formatColumn(col) {
+        const isReference = col.field === 'Id' || col.field.endsWith('Id');
+        if (isReference) {
+            return {
+                label: col.label || col.field,
+                fieldName: col.field + '_Url',
+                type: 'url',
+                typeAttributes: {
+                    label: { fieldName: col.field },
+                    target: '_blank'
+                },
+                editable: false,
+                initialWidth: col.width
+            };
+        }
+        return {
+            label: col.label || col.field,
+            fieldName: col.field,
+            type: 'text',
+            editable: col.editable !== false,
+            initialWidth: col.width
+        };
+    }
 
     reduceErrors(e) {
         if (e && e.body && e.body.message) {

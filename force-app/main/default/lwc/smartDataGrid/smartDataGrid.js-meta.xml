@@ -11,6 +11,7 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__RecordPage">
+            <property name="gridTitle" type="String" label="Grid Title" description="Title to display on the card header." default="Smart Data Grid"/>
             <property name="gridConfigName" type="String" label="Grid Config Developer Name" description="Developer Name of the Smart Grid Config metadata record to load."/>
             <property name="objectApiName" type="String" label="Default Object API Name" description="Used if no config provided (for field picker initialization)"/>
         </targetConfig>
