@@ -1,12 +1,6 @@
-<div align="center">
-  <img src="SFSpeckit/docs/assets/logo.png" width="300" alt="SFSpeckit Logo">
-  <h1>Salesforce Smart Grid — Phase 0 MVP</h1>
-</div>
-
-<br/>
+# Salesforce Smart Grid — Phase 0 MVP
 
 A **metadata-driven, dynamic inline-edit data grid** for Salesforce Lightning. Drop it onto any App, Home, or Record page to instantly render a fully functional, editable datatable for any object — no code changes required.
-
 
 ---
 
