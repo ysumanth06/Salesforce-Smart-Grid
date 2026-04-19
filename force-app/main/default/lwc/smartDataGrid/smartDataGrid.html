@@ -1,5 +1,9 @@
 <template>
     <lightning-card title={gridTitle}>
+        <div slot="actions">
+            <lightning-button label="Add Row" icon-name="utility:add" onclick={handleAddRow}></lightning-button>
+            <lightning-button label="Delete Selected" icon-name="utility:delete" variant="destructive" onclick={handleDelete} class="slds-m-left_x-small"></lightning-button>
+        </div>
         <!-- Filter Bar -->
         <template lwc:if={hasFilters}>
             <div class="slds-grid slds-wrap slds-gutters slds-p-horizontal_medium slds-p-top_small slds-m-bottom_medium slds-grid_vertical-align-end">
@@ -76,4 +80,13 @@
         onfieldselection={handleFieldSelection}
         onpickerclosed={handlePickerClosed}
     ></c-smart-grid-field-picker>
+
+    <!-- Resolution Modal (child) -->
+    <c-smart-grid-resolution-modal
+        object-api-name={objectApiName}
+        columns={gridColumns}
+        onrecordsolved={handleRecordSolved}
+        oncomplete={handleResolutionComplete}
+        onclose={handleResolutionClose}
+    ></c-smart-grid-resolution-modal>
 </template>

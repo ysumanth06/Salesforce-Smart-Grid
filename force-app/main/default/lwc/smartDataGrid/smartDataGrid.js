@@ -4,6 +4,8 @@ import getRecords from '@salesforce/apex/SmartGridController.getRecords';
 import saveRecords from '@salesforce/apex/SmartGridController.saveRecords';
 import getPicklistValues from '@salesforce/apex/SmartGridController.getPicklistValues';
 import getObjectFields from '@salesforce/apex/SmartGridController.getObjectFields';
+import deleteRecords from '@salesforce/apex/SmartGridController.deleteRecords';
+import LightningConfirm from 'lightning/confirm';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class SmartDataGrid extends LightningElement {
@@ -16,6 +18,7 @@ export default class SmartDataGrid extends LightningElement {
     @track draftValues = [];
     @track isLoading = true;
     @track errorMessage;
+    @track failureQueue = [];
 
     // Filter state
     @track filterComboboxes = [];
@@ -231,16 +234,80 @@ export default class SmartDataGrid extends LightningElement {
         }
     }
 
+    handleAddRow() {
+        const newRowId = 'new-' + Date.now();
+        const newRow = { Id: newRowId };
+        this.draftValues = [...this.draftValues, newRow];
+    }
+
+    async handleDelete() {
+        const datatable = this.template.querySelector('lightning-datatable');
+        const selectedRows = datatable.getSelectedRows();
+        if (!selectedRows || selectedRows.length === 0) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'No Rows Selected',
+                message: 'Please select rows to delete.',
+                variant: 'info'
+            }));
+            return;
+        }
+
+        const result = await LightningConfirm.open({
+            message: `Are you sure you want to delete ${selectedRows.length} record(s)?`,
+            theme: 'warning',
+            label: 'Confirm Deletion',
+        });
+
+        if (result) {
+            try {
+                this.isLoading = true;
+                const recordsToDelete = selectedRows.map(r => ({ Id: r.Id, sobjectType: this.objectApiName }));
+                const deleteResult = await deleteRecords({ records: recordsToDelete });
+                if (deleteResult && deleteResult.isSuccess) {
+                    this.dispatchEvent(new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Records deleted successfully!',
+                        variant: 'success'
+                    }));
+                    await this.fetchData();
+                } else {
+                    this.dispatchEvent(new ShowToastEvent({
+                        title: 'Error Deleting Records',
+                        message: deleteResult.tableErrors?.join(', ') || 'Failed to delete records',
+                        variant: 'error'
+                    }));
+                }
+            } catch(e) {
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error Deleting',
+                    message: this.reduceErrors(e),
+                    variant: 'error'
+                }));
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }
+
     async handleSave(event) {
         let drafts = event.detail.draftValues;
         
+        let recordsToSave = drafts.map((d, index) => {
+            let copy = { ...d };
+            if (copy.Id && copy.Id.startsWith('new-')) {
+                delete copy.Id;
+            }
+            copy.sobjectType = this.objectApiName;
+            return copy;
+        });
+
         try {
             this.isLoading = true;
             this.errorMessage = null;
             // Clear previous table errors
             this.template.querySelector('lightning-datatable').errors = {};
 
-            let result = await saveRecords({ records: drafts });
+            let result = await saveRecords({ records: recordsToSave });
             
             if(result && result.isSuccess) {
                 this.dispatchEvent(new ShowToastEvent({
@@ -252,13 +319,27 @@ export default class SmartDataGrid extends LightningElement {
                 await this.fetchData();
             } else {
                 let rowErrorMap = {};
+                let failedNewDrafts = [];
                 if (result.rowErrors && result.rowErrors.length > 0) {
                     result.rowErrors.forEach(re => {
-                        rowErrorMap[re.id] = {
-                            title: re.title,
-                            messages: re.messages,
-                            fieldNames: re.fieldNames
-                        };
+                        if (!isNaN(re.id)) {
+                            let originalIndex = parseInt(re.id, 10);
+                            let draftRow = drafts[originalIndex];
+                            if (draftRow) {
+                                failedNewDrafts.push(draftRow);
+                                rowErrorMap[draftRow.Id] = {
+                                    title: re.title,
+                                    messages: re.messages,
+                                    fieldNames: re.fieldNames
+                                };
+                            }
+                        } else {
+                            rowErrorMap[re.id] = {
+                                title: re.title,
+                                messages: re.messages,
+                                fieldNames: re.fieldNames
+                            };
+                        }
                     });
                 }
                 
@@ -277,9 +358,19 @@ export default class SmartDataGrid extends LightningElement {
                 }));
                 // Keep failed records in drafts
                 if (result.rowErrors) {
-                    let failedIds = result.rowErrors.map(e => e.id);
+                    let failedIds = Object.keys(rowErrorMap);
                     this.draftValues = drafts.filter(draft => failedIds.includes(draft.Id));
                 }
+
+                if (failedNewDrafts.length > 0) {
+                    this.failureQueue = failedNewDrafts;
+                    // Open the resolution modal
+                    const modal = this.template.querySelector('c-smart-grid-resolution-modal');
+                    if (modal) {
+                        modal.open(this.failureQueue);
+                    }
+                }
+
                 // Refresh data to show successful updates
                 await this.fetchData();
             }
@@ -292,6 +383,20 @@ export default class SmartDataGrid extends LightningElement {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    handleRecordSolved(event) {
+        const solvedDraftId = event.detail.draftId;
+        this.draftValues = this.draftValues.filter(d => d.Id !== solvedDraftId);
+    }
+
+    handleResolutionClose() {
+        this.failureQueue = [];
+    }
+
+    handleResolutionComplete() {
+        this.failureQueue = [];
+        this.fetchData();
     }
 
     // ─── Field Picker Integration ───
