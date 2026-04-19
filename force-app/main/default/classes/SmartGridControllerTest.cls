@@ -82,6 +82,9 @@ public class SmartGridControllerTest {
       null,
       null,
       null,
+      null,
+      null,
+      null,
       10
     );
     Test.stopTest();
@@ -251,8 +254,11 @@ public class SmartGridControllerTest {
     List<SObject> records = SmartGridController.getRecords(
       'Account',
       new List<String>{ 'Name', 'Industry' },
-      'Industry',
-      'Technology',
+      new Map<String, Object>{ 'Industry' => 'Technology' },
+      null,
+      null,
+      null,
+      null,
       null,
       10
     );

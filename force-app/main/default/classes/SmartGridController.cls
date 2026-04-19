@@ -103,7 +103,17 @@ public with sharing class SmartGridController {
     }
 
     @AuraEnabled
-    public static List<SObject> getRecords(String objectApiName, List<String> fields, String filterField, String filterValue, String sortField, Integer recordLimit) {
+    public static List<SObject> getRecords(
+        String objectApiName, 
+        List<String> fields, 
+        Map<String, Object> filters,
+        String dateField,
+        Date startDate,
+        Date endDate,
+        String sortField, 
+        String sortDirection,
+        Integer recordLimit
+    ) {
         if (String.isBlank(objectApiName) || fields == null || fields.isEmpty()) {
             throw new AuraHandledException('Invalid parameters: object api name and fields are required.');
         }
@@ -112,9 +122,12 @@ public with sharing class SmartGridController {
             GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
             req.objectApiName = objectApiName;
             req.fields = fields;
-            req.filterField = filterField;
-            req.filterValue = filterValue;
+            req.filters = filters;
+            req.dateField = dateField;
+            req.startDate = startDate;
+            req.endDate = endDate;
             req.sortField = sortField;
+            req.sortDirection = sortDirection;
             req.recordLimit = recordLimit;
 
             String query = GridQueryBuilder.buildSingleQuery(req);

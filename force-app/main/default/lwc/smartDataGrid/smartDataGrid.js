@@ -3,6 +3,7 @@ import getGridConfig from '@salesforce/apex/SmartGridController.getGridConfig';
 import getRecords from '@salesforce/apex/SmartGridController.getRecords';
 import saveRecords from '@salesforce/apex/SmartGridController.saveRecords';
 import getPicklistValues from '@salesforce/apex/SmartGridController.getPicklistValues';
+import getObjectFields from '@salesforce/apex/SmartGridController.getObjectFields';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class SmartDataGrid extends LightningElement {
@@ -17,9 +18,12 @@ export default class SmartDataGrid extends LightningElement {
     @track errorMessage;
 
     // Filter state
-    @track filterOptions = [];
-    @track selectedFilterValue = '';
-    _filterField;
+    @track filterComboboxes = [];
+    @track dateFilter = { fieldApiName: '', label: '', startDate: null, endDate: null };
+    @track hasDateFilter = false;
+
+    @track sortField;
+    @track sortDirection = 'asc';
 
     config;
     _showFieldPicker = false;
@@ -59,10 +63,7 @@ export default class SmartDataGrid extends LightningElement {
                 this.gridColumns = columnsDef;
 
                 // Load filter picklist if configured
-                if (this.config.Default_Filter_Field__c) {
-                    this._filterField = this.config.Default_Filter_Field__c;
-                    await this.loadFilterOptions();
-                }
+                await this.initializeFilters();
                 
                 // Fetch data if columns exist
                 if (this.gridColumns.length > 0) {
@@ -89,35 +90,96 @@ export default class SmartDataGrid extends LightningElement {
     // ─── Filter Logic ───
 
     /**
-     * Loads picklist values from Apex for the configured filter field.
-     * Populates the combobox options with an "All" entry as default.
+     * Initialize filters dynamically based on object fields
      */
-    async loadFilterOptions() {
-        if (!this.objectApiName || !this._filterField) return;
+    async initializeFilters() {
+        if (!this.objectApiName) return;
 
         try {
-            const values = await getPicklistValues({
-                objectApiName: this.objectApiName,
-                fieldApiName: this._filterField
-            });
+            const fields = await getObjectFields({ objectApiName: this.objectApiName });
+            
+            // Find up to 3 picklist fields
+            let targetPicklists = [];
+            if (this.config && this.config.Default_Filter_Field__c) {
+                let defaultField = fields.find(f => f.fieldApiName === this.config.Default_Filter_Field__c);
+                if (defaultField && defaultField.type === 'PICKLIST') {
+                    targetPicklists.push(defaultField);
+                }
+            }
+            
+            for (let f of fields) {
+                if (f.type === 'PICKLIST' && !targetPicklists.find(t => t.fieldApiName === f.fieldApiName)) {
+                    targetPicklists.push(f);
+                    if (targetPicklists.length >= 3) break;
+                }
+            }
+            
+            // Find 1 Date field
+            const dateFields = fields.filter(f => f.type === 'DATE' || f.type === 'DATETIME');
+            
+            // Populate picklist options
+            let comboboxes = [];
+            for (let p of targetPicklists) {
+                const values = await getPicklistValues({
+                    objectApiName: this.objectApiName,
+                    fieldApiName: p.fieldApiName
+                });
+                
+                comboboxes.push({
+                    fieldApiName: p.fieldApiName,
+                    label: p.label,
+                    options: [
+                        { label: '-- All --', value: '' },
+                        ...values.map(v => ({ label: v.label, value: v.value }))
+                    ],
+                    selectedValue: ''
+                });
+            }
+            this.filterComboboxes = comboboxes;
 
-            // Prepend "All" option as default
-            this.filterOptions = [
-                { label: '-- All --', value: '' },
-                ...values.map(v => ({ label: v.label, value: v.value }))
-            ];
+            if (dateFields.length > 0) {
+                this.dateFilter = {
+                    fieldApiName: dateFields[0].fieldApiName,
+                    label: dateFields[0].label,
+                    startDate: null,
+                    endDate: null
+                };
+                this.hasDateFilter = true;
+            }
         } catch(e) {
-            // Non-critical: filter just won't render if it fails
-            this.filterOptions = [];
             console.warn('Failed to load filter options:', this.reduceErrors(e));
         }
     }
 
-    /**
-     * Handle combobox selection change — refetch data with new filter value.
-     */
-    async handleFilterChange(event) {
-        this.selectedFilterValue = event.detail.value;
+    handleMultiFilterChange(event) {
+        const fieldName = event.target.name;
+        const value = event.detail.value;
+        const index = this.filterComboboxes.findIndex(fc => fc.fieldApiName === fieldName);
+        if (index !== -1) {
+            this.filterComboboxes[index].selectedValue = value;
+        }
+    }
+
+    handleDateChange(event) {
+        const fieldName = event.target.name; // 'startDate' or 'endDate'
+        this.dateFilter[fieldName] = event.detail.value;
+    }
+
+    async applyFilters() {
+        await this.fetchData();
+    }
+
+    async handleSort(event) {
+        const { fieldName, sortDirection } = event.detail;
+        
+        let actualFieldName = fieldName;
+        if (actualFieldName.endsWith('_Url')) {
+            actualFieldName = actualFieldName.replace('_Url', '');
+        }
+
+        this.sortField = actualFieldName;
+        this.sortDirection = sortDirection;
+        
         await this.fetchData();
     }
 
@@ -130,18 +192,25 @@ export default class SmartDataGrid extends LightningElement {
             
             let fieldsToQuery = this.gridColumns.map(c => c.fieldName);
 
-            // Pass filter value to Apex if a filter field is configured
-            let filterValueParam = null;
-            if (this._filterField && this.selectedFilterValue) {
-                filterValueParam = this.selectedFilterValue;
+            // Build filter map
+            let filterMap = {};
+            if (this.filterComboboxes) {
+                this.filterComboboxes.forEach(fc => {
+                    if (fc.selectedValue) {
+                        filterMap[fc.fieldApiName] = fc.selectedValue;
+                    }
+                });
             }
 
             let response = await getRecords({
                 objectApiName: this.objectApiName,
                 fields: fieldsToQuery,
-                filterField: this._filterField || this.config?.Default_Filter_Field__c,
-                filterValue: filterValueParam,
-                sortField: this.config?.Default_Sort_Field__c,
+                filters: filterMap,
+                dateField: this.hasDateFilter ? this.dateFilter.fieldApiName : null,
+                startDate: this.hasDateFilter && this.dateFilter.startDate ? this.dateFilter.startDate : null,
+                endDate: this.hasDateFilter && this.dateFilter.endDate ? this.dateFilter.endDate : null,
+                sortField: this.sortField || this.config?.Default_Sort_Field__c,
+                sortDirection: this.sortDirection,
                 recordLimit: this.config?.Record_Limit__c || 200
             });
             
@@ -291,37 +360,41 @@ export default class SmartDataGrid extends LightningElement {
         return !this.gridColumns && !this.isLoading && !this._showFieldPicker;
     }
 
-    get hasFilter() {
-        return this.filterOptions && this.filterOptions.length > 1;
-    }
-
-    get filterLabel() {
-        return `Filter by ${this._filterField || 'Field'}`;
+    get hasFilters() {
+        return (this.filterComboboxes && this.filterComboboxes.length > 0) || this.hasDateFilter;
     }
 
     // ─── Utilities ───
 
     formatColumn(col) {
-        const isReference = col.field === 'Id' || col.field.endsWith('Id');
+        let fieldApi = col.fieldApiName || col.field;
+        let label = col.displayLabel || col.label || fieldApi;
+        let isEditable = col.isEditable !== false && col.editable !== false;
+        let isSortable = col.isSortable === true || col.sortable === true;
+        let colWidth = col.columnWidth || col.width;
+
+        const isReference = fieldApi === 'Id' || fieldApi.endsWith('Id');
         if (isReference) {
             return {
-                label: col.label || col.field,
-                fieldName: col.field + '_Url',
+                label: label,
+                fieldName: fieldApi + '_Url',
                 type: 'url',
                 typeAttributes: {
-                    label: { fieldName: col.field },
+                    label: { fieldName: fieldApi },
                     target: '_blank'
                 },
                 editable: false,
-                initialWidth: col.width
+                sortable: isSortable,
+                initialWidth: colWidth
             };
         }
         return {
-            label: col.label || col.field,
-            fieldName: col.field,
+            label: label,
+            fieldName: fieldApi,
             type: 'text',
-            editable: col.editable !== false,
-            initialWidth: col.width
+            editable: isEditable,
+            sortable: isSortable,
+            initialWidth: colWidth
         };
     }
 

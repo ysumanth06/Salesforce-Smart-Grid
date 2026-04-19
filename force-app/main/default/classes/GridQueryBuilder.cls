@@ -39,21 +39,45 @@ public with sharing class GridQueryBuilder {
         String query = 'SELECT ' + String.join(validFields, ', ') + ' FROM ' + String.escapeSingleQuotes(req.objectApiName);
 
         // Filter Handling
-        if(String.isNotBlank(req.filterField) && isValidFilterField(sObjType, req.filterField)) {
-            String escapedFilterField = String.escapeSingleQuotes(req.filterField);
-            if(String.isNotBlank(req.filterValue)) {
-                // Dynamic filter with specific value — escape to prevent injection
-                String escapedFilterValue = String.escapeSingleQuotes(req.filterValue);
-                query += ' WHERE ' + escapedFilterField + ' = \'' + escapedFilterValue + '\'';
-            } else {
-                // Default: just ensure the filter field is not null
-                query += ' WHERE ' + escapedFilterField + ' != null';
+        List<String> whereClauses = new List<String>();
+
+        if (req.filters != null && !req.filters.isEmpty()) {
+            for (String field : req.filters.keySet()) {
+                if (isValidFilterField(sObjType, field)) {
+                    String escapedField = String.escapeSingleQuotes(field);
+                    Object val = req.filters.get(field);
+                    if (val != null) {
+                        String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
+                        whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
+                    } else {
+                        whereClauses.add(escapedField + ' != null');
+                    }
+                }
             }
+        }
+        
+        // Date Range logic
+        if (String.isNotBlank(req.dateField) && isValidFilterField(sObjType, req.dateField)) {
+            String escapedDateField = String.escapeSingleQuotes(req.dateField);
+            if (req.startDate != null) {
+                // Formatting date to SOQL format (YYYY-MM-DD)
+                String sd = String.valueOf(req.startDate);
+                whereClauses.add(escapedDateField + ' >= ' + sd);
+            }
+            if (req.endDate != null) {
+                String ed = String.valueOf(req.endDate);
+                whereClauses.add(escapedDateField + ' <= ' + ed);
+            }
+        }
+
+        if (!whereClauses.isEmpty()) {
+            query += ' WHERE ' + String.join(whereClauses, ' AND ');
         }
 
         // Sort Handling
         if(String.isNotBlank(req.sortField) && validateField(sObjType, req.sortField)) {
-            query += ' ORDER BY ' + String.escapeSingleQuotes(req.sortField) + ' ASC NULLS LAST';
+            String dir = (String.isNotBlank(req.sortDirection) && req.sortDirection.toUpperCase() == 'DESC') ? 'DESC' : 'ASC';
+            query += ' ORDER BY ' + String.escapeSingleQuotes(req.sortField) + ' ' + dir + ' NULLS LAST';
         }
 
         // Limit Handling
@@ -104,14 +128,22 @@ public with sharing class GridQueryBuilder {
         @InvocableVariable(label='Fields to Query' required=true)
         public List<String> fields;
         
-        @InvocableVariable(label='Filter Field (API Name)')
-        public String filterField;
-
-        @InvocableVariable(label='Filter Value')
-        public String filterValue;
+        public Map<String, Object> filters;
+        
+        @InvocableVariable(label='Date Field')
+        public String dateField;
+        
+        @InvocableVariable(label='Start Date')
+        public Date startDate;
+        
+        @InvocableVariable(label='End Date')
+        public Date endDate;
         
         @InvocableVariable(label='Sort Field (API Name)')
         public String sortField;
+
+        @InvocableVariable(label='Sort Direction')
+        public String sortDirection;
 
         @InvocableVariable(label='Record Limit')
         public Integer recordLimit;

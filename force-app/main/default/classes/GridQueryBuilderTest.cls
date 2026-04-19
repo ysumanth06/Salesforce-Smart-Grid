@@ -5,7 +5,7 @@ public class GridQueryBuilderTest {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
     req.fields = new List<String>{ 'Name', 'Industry' };
-    req.filterField = 'Industry';
+    req.filters = new Map<String, Object>{ 'Industry' => null };
     req.sortField = 'Name';
     req.recordLimit = 100;
 
@@ -112,8 +112,7 @@ public class GridQueryBuilderTest {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
     req.fields = new List<String>{ 'Name', 'Industry' };
-    req.filterField = 'Industry';
-    req.filterValue = 'Healthcare';
+    req.filters = new Map<String, Object>{ 'Industry' => 'Healthcare' };
     req.recordLimit = 100;
 
     Test.startTest();
@@ -132,8 +131,7 @@ public class GridQueryBuilderTest {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
     req.fields = new List<String>{ 'Name', 'Industry' };
-    req.filterField = 'Industry';
-    req.filterValue = 'Healthcare\' OR Name != \'';
+    req.filters = new Map<String, Object>{ 'Industry' => 'Healthcare\' OR Name != \'' };
     req.recordLimit = 100;
 
     Test.startTest();
@@ -156,8 +154,7 @@ public class GridQueryBuilderTest {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
     req.fields = new List<String>{ 'Name', 'Industry' };
-    req.filterField = 'Industry';
-    // filterValue intentionally left null
+    req.filters = new Map<String, Object>{ 'Industry' => null };
     req.recordLimit = 100;
 
     Test.startTest();
