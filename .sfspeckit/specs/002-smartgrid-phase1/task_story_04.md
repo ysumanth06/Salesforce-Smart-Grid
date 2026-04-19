@@ -5,7 +5,7 @@
 - **Feature**: 002-smartgrid-phase1
 - **Story ID**: TS-04
 - **Type**: FULL
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Started**: 2026-04-19
 - **Completed**: 2026-04-19
 
@@ -29,11 +29,11 @@ Finalize Phase 1 with User Preferences persistence, client-side CSV export, and 
 
 ## 🛠 SF Implementation Layers
 
-| Layer            | Skill   | File Path                                                     | Status     |
-| :--------------- | :------ | :------------------------------------------------------------ | :--------- |
-| **Apex Service** | sf-apex | `force-app/main/default/classes/SmartGridUserPrefService.cls` | ✅ DONE    |
-| **LWC Utility**  | sf-lwc  | `force-app/main/default/lwc/csvHelper/csvHelper.js`           | ✅ DONE    |
-| **LWC Main**     | sf-lwc  | `force-app/main/default/lwc/smartDataGrid/`                   | ✅ DONE    |
+| Layer            | Skill   | File Path                                                     | Status  |
+| :--------------- | :------ | :------------------------------------------------------------ | :------ |
+| **Apex Service** | sf-apex | `force-app/main/default/classes/SmartGridUserPrefService.cls` | ✅ DONE |
+| **LWC Utility**  | sf-lwc  | `force-app/main/default/lwc/csvHelper/csvHelper.js`           | ✅ DONE |
+| **LWC Main**     | sf-lwc  | `force-app/main/default/lwc/smartDataGrid/`                   | ✅ DONE |
 
 ## 🔒 Scoring Gates
 

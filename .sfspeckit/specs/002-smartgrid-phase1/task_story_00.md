@@ -5,7 +5,7 @@
 - **Feature**: 002-smartgrid-phase1
 - **Story ID**: TS-00
 - **Type**: FULL (Metadata + Setup Apex)
-- **Status**: REVIEW
+- **Status**: DONE
 - **Started**: 2026-04-19
 - **Completed**: 2026-04-19
 
@@ -30,13 +30,13 @@ Establish the structural foundation for Phase 1 by creating the new child Custom
 
 ## 🛠 SF Implementation Layers
 
-| Layer           | Skill          | File Path                                                                     | Status     |
-| :-------------- | :------------- | :---------------------------------------------------------------------------- | :--------- |
-| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_Column__mdt/*`                     | ✅ DONE    |
-| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_User_Pref__c/*`                    | ✅ DONE    |
-| **Permissions** | sf-permissions | `force-app/main/default/permissionsets/SmartGrid_User.permissionset-meta.xml` | ✅ DONE    |
-| **Apex**        | sf-apex        | `force-app/main/default/classes/SmartGridUserPrefService.cls`                 | ✅ DONE    |
-| **Testing**     | sf-testing     | `force-app/main/default/classes/SmartGridUserPrefServiceTest.cls`             | ✅ DONE    |
+| Layer           | Skill          | File Path                                                                     | Status  |
+| :-------------- | :------------- | :---------------------------------------------------------------------------- | :------ |
+| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_Column__mdt/*`                     | ✅ DONE |
+| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_User_Pref__c/*`                    | ✅ DONE |
+| **Permissions** | sf-permissions | `force-app/main/default/permissionsets/SmartGrid_User.permissionset-meta.xml` | ✅ DONE |
+| **Apex**        | sf-apex        | `force-app/main/default/classes/SmartGridUserPrefService.cls`                 | ✅ DONE |
+| **Testing**     | sf-testing     | `force-app/main/default/classes/SmartGridUserPrefServiceTest.cls`             | ✅ DONE |
 
 ## 🔒 Scoring Gates
 

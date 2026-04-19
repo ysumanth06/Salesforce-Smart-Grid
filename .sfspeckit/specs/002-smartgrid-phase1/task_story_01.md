@@ -5,7 +5,7 @@
 - **Feature**: 002-smartgrid-phase1
 - **Story ID**: TS-01
 - **Type**: FULL
-- **Status**: IMPLEMENTED
+- **Status**: DONE
 - **Started**: 2026-04-19
 - **Completed**: 2026-04-19
 
@@ -28,10 +28,10 @@ Upgrade the `SmartGridController` to support fetching columns from the new `Smar
 
 ## 🛠 SF Implementation Layers
 
-| Layer            | Skill      | File Path                                                    | Status     |
-| :--------------- | :--------- | :----------------------------------------------------------- | :--------- |
-| **Apex Service** | sf-apex    | `force-app/main/default/classes/SmartGridController.cls`     | ✅ DONE    |
-| **Apex Test**    | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls` | ✅ DONE    |
+| Layer            | Skill      | File Path                                                    | Status  |
+| :--------------- | :--------- | :----------------------------------------------------------- | :------ |
+| **Apex Service** | sf-apex    | `force-app/main/default/classes/SmartGridController.cls`     | ✅ DONE |
+| **Apex Test**    | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls` | ✅ DONE |
 
 ## 🔒 Scoring Gates
 
