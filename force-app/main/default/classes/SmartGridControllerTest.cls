@@ -240,4 +240,57 @@ public class SmartGridControllerTest {
       );
     }
   }
+  @isTest
+  static void testDeleteRecords_Valid() {
+    Account acc = new Account(Name = 'Delete Test');
+    insert acc;
+    Test.startTest();
+    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(new List<SObject>{acc});
+    Test.stopTest();
+    System.assert(sr.isSuccess, 'Delete should be successful');
+    System.assertEquals(0, [SELECT count() FROM Account WHERE Id = :acc.Id], 'Account should be deleted');
+  }
+
+  @isTest
+  static void testDeleteRecords_Bulk() {
+    List<Account> accounts = new List<Account>();
+    for(Integer i=0; i<201; i++) {
+        accounts.add(new Account(Name = 'Bulk Delete ' + i));
+    }
+    insert accounts;
+    Test.startTest();
+    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(accounts);
+    Test.stopTest();
+    System.assert(sr.isSuccess, 'Bulk delete should be successful');
+  }
+
+  @isTest
+  static void testDeleteRecords_Null() {
+    Test.startTest();
+    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(null);
+    Test.stopTest();
+    System.assert(sr.isSuccess, 'Should return success for null');
+  }
+
+  @isTest
+  static void testSaveRecords_InsertNew() {
+    Account acc = new Account(Name = 'New Insert Test');
+    Test.startTest();
+    SmartGridController.SaveResult sr = SmartGridController.saveRecords(new List<SObject>{acc});
+    Test.stopTest();
+    System.assert(sr.isSuccess, 'Insert should be successful');
+    System.assertEquals(1, [SELECT count() FROM Account WHERE Name = 'New Insert Test'], 'Account should be inserted');
+  }
+
+  @isTest
+  static void testSaveRecords_InsertPartialSuccess() {
+    Account acc1 = new Account(Name = 'Valid Insert');
+    Account acc2 = new Account(); // Missing Name
+    Test.startTest();
+    SmartGridController.SaveResult sr = SmartGridController.saveRecords(new List<SObject>{acc1, acc2});
+    Test.stopTest();
+    System.assertEquals(false, sr.isSuccess, 'Should be partial success');
+    System.assertEquals(1, sr.rowErrors.size(), 'Should have 1 error');
+    System.assertEquals('1', sr.rowErrors[0].id, 'Error ID should be the original index string');
+  }
 }

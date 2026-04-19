@@ -128,30 +128,111 @@ public with sharing class SmartGridController {
             return result;
         }
         
-        // Strip out inaccessible fields to prevent unauthorized DML
-        SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPDATABLE, records);
+        // Strip out inaccessible fields
+        SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPSERTABLE, records);
         List<SObject> safeRecords = securityDecision.getRecords();
 
-        Database.SaveResult[] saveResults = Database.update(safeRecords, false);
+        List<SObject> inserts = new List<SObject>();
+        List<SObject> updates = new List<SObject>();
+        Map<Integer, Integer> insertMap = new Map<Integer, Integer>();
+        Map<Integer, Integer> updateMap = new Map<Integer, Integer>();
+
+        for (Integer i = 0; i < safeRecords.size(); i++) {
+            if (safeRecords[i].Id == null) {
+                insertMap.put(inserts.size(), i);
+                inserts.add(safeRecords[i]);
+            } else {
+                updateMap.put(updates.size(), i);
+                updates.add(safeRecords[i]);
+            }
+        }
+
+        result.isSuccess = true;
+
+        if (!inserts.isEmpty()) {
+            Database.SaveResult[] insertResults = Database.insert(inserts, false);
+            for (Integer i = 0; i < insertResults.size(); i++) {
+                Database.SaveResult sr = insertResults[i];
+                if (!sr.isSuccess()) {
+                    result.isSuccess = false;
+                    RowError re = new RowError();
+                    Integer originalIdx = insertMap.get(i);
+                    re.id = String.valueOf(originalIdx);
+                    re.title = 'Error';
+                    re.messages = new List<String>();
+                    re.fieldNames = new List<String>();
+                    
+                    for(Database.Error err : sr.getErrors()) {
+                        re.messages.add(err.getMessage());
+                        if (err.getFields() != null) {
+                            for(String f : err.getFields()) {
+                                re.fieldNames.add(f);
+                            }
+                        }
+                        result.tableErrors.add('Row ' + re.id + ': ' + err.getMessage());
+                    }
+                    result.rowErrors.add(re);
+                }
+            }
+        }
+
+        if (!updates.isEmpty()) {
+            Database.SaveResult[] updateResults = Database.update(updates, false);
+            for (Integer i = 0; i < updateResults.size(); i++) {
+                Database.SaveResult sr = updateResults[i];
+                if (!sr.isSuccess()) {
+                    result.isSuccess = false;
+                    RowError re = new RowError();
+                    re.id = (String)updates[i].get('Id');
+                    re.title = 'Error';
+                    re.messages = new List<String>();
+                    re.fieldNames = new List<String>();
+                    
+                    for(Database.Error err : sr.getErrors()) {
+                        re.messages.add(err.getMessage());
+                        if (err.getFields() != null) {
+                            for(String f : err.getFields()) {
+                                re.fieldNames.add(f);
+                            }
+                        }
+                        result.tableErrors.add('Row ' + re.id + ': ' + err.getMessage());
+                    }
+                    result.rowErrors.add(re);
+                }
+            }
+        }
+        
+        return result;
+    }
+
+    @AuraEnabled
+    public static SaveResult deleteRecords(List<SObject> records) {
+        SaveResult result = new SaveResult();
+        if (records == null || records.isEmpty()) {
+            result.isSuccess = true;
+            return result;
+        }
+
+        SObjectType objType = records[0].getSObjectType();
+        if (!objType.getDescribe().isDeletable()) {
+            throw new AuraHandledException('You do not have permission to delete ' + objType.getDescribe().getLabel() + ' records.');
+        }
+
+        Database.DeleteResult[] deleteResults = Database.delete(records, false, AccessLevel.USER_MODE);
         
         result.isSuccess = true;
-        for (Integer i = 0; i < saveResults.size(); i++) {
-            Database.SaveResult sr = saveResults[i];
-            if (!sr.isSuccess()) {
+        for (Integer i = 0; i < deleteResults.size(); i++) {
+            Database.DeleteResult dr = deleteResults[i];
+            if (!dr.isSuccess()) {
                 result.isSuccess = false;
                 RowError re = new RowError();
-                re.id = (String)safeRecords[i].get('Id');
+                re.id = (String)records[i].get('Id');
                 re.title = 'Error';
                 re.messages = new List<String>();
                 re.fieldNames = new List<String>();
                 
-                for(Database.Error err : sr.getErrors()) {
+                for(Database.Error err : dr.getErrors()) {
                     re.messages.add(err.getMessage());
-                    if (err.getFields() != null) {
-                        for(String f : err.getFields()) {
-                            re.fieldNames.add(f);
-                        }
-                    }
                     result.tableErrors.add('Row ' + re.id + ': ' + err.getMessage());
                 }
                 result.rowErrors.add(re);
