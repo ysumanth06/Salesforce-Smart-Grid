@@ -6,6 +6,10 @@ import getPicklistValues from '@salesforce/apex/SmartGridController.getPicklistV
 import deleteRecords from '@salesforce/apex/SmartGridController.deleteRecords';
 import LightningConfirm from 'lightning/confirm';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import getPrefs from '@salesforce/apex/SmartGridUserPrefService.getPrefs';
+import savePrefs from '@salesforce/apex/SmartGridUserPrefService.savePrefs';
+import resetPrefs from '@salesforce/apex/SmartGridUserPrefService.resetPrefs';
+import { exportToCSV } from 'c/csvHelper';
 
 export default class SmartDataGrid extends LightningElement {
     @api gridConfigName;
@@ -28,19 +32,40 @@ export default class SmartDataGrid extends LightningElement {
     _showFieldPicker = false;
     pickerSelectedFields = [];
 
-    connectedCallback() {
+    async connectedCallback() {
+        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+        
         if (this.gridConfigName) {
             this.fetchConfig();
         } else if (this.objectApiName) {
             this.isLoading = false;
-            // Check cache first before prompting
-            if (this.loadCachedColumns()) {
+            // Check cache/server first before prompting
+            const hasPrefs = await this.loadCachedColumns();
+            if (hasPrefs) {
                 this.fetchData();
             } else {
                 this.openFieldPicker();
             }
         } else {
             this.isLoading = false;
+        }
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+    }
+
+    handleKeyDown(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+            event.preventDefault();
+            this.handleShortcutSave();
+        }
+    }
+
+    handleShortcutSave() {
+        const datatable = this.template.querySelector('lightning-datatable');
+        if (datatable && this.draftValues.length > 0) {
+            this.handleSave({ detail: { draftValues: this.draftValues } });
         }
     }
 
@@ -52,14 +77,19 @@ export default class SmartDataGrid extends LightningElement {
             
             if (this.config && this.config.Is_Active__c) {
                 this.objectApiName = this.config.Object_API_Name__c;
-                // Parse columns
-                let columnsDef = [];
-                if (this.config.Columns_JSON__c) {
-                    let parsed = JSON.parse(this.config.Columns_JSON__c);
-                    // Map to lightning-datatable structure
-                    columnsDef = parsed.map(c => this.formatColumn(c));
+                
+                // First check user prefs
+                const hasPrefs = await this.loadCachedColumns();
+                
+                if (!hasPrefs) {
+                    // Parse columns
+                    let columnsDef = [];
+                    if (this.config.Columns_JSON__c) {
+                        let parsed = JSON.parse(this.config.Columns_JSON__c);
+                        columnsDef = parsed.map(c => this.formatColumn(c));
+                    }
+                    this.gridColumns = columnsDef;
                 }
-                this.gridColumns = columnsDef;
 
                 // Load filter picklist if configured
                 if (this.config.Default_Filter_Field__c) {
@@ -332,8 +362,20 @@ export default class SmartDataGrid extends LightningElement {
 
     // ─── Field Picker Integration ───
 
-    loadCachedColumns() {
+    async loadCachedColumns() {
         if (!this.objectApiName) return false;
+        try {
+            const prefsJson = await getPrefs({ objectApiName: this.objectApiName });
+            if (prefsJson) {
+                const parsed = JSON.parse(prefsJson);
+                this.gridColumns = parsed.columns;
+                this.pickerSelectedFields = parsed.fields;
+                return true;
+            }
+        } catch (e) {
+            console.warn('Failed to load user prefs from server, falling back to local storage:', e);
+        }
+
         try {
             const cacheKey = `smartGridCols_${this.objectApiName}`;
             const cached = localStorage.getItem(cacheKey);
@@ -368,18 +410,7 @@ export default class SmartDataGrid extends LightningElement {
 
         this.pickerSelectedFields = fields;
 
-        // Cache the selection
-        try {
-            if (this.objectApiName) {
-                const cacheKey = `smartGridCols_${this.objectApiName}`;
-                localStorage.setItem(cacheKey, JSON.stringify({
-                    columns: this.gridColumns,
-                    fields: this.pickerSelectedFields
-                }));
-            }
-        } catch (e) {
-            console.warn('Failed to save columns to cache:', e);
-        }
+        this.saveCurrentPrefs();
 
         if (this.gridColumns.length > 0) {
             await this.fetchData();
@@ -388,6 +419,66 @@ export default class SmartDataGrid extends LightningElement {
 
     handlePickerClosed() {
         this._showFieldPicker = false;
+    }
+
+    handleResize(event) {
+        const columnWidths = event.detail.columnWidths;
+        if (this.gridColumns && columnWidths) {
+            this.gridColumns = this.gridColumns.map((col, idx) => {
+                return { ...col, initialWidth: columnWidths[idx] };
+            });
+            this.saveCurrentPrefs();
+        }
+    }
+
+    saveCurrentPrefs() {
+        if (!this.objectApiName) return;
+        const prefsObj = {
+            columns: this.gridColumns,
+            fields: this.pickerSelectedFields
+        };
+        const prefsStr = JSON.stringify(prefsObj);
+        
+        try {
+            localStorage.setItem(`smartGridCols_${this.objectApiName}`, prefsStr);
+        } catch (e) {
+            console.warn('Failed to save to local storage:', e);
+        }
+
+        savePrefs({ objectApiName: this.objectApiName, prefsJson: prefsStr })
+            .catch(e => console.warn('Failed to save prefs to server:', e));
+    }
+
+    handleExportCSV() {
+        exportToCSV(this.gridData, this.gridColumns, `${this.objectApiName}_export.csv`);
+    }
+
+    async handleResetPrefs() {
+        if (!this.objectApiName) return;
+        try {
+            await resetPrefs({ objectApiName: this.objectApiName });
+            localStorage.removeItem(`smartGridCols_${this.objectApiName}`);
+            this.gridColumns = [];
+            this.pickerSelectedFields = [];
+            
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Success',
+                message: 'Preferences reset to default.',
+                variant: 'success'
+            }));
+            
+            if (this.gridConfigName) {
+                await this.fetchConfig();
+            } else {
+                this.openFieldPicker();
+            }
+        } catch (e) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error',
+                message: 'Failed to reset preferences: ' + this.reduceErrors(e),
+                variant: 'error'
+            }));
+        }
     }
 
     // ─── Computed Properties ───

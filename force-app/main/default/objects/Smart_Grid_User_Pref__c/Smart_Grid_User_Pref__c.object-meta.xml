@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Stores user-specific grid personalization.</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableReports>false</enableReports>
+    <enableSearch>false</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <label>Smart Grid User Pref</label>
+    <nameField>
+        <displayFormat>SGUP-{00000}</displayFormat>
+        <label>Smart Grid User Pref Number</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Smart Grid User Prefs</pluralLabel>
+    <sharingModel>Private</sharingModel>
+</CustomObject>
