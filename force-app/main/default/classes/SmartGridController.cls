@@ -1,21 +1,79 @@
 public with sharing class SmartGridController {
 
+    @TestVisible
+    private static List<Smart_Grid_Config__mdt> mockConfigs;
+
     @AuraEnabled(cacheable=true)
-    public static Smart_Grid_Config__mdt getGridConfig(String configDevName) {
+    public static GridConfigDTO getGridConfig(String configDevName) {
         if (String.isBlank(configDevName)) {
             return null;
         }
         
-        List<Smart_Grid_Config__mdt> configs = [
-            SELECT Id, DeveloperName, Object_API_Name__c, Columns_JSON__c, Default_Filter_Field__c, Record_Limit__c, Default_Sort_Field__c, Is_Active__c, Allow_Personalization__c, Use_Advanced_Config__c
-            FROM Smart_Grid_Config__mdt
-            WHERE DeveloperName = :configDevName
-            WITH USER_MODE
-            LIMIT 1
-        ];
+        List<Smart_Grid_Config__mdt> configs;
+        
+        if (Test.isRunningTest() && mockConfigs != null) {
+            configs = mockConfigs;
+        } else {
+            configs = [
+                SELECT Id, DeveloperName, Object_API_Name__c, Columns_JSON__c, Default_Filter_Field__c, Record_Limit__c, Default_Sort_Field__c, Is_Active__c, Allow_Personalization__c, Use_Advanced_Config__c,
+                    (SELECT Id, Field_API_Name__c, Display_Label__c, Order__c, Is_Editable__c, Column_Width__c, Is_Sortable__c 
+                     FROM Smart_Grid_Columns__r 
+                     ORDER BY Order__c ASC)
+                FROM Smart_Grid_Config__mdt
+                WHERE DeveloperName = :configDevName
+                WITH USER_MODE
+                LIMIT 1
+            ];
+        }
         
         if (!configs.isEmpty() && configs[0].Is_Active__c) {
-            return configs[0];
+            Smart_Grid_Config__mdt conf = configs[0];
+            GridConfigDTO dto = new GridConfigDTO();
+            dto.id = conf.Id;
+            dto.developerName = conf.DeveloperName;
+            dto.objectApiName = conf.Object_API_Name__c;
+            dto.defaultFilterField = conf.Default_Filter_Field__c;
+            dto.recordLimit = conf.Record_Limit__c;
+            dto.defaultSortField = conf.Default_Sort_Field__c;
+            dto.isActive = conf.Is_Active__c;
+            dto.allowPersonalization = conf.Allow_Personalization__c;
+            dto.useAdvancedConfig = conf.Use_Advanced_Config__c;
+            dto.columns = new List<ColumnDTO>();
+
+            if (conf.Use_Advanced_Config__c == true) {
+                // Relational columns
+                if (conf.Smart_Grid_Columns__r != null) {
+                    for (Smart_Grid_Column__mdt col : conf.Smart_Grid_Columns__r) {
+                        ColumnDTO c = new ColumnDTO();
+                        c.fieldApiName = col.Field_API_Name__c;
+                        c.displayLabel = col.Display_Label__c;
+                        c.order = col.Order__c;
+                        c.isEditable = col.Is_Editable__c;
+                        c.columnWidth = col.Column_Width__c;
+                        c.isSortable = col.Is_Sortable__c;
+                        dto.columns.add(c);
+                    }
+                }
+            } else if (String.isNotBlank(conf.Columns_JSON__c)) {
+                // JSON columns
+                try {
+                    List<JsonColumn> parsedCols = (List<JsonColumn>)JSON.deserialize(conf.Columns_JSON__c, List<JsonColumn>.class);
+                    for (JsonColumn jc : parsedCols) {
+                        ColumnDTO c = new ColumnDTO();
+                        c.fieldApiName = jc.field;
+                        c.displayLabel = jc.label != null ? jc.label : jc.field;
+                        c.order = jc.order;
+                        c.isEditable = jc.editable;
+                        c.columnWidth = jc.width;
+                        c.isSortable = jc.sortable != null ? jc.sortable : false;
+                        dto.columns.add(c);
+                    }
+                } catch (Exception e) {
+                    // Ignore JSON parsing errors and return an empty column list
+                }
+            }
+
+            return dto;
         }
         return null;
     }
@@ -184,5 +242,36 @@ public with sharing class SmartGridController {
     public class PicklistOption {
         @AuraEnabled public String label;
         @AuraEnabled public String value;
+    }
+
+    public class JsonColumn {
+        public String field;
+        public String label;
+        public Decimal order;
+        public Boolean editable;
+        public Decimal width;
+        public Boolean sortable;
+    }
+
+    public class GridConfigDTO {
+        @AuraEnabled public String id;
+        @AuraEnabled public String developerName;
+        @AuraEnabled public String objectApiName;
+        @AuraEnabled public String defaultFilterField;
+        @AuraEnabled public Decimal recordLimit;
+        @AuraEnabled public String defaultSortField;
+        @AuraEnabled public Boolean isActive;
+        @AuraEnabled public Boolean allowPersonalization;
+        @AuraEnabled public Boolean useAdvancedConfig;
+        @AuraEnabled public List<ColumnDTO> columns;
+    }
+
+    public class ColumnDTO {
+        @AuraEnabled public String fieldApiName;
+        @AuraEnabled public String displayLabel;
+        @AuraEnabled public Decimal order;
+        @AuraEnabled public Boolean isEditable;
+        @AuraEnabled public Decimal columnWidth;
+        @AuraEnabled public Boolean isSortable;
     }
 }

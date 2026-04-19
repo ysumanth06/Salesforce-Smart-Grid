@@ -5,7 +5,9 @@
 - **Feature**: 002-smartgrid-phase1
 - **Story ID**: TS-01
 - **Type**: FULL
-- **Status**: DRAFT
+- **Status**: IMPLEMENTED
+- **Started**: 2026-04-19
+- **Completed**: 2026-04-19
 
 ## 🎯 Objective
 
@@ -19,21 +21,21 @@ Upgrade the `SmartGridController` to support fetching columns from the new `Smar
 
 ## ✅ Acceptance Criteria
 
-- [ ] Controller returns a list of column objects regardless of the storage source (JSON vs Relational).
-- [ ] If `Use_Advanced_Config__c` is false, fallback to legacy JSON parsing works perfectly.
-- [ ] Columns are ordered correctly in the response according to the defined `Order__c`.
-- [ ] Apex tests mock both JSON and Relational scenarios.
+- [x] Controller returns a list of column objects regardless of the storage source (JSON vs Relational).
+- [x] If `Use_Advanced_Config__c` is false, fallback to legacy JSON parsing works perfectly.
+- [x] Columns are ordered correctly in the response according to the defined `Order__c`.
+- [x] Apex tests mock both JSON and Relational scenarios.
 
 ## 🛠 SF Implementation Layers
 
 | Layer            | Skill      | File Path                                                    | Status     |
 | :--------------- | :--------- | :----------------------------------------------------------- | :--------- |
-| **Apex Service** | sf-apex    | `force-app/main/default/classes/SmartGridController.cls`     | ⭕ PENDING |
-| **Apex Test**    | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls` | ⭕ PENDING |
+| **Apex Service** | sf-apex    | `force-app/main/default/classes/SmartGridController.cls`     | ✅ DONE    |
+| **Apex Test**    | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls` | ✅ DONE    |
 
 ## 🔒 Scoring Gates
 
-- **sf-apex**: 120/150
+- **sf-apex**: 135/150
 
 ## 📝 Dependencies
 

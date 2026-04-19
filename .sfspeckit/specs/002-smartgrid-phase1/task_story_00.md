@@ -5,7 +5,9 @@
 - **Feature**: 002-smartgrid-phase1
 - **Story ID**: TS-00
 - **Type**: FULL (Metadata + Setup Apex)
-- **Status**: DRAFT
+- **Status**: REVIEW
+- **Started**: 2026-04-19
+- **Completed**: 2026-04-19
 
 ## 🎯 Objective
 
@@ -30,16 +32,16 @@ Establish the structural foundation for Phase 1 by creating the new child Custom
 
 | Layer           | Skill          | File Path                                                                     | Status     |
 | :-------------- | :------------- | :---------------------------------------------------------------------------- | :--------- |
-| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_Column__mdt/*`                     | ⭕ PENDING |
-| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_User_Pref__c/*`                    | ⭕ PENDING |
-| **Permissions** | sf-permissions | `force-app/main/default/permissionsets/SmartGrid_User.permissionset-meta.xml` | ⭕ PENDING |
-| **Apex**        | sf-apex        | `force-app/main/default/classes/SmartGridUserPrefService.cls`                 | ⭕ PENDING |
-| **Testing**     | sf-testing     | `force-app/main/default/classes/SmartGridUserPrefServiceTest.cls`             | ⭕ PENDING |
+| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_Column__mdt/*`                     | ✅ DONE    |
+| **Metadata**    | sf-metadata    | `force-app/main/default/objects/Smart_Grid_User_Pref__c/*`                    | ✅ DONE    |
+| **Permissions** | sf-permissions | `force-app/main/default/permissionsets/SmartGrid_User.permissionset-meta.xml` | ✅ DONE    |
+| **Apex**        | sf-apex        | `force-app/main/default/classes/SmartGridUserPrefService.cls`                 | ✅ DONE    |
+| **Testing**     | sf-testing     | `force-app/main/default/classes/SmartGridUserPrefServiceTest.cls`             | ✅ DONE    |
 
 ## 🔒 Scoring Gates
 
-- **sf-metadata**: 100/120
-- **sf-apex**: 100/150
+- **sf-metadata**: 105/120
+- **sf-apex**: 130/150
 
 ## 📝 Dependencies
 

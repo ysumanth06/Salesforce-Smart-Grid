@@ -3,13 +3,43 @@ public class SmartGridControllerTest {
   @isTest
   static void testGetGridConfig_Null() {
     Test.startTest();
-    Smart_Grid_Config__mdt config = SmartGridController.getGridConfig(null);
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(null);
     Test.stopTest();
     System.assertEquals(
       null,
       config,
       'Config should be null for null dev name'
     );
+  }
+
+  @isTest
+  static void testGetGridConfig_JSON() {
+    String jsonStr = '[{"Id":"m00000000000001", "DeveloperName":"Test_JSON", "Is_Active__c":true, "Use_Advanced_Config__c":false, "Columns_JSON__c":"[{\\"field\\":\\"Name\\",\\"order\\":1}]"}]';
+    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>)JSON.deserialize(jsonStr, List<Smart_Grid_Config__mdt>.class);
+
+    Test.startTest();
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig('Test_JSON');
+    Test.stopTest();
+
+    System.assertNotEquals(null, config, 'Config should not be null');
+    System.assertEquals('Test_JSON', config.developerName, 'DeveloperName should match');
+    System.assertEquals(1, config.columns.size(), 'Should have 1 column parsed from JSON');
+    System.assertEquals('Name', config.columns[0].fieldApiName, 'Column field should be Name');
+  }
+
+  @isTest
+  static void testGetGridConfig_Relational() {
+    String jsonStr = '[{"Id":"m00000000000002", "DeveloperName":"Test_Relational", "Is_Active__c":true, "Use_Advanced_Config__c":true, "Smart_Grid_Columns__r":{"totalSize":1, "done":true, "records":[{"Id":"m01000000000001", "Field_API_Name__c":"Industry", "Order__c":1, "Is_Editable__c":true}]}}]';
+    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>)JSON.deserialize(jsonStr, List<Smart_Grid_Config__mdt>.class);
+
+    Test.startTest();
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig('Test_Relational');
+    Test.stopTest();
+
+    System.assertNotEquals(null, config, 'Config should not be null');
+    System.assertEquals('Test_Relational', config.developerName, 'DeveloperName should match');
+    System.assertEquals(1, config.columns.size(), 'Should have 1 column from relationship');
+    System.assertEquals('Industry', config.columns[0].fieldApiName, 'Column field should be Industry');
   }
 
   @isTest

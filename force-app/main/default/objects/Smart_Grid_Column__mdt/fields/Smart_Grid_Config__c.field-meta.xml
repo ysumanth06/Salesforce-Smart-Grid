@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Smart_Grid_Config__c</fullName>
+    <description>Links to the parent Smart Grid Configuration.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Smart Grid Config</label>
+    <referenceTo>Smart_Grid_Config__mdt</referenceTo>
+    <relationshipLabel>Smart Grid Columns</relationshipLabel>
+    <relationshipName>Smart_Grid_Columns</relationshipName>
+    <type>MetadataRelationship</type>
+</CustomField>
