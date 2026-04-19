@@ -3,6 +3,8 @@
         <div slot="actions">
             <lightning-button label="Add Row" icon-name="utility:add" onclick={handleAddRow}></lightning-button>
             <lightning-button label="Delete Selected" icon-name="utility:delete" variant="destructive" onclick={handleDelete} class="slds-m-left_x-small"></lightning-button>
+            <lightning-button label="Export CSV" icon-name="utility:download" onclick={handleExportCSV} class="slds-m-left_x-small"></lightning-button>
+            <lightning-button label="Reset Config" icon-name="utility:refresh" onclick={handleResetPrefs} class="slds-m-left_x-small"></lightning-button>
         </div>
         <!-- Filter Bar -->
         <template lwc:if={hasFilters}>
@@ -62,7 +64,8 @@
                     draft-values={draftValues}
                     sorted-by={sortField}
                     sorted-direction={sortDirection}
-                    onsort={handleSort}>
+                    onsort={handleSort}
+                    onresize={handleResize}>
                 </lightning-datatable>
             </template>
             <template lwc:if={showNoConfigMessage}>

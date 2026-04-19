@@ -5,7 +5,9 @@
 - **Feature**: 002-smartgrid-phase1
 - **Story ID**: TS-04
 - **Type**: FULL
-- **Status**: DRAFT
+- **Status**: IMPLEMENTED
+- **Started**: 2026-04-19
+- **Completed**: 2026-04-19
 
 ## 🎯 Objective
 
@@ -20,18 +22,18 @@ Finalize Phase 1 with User Preferences persistence, client-side CSV export, and 
 
 ## ✅ Acceptance Criteria
 
-- [ ] Hidden or frozen columns are remembered after a page refresh.
-- [ ] "Export to CSV" downloads a file containing exactly what is currently filtered in the grid.
-- [ ] Pressing `Ctrl+S` triggers the same save logic as the Save button.
-- [ ] "Reset" restores the grid to the base admin config.
+- [x] Hidden or frozen columns are remembered after a page refresh.
+- [x] "Export to CSV" downloads a file containing exactly what is currently filtered in the grid.
+- [x] Pressing `Ctrl+S` triggers the same save logic as the Save button.
+- [x] "Reset" restores the grid to the base admin config.
 
 ## 🛠 SF Implementation Layers
 
 | Layer            | Skill   | File Path                                                     | Status     |
 | :--------------- | :------ | :------------------------------------------------------------ | :--------- |
-| **Apex Service** | sf-apex | `force-app/main/default/classes/SmartGridUserPrefService.cls` | ⭕ PENDING |
-| **LWC Utility**  | sf-lwc  | `force-app/main/default/lwc/csvHelper/csvHelper.js`           | ⭕ PENDING |
-| **LWC Main**     | sf-lwc  | `force-app/main/default/lwc/smartDataGrid/`                   | ⭕ PENDING |
+| **Apex Service** | sf-apex | `force-app/main/default/classes/SmartGridUserPrefService.cls` | ✅ DONE    |
+| **LWC Utility**  | sf-lwc  | `force-app/main/default/lwc/csvHelper/csvHelper.js`           | ✅ DONE    |
+| **LWC Main**     | sf-lwc  | `force-app/main/default/lwc/smartDataGrid/`                   | ✅ DONE    |
 
 ## 🔒 Scoring Gates
 
