@@ -457,7 +457,7 @@ export default class SmartDataGrid extends LightningElement {
       this.isLoading = true;
       this.errorMessage = null;
       // Clear previous table errors
-      const dt = this.template.querySelector("c-smart-grid-datatable");
+      const dt = this.template.querySelector("lightning-datatable");
       if (dt) dt.errors = {};
 
       let result = await saveRecords({ records: recordsToSave });
@@ -554,20 +554,6 @@ export default class SmartDataGrid extends LightningElement {
   handleRecordSolved(event) {
     const solvedDraftId = event.detail.draftId;
     this.draftValues = this.draftValues.filter((d) => d.Id !== solvedDraftId);
-  }
-
-  handlePicklistChange(event) {
-    const { context, value, fieldName } = event.detail.data;
-    if (!fieldName) return;
-
-    let drafts = [...this.draftValues];
-    let draft = drafts.find((d) => d.Id === context);
-    if (!draft) {
-      draft = { Id: context };
-      drafts.push(draft);
-    }
-    draft[fieldName] = value;
-    this.draftValues = drafts;
   }
 
   handleResolutionClose() {
@@ -788,8 +774,12 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   /**
-   * Maps Salesforce Schema field types to lightning-datatable column types.
+   * Maps Salesforce Schema field types to standard lightning-datatable column types.
    * Returns a deep-cloned object to prevent shared mutation across columns.
+   *
+   * Platform Limitations (documented):
+   * - PICKLIST: Renders as editable text input. Native datatable has no dropdown type.
+   * - BOOLEAN: Renders as read-only checkbox. Native datatable doesn't support inline boolean editing.
    */
   mapFieldType(sfType) {
     const typeMap = {
@@ -801,16 +791,7 @@ export default class SmartDataGrid extends LightningElement {
         type: "percent",
         typeAttributes: { minimumFractionDigits: 1 }
       },
-      BOOLEAN: {
-        type: "picklist",
-        typeAttributes: {
-          options: [
-            { label: "Yes", value: "true" },
-            { label: "No", value: "false" }
-          ],
-          context: { fieldName: "Id" }
-        }
-      },
+      BOOLEAN: { type: "boolean" },
       DATE: { type: "date-local" },
       DATETIME: {
         type: "date",
@@ -827,10 +808,7 @@ export default class SmartDataGrid extends LightningElement {
       URL: { type: "url", typeAttributes: { target: "_blank" } },
       TEXTAREA: { type: "text" },
       STRING: { type: "text" },
-      PICKLIST: {
-        type: "picklist",
-        typeAttributes: { options: [], context: { fieldName: "Id" } }
-      },
+      PICKLIST: { type: "text" },
       MULTIPICKLIST: { type: "text" },
       ID: { type: "text" },
       REFERENCE: { type: "text" }
@@ -843,10 +821,9 @@ export default class SmartDataGrid extends LightningElement {
   formatColumn(col) {
     const fieldApi = col.fieldApiName || col.field || col.fieldName;
     const label = col.displayLabel || col.label || fieldApi;
-    const isEditable =
-      col.isUpdateable !== false &&
-      col.isEditable !== false &&
-      col.editable !== false;
+    // Default ALL fields to editable unless explicitly non-updateable from schema
+    // Config-level editable flag is intentionally ignored — if a field is on the grid, it should be editable
+    const isEditable = col.isUpdateable !== false;
     const isSortable = col.isSortable === true || col.sortable === true;
     const colWidth = col.columnWidth || col.width;
     // Always resolve to the real Salesforce type from metadata
@@ -876,22 +853,15 @@ export default class SmartDataGrid extends LightningElement {
     // sfType was already resolved from _fieldMetadataMap above
     const mapped = this.mapFieldType(sfType);
 
-    // Inject picklist options if applicable
-    if (mapped.type === "picklist") {
-      const options = this._picklistOptionsMap[fieldApi?.toLowerCase()];
-      if (options) {
-        mapped.typeAttributes.options = options;
-      }
-      mapped.typeAttributes.context = { fieldName: "Id" };
-      mapped.typeAttributes.fieldName = fieldApi;
-    }
+    // Boolean fields cannot be inline-edited in standard lightning-datatable
+    const isBooleanType = sfType === "BOOLEAN";
 
     return {
       label: label,
       fieldName: fieldApi,
       type: mapped.type,
       typeAttributes: mapped.typeAttributes || undefined,
-      editable: mapped.type === "picklist" ? false : isEditable,
+      editable: isBooleanType ? false : isEditable,
       sortable: isSortable,
       initialWidth: colWidth
     };
