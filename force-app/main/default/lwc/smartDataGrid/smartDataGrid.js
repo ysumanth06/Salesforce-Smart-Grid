@@ -40,6 +40,7 @@ export default class SmartDataGrid extends LightningElement {
   config;
   _showFieldPicker = false;
   pickerSelectedFields = [];
+  _fieldMetadataMap = {}; // Maps fieldApiName → Salesforce schema type (e.g. 'BOOLEAN', 'PICKLIST')
 
   async connectedCallback() {
     window.addEventListener("keydown", this.handleKeyDown.bind(this));
@@ -143,6 +144,13 @@ export default class SmartDataGrid extends LightningElement {
       const fields = await getObjectFields({
         objectApiName: this.objectApiName
       });
+
+      // Build a metadata map so formatColumn can always look up the real SF type
+      const metaMap = {};
+      fields.forEach((f) => {
+        metaMap[f.fieldApiName] = f.type;
+      });
+      this._fieldMetadataMap = metaMap;
 
       let filters = [];
       for (let col of this.gridColumns) {
@@ -780,13 +788,15 @@ export default class SmartDataGrid extends LightningElement {
       col.editable !== false;
     const isSortable = col.isSortable === true || col.sortable === true;
     const colWidth = col.columnWidth || col.width;
-    const type = (col.type || "").toUpperCase();
+    // Always resolve to the real Salesforce type from metadata
+    const sfType = (
+      this._fieldMetadataMap[fieldApi] ||
+      col.type ||
+      ""
+    ).toUpperCase();
 
     const isReference =
-      type === "REFERENCE" ||
-      type === "ID" ||
-      fieldApi === "Id" ||
-      (fieldApi.endsWith("Id") && type === "STRING");
+      sfType === "REFERENCE" || sfType === "ID" || fieldApi === "Id";
     if (isReference) {
       return {
         label: label,
@@ -802,7 +812,8 @@ export default class SmartDataGrid extends LightningElement {
       };
     }
 
-    const mapped = this.mapFieldType(col.type);
+    // sfType was already resolved from _fieldMetadataMap above
+    const mapped = this.mapFieldType(sfType);
 
     // Inject picklist options if applicable
     if (mapped.type === "picklist") {
