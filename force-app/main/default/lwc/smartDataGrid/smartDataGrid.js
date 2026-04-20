@@ -40,7 +40,8 @@ export default class SmartDataGrid extends LightningElement {
   config;
   _showFieldPicker = false;
   pickerSelectedFields = [];
-  _fieldMetadataMap = {}; // Maps fieldApiName → Salesforce schema type (e.g. 'BOOLEAN', 'PICKLIST')
+  _fieldMetadataMap = {}; // Maps fieldApiName → Salesforce schema type
+  _picklistOptionsMap = {}; // Maps fieldApiName → List of {label, value} options
 
   async connectedCallback() {
     window.addEventListener("keydown", this.handleKeyDown.bind(this));
@@ -179,10 +180,15 @@ export default class SmartDataGrid extends LightningElement {
             objectApiName: this.objectApiName,
             fieldApiName: col.fieldName
           });
-          filter.options = [
+          const options = [
             { label: "-- All --", value: "" },
             ...values.map((v) => ({ label: v.label, value: v.value }))
           ];
+          filter.options = options;
+          // Store in our direct map for the grid cells (excluding the -- All -- option)
+          this._picklistOptionsMap[col.fieldName.toLowerCase()] = values.map(
+            (v) => ({ label: v.label, value: v.value })
+          );
         } else if (
           fieldDescribe.type === "DATE" ||
           fieldDescribe.type === "DATETIME"
@@ -822,11 +828,9 @@ export default class SmartDataGrid extends LightningElement {
 
     // Inject picklist options if applicable
     if (mapped.type === "picklist") {
-      const filter = this.filterFields?.find(
-        (f) => f.fieldName?.toLowerCase() === fieldApi?.toLowerCase()
-      );
-      if (filter && filter.options) {
-        mapped.typeAttributes.options = filter.options;
+      const options = this._picklistOptionsMap[fieldApi?.toLowerCase()];
+      if (options) {
+        mapped.typeAttributes.options = options;
       }
       mapped.typeAttributes.context = { fieldName: "Id" };
       mapped.typeAttributes.fieldName = fieldApi;

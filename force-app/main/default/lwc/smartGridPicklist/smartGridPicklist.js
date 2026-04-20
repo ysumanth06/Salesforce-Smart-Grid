@@ -13,7 +13,7 @@ export default class SmartGridPicklist extends LightningElement {
     const selectedOption = this.options?.find(
       (opt) => opt.value === this.value
     );
-    return selectedOption ? selectedOption.label : this.value || "";
+    return selectedOption ? selectedOption.label : this.value || "---";
   }
 
   handleCellClick(event) {

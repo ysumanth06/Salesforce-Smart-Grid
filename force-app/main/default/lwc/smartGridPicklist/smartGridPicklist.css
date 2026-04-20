@@ -4,7 +4,6 @@
   align-items: center;
   width: 100%;
   cursor: pointer;
-  transition: background-color 0.1s;
 }
 
 .cell-container:hover {
@@ -13,7 +12,11 @@
 
 .read-mode {
   width: 100%;
-  padding: 4px;
+  height: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
 }
 
 .combobox-input {
