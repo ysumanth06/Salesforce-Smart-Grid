@@ -822,7 +822,9 @@ export default class SmartDataGrid extends LightningElement {
 
     // Inject picklist options if applicable
     if (mapped.type === "picklist") {
-      const filter = this.filterFields?.find((f) => f.fieldName === fieldApi);
+      const filter = this.filterFields?.find(
+        (f) => f.fieldName?.toLowerCase() === fieldApi?.toLowerCase()
+      );
       if (filter && filter.options) {
         mapped.typeAttributes.options = filter.options;
       }
@@ -835,7 +837,7 @@ export default class SmartDataGrid extends LightningElement {
       fieldName: fieldApi,
       type: mapped.type,
       typeAttributes: mapped.typeAttributes || undefined,
-      editable: isEditable,
+      editable: mapped.type === "picklist" ? false : isEditable,
       sortable: isSortable,
       initialWidth: colWidth
     };

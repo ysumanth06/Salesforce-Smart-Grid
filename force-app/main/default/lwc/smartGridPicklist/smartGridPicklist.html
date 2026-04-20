@@ -20,16 +20,9 @@
     <template if:false={isEditMode}>
       <div
         class="slds-grid slds-grid_vertical-align-center slds-truncate read-mode"
+        onclick={handleEditClick}
       >
         <span class="slds-truncate" title={displayValue}>{displayValue}</span>
-        <lightning-button-icon
-          icon-name="utility:edit"
-          variant="bare"
-          size="x-small"
-          class="slds-m-left_x-small pencil-icon"
-          onclick={handleEditClick}
-        >
-        </lightning-button-icon>
       </div>
     </template>
   </div>

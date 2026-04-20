@@ -3,20 +3,17 @@
   display: flex;
   align-items: center;
   width: 100%;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.cell-container:hover {
+  background-color: #f3f3f3;
 }
 
 .read-mode {
   width: 100%;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.pencil-icon {
-  visibility: hidden;
-}
-
-.cell-container:hover .pencil-icon {
-  visibility: visible;
+  padding: 4px;
 }
 
 .combobox-input {
