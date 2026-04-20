@@ -27,14 +27,7 @@ export default class SmartDataGrid extends LightningElement {
   @track activeFilterPills = [];
 
   // Filter state
-  @track filterComboboxes = [];
-  @track dateFilter = {
-    fieldApiName: "",
-    label: "",
-    startDate: null,
-    endDate: null
-  };
-  @track hasDateFilter = false;
+  @track filterFields = [];
 
   @track sortField;
   @track sortDirection = "asc";
@@ -58,7 +51,8 @@ export default class SmartDataGrid extends LightningElement {
       // Check cache/server first before prompting
       const hasPrefs = await this.loadCachedColumns();
       if (hasPrefs) {
-        this.fetchData();
+        await this.initializeFilters();
+        await this.fetchData();
       } else {
         this.isSetupRequired = true;
       }
@@ -136,62 +130,60 @@ export default class SmartDataGrid extends LightningElement {
    * Initialize filters dynamically based on object fields
    */
   async initializeFilters() {
-    if (!this.objectApiName || !this.gridColumns) return;
+    if (
+      !this.objectApiName ||
+      !this.gridColumns ||
+      this.gridColumns.length === 0
+    )
+      return;
 
     try {
-      // Get all field describes for the object
       const fields = await getObjectFields({
         objectApiName: this.objectApiName
       });
 
-      // Filter: Only include fields currently displayed in the grid
-      const activeFieldNames = this.gridColumns.map((c) => c.fieldName);
-      const activeFields = fields.filter((f) =>
-        activeFieldNames.includes(f.fieldApiName)
-      );
+      let filters = [];
+      for (let col of this.gridColumns) {
+        // Skip URL-helper fields for filtering
+        if (col.fieldName.endsWith("_Url")) continue;
 
-      // Find picklist fields among active columns
-      let targetPicklists = activeFields.filter(
-        (f) => f.type === "PICKLIST" || f.type === "MULTIPICKLIST"
-      );
+        const fieldDescribe = fields.find(
+          (f) => f.fieldApiName === col.fieldName
+        );
+        if (!fieldDescribe) continue;
 
-      // Find the first Date/DateTime field among active columns
-      const dateFields = activeFields.filter(
-        (f) => f.type === "DATE" || f.type === "DATETIME"
-      );
+        let filter = {
+          fieldName: col.fieldName,
+          label: col.label,
+          selectedValue: "",
+          type: fieldDescribe.type
+        };
 
-      // Populate picklist options
-      let comboboxes = [];
-      for (let p of targetPicklists) {
-        // eslint-disable-next-line no-await-in-loop
-        const values = await getPicklistValues({
-          objectApiName: this.objectApiName,
-          fieldApiName: p.fieldApiName
-        });
-
-        comboboxes.push({
-          fieldApiName: p.fieldApiName,
-          label: p.label,
-          options: [
+        if (
+          fieldDescribe.type === "PICKLIST" ||
+          fieldDescribe.type === "MULTIPICKLIST"
+        ) {
+          filter.isPicklist = true;
+          // eslint-disable-next-line no-await-in-loop
+          const values = await getPicklistValues({
+            objectApiName: this.objectApiName,
+            fieldApiName: col.fieldName
+          });
+          filter.options = [
             { label: "-- All --", value: "" },
             ...values.map((v) => ({ label: v.label, value: v.value }))
-          ],
-          selectedValue: ""
-        });
+          ];
+        } else if (
+          fieldDescribe.type === "DATE" ||
+          fieldDescribe.type === "DATETIME"
+        ) {
+          filter.isDate = true;
+        } else {
+          filter.isText = true;
+        }
+        filters.push(filter);
       }
-      this.filterComboboxes = comboboxes;
-
-      if (dateFields.length > 0) {
-        this.dateFilter = {
-          fieldApiName: dateFields[0].fieldApiName,
-          label: dateFields[0].label,
-          startDate: null,
-          endDate: null
-        };
-        this.hasDateFilter = true;
-      } else {
-        this.hasDateFilter = false;
-      }
+      this.filterFields = filters;
     } catch (e) {
       console.warn("Failed to load filter options:", this.reduceErrors(e));
     }
@@ -208,9 +200,13 @@ export default class SmartDataGrid extends LightningElement {
     }
   }
 
-  handleDateChange(event) {
-    const fieldName = event.target.name; // 'startDate' or 'endDate'
-    this.dateFilter[fieldName] = event.detail.value;
+  handleFilterChange(event) {
+    const fieldName = event.target.name;
+    const value = event.detail.value;
+    const filter = this.filterFields.find((f) => f.fieldName === fieldName);
+    if (filter) {
+      filter.selectedValue = value;
+    }
   }
 
   async applyFilters() {
@@ -220,14 +216,10 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   async handleClearAllFilters() {
-    this.filterComboboxes = this.filterComboboxes.map((fc) => ({
-      ...fc,
+    this.filterFields = this.filterFields.map((f) => ({
+      ...f,
       selectedValue: ""
     }));
-    if (this.hasDateFilter) {
-      this.dateFilter.startDate = null;
-      this.dateFilter.endDate = null;
-    }
     this.isFilterPanelOpen = false;
     this.updateActivePills();
     await this.fetchData();
@@ -263,21 +255,26 @@ export default class SmartDataGrid extends LightningElement {
 
       // Build filter map
       let filterMap = {};
-      if (this.filterComboboxes) {
-        this.filterComboboxes.forEach((fc) => {
-          if (fc.selectedValue) {
-            filterMap[fc.fieldApiName] = fc.selectedValue;
+      if (this.filterFields) {
+        this.filterFields.forEach((f) => {
+          if (f.selectedValue && !f.isDate) {
+            filterMap[f.fieldName] = f.selectedValue;
           }
         });
       }
+
+      // Find first date filter for the paged results call (it currently only supports one date range)
+      const dateFilter = this.filterFields.find(
+        (f) => f.isDate && f.selectedValue
+      );
 
       let response = await getRecordsPaged({
         objectApiName: this.objectApiName,
         fields: fieldsToQuery,
         filters: filterMap,
-        dateField: this.hasDateFilter ? this.dateFilter.fieldApiName : null,
-        startDate: this.dateFilter ? this.dateFilter.startDate : null,
-        endDate: this.dateFilter ? this.dateFilter.endDate : null,
+        dateField: dateFilter ? dateFilter.fieldName : null,
+        startDate: dateFilter ? dateFilter.selectedValue : null,
+        endDate: null, // Note: Simplified date logic to work with the universal array
         sortField: this.sortField || this.config?.defaultSortField,
         sortDirection: this.sortDirection,
         pageSize: this.pageSize,
@@ -676,42 +673,27 @@ export default class SmartDataGrid extends LightningElement {
 
   updateActivePills() {
     let pills = [];
-    this.filterComboboxes.forEach((fc) => {
-      if (fc.selectedValue && fc.selectedValue !== "") {
-        let opt = fc.options.find((o) => o.value === fc.selectedValue);
-        let optLabel = opt ? opt.label : fc.selectedValue;
+    this.filterFields.forEach((f) => {
+      if (f.selectedValue && f.selectedValue !== "") {
+        let displayVal = f.selectedValue;
+        if (f.isPicklist) {
+          let opt = f.options.find((o) => o.value === f.selectedValue);
+          displayVal = opt ? opt.label : f.selectedValue;
+        }
         pills.push({
-          label: `${fc.label}: ${optLabel}`,
-          name: fc.fieldApiName
+          label: `${f.label}: ${displayVal}`,
+          name: f.fieldName
         });
       }
     });
-    if (this.hasDateFilter) {
-      if (this.dateFilter.startDate) {
-        pills.push({
-          label: `Start Date: ${this.dateFilter.startDate}`,
-          name: "startDate"
-        });
-      }
-      if (this.dateFilter.endDate) {
-        pills.push({
-          label: `End Date: ${this.dateFilter.endDate}`,
-          name: "endDate"
-        });
-      }
-    }
     this.activeFilterPills = pills;
   }
 
   handleRemoveFilterPill(event) {
     const name = event.target.name;
-    if (name === "startDate") {
-      this.dateFilter.startDate = null;
-    } else if (name === "endDate") {
-      this.dateFilter.endDate = null;
-    } else {
-      let fc = this.filterComboboxes.find((f) => f.fieldApiName === name);
-      if (fc) fc.selectedValue = "";
+    let filter = this.filterFields.find((f) => f.fieldName === name);
+    if (filter) {
+      filter.selectedValue = "";
     }
     this.updateActivePills();
     this.fetchData();

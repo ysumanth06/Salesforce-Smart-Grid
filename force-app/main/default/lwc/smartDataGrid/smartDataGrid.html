@@ -21,6 +21,12 @@
         onclick={handleDelete}
         class="slds-m-left_x-small"
       ></lightning-button>
+      <lightning-button
+        label="Export CSV"
+        icon-name="utility:download"
+        onclick={handleExportCSV}
+        class="slds-m-left_x-small"
+      ></lightning-button>
       <lightning-button-icon
         icon-name="utility:filterList"
         alternative-text="Toggle Filters"
@@ -29,12 +35,6 @@
         class="slds-m-left_x-small"
         variant="border-filled"
       ></lightning-button-icon>
-      <lightning-button
-        label="Export CSV"
-        icon-name="utility:download"
-        onclick={handleExportCSV}
-        class="slds-m-left_x-small"
-      ></lightning-button>
     </div>
     <!-- Active Filter Pills -->
     <template lwc:if={hasActiveFilters}>
@@ -59,43 +59,39 @@
         <div
           class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end"
         >
-          <template for:each={filterComboboxes} for:item="fc">
+          <template for:each={filterFields} for:item="f">
             <div
-              key={fc.fieldApiName}
+              key={f.fieldName}
               class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
             >
-              <lightning-combobox
-                name={fc.fieldApiName}
-                label={fc.label}
-                value={fc.selectedValue}
-                options={fc.options}
-                onchange={handleMultiFilterChange}
-              ></lightning-combobox>
-            </div>
-          </template>
-
-          <template lwc:if={hasDateFilter}>
-            <div
-              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
-            >
-              <lightning-input
-                type="date"
-                name="startDate"
-                label="Start Date"
-                value={dateFilter.startDate}
-                onchange={handleDateChange}
-              ></lightning-input>
-            </div>
-            <div
-              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
-            >
-              <lightning-input
-                type="date"
-                name="endDate"
-                label="End Date"
-                value={dateFilter.endDate}
-                onchange={handleDateChange}
-              ></lightning-input>
+              <template lwc:if={f.isPicklist}>
+                <lightning-combobox
+                  name={f.fieldName}
+                  label={f.label}
+                  value={f.selectedValue}
+                  options={f.options}
+                  onchange={handleFilterChange}
+                ></lightning-combobox>
+              </template>
+              <template lwc:elseif={f.isDate}>
+                <lightning-input
+                  type="date"
+                  name={f.fieldName}
+                  label={f.label}
+                  value={f.selectedValue}
+                  onchange={handleFilterChange}
+                ></lightning-input>
+              </template>
+              <template lwc:else>
+                <lightning-input
+                  type="text"
+                  name={f.fieldName}
+                  label={f.label}
+                  value={f.selectedValue}
+                  onchange={handleFilterChange}
+                  placeholder="Search..."
+                ></lightning-input>
+              </template>
             </div>
           </template>
 
@@ -170,36 +166,36 @@
           valid Grid Config Developer Name.
         </div>
       </template>
-
-      <!-- Pagination Footer -->
-      <template lwc:if={gridColumns}>
-        <div
-          class="slds-grid slds-grid_align-center slds-p-top_small slds-p-bottom_medium slds-border_top"
-        >
-          <lightning-button
-            label="Previous"
-            icon-name="utility:chevronleft"
-            onclick={handlePreviousPage}
-            disabled={disablePrevious}
-            variant="neutral"
-            class="slds-m-right_medium"
-          ></lightning-button>
-          <span class="slds-align-middle slds-text-body_regular">
-            Page <strong>{currentPage}</strong> of
-            <strong>{totalPages}</strong> ({totalRecords} records)
-          </span>
-          <lightning-button
-            label="Next"
-            icon-name="utility:chevronright"
-            icon-position="right"
-            onclick={handleNextPage}
-            disabled={disableNext}
-            variant="neutral"
-            class="slds-m-left_medium"
-          ></lightning-button>
-        </div>
-      </template>
     </div>
+
+    <!-- Pagination Footer -->
+    <template lwc:if={gridColumns}>
+      <div
+        class="slds-grid slds-grid_align-center slds-p-top_small slds-p-bottom_medium slds-border_top"
+      >
+        <lightning-button
+          label="Previous"
+          icon-name="utility:chevronleft"
+          onclick={handlePreviousPage}
+          disabled={disablePrevious}
+          variant="neutral"
+          class="slds-m-right_medium"
+        ></lightning-button>
+        <span class="slds-align-middle slds-text-body_regular">
+          Page <strong>{currentPage}</strong> of
+          <strong>{totalPages}</strong> ({totalRecords} records)
+        </span>
+        <lightning-button
+          label="Next"
+          icon-name="utility:chevronright"
+          icon-position="right"
+          onclick={handleNextPage}
+          disabled={disableNext}
+          variant="neutral"
+          class="slds-m-left_medium"
+        ></lightning-button>
+      </div>
+    </template>
   </lightning-card>
 
   <!-- Field Picker Modal (child) -->

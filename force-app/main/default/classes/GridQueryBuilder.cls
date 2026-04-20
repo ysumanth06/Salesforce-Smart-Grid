@@ -62,11 +62,24 @@ public with sharing class GridQueryBuilder {
         if (isValidFilterField(sObjType, field)) {
           String escapedField = String.escapeSingleQuotes(field);
           Object val = req.filters.get(field);
-          if (val != null) {
+          if (val != null && String.isNotBlank(String.valueOf(val))) {
             String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
-            whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
-          } else {
-            whereClauses.add(escapedField + ' != null');
+            Schema.DisplayType fType = sObjType.getDescribe()
+              .fields.getMap()
+              .get(field.toLowerCase())
+              .getDescribe()
+              .getType();
+
+            if (
+              fType == Schema.DisplayType.STRING ||
+              fType == Schema.DisplayType.TEXTAREA ||
+              fType == Schema.DisplayType.EMAIL ||
+              fType == Schema.DisplayType.PHONE
+            ) {
+              whereClauses.add(escapedField + ' LIKE \'%' + escapedVal + '%\'');
+            } else {
+              whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
+            }
           }
         }
       }
