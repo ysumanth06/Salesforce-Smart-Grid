@@ -507,20 +507,6 @@ export default class SmartDataGrid extends LightningElement {
     this.draftValues = this.draftValues.filter((d) => d.Id !== solvedDraftId);
   }
 
-  handlePicklistChange(event) {
-    const { context, value, fieldName } = event.detail.data;
-    if (!fieldName) return;
-
-    let drafts = [...this.draftValues];
-    let draft = drafts.find((d) => d.Id === context);
-    if (!draft) {
-      draft = { Id: context };
-      drafts.push(draft);
-    }
-    draft[fieldName] = value;
-    this.draftValues = drafts;
-  }
-
   handleResolutionClose() {
     this.failureQueue = [];
   }
@@ -768,10 +754,7 @@ export default class SmartDataGrid extends LightningElement {
       URL: { type: "url", typeAttributes: { target: "_blank" } },
       TEXTAREA: { type: "text" },
       STRING: { type: "text" },
-      PICKLIST: {
-        type: "picklist",
-        typeAttributes: { options: [], context: { fieldName: "Id" } }
-      },
+      PICKLIST: { type: "text" },
       MULTIPICKLIST: { type: "text" },
       ID: { type: "text" },
       REFERENCE: { type: "text" }
@@ -814,16 +797,6 @@ export default class SmartDataGrid extends LightningElement {
 
     // sfType was already resolved from _fieldMetadataMap above
     const mapped = this.mapFieldType(sfType);
-
-    // Inject picklist options if applicable
-    if (mapped.type === "picklist") {
-      const filter = this.filterFields?.find((f) => f.fieldName === fieldApi);
-      if (filter && filter.options) {
-        mapped.typeAttributes.options = filter.options;
-      }
-      mapped.typeAttributes.context = { fieldName: "Id" };
-      mapped.typeAttributes.fieldName = fieldApi;
-    }
 
     return {
       label: label,
