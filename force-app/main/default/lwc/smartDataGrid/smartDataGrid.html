@@ -53,56 +53,61 @@
 
     <!-- Filter Bar (Collapsible Panel) -->
     <template lwc:if={showFilterPanel}>
-      <div class="slds-box slds-theme_shade slds-m-bottom_medium slds-m-horizontal_medium slds-p-around_medium">
-        <div class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end">
-        <template for:each={filterComboboxes} for:item="fc">
-          <div
-            key={fc.fieldApiName}
-            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
-          >
-            <lightning-combobox
-              name={fc.fieldApiName}
-              label={fc.label}
-              value={fc.selectedValue}
-              options={fc.options}
-              onchange={handleMultiFilterChange}
-            ></lightning-combobox>
-          </div>
-        </template>
-
-        <template lwc:if={hasDateFilter}>
-          <div
-            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
-          >
-            <lightning-input
-              type="date"
-              name="startDate"
-              label="Start Date"
-              value={dateFilter.startDate}
-              onchange={handleDateChange}
-            ></lightning-input>
-          </div>
-          <div
-            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
-          >
-            <lightning-input
-              type="date"
-              name="endDate"
-              label="End Date"
-              value={dateFilter.endDate}
-              onchange={handleDateChange}
-            ></lightning-input>
-          </div>
-        </template>
-
+      <div
+        class="slds-box slds-theme_shade slds-m-bottom_medium slds-m-horizontal_medium slds-p-around_medium"
+      >
         <div
-          class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+          class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end"
         >
-          <lightning-button
-            label="Apply Filters"
-            variant="brand"
-            onclick={applyFilters}
-          ></lightning-button>
+          <template for:each={filterComboboxes} for:item="fc">
+            <div
+              key={fc.fieldApiName}
+              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+            >
+              <lightning-combobox
+                name={fc.fieldApiName}
+                label={fc.label}
+                value={fc.selectedValue}
+                options={fc.options}
+                onchange={handleMultiFilterChange}
+              ></lightning-combobox>
+            </div>
+          </template>
+
+          <template lwc:if={hasDateFilter}>
+            <div
+              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+            >
+              <lightning-input
+                type="date"
+                name="startDate"
+                label="Start Date"
+                value={dateFilter.startDate}
+                onchange={handleDateChange}
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+            >
+              <lightning-input
+                type="date"
+                name="endDate"
+                label="End Date"
+                value={dateFilter.endDate}
+                onchange={handleDateChange}
+              ></lightning-input>
+            </div>
+          </template>
+
+          <div
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+          >
+            <lightning-button
+              label="Apply Filters"
+              variant="brand"
+              onclick={applyFilters}
+            ></lightning-button>
+          </div>
         </div>
       </div>
     </template>
