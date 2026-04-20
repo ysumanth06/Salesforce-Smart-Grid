@@ -189,17 +189,6 @@ export default class SmartDataGrid extends LightningElement {
     }
   }
 
-  handleMultiFilterChange(event) {
-    const fieldName = event.target.name;
-    const value = event.detail.value;
-    const index = this.filterComboboxes.findIndex(
-      (fc) => fc.fieldApiName === fieldName
-    );
-    if (index !== -1) {
-      this.filterComboboxes[index].selectedValue = value;
-    }
-  }
-
   handleFilterChange(event) {
     const fieldName = event.target.name;
     const value = event.detail.value;
@@ -653,10 +642,7 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   get hasFilters() {
-    return (
-      (this.filterComboboxes && this.filterComboboxes.length > 0) ||
-      this.hasDateFilter
-    );
+    return this.filterFields && this.filterFields.length > 0;
   }
 
   get showFilterPanel() {
