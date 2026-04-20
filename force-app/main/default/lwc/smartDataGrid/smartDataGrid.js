@@ -23,6 +23,8 @@ export default class SmartDataGrid extends LightningElement {
   @track errorMessage;
   @track failureQueue = [];
   @track isSetupRequired = false;
+  @track isFilterPanelOpen = false;
+  @track activeFilterPills = [];
 
   // Filter state
   @track filterComboboxes = [];
@@ -216,7 +218,56 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   async applyFilters() {
+    this.isFilterPanelOpen = false;
+    this.updateActivePills();
     await this.fetchData();
+  }
+
+  toggleFilterPanel() {
+    this.isFilterPanelOpen = !this.isFilterPanelOpen;
+  }
+
+  updateActivePills() {
+    let pills = [];
+    this.filterComboboxes.forEach((fc) => {
+      if (fc.selectedValue && fc.selectedValue !== "") {
+        let opt = fc.options.find((o) => o.value === fc.selectedValue);
+        let optLabel = opt ? opt.label : fc.selectedValue;
+        pills.push({
+          label: `${fc.label}: ${optLabel}`,
+          name: fc.fieldApiName
+        });
+      }
+    });
+    if (this.hasDateFilter) {
+      if (this.dateFilter.startDate) {
+        pills.push({
+          label: `Start Date: ${this.dateFilter.startDate}`,
+          name: "startDate"
+        });
+      }
+      if (this.dateFilter.endDate) {
+        pills.push({
+          label: `End Date: ${this.dateFilter.endDate}`,
+          name: "endDate"
+        });
+      }
+    }
+    this.activeFilterPills = pills;
+  }
+
+  handleRemoveFilterPill(event) {
+    const name = event.target.name;
+    if (name === "startDate") {
+      this.dateFilter.startDate = null;
+    } else if (name === "endDate") {
+      this.dateFilter.endDate = null;
+    } else {
+      let fc = this.filterComboboxes.find((f) => f.fieldApiName === name);
+      if (fc) fc.selectedValue = "";
+    }
+    this.updateActivePills();
+    this.fetchData();
   }
 
   async handleSort(event) {
@@ -621,6 +672,61 @@ export default class SmartDataGrid extends LightningElement {
       (this.filterComboboxes && this.filterComboboxes.length > 0) ||
       this.hasDateFilter
     );
+  }
+
+  get showFilterPanel() {
+    return this.hasFilters && this.isFilterPanelOpen;
+  }
+
+  get hasActiveFilters() {
+    return this.activeFilterPills && this.activeFilterPills.length > 0;
+  }
+
+  toggleFilterPanel() {
+    this.isFilterPanelOpen = !this.isFilterPanelOpen;
+  }
+
+  updateActivePills() {
+    let pills = [];
+    this.filterComboboxes.forEach((fc) => {
+      if (fc.selectedValue && fc.selectedValue !== "") {
+        let opt = fc.options.find((o) => o.value === fc.selectedValue);
+        let optLabel = opt ? opt.label : fc.selectedValue;
+        pills.push({
+          label: `${fc.label}: ${optLabel}`,
+          name: fc.fieldApiName
+        });
+      }
+    });
+    if (this.hasDateFilter) {
+      if (this.dateFilter.startDate) {
+        pills.push({
+          label: `Start Date: ${this.dateFilter.startDate}`,
+          name: "startDate"
+        });
+      }
+      if (this.dateFilter.endDate) {
+        pills.push({
+          label: `End Date: ${this.dateFilter.endDate}`,
+          name: "endDate"
+        });
+      }
+    }
+    this.activeFilterPills = pills;
+  }
+
+  handleRemoveFilterPill(event) {
+    const name = event.target.name;
+    if (name === "startDate") {
+      this.dateFilter.startDate = null;
+    } else if (name === "endDate") {
+      this.dateFilter.endDate = null;
+    } else {
+      let fc = this.filterComboboxes.find((f) => f.fieldApiName === name);
+      if (fc) fc.selectedValue = "";
+    }
+    this.updateActivePills();
+    this.fetchData();
   }
 
   // ─── Utilities ───

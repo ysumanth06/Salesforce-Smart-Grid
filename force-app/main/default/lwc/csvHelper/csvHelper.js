@@ -21,12 +21,11 @@ export function exportToCSV(data, columns, filename = 'export.csv') {
 
     const csvString = `${csvHeader}\n${csvBody}`;
     
-    // Create a Blob with UTF-8 BOM and valid MIME type
-    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv' });
+    // Create a Data URI with UTF-8 BOM to bypass LWS Blob restrictions
+    const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFF' + csvString);
     const link = document.createElement('a');
     if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
+        link.setAttribute('href', encodedUri);
         link.setAttribute('download', filename);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);

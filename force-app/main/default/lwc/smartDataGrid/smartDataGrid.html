@@ -21,6 +21,14 @@
         onclick={handleDelete}
         class="slds-m-left_x-small"
       ></lightning-button>
+      <lightning-button-icon
+        icon-name="utility:filterList"
+        alternative-text="Toggle Filters"
+        title="Toggle Filters"
+        onclick={toggleFilterPanel}
+        class="slds-m-left_x-small"
+        variant="border-filled"
+      ></lightning-button-icon>
       <lightning-button
         label="Export CSV"
         icon-name="utility:download"
@@ -28,11 +36,25 @@
         class="slds-m-left_x-small"
       ></lightning-button>
     </div>
-    <!-- Filter Bar -->
-    <template lwc:if={hasFilters}>
-      <div
-        class="slds-grid slds-wrap slds-gutters slds-p-horizontal_medium slds-p-top_small slds-m-bottom_medium slds-grid_vertical-align-end"
-      >
+    <!-- Active Filter Pills -->
+    <template lwc:if={hasActiveFilters}>
+      <div class="slds-p-horizontal_medium slds-m-bottom_small">
+        <template for:each={activeFilterPills} for:item="pill">
+          <lightning-pill
+            key={pill.name}
+            label={pill.label}
+            name={pill.name}
+            onremove={handleRemoveFilterPill}
+            class="slds-m-right_xx-small"
+          ></lightning-pill>
+        </template>
+      </div>
+    </template>
+
+    <!-- Filter Bar (Collapsible Panel) -->
+    <template lwc:if={showFilterPanel}>
+      <div class="slds-box slds-theme_shade slds-m-bottom_medium slds-m-horizontal_medium slds-p-around_medium">
+        <div class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end">
         <template for:each={filterComboboxes} for:item="fc">
           <div
             key={fc.fieldApiName}
