@@ -14,6 +14,13 @@
 2. **UI Layout:** The filter toggle button was positioned before the Export button, contrary to user preference.
 3. **Pagination Overlap:** The pagination footer was placed inside the fixed-height table container, causing it to overlap with table rows or get cut off.
 4. **Dynamic Grid Filter Bug:** Filters were not initializing correctly when dynamic grids loaded with cached user preferences.
+5. **Unresponsive Filter Button:** The filter panel failed to toggle open due to stale logic in the `hasFilters` getter.
+
+## Root Cause Analysis
+
+1. **Universal Filters:** The shift from dedicated picklist variables to a universal `filterFields` array left several getters (`hasFilters`, `showFilterPanel`) referencing non-existent variables.
+2. **Layout Placement:** Buttons were arranged in a default order that didn't follow the "Action Group" logic preferred by the user.
+3. **Container Overflow:** The `position: relative` container with a fixed height did not account for the footer height, causing z-index and overflow issues.
 
 ## Implementation Details
 
