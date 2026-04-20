@@ -9,7 +9,6 @@ import LightningConfirm from "lightning/confirm";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getPrefs from "@salesforce/apex/SmartGridUserPrefService.getPrefs";
 import savePrefs from "@salesforce/apex/SmartGridUserPrefService.savePrefs";
-import resetPrefs from "@salesforce/apex/SmartGridUserPrefService.resetPrefs";
 import { exportToCSV } from "c/csvHelper";
 
 export default class SmartDataGrid extends LightningElement {

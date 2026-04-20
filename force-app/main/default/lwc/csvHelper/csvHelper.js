@@ -21,8 +21,8 @@ export function exportToCSV(data, columns, filename = 'export.csv') {
 
     const csvString = `${csvHeader}\n${csvBody}`;
     
-    // Create a Blob and trigger download
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    // Create a Blob with UTF-8 BOM and valid MIME type
+    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv' });
     const link = document.createElement('a');
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
