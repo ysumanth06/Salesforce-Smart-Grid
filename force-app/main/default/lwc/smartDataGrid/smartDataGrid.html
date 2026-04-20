@@ -145,7 +145,7 @@
         </div>
       </template>
       <template lwc:elseif={gridColumns}>
-        <lightning-datatable
+        <c-smart-grid-datatable
           key-field="Id"
           data={gridData}
           columns={gridColumns}
@@ -155,8 +155,9 @@
           sorted-direction={sortDirection}
           onsort={handleSort}
           onresize={handleResize}
+          onpicklistchange={handlePicklistChange}
         >
-        </lightning-datatable>
+        </c-smart-grid-datatable>
       </template>
       <template lwc:if={showNoConfigMessage}>
         <div

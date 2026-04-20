@@ -497,6 +497,20 @@ export default class SmartDataGrid extends LightningElement {
     this.draftValues = this.draftValues.filter((d) => d.Id !== solvedDraftId);
   }
 
+  handlePicklistChange(event) {
+    const { context, value, fieldName } = event.detail.data;
+    if (!fieldName) return;
+
+    let drafts = [...this.draftValues];
+    let draft = drafts.find((d) => d.Id === context);
+    if (!draft) {
+      draft = { Id: context };
+      drafts.push(draft);
+    }
+    draft[fieldName] = value;
+    this.draftValues = drafts;
+  }
+
   handleResolutionClose() {
     this.failureQueue = [];
   }
@@ -559,15 +573,34 @@ export default class SmartDataGrid extends LightningElement {
     this._showFieldPicker = false;
     this.isSetupRequired = false;
 
-    this.gridColumns = columns.map((col) => this.formatColumn(col));
+    try {
+      this.isLoading = true;
+      // Fetch fresh metadata to ensure we have types for all selected fields
+      const fieldMetadata = await getObjectFields({
+        objectApiName: this.objectApiName
+      });
 
-    this.pickerSelectedFields = fields;
+      this.gridColumns = columns.map((col) => {
+        const meta = fieldMetadata.find(
+          (f) => f.fieldApiName === col.fieldApiName
+        );
+        return this.formatColumn({
+          ...col,
+          type: meta ? meta.type : col.type
+        });
+      });
 
-    this.saveCurrentPrefs();
+      this.pickerSelectedFields = fields;
+      this.saveCurrentPrefs();
 
-    if (this.gridColumns.length > 0) {
-      await this.initializeFilters();
-      await this.fetchData();
+      if (this.gridColumns.length > 0) {
+        await this.initializeFilters();
+        await this.fetchData();
+      }
+    } catch (e) {
+      console.error("Error in field selection:", e);
+    } finally {
+      this.isLoading = false;
     }
   }
 
@@ -717,7 +750,10 @@ export default class SmartDataGrid extends LightningElement {
       URL: { type: "url", typeAttributes: { target: "_blank" } },
       TEXTAREA: { type: "text" },
       STRING: { type: "text" },
-      PICKLIST: { type: "text" },
+      PICKLIST: {
+        type: "picklist",
+        typeAttributes: { options: [], context: { fieldName: "Id" } }
+      },
       MULTIPICKLIST: { type: "text" },
       ID: { type: "text" },
       REFERENCE: { type: "text" }
@@ -749,6 +785,17 @@ export default class SmartDataGrid extends LightningElement {
     }
 
     const mapped = this.mapFieldType(col.type);
+
+    // Inject picklist options if applicable
+    if (mapped.type === "picklist") {
+      const filter = this.filterFields?.find((f) => f.fieldName === fieldApi);
+      if (filter && filter.options) {
+        mapped.typeAttributes.options = filter.options;
+      }
+      mapped.typeAttributes.context = { fieldName: "Id" };
+      mapped.typeAttributes.fieldName = fieldApi;
+    }
+
     return {
       label: label,
       fieldName: fieldApi,
