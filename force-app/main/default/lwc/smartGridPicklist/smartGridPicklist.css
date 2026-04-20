@@ -1,0 +1,24 @@
+.cell-container {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.read-mode {
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.pencil-icon {
+  visibility: hidden;
+}
+
+.cell-container:hover .pencil-icon {
+  visibility: visible;
+}
+
+.combobox-input {
+  width: 100%;
+}

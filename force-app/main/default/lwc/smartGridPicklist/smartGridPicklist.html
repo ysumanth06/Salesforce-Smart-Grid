@@ -1,12 +1,36 @@
 <template>
-  <lightning-combobox
-    name="picklist"
-    label={label}
-    value={value}
-    options={options}
-    placeholder={placeholder}
-    onchange={handleChange}
-    variant="label-hidden"
-    class="slds-p-around_xx-small"
-  ></lightning-combobox>
+  <div
+    class="slds-p-horizontal_x-small cell-container"
+    onclick={handleCellClick}
+  >
+    <template if:true={isEditMode}>
+      <lightning-combobox
+        name="picklist"
+        label={label}
+        value={value}
+        placeholder={placeholder}
+        options={options}
+        onchange={handleChange}
+        onblur={handleBlur}
+        variant="label-hidden"
+        class="combobox-input"
+      >
+      </lightning-combobox>
+    </template>
+    <template if:false={isEditMode}>
+      <div
+        class="slds-grid slds-grid_vertical-align-center slds-truncate read-mode"
+      >
+        <span class="slds-truncate" title={displayValue}>{displayValue}</span>
+        <lightning-button-icon
+          icon-name="utility:edit"
+          variant="bare"
+          size="x-small"
+          class="slds-m-left_x-small pencil-icon"
+          onclick={handleEditClick}
+        >
+        </lightning-button-icon>
+      </div>
+    </template>
+  </div>
 </template>
