@@ -15,8 +15,9 @@
 
 ## Root Cause Analysis
 
-1. **Metadata Desync:** In dynamic grids, the column definition returned by the field picker lacked the `type` property. Since `formatColumn` only used the provided column object, it defaulted to 'text'.
-2. **Standard Component Limitation:** `lightning-datatable` does not provide a built-in picklist type, requiring a custom LWC extension to support `lightning-combobox` inside grid cells.
+1. **Stale-Type Bug (Critical):** After columns are formatted the first time (or loaded from cache), `col.type` contains the _datatable_ type (e.g. `"text"`, `"boolean"`, `"url"`) — NOT the _Salesforce schema_ type (e.g. `"BOOLEAN"`, `"PICKLIST"`, `"REFERENCE"`). When `refreshColumns()` re-ran `formatColumn()`, it passed the datatable type to `mapFieldType()`, which didn't recognize lowercase datatable types and defaulted everything back to `{ type: "text" }`. This caused an infinite loop of "always text".
+2. **Fix:** Introduced `_fieldMetadataMap` — a class-level dictionary populated during `initializeFilters()` from `getObjectFields()`. `formatColumn()` now always resolves the real Salesforce type from this map: `this._fieldMetadataMap[fieldApi] || col.type`. This ensures correct types survive caching, re-formatting, and preference loading.
+3. **Standard Component Limitation:** `lightning-datatable` does not provide a built-in picklist type, requiring a custom LWC extension (`smartGridDatatable`) to support `lightning-combobox` inside grid cells.
 
 ## Implementation Details
 
