@@ -52,6 +52,7 @@ export default class SmartDataGrid extends LightningElement {
       const hasPrefs = await this.loadCachedColumns();
       if (hasPrefs) {
         await this.initializeFilters();
+        this.refreshColumns();
         await this.fetchData();
       } else {
         this.isSetupRequired = true;
@@ -104,6 +105,7 @@ export default class SmartDataGrid extends LightningElement {
         // Fetch data and initialize filters if columns exist
         if (this.gridColumns.length > 0) {
           await this.initializeFilters();
+          this.refreshColumns(); // Re-format with picklist options
           await this.fetchData();
         }
       } else if (this.objectApiName) {
@@ -580,9 +582,13 @@ export default class SmartDataGrid extends LightningElement {
         objectApiName: this.objectApiName
       });
 
+      this.pickerSelectedFields = fields;
+      await this.initializeFilters();
+
+      // Now that filters (and picklist options) are loaded, format the columns
       this.gridColumns = columns.map((col) => {
         const meta = fieldMetadata.find(
-          (f) => f.fieldApiName === col.fieldApiName
+          (f) => f.fieldApiName === (col.fieldApiName || col.fieldName)
         );
         return this.formatColumn({
           ...col,
@@ -590,13 +596,8 @@ export default class SmartDataGrid extends LightningElement {
         });
       });
 
-      this.pickerSelectedFields = fields;
       this.saveCurrentPrefs();
-
-      if (this.gridColumns.length > 0) {
-        await this.initializeFilters();
-        await this.fetchData();
-      }
+      await this.fetchData();
     } catch (e) {
       console.error("Error in field selection:", e);
     } finally {
@@ -720,6 +721,15 @@ export default class SmartDataGrid extends LightningElement {
 
   // ─── Utilities ───
 
+  refreshColumns() {
+    if (!this.gridColumns) return;
+    // Re-run formatColumn on all existing columns to pick up picklist options
+    this.gridColumns = this.gridColumns.map((col) => {
+      // We need the original raw column data or at least the type
+      return this.formatColumn(col);
+    });
+  }
+
   /**
    * Maps Salesforce Schema field types to lightning-datatable column types.
    */
@@ -762,13 +772,21 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   formatColumn(col) {
-    let fieldApi = col.fieldApiName || col.field;
-    let label = col.displayLabel || col.label || fieldApi;
-    let isEditable = col.isEditable !== false && col.editable !== false;
-    let isSortable = col.isSortable === true || col.sortable === true;
-    let colWidth = col.columnWidth || col.width;
+    const fieldApi = col.fieldApiName || col.field || col.fieldName;
+    const label = col.displayLabel || col.label || fieldApi;
+    const isEditable =
+      col.isUpdateable !== false &&
+      col.isEditable !== false &&
+      col.editable !== false;
+    const isSortable = col.isSortable === true || col.sortable === true;
+    const colWidth = col.columnWidth || col.width;
+    const type = (col.type || "").toUpperCase();
 
-    const isReference = fieldApi === "Id" || fieldApi.endsWith("Id");
+    const isReference =
+      type === "REFERENCE" ||
+      type === "ID" ||
+      fieldApi === "Id" ||
+      (fieldApi.endsWith("Id") && type === "STRING");
     if (isReference) {
       return {
         label: label,
