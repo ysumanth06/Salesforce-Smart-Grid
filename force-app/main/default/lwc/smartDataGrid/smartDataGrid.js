@@ -85,9 +85,9 @@ export default class SmartDataGrid extends LightningElement {
       this.errorMessage = null;
       this.config = await getGridConfig({ configDevName: this.gridConfigName });
 
-      if (this.config && this.config.Is_Active__c) {
+      if (this.config && this.config.isActive) {
         // eslint-disable-next-line @lwc/lwc/no-api-reassignments
-        this.objectApiName = this.config.Object_API_Name__c;
+        this.objectApiName = this.config.objectApiName;
 
         // First check user prefs
         const hasPrefs = await this.loadCachedColumns();
@@ -95,9 +95,8 @@ export default class SmartDataGrid extends LightningElement {
         if (!hasPrefs) {
           // Parse columns
           let columnsDef = [];
-          if (this.config.Columns_JSON__c) {
-            let parsed = JSON.parse(this.config.Columns_JSON__c);
-            columnsDef = parsed.map((c) => this.formatColumn(c));
+          if (this.config.columns && this.config.columns.length > 0) {
+            columnsDef = this.config.columns.map((c) => this.formatColumn(c));
           }
           this.gridColumns = columnsDef;
         }
@@ -142,9 +141,9 @@ export default class SmartDataGrid extends LightningElement {
 
       // Find up to 3 picklist fields
       let targetPicklists = [];
-      if (this.config && this.config.Default_Filter_Field__c) {
+      if (this.config && this.config.defaultFilterField) {
         let defaultField = fields.find(
-          (f) => f.fieldApiName === this.config.Default_Filter_Field__c
+          (f) => f.fieldApiName === this.config.defaultFilterField
         );
         if (defaultField && defaultField.type === "PICKLIST") {
           targetPicklists.push(defaultField);
@@ -272,9 +271,9 @@ export default class SmartDataGrid extends LightningElement {
           this.hasDateFilter && this.dateFilter.endDate
             ? this.dateFilter.endDate
             : null,
-        sortField: this.sortField || this.config?.Default_Sort_Field__c,
+        sortField: this.sortField || this.config?.defaultSortField,
         sortDirection: this.sortDirection,
-        recordLimit: this.config?.Record_Limit__c || 200
+        recordLimit: this.config?.recordLimit || 200
       });
 
       // Auto-generate URL properties for lightning-datatable 'url' columns
@@ -297,6 +296,7 @@ export default class SmartDataGrid extends LightningElement {
   handleAddRow() {
     const newRowId = "new-" + Date.now();
     const newRow = { Id: newRowId };
+    this.gridData = [newRow, ...this.gridData];
     this.draftValues = [...this.draftValues, newRow];
   }
 
@@ -581,39 +581,21 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   handleExportCSV() {
-    exportToCSV(
-      this.gridData,
-      this.gridColumns,
-      `${this.objectApiName}_export.csv`
-    );
-  }
-
-  async handleResetPrefs() {
-    if (!this.prefKey) return;
     try {
-      await resetPrefs({ objectApiName: this.prefKey });
-      localStorage.removeItem(`smartGridCols_${this.prefKey}`);
-      this.gridColumns = [];
-      this.pickerSelectedFields = [];
-
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Success",
-          message: "Preferences reset to default.",
-          variant: "success"
-        })
+      // Create deep copy to remove LWC proxy before export
+      const dataCopy = JSON.parse(JSON.stringify(this.gridData));
+      const colsCopy = JSON.parse(JSON.stringify(this.gridColumns));
+      
+      exportToCSV(
+        dataCopy,
+        colsCopy,
+        `${this.objectApiName}_export.csv`
       );
-
-      if (this.gridConfigName) {
-        await this.fetchConfig();
-      } else {
-        this.isSetupRequired = true;
-      }
     } catch (e) {
       this.dispatchEvent(
         new ShowToastEvent({
-          title: "Error",
-          message: "Failed to reset preferences: " + this.reduceErrors(e),
+          title: "Export Error",
+          message: this.reduceErrors(e),
           variant: "error"
         })
       );
