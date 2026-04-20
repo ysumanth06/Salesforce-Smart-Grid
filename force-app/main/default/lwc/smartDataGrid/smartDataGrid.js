@@ -154,8 +154,6 @@ export default class SmartDataGrid extends LightningElement {
       let targetPicklists = activeFields.filter(
         (f) => f.type === "PICKLIST" || f.type === "MULTIPICKLIST"
       );
-      // Limit to 3 picklists to keep UI clean
-      targetPicklists = targetPicklists.slice(0, 3);
 
       // Find the first Date/DateTime field among active columns
       const dateFields = activeFields.filter(
@@ -216,6 +214,20 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   async applyFilters() {
+    this.isFilterPanelOpen = false;
+    this.updateActivePills();
+    await this.fetchData();
+  }
+
+  async handleClearAllFilters() {
+    this.filterComboboxes = this.filterComboboxes.map((fc) => ({
+      ...fc,
+      selectedValue: ""
+    }));
+    if (this.hasDateFilter) {
+      this.dateFilter.startDate = null;
+      this.dateFilter.endDate = null;
+    }
     this.isFilterPanelOpen = false;
     this.updateActivePills();
     await this.fetchData();

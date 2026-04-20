@@ -100,12 +100,17 @@
           </template>
 
           <div
-            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small slds-grid slds-grid_vertical-align-end"
           >
             <lightning-button
               label="Apply Filters"
               variant="brand"
               onclick={applyFilters}
+              class="slds-m-right_x-small"
+            ></lightning-button>
+            <lightning-button
+              label="Clear All"
+              onclick={handleClearAllFilters}
             ></lightning-button>
           </div>
         </div>
