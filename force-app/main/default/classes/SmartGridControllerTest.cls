@@ -3,7 +3,9 @@ public class SmartGridControllerTest {
   @isTest
   static void testGetGridConfig_Null() {
     Test.startTest();
-    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(null);
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(
+      null
+    );
     Test.stopTest();
     System.assertEquals(
       null,
@@ -15,31 +17,65 @@ public class SmartGridControllerTest {
   @isTest
   static void testGetGridConfig_JSON() {
     String jsonStr = '[{"Id":"m00000000000001", "DeveloperName":"Test_JSON", "Is_Active__c":true, "Use_Advanced_Config__c":false, "Columns_JSON__c":"[{\\"field\\":\\"Name\\",\\"order\\":1}]"}]';
-    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>)JSON.deserialize(jsonStr, List<Smart_Grid_Config__mdt>.class);
+    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
+      jsonStr,
+      List<Smart_Grid_Config__mdt>.class
+    );
 
     Test.startTest();
-    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig('Test_JSON');
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(
+      'Test_JSON'
+    );
     Test.stopTest();
 
     System.assertNotEquals(null, config, 'Config should not be null');
-    System.assertEquals('Test_JSON', config.developerName, 'DeveloperName should match');
-    System.assertEquals(1, config.columns.size(), 'Should have 1 column parsed from JSON');
-    System.assertEquals('Name', config.columns[0].fieldApiName, 'Column field should be Name');
+    System.assertEquals(
+      'Test_JSON',
+      config.developerName,
+      'DeveloperName should match'
+    );
+    System.assertEquals(
+      1,
+      config.columns.size(),
+      'Should have 1 column parsed from JSON'
+    );
+    System.assertEquals(
+      'Name',
+      config.columns[0].fieldApiName,
+      'Column field should be Name'
+    );
   }
 
   @isTest
   static void testGetGridConfig_Relational() {
     String jsonStr = '[{"Id":"m00000000000002", "DeveloperName":"Test_Relational", "Is_Active__c":true, "Use_Advanced_Config__c":true, "Smart_Grid_Columns__r":{"totalSize":1, "done":true, "records":[{"Id":"m01000000000001", "Field_API_Name__c":"Industry", "Order__c":1, "Is_Editable__c":true}]}}]';
-    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>)JSON.deserialize(jsonStr, List<Smart_Grid_Config__mdt>.class);
+    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
+      jsonStr,
+      List<Smart_Grid_Config__mdt>.class
+    );
 
     Test.startTest();
-    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig('Test_Relational');
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(
+      'Test_Relational'
+    );
     Test.stopTest();
 
     System.assertNotEquals(null, config, 'Config should not be null');
-    System.assertEquals('Test_Relational', config.developerName, 'DeveloperName should match');
-    System.assertEquals(1, config.columns.size(), 'Should have 1 column from relationship');
-    System.assertEquals('Industry', config.columns[0].fieldApiName, 'Column field should be Industry');
+    System.assertEquals(
+      'Test_Relational',
+      config.developerName,
+      'DeveloperName should match'
+    );
+    System.assertEquals(
+      1,
+      config.columns.size(),
+      'Should have 1 column from relationship'
+    );
+    System.assertEquals(
+      'Industry',
+      config.columns[0].fieldApiName,
+      'Column field should be Industry'
+    );
   }
 
   @isTest
@@ -76,7 +112,7 @@ public class SmartGridControllerTest {
     insert target;
 
     Test.startTest();
-    List<SObject> records = SmartGridController.getRecords(
+    SmartGridController.PagedResult result = SmartGridController.getRecordsPaged(
       'Account',
       new List<String>{ 'Name' },
       null,
@@ -85,11 +121,14 @@ public class SmartGridControllerTest {
       null,
       null,
       null,
-      10
+      10,
+      1
     );
     Test.stopTest();
 
-    System.assertEquals(1, records.size(), 'Should return 1 record');
+    System.assertEquals(1, result.records.size(), 'Should return 1 record');
+    System.assertEquals(1, result.totalSize, 'Total size should be 1');
+    System.assertEquals(1, result.pageNumber, 'Page number should be 1');
   }
 
   @isTest
@@ -251,7 +290,7 @@ public class SmartGridControllerTest {
     insert acc;
 
     Test.startTest();
-    List<SObject> records = SmartGridController.getRecords(
+    SmartGridController.PagedResult result = SmartGridController.getRecordsPaged(
       'Account',
       new List<String>{ 'Name', 'Industry' },
       new Map<String, Object>{ 'Industry' => 'Technology' },
@@ -260,15 +299,16 @@ public class SmartGridControllerTest {
       null,
       null,
       null,
-      10
+      10,
+      1
     );
     Test.stopTest();
 
     System.assert(
-      records.size() > 0,
+      result.records.size() > 0,
       'Should return at least the Technology record'
     );
-    for (SObject r : records) {
+    for (SObject r : result.records) {
       System.assertEquals(
         'Technology',
         (String) r.get('Industry'),
@@ -281,21 +321,29 @@ public class SmartGridControllerTest {
     Account acc = new Account(Name = 'Delete Test');
     insert acc;
     Test.startTest();
-    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(new List<SObject>{acc});
+    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(
+      new List<SObject>{ acc }
+    );
     Test.stopTest();
     System.assert(sr.isSuccess, 'Delete should be successful');
-    System.assertEquals(0, [SELECT count() FROM Account WHERE Id = :acc.Id], 'Account should be deleted');
+    System.assertEquals(
+      0,
+      [SELECT COUNT() FROM Account WHERE Id = :acc.Id],
+      'Account should be deleted'
+    );
   }
 
   @isTest
   static void testDeleteRecords_Bulk() {
     List<Account> accounts = new List<Account>();
-    for(Integer i=0; i<201; i++) {
-        accounts.add(new Account(Name = 'Bulk Delete ' + i));
+    for (Integer i = 0; i < 201; i++) {
+      accounts.add(new Account(Name = 'Bulk Delete ' + i));
     }
     insert accounts;
     Test.startTest();
-    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(accounts);
+    SmartGridController.SaveResult sr = SmartGridController.deleteRecords(
+      accounts
+    );
     Test.stopTest();
     System.assert(sr.isSuccess, 'Bulk delete should be successful');
   }
@@ -312,10 +360,16 @@ public class SmartGridControllerTest {
   static void testSaveRecords_InsertNew() {
     Account acc = new Account(Name = 'New Insert Test');
     Test.startTest();
-    SmartGridController.SaveResult sr = SmartGridController.saveRecords(new List<SObject>{acc});
+    SmartGridController.SaveResult sr = SmartGridController.saveRecords(
+      new List<SObject>{ acc }
+    );
     Test.stopTest();
     System.assert(sr.isSuccess, 'Insert should be successful');
-    System.assertEquals(1, [SELECT count() FROM Account WHERE Name = 'New Insert Test'], 'Account should be inserted');
+    System.assertEquals(
+      1,
+      [SELECT COUNT() FROM Account WHERE Name = 'New Insert Test'],
+      'Account should be inserted'
+    );
   }
 
   @isTest
@@ -323,10 +377,16 @@ public class SmartGridControllerTest {
     Account acc1 = new Account(Name = 'Valid Insert');
     Account acc2 = new Account(); // Missing Name
     Test.startTest();
-    SmartGridController.SaveResult sr = SmartGridController.saveRecords(new List<SObject>{acc1, acc2});
+    SmartGridController.SaveResult sr = SmartGridController.saveRecords(
+      new List<SObject>{ acc1, acc2 }
+    );
     Test.stopTest();
     System.assertEquals(false, sr.isSuccess, 'Should be partial success');
     System.assertEquals(1, sr.rowErrors.size(), 'Should have 1 error');
-    System.assertEquals('1', sr.rowErrors[0].id, 'Error ID should be the original index string');
+    System.assertEquals(
+      '1',
+      sr.rowErrors[0].id,
+      'Error ID should be the original index string'
+    );
   }
 }

@@ -131,7 +131,9 @@ public class GridQueryBuilderTest {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
     req.fields = new List<String>{ 'Name', 'Industry' };
-    req.filters = new Map<String, Object>{ 'Industry' => 'Healthcare\' OR Name != \'' };
+    req.filters = new Map<String, Object>{
+      'Industry' => 'Healthcare\' OR Name != \''
+    };
     req.recordLimit = 100;
 
     Test.startTest();
@@ -165,5 +167,21 @@ public class GridQueryBuilderTest {
       query.contains('WHERE Industry != null'),
       'Query should fall back to != null when no filterValue. Got: ' + query
     );
+  }
+
+  @isTest
+  static void testBuildSingleQuery_Offset() {
+    GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
+    req.objectApiName = 'Account';
+    req.fields = new List<String>{ 'Name' };
+    req.recordLimit = 10;
+    req.offsetValue = 20;
+
+    Test.startTest();
+    String query = GridQueryBuilder.buildSingleQuery(req);
+    Test.stopTest();
+
+    System.assert(query.contains('LIMIT 10'), 'Query should contain limit');
+    System.assert(query.contains('OFFSET 20'), 'Query should contain offset');
   }
 }

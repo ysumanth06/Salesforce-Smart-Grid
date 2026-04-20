@@ -165,6 +165,35 @@
           valid Grid Config Developer Name.
         </div>
       </template>
+
+      <!-- Pagination Footer -->
+      <template lwc:if={gridColumns}>
+        <div
+          class="slds-grid slds-grid_align-center slds-p-top_small slds-p-bottom_medium slds-border_top"
+        >
+          <lightning-button
+            label="Previous"
+            icon-name="utility:chevronleft"
+            onclick={handlePreviousPage}
+            disabled={disablePrevious}
+            variant="neutral"
+            class="slds-m-right_medium"
+          ></lightning-button>
+          <span class="slds-align-middle slds-text-body_regular">
+            Page <strong>{currentPage}</strong> of
+            <strong>{totalPages}</strong> ({totalRecords} records)
+          </span>
+          <lightning-button
+            label="Next"
+            icon-name="utility:chevronright"
+            icon-position="right"
+            onclick={handleNextPage}
+            disabled={disableNext}
+            variant="neutral"
+            class="slds-m-left_medium"
+          ></lightning-button>
+        </div>
+      </template>
     </div>
   </lightning-card>
 

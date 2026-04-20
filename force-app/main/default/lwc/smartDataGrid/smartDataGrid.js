@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from "lwc";
 import getGridConfig from "@salesforce/apex/SmartGridController.getGridConfig";
-import getRecords from "@salesforce/apex/SmartGridController.getRecords";
+import getRecordsPaged from "@salesforce/apex/SmartGridController.getRecordsPaged";
 import saveRecords from "@salesforce/apex/SmartGridController.saveRecords";
 import getPicklistValues from "@salesforce/apex/SmartGridController.getPicklistValues";
 import getObjectFields from "@salesforce/apex/SmartGridController.getObjectFields";
@@ -38,6 +38,11 @@ export default class SmartDataGrid extends LightningElement {
 
   @track sortField;
   @track sortDirection = "asc";
+
+  // Pagination state
+  @track currentPage = 1;
+  @track totalRecords = 0;
+  @track pageSize = 50;
 
   config;
   _showFieldPicker = false;
@@ -102,11 +107,9 @@ export default class SmartDataGrid extends LightningElement {
           this.gridColumns = columnsDef;
         }
 
-        // Load filter picklist if configured
-        await this.initializeFilters();
-
-        // Fetch data if columns exist
+        // Fetch data and initialize filters if columns exist
         if (this.gridColumns.length > 0) {
+          await this.initializeFilters();
           await this.fetchData();
         }
       } else if (this.objectApiName) {
@@ -133,36 +136,29 @@ export default class SmartDataGrid extends LightningElement {
    * Initialize filters dynamically based on object fields
    */
   async initializeFilters() {
-    if (!this.objectApiName) return;
+    if (!this.objectApiName || !this.gridColumns) return;
 
     try {
+      // Get all field describes for the object
       const fields = await getObjectFields({
         objectApiName: this.objectApiName
       });
 
-      // Find up to 3 picklist fields
-      let targetPicklists = [];
-      if (this.config && this.config.defaultFilterField) {
-        let defaultField = fields.find(
-          (f) => f.fieldApiName === this.config.defaultFilterField
-        );
-        if (defaultField && defaultField.type === "PICKLIST") {
-          targetPicklists.push(defaultField);
-        }
-      }
+      // Filter: Only include fields currently displayed in the grid
+      const activeFieldNames = this.gridColumns.map((c) => c.fieldName);
+      const activeFields = fields.filter((f) =>
+        activeFieldNames.includes(f.fieldApiName)
+      );
 
-      for (let f of fields) {
-        if (
-          f.type === "PICKLIST" &&
-          !targetPicklists.find((t) => t.fieldApiName === f.fieldApiName)
-        ) {
-          targetPicklists.push(f);
-          if (targetPicklists.length >= 3) break;
-        }
-      }
+      // Find picklist fields among active columns
+      let targetPicklists = activeFields.filter(
+        (f) => f.type === "PICKLIST" || f.type === "MULTIPICKLIST"
+      );
+      // Limit to 3 picklists to keep UI clean
+      targetPicklists = targetPicklists.slice(0, 3);
 
-      // Find 1 Date field
-      const dateFields = fields.filter(
+      // Find the first Date/DateTime field among active columns
+      const dateFields = activeFields.filter(
         (f) => f.type === "DATE" || f.type === "DATETIME"
       );
 
@@ -195,6 +191,8 @@ export default class SmartDataGrid extends LightningElement {
           endDate: null
         };
         this.hasDateFilter = true;
+      } else {
+        this.hasDateFilter = false;
       }
     } catch (e) {
       console.warn("Failed to load filter options:", this.reduceErrors(e));
@@ -261,26 +259,21 @@ export default class SmartDataGrid extends LightningElement {
         });
       }
 
-      let response = await getRecords({
+      let response = await getRecordsPaged({
         objectApiName: this.objectApiName,
         fields: fieldsToQuery,
         filters: filterMap,
         dateField: this.hasDateFilter ? this.dateFilter.fieldApiName : null,
-        startDate:
-          this.hasDateFilter && this.dateFilter.startDate
-            ? this.dateFilter.startDate
-            : null,
-        endDate:
-          this.hasDateFilter && this.dateFilter.endDate
-            ? this.dateFilter.endDate
-            : null,
+        startDate: this.dateFilter ? this.dateFilter.startDate : null,
+        endDate: this.dateFilter ? this.dateFilter.endDate : null,
         sortField: this.sortField || this.config?.defaultSortField,
         sortDirection: this.sortDirection,
-        recordLimit: this.config?.recordLimit || 200
+        pageSize: this.pageSize,
+        pageNumber: this.currentPage
       });
 
       // Auto-generate URL properties for lightning-datatable 'url' columns
-      this.gridData = response.map((row) => {
+      this.gridData = response.records.map((row) => {
         let mappedRow = { ...row };
         Object.keys(mappedRow).forEach((key) => {
           if (key === "Id" || key.endsWith("Id")) {
@@ -289,10 +282,39 @@ export default class SmartDataGrid extends LightningElement {
         });
         return mappedRow;
       });
+      this.totalRecords = response.totalSize;
     } catch (e) {
       this.errorMessage = "Error loading records: " + this.reduceErrors(e);
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  // ─── Pagination Logic ───
+
+  get totalPages() {
+    return Math.ceil(this.totalRecords / this.pageSize) || 1;
+  }
+
+  get disablePrevious() {
+    return this.currentPage <= 1 || this.isLoading;
+  }
+
+  get disableNext() {
+    return this.currentPage >= this.totalPages || this.isLoading;
+  }
+
+  handlePreviousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchData();
+    }
+  }
+
+  handleNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.fetchData();
     }
   }
 
@@ -546,6 +568,7 @@ export default class SmartDataGrid extends LightningElement {
     this.saveCurrentPrefs();
 
     if (this.gridColumns.length > 0) {
+      await this.initializeFilters();
       await this.fetchData();
     }
   }
@@ -684,6 +707,44 @@ export default class SmartDataGrid extends LightningElement {
 
   // ─── Utilities ───
 
+  /**
+   * Maps Salesforce Schema field types to lightning-datatable column types.
+   */
+  mapFieldType(sfType) {
+    const typeMap = {
+      CURRENCY: { type: "currency", typeAttributes: { currencyCode: "USD" } },
+      DOUBLE: { type: "number", typeAttributes: { minimumFractionDigits: 0 } },
+      INTEGER: { type: "number" },
+      LONG: { type: "number" },
+      PERCENT: {
+        type: "percent",
+        typeAttributes: { minimumFractionDigits: 1 }
+      },
+      BOOLEAN: { type: "boolean" },
+      DATE: { type: "date-local" },
+      DATETIME: {
+        type: "date",
+        typeAttributes: {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      },
+      EMAIL: { type: "email" },
+      PHONE: { type: "phone" },
+      URL: { type: "url", typeAttributes: { target: "_blank" } },
+      TEXTAREA: { type: "text" },
+      STRING: { type: "text" },
+      PICKLIST: { type: "text" },
+      MULTIPICKLIST: { type: "text" },
+      ID: { type: "text" },
+      REFERENCE: { type: "text" }
+    };
+    return typeMap[sfType?.toUpperCase()] || { type: "text" };
+  }
+
   formatColumn(col) {
     let fieldApi = col.fieldApiName || col.field;
     let label = col.displayLabel || col.label || fieldApi;
@@ -706,10 +767,13 @@ export default class SmartDataGrid extends LightningElement {
         initialWidth: colWidth
       };
     }
+
+    const mapped = this.mapFieldType(col.type);
     return {
       label: label,
       fieldName: fieldApi,
-      type: "text",
+      type: mapped.type,
+      typeAttributes: mapped.typeAttributes || undefined,
       editable: isEditable,
       sortable: isSortable,
       initialWidth: colWidth
