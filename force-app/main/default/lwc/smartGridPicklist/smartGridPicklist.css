@@ -7,7 +7,7 @@
 }
 
 .cell-container:hover {
-  background-color: #f3f3f3;
+  background-color: var(--slds-g-color-surface-2, #f3f3f3);
 }
 
 .read-mode {

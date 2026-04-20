@@ -10,6 +10,7 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getPrefs from "@salesforce/apex/SmartGridUserPrefService.getPrefs";
 import savePrefs from "@salesforce/apex/SmartGridUserPrefService.savePrefs";
 import { exportToCSV } from "c/csvHelper";
+import { reduceErrors } from "c/errorUtils";
 
 export default class SmartDataGrid extends LightningElement {
   @api gridConfigName;
@@ -42,9 +43,11 @@ export default class SmartDataGrid extends LightningElement {
   pickerSelectedFields = [];
   _fieldMetadataMap = {}; // Maps fieldApiName → Salesforce schema type
   _picklistOptionsMap = {}; // Maps fieldApiName → List of {label, value} options
+  _boundKeyDown; // Stored reference for proper event listener cleanup
 
   async connectedCallback() {
-    window.addEventListener("keydown", this.handleKeyDown.bind(this));
+    this._boundKeyDown = this.handleKeyDown.bind(this);
+    window.addEventListener("keydown", this._boundKeyDown);
 
     if (this.gridConfigName) {
       this.fetchConfig();
@@ -65,7 +68,7 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   disconnectedCallback() {
-    window.removeEventListener("keydown", this.handleKeyDown.bind(this));
+    window.removeEventListener("keydown", this._boundKeyDown);
   }
 
   handleKeyDown(event) {
@@ -91,6 +94,12 @@ export default class SmartDataGrid extends LightningElement {
       if (this.config && this.config.isActive) {
         // eslint-disable-next-line @lwc/lwc/no-api-reassignments
         this.objectApiName = this.config.objectApiName;
+
+        // L-7: Set grid title fallback from config name if not explicitly set
+        if (this.gridTitle === "Smart Data Grid" && this.config.developerName) {
+          // eslint-disable-next-line @lwc/lwc/no-api-reassignments
+          this.gridTitle = this.config.developerName.replace(/_/g, " ");
+        }
 
         // First check user prefs
         const hasPrefs = await this.loadCachedColumns();
@@ -238,6 +247,8 @@ export default class SmartDataGrid extends LightningElement {
       actualFieldName = actualFieldName.replace("_Url", "");
     }
 
+    // Store both: actual field for Apex query, display field for datatable indicator
+    this._sortDisplayField = fieldName;
     this.sortField = actualFieldName;
     this.sortDirection = sortDirection;
 
@@ -318,6 +329,31 @@ export default class SmartDataGrid extends LightningElement {
     return this.currentPage >= this.totalPages || this.isLoading;
   }
 
+  // L-4: Computed property for datatable sorted-by that uses the display field name
+  get sortedByDisplay() {
+    return this._sortDisplayField || this.sortField;
+  }
+
+  // L-6: Page size options for the selector
+  get pageSizeOptions() {
+    return [
+      { label: "25", value: "25" },
+      { label: "50", value: "50" },
+      { label: "100", value: "100" },
+      { label: "200", value: "200" }
+    ];
+  }
+
+  get pageSizeString() {
+    return String(this.pageSize);
+  }
+
+  handlePageSizeChange(event) {
+    this.pageSize = parseInt(event.detail.value, 10);
+    this.currentPage = 1;
+    this.fetchData();
+  }
+
   handlePreviousPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
@@ -333,7 +369,11 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   handleAddRow() {
-    const newRowId = "new-" + Date.now();
+    const newRowId =
+      "new-" +
+      (typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Date.now() + "-" + Math.random().toString(36).slice(2));
     const newRow = { Id: newRowId };
     this.gridData = [newRow, ...this.gridData];
     this.draftValues = [...this.draftValues, newRow];
@@ -417,9 +457,7 @@ export default class SmartDataGrid extends LightningElement {
       this.isLoading = true;
       this.errorMessage = null;
       // Clear previous table errors
-      const dt =
-        this.template.querySelector("c-smart-grid-datatable") ||
-        this.template.querySelector("lightning-datatable");
+      const dt = this.template.querySelector("c-smart-grid-datatable");
       if (dt) dt.errors = {};
 
       let result = await saveRecords({ records: recordsToSave });
@@ -751,6 +789,7 @@ export default class SmartDataGrid extends LightningElement {
 
   /**
    * Maps Salesforce Schema field types to lightning-datatable column types.
+   * Returns a deep-cloned object to prevent shared mutation across columns.
    */
   mapFieldType(sfType) {
     const typeMap = {
@@ -762,7 +801,16 @@ export default class SmartDataGrid extends LightningElement {
         type: "percent",
         typeAttributes: { minimumFractionDigits: 1 }
       },
-      BOOLEAN: { type: "boolean" },
+      BOOLEAN: {
+        type: "picklist",
+        typeAttributes: {
+          options: [
+            { label: "Yes", value: "true" },
+            { label: "No", value: "false" }
+          ],
+          context: { fieldName: "Id" }
+        }
+      },
       DATE: { type: "date-local" },
       DATETIME: {
         type: "date",
@@ -787,7 +835,9 @@ export default class SmartDataGrid extends LightningElement {
       ID: { type: "text" },
       REFERENCE: { type: "text" }
     };
-    return typeMap[sfType?.toUpperCase()] || { type: "text" };
+    const result = typeMap[sfType?.toUpperCase()] || { type: "text" };
+    // Deep-clone to prevent shared-object mutation across column formatting
+    return JSON.parse(JSON.stringify(result));
   }
 
   formatColumn(col) {
@@ -847,10 +897,8 @@ export default class SmartDataGrid extends LightningElement {
     };
   }
 
+  // L-1: Delegate to shared utility
   reduceErrors(e) {
-    if (e && e.body && e.body.message) {
-      return e.body.message;
-    }
-    return e ? String(e) : "Unknown error";
+    return reduceErrors(e);
   }
 }

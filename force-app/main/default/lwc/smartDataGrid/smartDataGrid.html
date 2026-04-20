@@ -12,6 +12,7 @@
         label="Add Row"
         icon-name="utility:add"
         onclick={handleAddRow}
+        disabled={isLoading}
         class="slds-m-left_x-small"
       ></lightning-button>
       <lightning-button
@@ -19,12 +20,14 @@
         icon-name="utility:delete"
         variant="destructive"
         onclick={handleDelete}
+        disabled={isLoading}
         class="slds-m-left_x-small"
       ></lightning-button>
       <lightning-button
         label="Export CSV"
         icon-name="utility:download"
         onclick={handleExportCSV}
+        disabled={isLoading}
         class="slds-m-left_x-small"
       ></lightning-button>
       <lightning-button-icon
@@ -151,7 +154,7 @@
           columns={gridColumns}
           onsave={handleSave}
           draft-values={draftValues}
-          sorted-by={sortField}
+          sorted-by={sortedByDisplay}
           sorted-direction={sortDirection}
           onsort={handleSort}
           onresize={handleResize}
@@ -172,7 +175,7 @@
     <!-- Pagination Footer -->
     <template lwc:if={gridColumns}>
       <div
-        class="slds-grid slds-grid_align-center slds-p-top_small slds-p-bottom_medium slds-border_top"
+        class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-p-top_small slds-p-bottom_medium slds-border_top"
       >
         <lightning-button
           label="Previous"
@@ -195,6 +198,15 @@
           variant="neutral"
           class="slds-m-left_medium"
         ></lightning-button>
+        <lightning-combobox
+          label="Page Size"
+          value={pageSizeString}
+          options={pageSizeOptions}
+          onchange={handlePageSizeChange}
+          variant="label-hidden"
+          class="slds-m-left_large"
+          style="width: 80px"
+        ></lightning-combobox>
       </div>
     </template>
   </lightning-card>

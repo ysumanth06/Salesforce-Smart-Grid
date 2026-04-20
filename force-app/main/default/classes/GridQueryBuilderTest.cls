@@ -18,8 +18,9 @@ public class GridQueryBuilderTest {
       'Query should select specified fields'
     );
     System.assert(
-      query.contains('WHERE Industry != null'),
-      'Query should contain where clause'
+      !query.contains('WHERE'),
+      'Query should NOT contain WHERE clause when filter value is null. Got: ' +
+      query
     );
     System.assert(
       query.contains('ORDER BY Name ASC NULLS LAST'),
@@ -164,8 +165,9 @@ public class GridQueryBuilderTest {
     Test.stopTest();
 
     System.assert(
-      query.contains('WHERE Industry != null'),
-      'Query should fall back to != null when no filterValue. Got: ' + query
+      !query.contains('WHERE'),
+      'Query should NOT contain WHERE clause when filter value is null. Got: ' +
+      query
     );
   }
 

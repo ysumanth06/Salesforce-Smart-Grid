@@ -141,6 +141,89 @@ public with sharing class GridQueryBuilder {
     return query;
   }
 
+  /**
+   * @description Builds a validated COUNT() query reusing the same
+   * filter and date-range logic as buildSingleQuery.
+   * @param req QueryRequest with objectApiName, filters, dateField, startDate, endDate
+   * @return A safe SOQL COUNT() query string
+   */
+  public static String buildCountQuery(QueryRequest req) {
+    if (String.isBlank(req.objectApiName)) {
+      throw new QueryBuilderException(
+        'Object API Name cannot be null or blank.'
+      );
+    }
+
+    SObjectType sObjType = Schema.getGlobalDescribe().get(req.objectApiName);
+    if (sObjType == null) {
+      throw new QueryBuilderException(
+        'Invalid Object API Name: ' + req.objectApiName
+      );
+    }
+
+    if (!sObjType.getDescribe().isAccessible()) {
+      throw new QueryBuilderException(
+        'User does not have access to object: ' + req.objectApiName
+      );
+    }
+
+    String query =
+      'SELECT COUNT() FROM ' + String.escapeSingleQuotes(req.objectApiName);
+
+    List<String> whereClauses = new List<String>();
+
+    if (req.filters != null && !req.filters.isEmpty()) {
+      for (String field : req.filters.keySet()) {
+        if (isValidFilterField(sObjType, field)) {
+          Object val = req.filters.get(field);
+          if (val != null && String.isNotBlank(String.valueOf(val))) {
+            String escapedField = String.escapeSingleQuotes(field);
+            String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
+            Schema.DisplayType fType = sObjType.getDescribe()
+              .fields.getMap()
+              .get(field.toLowerCase())
+              .getDescribe()
+              .getType();
+
+            if (
+              fType == Schema.DisplayType.STRING ||
+              fType == Schema.DisplayType.TEXTAREA ||
+              fType == Schema.DisplayType.EMAIL ||
+              fType == Schema.DisplayType.PHONE
+            ) {
+              whereClauses.add(escapedField + ' LIKE \'%' + escapedVal + '%\'');
+            } else {
+              whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
+            }
+          }
+        }
+      }
+    }
+
+    if (
+      String.isNotBlank(req.dateField) &&
+      isValidFilterField(sObjType, req.dateField)
+    ) {
+      String escapedDateField = String.escapeSingleQuotes(req.dateField);
+      if (req.startDate != null) {
+        whereClauses.add(
+          escapedDateField + ' >= ' + String.valueOf(req.startDate)
+        );
+      }
+      if (req.endDate != null) {
+        whereClauses.add(
+          escapedDateField + ' <= ' + String.valueOf(req.endDate)
+        );
+      }
+    }
+
+    if (!whereClauses.isEmpty()) {
+      query += ' WHERE ' + String.join(whereClauses, ' AND ');
+    }
+
+    return query;
+  }
+
   public static List<String> validateFields(
     SObjectType sObjType,
     List<String> fields

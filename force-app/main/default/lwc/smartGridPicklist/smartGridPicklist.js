@@ -6,8 +6,10 @@ export default class SmartGridPicklist extends LightningElement {
   @api options;
   @api value;
   @api context; // Row ID
+  @api fieldName; // Field API name for the column
 
   @track isEditMode = false;
+  _pendingChange = false;
 
   get displayValue() {
     const selectedOption = this.options?.find(
@@ -31,11 +33,19 @@ export default class SmartGridPicklist extends LightningElement {
   }
 
   handleBlur() {
-    this.isEditMode = false;
+    // Delay closing so handleChange fires first when user selects a value
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    setTimeout(() => {
+      if (!this._pendingChange) {
+        this.isEditMode = false;
+      }
+      this._pendingChange = false;
+    }, 200);
   }
 
   handleChange(event) {
     const newValue = event.detail.value;
+    this._pendingChange = true;
     this.isEditMode = false;
 
     // Fire event that lightning-datatable expects for custom types
@@ -48,7 +58,7 @@ export default class SmartGridPicklist extends LightningElement {
           data: {
             context: this.context,
             value: newValue,
-            fieldName: this.template.host.getAttribute("data-field-name")
+            fieldName: this.fieldName
           }
         }
       })

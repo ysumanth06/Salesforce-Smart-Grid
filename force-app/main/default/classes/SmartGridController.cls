@@ -196,49 +196,13 @@ public with sharing class SmartGridController {
       req.recordLimit = safePageSize;
       req.offsetValue = offset;
 
-      // 1. Get total count (for pagination)
-      // Note: We build a separate count query to avoid LIMIT/OFFSET
-      String countQuery =
-        'SELECT COUNT() FROM ' + String.escapeSingleQuotes(objectApiName);
-
-      // Build filter clauses (reusing logic or simplified for count)
-      List<String> whereClauses = new List<String>();
-      if (filters != null) {
-        for (String field : filters.keySet()) {
-          Object val = filters.get(field);
-          if (val != null) {
-            whereClauses.add(
-              String.escapeSingleQuotes(field) +
-                ' = \'' +
-                String.escapeSingleQuotes(String.valueOf(val)) +
-                '\''
-            );
-          }
-        }
-      }
-      if (String.isNotBlank(dateField)) {
-        if (startDate != null)
-          whereClauses.add(
-            String.escapeSingleQuotes(dateField) +
-              ' >= ' +
-              String.valueOf(startDate)
-          );
-        if (endDate != null)
-          whereClauses.add(
-            String.escapeSingleQuotes(dateField) +
-              ' <= ' +
-              String.valueOf(endDate)
-          );
-      }
-      if (!whereClauses.isEmpty()) {
-        countQuery += ' WHERE ' + String.join(whereClauses, ' AND ');
-      }
-
+      // 1. Get total count using validated query builder
+      String countQuery = GridQueryBuilder.buildCountQuery(req);
       Integer totalSize = Database.countQuery(countQuery);
 
-      // 2. Get records
+      // 2. Get records with USER_MODE for FLS/CRUD enforcement
       String query = GridQueryBuilder.buildSingleQuery(req);
-      List<SObject> records = Database.query(query);
+      List<SObject> records = Database.query(query, AccessLevel.USER_MODE);
 
       PagedResult result = new PagedResult();
       result.records = records;
@@ -321,6 +285,17 @@ public with sharing class SmartGridController {
     if (records == null || records.isEmpty()) {
       result.isSuccess = true;
       return result;
+    }
+
+    // CRUD check — ensure user has create/update access to the object
+    SObjectType objType = records[0].getSObjectType();
+    DescribeSObjectResult objDescribe = objType.getDescribe();
+    if (!objDescribe.isCreateable() && !objDescribe.isUpdateable()) {
+      throw new AuraHandledException(
+        'You do not have permission to create or update ' +
+          objDescribe.getLabel() +
+          ' records.'
+      );
     }
 
     // Strip out inaccessible fields

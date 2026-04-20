@@ -3,7 +3,7 @@
     class="slds-p-horizontal_x-small cell-container"
     onclick={handleCellClick}
   >
-    <template if:true={isEditMode}>
+    <template lwc:if={isEditMode}>
       <lightning-combobox
         name="picklist"
         label={label}
@@ -17,7 +17,7 @@
       >
       </lightning-combobox>
     </template>
-    <template if:false={isEditMode}>
+    <template lwc:else>
       <div
         class="slds-grid slds-grid_vertical-align-center slds-truncate read-mode"
         onclick={handleEditClick}
