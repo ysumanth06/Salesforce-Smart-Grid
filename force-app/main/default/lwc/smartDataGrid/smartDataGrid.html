@@ -1,95 +1,166 @@
 <template>
-    <lightning-card title={gridTitle}>
-        <div slot="actions">
-            <lightning-button label="Add Row" icon-name="utility:add" onclick={handleAddRow}></lightning-button>
-            <lightning-button label="Delete Selected" icon-name="utility:delete" variant="destructive" onclick={handleDelete} class="slds-m-left_x-small"></lightning-button>
-            <lightning-button label="Export CSV" icon-name="utility:download" onclick={handleExportCSV} class="slds-m-left_x-small"></lightning-button>
-            <lightning-button label="Reset Config" icon-name="utility:refresh" onclick={handleResetPrefs} class="slds-m-left_x-small"></lightning-button>
-        </div>
-        <!-- Filter Bar -->
-        <template lwc:if={hasFilters}>
-            <div class="slds-grid slds-wrap slds-gutters slds-p-horizontal_medium slds-p-top_small slds-m-bottom_medium slds-grid_vertical-align-end">
-                <template for:each={filterComboboxes} for:item="fc">
-                    <div key={fc.fieldApiName} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <lightning-combobox
-                            name={fc.fieldApiName}
-                            label={fc.label}
-                            value={fc.selectedValue}
-                            options={fc.options}
-                            onchange={handleMultiFilterChange}
-                        ></lightning-combobox>
-                    </div>
-                </template>
-                
-                <template lwc:if={hasDateFilter}>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <lightning-input
-                            type="date"
-                            name="startDate"
-                            label="Start Date"
-                            value={dateFilter.startDate}
-                            onchange={handleDateChange}
-                        ></lightning-input>
-                    </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                        <lightning-input
-                            type="date"
-                            name="endDate"
-                            label="End Date"
-                            value={dateFilter.endDate}
-                            onchange={handleDateChange}
-                        ></lightning-input>
-                    </div>
-                </template>
-                
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small">
-                    <lightning-button label="Apply Filters" variant="brand" onclick={applyFilters}></lightning-button>
-                </div>
-            </div>
+  <lightning-card title={gridTitle}>
+    <div slot="actions">
+      <template lwc:if={isDynamicGrid}>
+        <lightning-button
+          label="Select Fields"
+          icon-name="utility:setup"
+          onclick={openFieldPicker}
+        ></lightning-button>
+      </template>
+      <lightning-button
+        label="Add Row"
+        icon-name="utility:add"
+        onclick={handleAddRow}
+        class="slds-m-left_x-small"
+      ></lightning-button>
+      <lightning-button
+        label="Delete Selected"
+        icon-name="utility:delete"
+        variant="destructive"
+        onclick={handleDelete}
+        class="slds-m-left_x-small"
+      ></lightning-button>
+      <lightning-button
+        label="Export CSV"
+        icon-name="utility:download"
+        onclick={handleExportCSV}
+        class="slds-m-left_x-small"
+      ></lightning-button>
+      <lightning-button
+        label="Reset Config"
+        icon-name="utility:refresh"
+        onclick={handleResetPrefs}
+        class="slds-m-left_x-small"
+      ></lightning-button>
+    </div>
+    <!-- Filter Bar -->
+    <template lwc:if={hasFilters}>
+      <div
+        class="slds-grid slds-wrap slds-gutters slds-p-horizontal_medium slds-p-top_small slds-m-bottom_medium slds-grid_vertical-align-end"
+      >
+        <template for:each={filterComboboxes} for:item="fc">
+          <div
+            key={fc.fieldApiName}
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+          >
+            <lightning-combobox
+              name={fc.fieldApiName}
+              label={fc.label}
+              value={fc.selectedValue}
+              options={fc.options}
+              onchange={handleMultiFilterChange}
+            ></lightning-combobox>
+          </div>
         </template>
 
-        <div class="slds-m-around_medium" style="height: 400px; position: relative;">
-            <template lwc:if={isLoading}>
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
-            </template>
-            <template lwc:if={errorMessage}>
-                <div class="slds-text-color_error slds-p-bottom_small">{errorMessage}</div>
-            </template>
-            <template lwc:if={gridColumns}>
-                <lightning-datatable
-                    key-field="Id"
-                    data={gridData}
-                    columns={gridColumns}
-                    onsave={handleSave}
-                    draft-values={draftValues}
-                    sorted-by={sortField}
-                    sorted-direction={sortDirection}
-                    onsort={handleSort}
-                    onresize={handleResize}>
-                </lightning-datatable>
-            </template>
-            <template lwc:if={showNoConfigMessage}>
-                <div class="slds-text-align_center slds-text-color_weak slds-p-around_large">
-                    No grid configuration found. Please check your setup or provide a valid Grid Config Developer Name.
-                </div>
-            </template>
+        <template lwc:if={hasDateFilter}>
+          <div
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+          >
+            <lightning-input
+              type="date"
+              name="startDate"
+              label="Start Date"
+              value={dateFilter.startDate}
+              onchange={handleDateChange}
+            ></lightning-input>
+          </div>
+          <div
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+          >
+            <lightning-input
+              type="date"
+              name="endDate"
+              label="End Date"
+              value={dateFilter.endDate}
+              onchange={handleDateChange}
+            ></lightning-input>
+          </div>
+        </template>
+
+        <div
+          class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+        >
+          <lightning-button
+            label="Apply Filters"
+            variant="brand"
+            onclick={applyFilters}
+          ></lightning-button>
         </div>
-    </lightning-card>
+      </div>
+    </template>
 
-    <!-- Field Picker Modal (child) -->
-    <c-smart-grid-field-picker
-        object-api-name={objectApiName}
-        selected-fields={pickerSelectedFields}
-        onfieldselection={handleFieldSelection}
-        onpickerclosed={handlePickerClosed}
-    ></c-smart-grid-field-picker>
+    <div class="slds-m-around_medium" style="height: 400px; position: relative">
+      <template lwc:if={isLoading}>
+        <lightning-spinner
+          alternative-text="Loading"
+          size="medium"
+        ></lightning-spinner>
+      </template>
+      <template lwc:elseif={isSetupRequired}>
+        <div
+          class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center"
+        >
+          <div class="slds-text-longform slds-m-bottom_medium">
+            <h3 class="slds-text-heading_medium">
+              Grid Configuration Required
+            </h3>
+            <p class="slds-text-body_regular">
+              Select the fields you want to display to get started.
+            </p>
+          </div>
+          <lightning-button
+            variant="brand"
+            label="Select Fields to Display"
+            onclick={openFieldPicker}
+          ></lightning-button>
+        </div>
+      </template>
+      <template lwc:elseif={errorMessage}>
+        <div class="slds-text-color_error slds-p-bottom_small">
+          {errorMessage}
+        </div>
+      </template>
+      <template lwc:elseif={gridColumns}>
+        <lightning-datatable
+          key-field="Id"
+          data={gridData}
+          columns={gridColumns}
+          onsave={handleSave}
+          draft-values={draftValues}
+          sorted-by={sortField}
+          sorted-direction={sortDirection}
+          onsort={handleSort}
+          onresize={handleResize}
+        >
+        </lightning-datatable>
+      </template>
+      <template lwc:if={showNoConfigMessage}>
+        <div
+          class="slds-text-align_center slds-text-color_weak slds-p-around_large"
+        >
+          No grid configuration found. Please check your setup or provide a
+          valid Grid Config Developer Name.
+        </div>
+      </template>
+    </div>
+  </lightning-card>
 
-    <!-- Resolution Modal (child) -->
-    <c-smart-grid-resolution-modal
-        object-api-name={objectApiName}
-        columns={gridColumns}
-        onrecordsolved={handleRecordSolved}
-        oncomplete={handleResolutionComplete}
-        onclose={handleResolutionClose}
-    ></c-smart-grid-resolution-modal>
+  <!-- Field Picker Modal (child) -->
+  <c-smart-grid-field-picker
+    object-api-name={objectApiName}
+    selected-fields={pickerSelectedFields}
+    onfieldselection={handleFieldSelection}
+    onpickerclosed={handlePickerClosed}
+  ></c-smart-grid-field-picker>
+
+  <!-- Resolution Modal (child) -->
+  <c-smart-grid-resolution-modal
+    object-api-name={objectApiName}
+    columns={gridColumns}
+    onrecordsolved={handleRecordSolved}
+    oncomplete={handleResolutionComplete}
+    onclose={handleResolutionClose}
+  ></c-smart-grid-resolution-modal>
 </template>
