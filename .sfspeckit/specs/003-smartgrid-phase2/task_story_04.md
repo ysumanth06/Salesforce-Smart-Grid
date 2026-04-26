@@ -1,7 +1,7 @@
 # Task Story 04: Record ID Validation Hardening [US-P2-04]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P1 — Critical
-**Status**: DRAFT | **Branch**: `feature/003-ts04-id-validation`
+**Status**: READY | **Branch**: `feature/003-ts04-id-validation`
 
 ---
 

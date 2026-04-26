@@ -1,7 +1,7 @@
 # Task Story 02: Column Totals Footer [US-P2-02]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P1 — Critical
-**Status**: DRAFT | **Branch**: `feature/003-ts02-column-totals`
+**Status**: READY | **Branch**: `feature/003-ts02-column-totals`
 
 ---
 

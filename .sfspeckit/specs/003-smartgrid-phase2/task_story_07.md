@@ -1,7 +1,7 @@
 # Task Story 07: Related Object Navigation [US-P2-07]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P2 — High
-**Status**: DRAFT | **Branch**: `feature/003-ts07-related-grid`
+**Status**: READY | **Branch**: `feature/003-ts07-related-grid`
 
 ---
 

@@ -1,7 +1,7 @@
 # Task Story 03: Undo/Redo — Dirty State Manager [US-P2-03]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P1 — Critical
-**Status**: DRAFT | **Branch**: `feature/003-ts03-undo-redo`
+**Status**: READY | **Branch**: `feature/003-ts03-undo-redo`
 
 ---
 

@@ -3,7 +3,7 @@
 **Feature**: 003-smartgrid-phase2 (Phase 2 — Smart Grid Pro)
 **Story Type**: FULL
 **Priority**: P0 — Foundation (blocks all other stories)
-**Status**: DRAFT
+**Status**: READY
 **Assignee**: —
 **Jira**: —
 **Branch**: `feature/003-ts00-foundation`

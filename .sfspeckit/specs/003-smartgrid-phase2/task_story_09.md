@@ -1,7 +1,7 @@
 # Task Story 09: Query History & Saved Views [US-P2-09]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P3 — Nice-to-Have
-**Status**: DRAFT | **Branch**: `feature/003-ts09-saved-views`
+**Status**: READY | **Branch**: `feature/003-ts09-saved-views`
 
 ---
 

@@ -1,7 +1,7 @@
 # Task Story 11: Formula/Computed Columns [US-P2-11]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P3 — Nice-to-Have
-**Status**: DRAFT | **Branch**: `feature/003-ts11-computed-columns`
+**Status**: READY | **Branch**: `feature/003-ts11-computed-columns`
 
 ---
 

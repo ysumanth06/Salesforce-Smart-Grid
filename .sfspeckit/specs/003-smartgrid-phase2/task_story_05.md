@@ -1,7 +1,7 @@
 # Task Story 05: Reading Pane — Record Detail Sidebar [US-P2-05]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P2 — High
-**Status**: DRAFT | **Branch**: `feature/003-ts05-reading-pane`
+**Status**: READY | **Branch**: `feature/003-ts05-reading-pane`
 
 ---
 
