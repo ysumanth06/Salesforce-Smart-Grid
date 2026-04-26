@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Default__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description
+  >If true, this view auto-loads when the grid initializes for this object.</description>
+    <externalId>false</externalId>
+    <label>Is Default</label>
+    <type>Checkbox</type>
+</CustomField>

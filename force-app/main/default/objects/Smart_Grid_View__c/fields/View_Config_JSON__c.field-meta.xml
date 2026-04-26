@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>View_Config_JSON__c</fullName>
+    <description
+  >Serialized JSON containing filter, sort, and column state for this saved view.</description>
+    <externalId>false</externalId>
+    <label>View Configuration</label>
+    <length>32768</length>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

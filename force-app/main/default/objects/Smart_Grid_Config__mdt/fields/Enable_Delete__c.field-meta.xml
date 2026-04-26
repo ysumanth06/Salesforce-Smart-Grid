@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_Delete__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description
+  >Toggle delete button visibility in the grid toolbar.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Enable Delete</label>
+    <type>Checkbox</type>
+</CustomField>
