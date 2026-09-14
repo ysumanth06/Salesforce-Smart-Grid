@@ -5,9 +5,34 @@ export default class SmartGridFilterBuilder extends LightningElement {
   @track rootGroup = {
     id: "root",
     logic: "AND",
-    conditions: [{ id: "c_init_1", field: "", operator: "=", value: "" }],
+    conditions: [
+      {
+        id: "c_init_1",
+        field: "",
+        operator: "=",
+        value: "",
+        operatorOptions: [
+          { label: "contains", value: "contains" },
+          { label: "equals (=)", value: "=" },
+          { label: "not equal (!=)", value: "!=" },
+          { label: "starts with", value: "starts_with" },
+          { label: "ends with", value: "ends_with" },
+          { label: "does not contain", value: "not_contains" }
+        ]
+      }
+    ],
     groups: []
   };
+
+  connectedCallback() {
+    if (this.rootGroup && this.rootGroup.conditions) {
+      this.rootGroup.conditions.forEach((c) => {
+        if (!c.operatorOptions || c.operatorOptions.length === 0) {
+          c.operatorOptions = this.getOperatorOptionsForField(c.field);
+        }
+      });
+    }
+  }
 
   @api
   get filterExpression() {
@@ -79,6 +104,21 @@ export default class SmartGridFilterBuilder extends LightningElement {
     ];
   }
 
+  @api
+  getOperatorOptionsForField(fieldName) {
+    if (!fieldName || !this.columns || this.columns.length === 0) {
+      return this.getOperatorOptionsForType("STRING");
+    }
+    const lowerName = fieldName.toLowerCase();
+    const col = this.columns.find(
+      (c) =>
+        (c.fieldName && c.fieldName.toLowerCase() === lowerName) ||
+        (c.fieldApiName && c.fieldApiName.toLowerCase() === lowerName)
+    );
+    const type = col ? col.type || "STRING" : "STRING";
+    return this.getOperatorOptionsForType(type);
+  }
+
   hydrateGroup(group, idPrefix) {
     return {
       id: idPrefix,
@@ -87,7 +127,8 @@ export default class SmartGridFilterBuilder extends LightningElement {
         id: `${idPrefix}_c_${idx}_${Date.now()}`,
         field: c.field || "",
         operator: c.operator || "=",
-        value: c.value != null ? String(c.value) : ""
+        value: c.value != null ? String(c.value) : "",
+        operatorOptions: this.getOperatorOptionsForField(c.field)
       })),
       groups: (group.groups || []).map((g, idx) =>
         this.hydrateGroup(g, `${idPrefix}_g_${idx}_${Date.now()}`)
@@ -122,42 +163,64 @@ export default class SmartGridFilterBuilder extends LightningElement {
   }
 
   updateCondition(group, condId, fieldName, newVal) {
-    for (const cond of group.conditions) {
+    let found = false;
+    group.conditions = (group.conditions || []).map((cond) => {
       if (cond.id === condId) {
-        cond[fieldName] = newVal;
-        return;
+        found = true;
+        const updated = { ...cond, [fieldName]: newVal };
+        if (fieldName === "field") {
+          updated.operatorOptions = this.getOperatorOptionsForField(newVal);
+          if (updated.operatorOptions && updated.operatorOptions.length > 0) {
+            updated.operator = updated.operatorOptions[0].value;
+          }
+        }
+        return updated;
       }
-    }
-    for (const childGroup of group.groups) {
-      this.updateCondition(childGroup, condId, fieldName, newVal);
+      return cond;
+    });
+
+    if (!found && group.groups) {
+      for (const childGroup of group.groups) {
+        this.updateCondition(childGroup, condId, fieldName, newVal);
+      }
     }
   }
 
   @api
   handleAddCondition() {
-    this.rootGroup.conditions.push({
-      id: `c_${Date.now()}_${Math.random()}`,
-      field: this.fieldOptions[0] ? this.fieldOptions[0].value : "",
-      operator: "=",
-      value: ""
-    });
+    const defaultField = this.fieldOptions[0] ? this.fieldOptions[0].value : "";
+    this.rootGroup.conditions = [
+      ...this.rootGroup.conditions,
+      {
+        id: `c_${Date.now()}_${Math.random()}`,
+        field: defaultField,
+        operator: "=",
+        value: "",
+        operatorOptions: this.getOperatorOptionsForField(defaultField)
+      }
+    ];
   }
 
   @api
   handleAddGroup() {
-    this.rootGroup.groups.push({
-      id: `g_${Date.now()}_${Math.random()}`,
-      logic: "OR",
-      conditions: [
-        {
-          id: `c_${Date.now()}_${Math.random()}`,
-          field: this.fieldOptions[0] ? this.fieldOptions[0].value : "",
-          operator: "=",
-          value: ""
-        }
-      ],
-      groups: []
-    });
+    const defaultField = this.fieldOptions[0] ? this.fieldOptions[0].value : "";
+    this.rootGroup.groups = [
+      ...this.rootGroup.groups,
+      {
+        id: `g_${Date.now()}_${Math.random()}`,
+        logic: "OR",
+        conditions: [
+          {
+            id: `c_${Date.now()}_${Math.random()}`,
+            field: defaultField,
+            operator: "=",
+            value: "",
+            operatorOptions: this.getOperatorOptionsForField(defaultField)
+          }
+        ],
+        groups: []
+      }
+    ];
   }
 
   handleRemoveCondition(event) {
@@ -166,22 +229,19 @@ export default class SmartGridFilterBuilder extends LightningElement {
   }
 
   removeConditionFromGroup(group, condId) {
-    const idx = group.conditions.findIndex((c) => c.id === condId);
-    if (idx !== -1) {
-      group.conditions.splice(idx, 1);
-      return;
-    }
-    for (const child of group.groups) {
-      this.removeConditionFromGroup(child, condId);
+    group.conditions = (group.conditions || []).filter((c) => c.id !== condId);
+    if (group.groups) {
+      for (const child of group.groups) {
+        this.removeConditionFromGroup(child, condId);
+      }
     }
   }
 
   handleRemoveGroup(event) {
     const groupId = event.target.dataset.id;
-    const idx = this.rootGroup.groups.findIndex((g) => g.id === groupId);
-    if (idx !== -1) {
-      this.rootGroup.groups.splice(idx, 1);
-    }
+    this.rootGroup.groups = (this.rootGroup.groups || []).filter(
+      (g) => g.id !== groupId
+    );
   }
 
   @api

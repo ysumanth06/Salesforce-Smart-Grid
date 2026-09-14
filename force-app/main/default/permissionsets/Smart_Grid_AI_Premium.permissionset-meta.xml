@@ -4,7 +4,6 @@
   >Grants premium AI capabilities including NLP Command Palette, Data Quality Insights, and Conversational Assistant.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>SmartGrid AI Premium</label>
-    <license>Salesforce</license>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Smart_Grid_AI_Config__mdt</name>
@@ -13,4 +12,28 @@
         <enabled>true</enabled>
         <name>Smart_Grid_License__mdt</name>
     </customMetadataTypeAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridNLPEngine</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridNLPDMLHandler</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridDataQualityService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridAgentService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridLicenseService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridTelemetryService</apexClass>
+    </classAccesses>
 </PermissionSet>

@@ -12,6 +12,7 @@ import savePrefs from "@salesforce/apex/SmartGridUserPrefService.savePrefs";
 import getFormatRules from "@salesforce/apex/SmartGridController.getFormatRules";
 import getAggregates from "@salesforce/apex/SmartGridController.getAggregates";
 import logQueryHistory from "@salesforce/apex/SmartGridController.logQueryHistory";
+import checkFeatureEntitlements from "@salesforce/apex/SmartGridLicenseService.checkFeatureEntitlements";
 import { exportToCSV } from "c/csvHelper";
 import { exportToExcel } from "c/spreadsheetExporter";
 import { reduceErrors } from "c/errorUtils";
@@ -72,6 +73,26 @@ export default class SmartDataGrid extends LightningElement {
   // Phase 3 AI Command Palette & Filters
   @track showCommandPalette = false;
   @track aiFilterPills = [];
+  @track showAssistant = false;
+  @track showDataQuality = false;
+  @track showOnboarding = false;
+  @track entitlements = {
+    CORE_GRID: true,
+    NLP_COMMAND_PALETTE: true,
+    AI_SUGGESTIONS: true,
+    CONVERSATIONAL_ASSISTANT: true
+  };
+  _lastEditedField = null;
+
+  get canUseCommandPalette() {
+    return this.entitlements?.NLP_COMMAND_PALETTE !== false;
+  }
+  get canUseAssistant() {
+    return this.entitlements?.CONVERSATIONAL_ASSISTANT !== false;
+  }
+  get canUseDataQuality() {
+    return this.entitlements?.AI_SUGGESTIONS !== false;
+  }
 
   get visibleFieldNames() {
     return (this.gridColumns || []).map((c) => c.fieldName);
@@ -112,6 +133,7 @@ export default class SmartDataGrid extends LightningElement {
     this._boundKeyDown = this.handleKeyDown.bind(this);
     window.addEventListener("keydown", this._boundKeyDown);
     this.subscribeToMessageChannel();
+    this.loadEntitlements();
 
     if (this.gridConfigName) {
       this.fetchConfig();
@@ -517,8 +539,10 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   async handleDelete() {
-    const datatable = this.template.querySelector("lightning-datatable");
-    const selectedRows = datatable.getSelectedRows();
+    const datatable =
+      this.template.querySelector("c-smart-grid-datatable") ||
+      this.template.querySelector("lightning-datatable");
+    const selectedRows = datatable ? datatable.getSelectedRows() : [];
     if (!selectedRows || selectedRows.length === 0) {
       this.dispatchEvent(
         new ShowToastEvent({
@@ -539,7 +563,41 @@ export default class SmartDataGrid extends LightningElement {
     if (result) {
       try {
         this.isLoading = true;
-        const recordsToDelete = selectedRows.map((r) => ({
+
+        const unsavedRows = selectedRows.filter(
+          (r) => r.Id && String(r.Id).startsWith("new-")
+        );
+        const persistedRows = selectedRows.filter(
+          (r) => !r.Id || !String(r.Id).startsWith("new-")
+        );
+
+        if (unsavedRows.length > 0) {
+          const unsavedIds = new Set(unsavedRows.map((r) => r.Id));
+          this.gridData = this.gridData.filter((r) => !unsavedIds.has(r.Id));
+          this.draftValues = this.draftValues.filter(
+            (d) => !unsavedIds.has(d.Id)
+          );
+          if (this._unfilteredGridData) {
+            this._unfilteredGridData = this._unfilteredGridData.filter(
+              (r) => !unsavedIds.has(r.Id)
+            );
+          }
+          this.dirtyStateManager.clear();
+          this.updateUndoRedoState();
+        }
+
+        if (persistedRows.length === 0) {
+          this.dispatchEvent(
+            new ShowToastEvent({
+              title: "Success",
+              message: "Unsaved row(s) removed.",
+              variant: "success"
+            })
+          );
+          return;
+        }
+
+        const recordsToDelete = persistedRows.map((r) => ({
           Id: r.Id,
           sobjectType: this.objectApiName
         }));
@@ -1149,6 +1207,7 @@ export default class SmartDataGrid extends LightningElement {
         const newVal = draft[field];
 
         if (oldVal !== newVal) {
+          this._lastEditedField = field;
           changes.push({
             recordId: draft.Id,
             fieldName: field,
@@ -1294,14 +1353,27 @@ export default class SmartDataGrid extends LightningElement {
       return;
     }
 
-    // Find the first editable column
-    const editableCol = this.gridColumns.find(
-      (c) =>
-        c.editable &&
-        !c.formula &&
-        !c.expression &&
-        !c.fieldName.endsWith("_Url")
-    );
+    // Find targeted editable column (prefer recently focused/edited column)
+    let editableCol = null;
+    if (this._lastEditedField) {
+      editableCol = this.gridColumns.find(
+        (c) =>
+          c.fieldName === this._lastEditedField &&
+          c.editable &&
+          !c.formula &&
+          !c.expression &&
+          !c.fieldName.endsWith("_Url")
+      );
+    }
+    if (!editableCol) {
+      editableCol = this.gridColumns.find(
+        (c) =>
+          c.editable &&
+          !c.formula &&
+          !c.expression &&
+          !c.fieldName.endsWith("_Url")
+      );
+    }
     if (!editableCol) {
       this.dispatchEvent(
         new ShowToastEvent({
@@ -1906,6 +1978,32 @@ export default class SmartDataGrid extends LightningElement {
       };
     }
 
+    // Custom picklist type support (c-smart-grid-picklist via c-smart-grid-datatable)
+    const isPicklist = sfType === "PICKLIST";
+    const picklistOptions = this._picklistOptionsMap[fieldApi.toLowerCase()];
+    if (isPicklist && picklistOptions && picklistOptions.length > 0) {
+      return {
+        label: label,
+        fieldName: fieldApi,
+        type: "picklist",
+        typeAttributes: {
+          label: label,
+          placeholder: "Choose " + label,
+          options: picklistOptions,
+          context: { fieldName: "Id" },
+          fieldName: fieldApi
+        },
+        cellAttributes: {
+          class: { fieldName: fieldApi + "_cellClass" },
+          iconName: { fieldName: fieldApi + "_iconName" },
+          iconPosition: "left"
+        },
+        editable: false,
+        sortable: isSortable,
+        initialWidth: colWidth
+      };
+    }
+
     // sfType was already resolved from _fieldMetadataMap above
     const mapped = this.mapFieldType(sfType);
 
@@ -1929,6 +2027,61 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   // ─── Sprint 4 Actions (TS-05, TS-06, TS-07, TS-09) ───
+
+  async loadEntitlements() {
+    try {
+      const res = await checkFeatureEntitlements();
+      if (res) {
+        this.entitlements = { ...this.entitlements, ...res };
+      }
+    } catch (e) {
+      console.warn("Could not load feature entitlements:", e);
+    }
+  }
+
+  handleOpenAssistant() {
+    this.showAssistant = true;
+  }
+
+  handleCloseAssistant() {
+    this.showAssistant = false;
+  }
+
+  handleOpenDataQuality() {
+    this.showDataQuality = true;
+  }
+
+  handleCloseDataQuality() {
+    this.showDataQuality = false;
+  }
+
+  handleOpenOnboarding() {
+    this.showOnboarding = true;
+  }
+
+  handleCloseOnboarding() {
+    this.showOnboarding = false;
+  }
+
+  handlePicklistChange(event) {
+    const data = event.detail?.data || {};
+    const recordId = data.context;
+    const fieldName = data.fieldName;
+    const value = data.value;
+
+    if (!recordId || !fieldName) return;
+
+    this.handleCellChange({
+      detail: {
+        draftValues: [
+          {
+            Id: recordId,
+            [fieldName]: value
+          }
+        ]
+      }
+    });
+  }
 
   handleOpenAdvancedFilter() {
     this.showAdvancedFilterModal = true;

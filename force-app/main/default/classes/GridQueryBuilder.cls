@@ -628,24 +628,31 @@ public with sharing class GridQueryBuilder {
       Schema.DisplayType dt = dateDfr.getType();
       String escapedDateField = String.escapeSingleQuotes(dateDfr.getName());
 
-      if (startDate != null) {
-        if (dt == Schema.DisplayType.DATETIME) {
-          whereClauses.add(
-            escapedDateField + ' >= ' + String.valueOf(startDate) + 'T00:00:00Z'
-          );
-        } else {
-          whereClauses.add(
-            escapedDateField + ' >= ' + String.valueOf(startDate)
-          );
+      if (dt == Schema.DisplayType.DATE || dt == Schema.DisplayType.DATETIME) {
+        if (startDate != null) {
+          if (dt == Schema.DisplayType.DATETIME) {
+            whereClauses.add(
+              escapedDateField +
+                ' >= ' +
+                String.valueOf(startDate) +
+                'T00:00:00Z'
+            );
+          } else {
+            whereClauses.add(
+              escapedDateField + ' >= ' + String.valueOf(startDate)
+            );
+          }
         }
-      }
-      if (endDate != null) {
-        if (dt == Schema.DisplayType.DATETIME) {
-          whereClauses.add(
-            escapedDateField + ' <= ' + String.valueOf(endDate) + 'T23:59:59Z'
-          );
-        } else {
-          whereClauses.add(escapedDateField + ' <= ' + String.valueOf(endDate));
+        if (endDate != null) {
+          if (dt == Schema.DisplayType.DATETIME) {
+            whereClauses.add(
+              escapedDateField + ' <= ' + String.valueOf(endDate) + 'T23:59:59Z'
+            );
+          } else {
+            whereClauses.add(
+              escapedDateField + ' <= ' + String.valueOf(endDate)
+            );
+          }
         }
       }
     }

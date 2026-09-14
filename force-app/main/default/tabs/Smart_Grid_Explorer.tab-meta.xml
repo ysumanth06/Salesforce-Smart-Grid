@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Interactive Smart Grid Demo Page</description>
+    <flexiPage>Smart_Grid_Demo</flexiPage>
+    <label>Smart Grid</label>
+    <motif>Custom62: Chalkboard</motif>
+</CustomTab>

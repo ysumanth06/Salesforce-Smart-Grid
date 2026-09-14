@@ -100,4 +100,27 @@ describe("c-smart-grid-filter-builder", () => {
     expect(element.filterExpression.conditions.length).toBe(0);
     expect(element.filterExpression.groups.length).toBe(0);
   });
+
+  test("populates operatorOptions for conditions based on column data type", () => {
+    const element = createElement("c-smart-grid-filter-builder", {
+      is: SmartGridFilterBuilder
+    });
+    element.columns = [
+      { label: "Account Name", fieldName: "Name", type: "STRING" },
+      { label: "Annual Revenue", fieldName: "AnnualRevenue", type: "CURRENCY" },
+      { label: "Created Date", fieldName: "CreatedDate", type: "DATE" }
+    ];
+    document.body.appendChild(element);
+
+    const stringOps = element.getOperatorOptionsForField("Name");
+    expect(stringOps.some((o) => o.value === "contains")).toBe(true);
+
+    const numberOps = element.getOperatorOptionsForField("AnnualRevenue");
+    expect(numberOps.some((o) => o.value === ">")).toBe(true);
+    expect(numberOps.some((o) => o.value === "contains")).toBe(false);
+
+    const dateOps = element.getOperatorOptionsForField("CreatedDate");
+    expect(dateOps.some((o) => o.value === "after")).toBe(false);
+    expect(dateOps.some((o) => o.value === ">")).toBe(true);
+  });
 });

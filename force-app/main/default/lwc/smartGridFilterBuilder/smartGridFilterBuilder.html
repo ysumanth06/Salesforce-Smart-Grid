@@ -99,7 +99,7 @@
                   name="operator"
                   label="Operator"
                   value={cond.operator}
-                  options={logicOptions}
+                  options={cond.operatorOptions}
                   data-id={cond.id}
                   data-field="operator"
                   onchange={handleConditionChange}
@@ -184,7 +184,7 @@
                       name="childOperator"
                       label="Operator"
                       value={cCond.operator}
-                      options={logicOptions}
+                      options={cCond.operatorOptions}
                       data-id={cCond.id}
                       data-field="operator"
                       onchange={handleConditionChange}

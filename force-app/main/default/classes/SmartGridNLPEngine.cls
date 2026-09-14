@@ -265,6 +265,7 @@ public with sharing class SmartGridNLPEngine {
       return null;
     }
 
+    // Custom metadata SOQL does not support OR disjunctions across relationship fields
     List<Smart_Grid_AI_Config__mdt> configs = [
       SELECT
         Id,
@@ -280,12 +281,32 @@ public with sharing class SmartGridNLPEngine {
         Max_Tokens__c,
         Confidence_Threshold__c
       FROM Smart_Grid_AI_Config__mdt
-      WHERE
-        DeveloperName = :configDevName
-        OR Grid_Config__r.DeveloperName = :configDevName
+      WHERE DeveloperName = :configDevName
       WITH USER_MODE
       LIMIT 1
     ];
+
+    if (configs.isEmpty()) {
+      configs = [
+        SELECT
+          Id,
+          DeveloperName,
+          Enable_NLP__c,
+          Enable_Suggestions__c,
+          Enable_Chat__c,
+          Provider_Type__c,
+          Named_Credential__c,
+          Custom_Provider_Class__c,
+          Prompt_Template__c,
+          Model_Identifier__c,
+          Max_Tokens__c,
+          Confidence_Threshold__c
+        FROM Smart_Grid_AI_Config__mdt
+        WHERE Grid_Config__r.DeveloperName = :configDevName
+        WITH USER_MODE
+        LIMIT 1
+      ];
+    }
 
     return configs.isEmpty() ? null : configs[0];
   }

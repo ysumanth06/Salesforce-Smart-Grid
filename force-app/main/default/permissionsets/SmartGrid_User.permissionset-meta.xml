@@ -3,7 +3,10 @@
     <description>Grants end-user access to Smart Grid features.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>SmartGrid User</label>
-    <license>Salesforce</license>
+    <tabSettings>
+        <tab>Smart_Grid_Explorer</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Smart_Grid_Config__mdt</name>
@@ -87,5 +90,13 @@
     <classAccesses>
         <enabled>true</enabled>
         <apexClass>SmartGridViewService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridLicenseService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridTelemetryService</apexClass>
     </classAccesses>
 </PermissionSet>

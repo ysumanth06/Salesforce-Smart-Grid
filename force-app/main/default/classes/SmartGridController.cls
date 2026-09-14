@@ -438,10 +438,13 @@ public with sharing class SmartGridController {
       );
       for (Integer i = 0; i < insertResults.size(); i++) {
         Database.SaveResult sr = insertResults[i];
-        if (!sr.isSuccess()) {
+        Integer originalIdx = insertMap.get(i);
+        if (sr.isSuccess()) {
+          records[originalIdx].Id = sr.getId();
+          result.insertedIds.add(sr.getId());
+        } else {
           result.isSuccess = false;
           RowError re = new RowError();
-          Integer originalIdx = insertMap.get(i);
           re.id = String.valueOf(originalIdx);
           re.title = 'Error';
           re.messages = new List<String>();
@@ -808,6 +811,8 @@ public with sharing class SmartGridController {
   public class SaveResult {
     @AuraEnabled
     public Boolean isSuccess = true;
+    @AuraEnabled
+    public List<String> insertedIds = new List<String>();
     @AuraEnabled
     public List<RowError> rowErrors = new List<RowError>();
     @AuraEnabled

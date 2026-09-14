@@ -146,15 +146,54 @@
         ></lightning-button>
       </template>
       <!-- AI Command Palette Trigger (Cmd+K) (Phase 3) -->
+      <template lwc:if={canUseCommandPalette}>
+        <lightning-button-icon
+          icon-name="utility:einstein"
+          alternative-text="AI Command Palette (Cmd+K)"
+          title="AI Command Palette (Cmd+K)"
+          onclick={handleOpenCommandPalette}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+          variant="border-filled"
+          data-testid="toolbar-ai-command-btn"
+        ></lightning-button-icon>
+      </template>
+      <!-- Data Quality Health Inspector Trigger -->
+      <template lwc:if={canUseDataQuality}>
+        <lightning-button-icon
+          icon-name="utility:heart"
+          alternative-text="Dataset Health & Data Quality"
+          title="Dataset Health & Duplicate Inspector"
+          onclick={handleOpenDataQuality}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+          variant="border-filled"
+          data-testid="toolbar-data-quality-btn"
+        ></lightning-button-icon>
+      </template>
+      <!-- Conversational AI Assistant Trigger -->
+      <template lwc:if={canUseAssistant}>
+        <lightning-button-icon
+          icon-name="utility:chat"
+          alternative-text="Conversational AI Assistant"
+          title="Conversational AI Assistant"
+          onclick={handleOpenAssistant}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+          variant="border-filled"
+          data-testid="toolbar-assistant-btn"
+        ></lightning-button-icon>
+      </template>
+      <!-- Grid Guide & Walkthrough Trigger -->
       <lightning-button-icon
-        icon-name="utility:einstein"
-        alternative-text="AI Command Palette (Cmd+K)"
-        title="AI Command Palette (Cmd+K)"
-        onclick={handleOpenCommandPalette}
+        icon-name="utility:help"
+        alternative-text="Grid Guide & Walkthrough"
+        title="Grid Guide & Walkthrough"
+        onclick={handleOpenOnboarding}
         disabled={isLoading}
         class="slds-var-m-left_x-small"
         variant="border-filled"
-        data-testid="toolbar-ai-command-btn"
+        data-testid="toolbar-help-btn"
       ></lightning-button-icon>
     </div>
     <!-- Active Filter Pills Bar (TS-01) -->
@@ -227,8 +266,8 @@
     </template>
 
     <div
-      class="slds-var-m-around_medium"
-      style="height: 400px; position: relative"
+      class="slds-var-p-horizontal_medium slds-var-p-bottom_small"
+      style="position: relative; min-height: 250px"
       onpaste={handlePaste}
     >
       <template lwc:if={isLoading}>
@@ -264,22 +303,25 @@
       <template lwc:elseif={gridColumns}>
         <div class="slds-grid slds-wrap">
           <div class={gridContainerClass}>
-            <lightning-datatable
-              key-field="Id"
-              data={gridData}
-              columns={gridColumns}
-              onsave={handleSave}
-              draft-values={draftValues}
-              sorted-by={sortedByDisplay}
-              sorted-direction={sortDirection}
-              onsort={handleSort}
-              onresize={handleResize}
-              onrowselection={handleRowSelection}
-              oncellchange={handleCellChange}
-              onheaderaction={handleHeaderAction}
-              ondblclick={handleHeaderDoubleClick}
-            >
-            </lightning-datatable>
+            <div class="smart-grid-table-container">
+              <c-smart-grid-datatable
+                key-field="Id"
+                data={gridData}
+                columns={gridColumns}
+                onsave={handleSave}
+                draft-values={draftValues}
+                sorted-by={sortedByDisplay}
+                sorted-direction={sortDirection}
+                onsort={handleSort}
+                onresize={handleResize}
+                onrowselection={handleRowSelection}
+                oncellchange={handleCellChange}
+                onpicklistchange={handlePicklistChange}
+                onheaderaction={handleHeaderAction}
+                ondblclick={handleHeaderDoubleClick}
+              >
+              </c-smart-grid-datatable>
+            </div>
             <!-- Sticky Column Totals Footer (TS-02) -->
             <template lwc:if={hasTotals}>
               <div
@@ -368,7 +410,8 @@
     <!-- Pagination Footer -->
     <template lwc:if={gridColumns}>
       <div
-        class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-var-p-top_small slds-var-p-bottom_medium slds-border_top"
+        slot="footer"
+        class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-var-p-vertical_x-small"
       >
         <lightning-button
           label="Previous"
@@ -462,4 +505,28 @@
     onapplyfilters={handleApplyAIFilters}
     onclose={handleCloseCommandPalette}
   ></c-smart-grid-command-palette>
+
+  <!-- Conversational Assistant Drawer -->
+  <c-smart-grid-assistant
+    is-open={showAssistant}
+    object-api-name={objectApiName}
+    active-filters={activeFilterJson}
+    visible-fields={visibleFieldNames}
+    config-dev-name={gridConfigName}
+    onclose={handleCloseAssistant}
+  ></c-smart-grid-assistant>
+
+  <!-- Data Quality & Health Inspection Drawer -->
+  <c-smart-grid-data-quality
+    is-open={showDataQuality}
+    object-api-name={objectApiName}
+    available-fields={visibleFieldNames}
+    onclose={handleCloseDataQuality}
+  ></c-smart-grid-data-quality>
+
+  <!-- Product Walkthrough & Onboarding Modal -->
+  <c-smart-grid-onboarding
+    is-open={showOnboarding}
+    onclose={handleCloseOnboarding}
+  ></c-smart-grid-onboarding>
 </template>

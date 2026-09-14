@@ -49,3 +49,11 @@
   font-size: 0.72rem;
   letter-spacing: 0.5px;
 }
+
+/* Datatable Container with responsive scrolling */
+.smart-grid-table-container {
+  max-height: calc(100vh - 280px);
+  min-height: 250px;
+  overflow: auto;
+  position: relative;
+}

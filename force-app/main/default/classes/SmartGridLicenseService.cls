@@ -57,7 +57,7 @@ public with sharing class SmartGridLicenseService {
         SELECT PermissionSet.Name
         FROM PermissionSetAssignment
         WHERE AssigneeId = :userId AND PermissionSet.Name IN :requiredPermSets
-        WITH USER_MODE
+        WITH SYSTEM_MODE
       ]) {
         userAssignedPermSets.add(psa.PermissionSet.Name);
       }
