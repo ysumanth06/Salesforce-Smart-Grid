@@ -18,6 +18,11 @@ import { applyFormatRules } from "c/formatRuleEngine";
 import { DirtyStateManager } from "c/dirtyStateManager";
 import { computeFormulaColumns } from "c/formulaEvaluator";
 import {
+  generateColumnActions,
+  filterRecordsByHeaderActions,
+  reorderColumnsWithPin
+} from "c/columnHeaderMenuManager";
+import {
   publish,
   subscribe,
   unsubscribe,
@@ -57,6 +62,11 @@ export default class SmartDataGrid extends LightningElement {
   @track showReadingPane = false;
   @track showRelatedGrid = false;
   @track selectedRowId;
+
+  // Task Story 13: In-place column header filters & pinning state
+  @track activeHeaderFilters = {};
+  @track pinnedColumnField = null;
+  _unfilteredGridData = [];
 
   dirtyStateManager = new DirtyStateManager(50);
 
@@ -383,11 +393,13 @@ export default class SmartDataGrid extends LightningElement {
       );
 
       // Compute formula columns (TS-11)
-      this.gridData = computeFormulaColumns(
+      this._unfilteredGridData = computeFormulaColumns(
         formattedRecords,
         this.gridColumns,
         this.draftValues
       );
+      this.applyHeaderFilters();
+      this.refreshHeaderActions();
       this.totalRecords = response.totalSize;
 
       // Recalculate column totals across full filtered dataset (TS-02)
@@ -671,6 +683,9 @@ export default class SmartDataGrid extends LightningElement {
         const parsed = JSON.parse(prefsJson);
         this.gridColumns = parsed.columns;
         this.pickerSelectedFields = parsed.fields;
+        if (parsed.pinnedColumn) {
+          this.pinnedColumnField = parsed.pinnedColumn;
+        }
         return true;
       }
     } catch (e) {
@@ -687,6 +702,9 @@ export default class SmartDataGrid extends LightningElement {
         const parsed = JSON.parse(cached);
         this.gridColumns = parsed.columns;
         this.pickerSelectedFields = parsed.fields;
+        if (parsed.pinnedColumn) {
+          this.pinnedColumnField = parsed.pinnedColumn;
+        }
         return true;
       }
     } catch (e) {
@@ -758,7 +776,8 @@ export default class SmartDataGrid extends LightningElement {
     if (!this.prefKey) return;
     const prefsObj = {
       columns: this.gridColumns,
-      fields: this.pickerSelectedFields
+      fields: this.pickerSelectedFields,
+      pinnedColumn: this.pinnedColumnField
     };
     const prefsStr = JSON.stringify(prefsObj);
 
@@ -1307,7 +1326,8 @@ export default class SmartDataGrid extends LightningElement {
       columns: this.pickerSelectedFields,
       sortField: this.sortField,
       sortDirection: this.sortDirection,
-      filterExpression: this.activeFilterExpression
+      filterExpression: this.activeFilterExpression,
+      pinnedColumn: this.pinnedColumnField
     };
   }
 
@@ -1323,6 +1343,15 @@ export default class SmartDataGrid extends LightningElement {
       const fieldsToAggregate = JSON.parse(this.config.totalsFieldsJson);
       if (!Array.isArray(fieldsToAggregate) || fieldsToAggregate.length === 0) {
         this.totalsData = [];
+        return;
+      }
+
+      // If in-place column header filters are active, compute client totals on the filtered gridData
+      const hasHeaderFilters = Object.values(this.activeHeaderFilters).some(
+        (set) => set instanceof Set && set.size > 0
+      );
+      if (hasHeaderFilters && this.gridData) {
+        this.totalsData = this.computeClientTotals(fieldsToAggregate);
         return;
       }
 
@@ -1583,6 +1612,9 @@ export default class SmartDataGrid extends LightningElement {
         this.pickerSelectedFields = config.columns;
         this.refreshColumns();
       }
+      if (config.pinnedColumn !== undefined) {
+        this.pinnedColumnField = config.pinnedColumn;
+      }
     }
     this.currentPage = 1;
     await this.fetchData();
@@ -1591,10 +1623,141 @@ export default class SmartDataGrid extends LightningElement {
   async handleResetView() {
     this.activeFilterExpression = null;
     this.activeFilterJson = null;
+    this.activeHeaderFilters = {};
+    this.pinnedColumnField = null;
     this.sortField = null;
     this.sortDirection = "asc";
     this.currentPage = 1;
     await this.fetchData();
+  }
+
+  // ─── Task Story 13: Column Header Actions Orchestration ───
+
+  computeClientTotals(fieldsToAggregate) {
+    if (!this.gridData || this.gridData.length === 0) return [];
+    return fieldsToAggregate.map((field) => {
+      let sum = 0;
+      let count = 0;
+      let min = null;
+      let max = null;
+      for (const row of this.gridData) {
+        const val = Number(row[field]);
+        if (!isNaN(val) && val !== null) {
+          sum += val;
+          count++;
+          if (min === null || val < min) min = val;
+          if (max === null || val > max) max = val;
+        }
+      }
+      return {
+        fieldApiName: field,
+        sum: sum,
+        avg: count > 0 ? sum / count : 0,
+        min: min !== null ? min : 0,
+        max: max !== null ? max : 0,
+        count: count
+      };
+    });
+  }
+
+  applyHeaderFilters() {
+    if (!this._unfilteredGridData) {
+      this.gridData = [];
+      return;
+    }
+    this.gridData = filterRecordsByHeaderActions(
+      this._unfilteredGridData,
+      this.activeHeaderFilters
+    );
+  }
+
+  refreshHeaderActions() {
+    if (!this.gridColumns || !this._unfilteredGridData) return;
+    let updatedCols = this.gridColumns.map((col) => {
+      const actions = generateColumnActions(
+        col,
+        this._unfilteredGridData,
+        this.activeHeaderFilters,
+        this.pinnedColumnField
+      );
+      const isFiltered =
+        this.activeHeaderFilters[col.fieldName] &&
+        this.activeHeaderFilters[col.fieldName].size > 0;
+      const isPinned = this.pinnedColumnField === col.fieldName;
+
+      const copy = { ...col, actions };
+      if (isPinned) {
+        copy.iconName = "utility:pinned";
+      } else if (isFiltered) {
+        copy.iconName = "utility:filter";
+      } else if (
+        copy.iconName === "utility:pinned" ||
+        copy.iconName === "utility:filter"
+      ) {
+        delete copy.iconName;
+      }
+      return copy;
+    });
+
+    if (this.pinnedColumnField) {
+      updatedCols = reorderColumnsWithPin(updatedCols, this.pinnedColumnField);
+    }
+    this.gridColumns = updatedCols;
+  }
+
+  handleHeaderAction(event) {
+    const actionName = event.detail.action.name;
+    const colDef = event.detail.columnDefinition;
+    const fieldName = colDef.fieldName;
+
+    if (actionName === "pin_left") {
+      this.pinnedColumnField = fieldName;
+      this.refreshHeaderActions();
+      this.saveCurrentPrefs();
+      return;
+    }
+
+    if (actionName === "unpin_left") {
+      this.pinnedColumnField = null;
+      this.refreshHeaderActions();
+      this.saveCurrentPrefs();
+      return;
+    }
+
+    if (actionName === "more_filters") {
+      this.handleOpenAdvancedFilter();
+      return;
+    }
+
+    if (actionName === "all" || actionName === "clear") {
+      if (this.activeHeaderFilters[fieldName]) {
+        delete this.activeHeaderFilters[fieldName];
+      }
+      this.applyHeaderFilters();
+      this.refreshHeaderActions();
+      this.fetchTotals();
+      return;
+    }
+
+    if (actionName.startsWith("val_")) {
+      const rawVal = decodeURIComponent(actionName.substring(4));
+      if (!this.activeHeaderFilters[fieldName]) {
+        this.activeHeaderFilters[fieldName] = new Set();
+      }
+      const set = this.activeHeaderFilters[fieldName];
+      if (set.has(rawVal)) {
+        set.delete(rawVal);
+        if (set.size === 0) {
+          delete this.activeHeaderFilters[fieldName];
+        }
+      } else {
+        set.add(rawVal);
+      }
+
+      this.applyHeaderFilters();
+      this.refreshHeaderActions();
+      this.fetchTotals();
+    }
   }
 
   handleCloseReadingPane() {
