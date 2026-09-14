@@ -277,8 +277,8 @@ export default class SmartDataGrid extends LightningElement {
       for (let col of this.gridColumns) {
         const colFieldName =
           col.fieldName || col.fieldApiName || col.field || "";
-        // Skip URL-helper fields for filtering
-        if (colFieldName.endsWith("_Url")) continue;
+        // Skip empty or URL-helper fields for filtering
+        if (!colFieldName || colFieldName.endsWith("_Url")) continue;
 
         const fieldDescribe = fields.find(
           (f) => f.fieldApiName.toLowerCase() === colFieldName.toLowerCase()
@@ -1989,8 +1989,14 @@ export default class SmartDataGrid extends LightningElement {
     return JSON.parse(JSON.stringify(result));
   }
 
+  @api
   formatColumn(col) {
+    if (!col) return col;
     const fieldApi = col.fieldApiName || col.field || col.fieldName;
+    if (!fieldApi) {
+      return col;
+    }
+    const lowerField = fieldApi.toLowerCase();
     const label = col.displayLabel || col.label || fieldApi;
     // Formula / computed columns are strictly read-only (AC-11-3)
     const isFormula = Boolean(col.formula || col.expression);
@@ -2000,7 +2006,7 @@ export default class SmartDataGrid extends LightningElement {
     // Always resolve to the real Salesforce type from metadata
     const sfType = (
       this._fieldMetadataMap[fieldApi] ||
-      this._fieldMetadataMap[fieldApi?.toLowerCase()] ||
+      this._fieldMetadataMap[lowerField] ||
       col.sfType ||
       col.type ||
       ""
@@ -2031,7 +2037,7 @@ export default class SmartDataGrid extends LightningElement {
     // Custom picklist type support (c-smart-grid-picklist via c-smart-grid-datatable)
     const isPicklist = sfType === "PICKLIST" || col.type === "picklist";
     const picklistOptions =
-      this._picklistOptionsMap[fieldApi.toLowerCase()] ||
+      this._picklistOptionsMap[lowerField] ||
       (col.typeAttributes && col.typeAttributes.options);
     if (isPicklist && picklistOptions && picklistOptions.length > 0) {
       return {
