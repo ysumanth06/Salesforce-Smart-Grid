@@ -9,13 +9,13 @@ Each step mirrors one tab of the Salesforce Testing Center "New Test" wizard.
 
 ## Step 1: Basic Information
 
-| Input | Source | Fallback |
-|-------|--------|----------|
-| Skill Path | Auto-resolve from `${SKILL_HOOKS}` env var (strip `/hooks` suffix). If unset → hardcoded `~/.claude/skills/sf-ai-agentforce-testing`. | Hardcoded path |
-| Agent Name | User provided or auto-discover via `agent_discovery.py` | AskUserQuestion |
-| Org Alias | User provided or `sfdx-config.json` → `target-org` | AskUserQuestion |
-| Description | ALWAYS ask — used for test generation context | AskUserQuestion |
-| Test Type | User selects: CLI / API / Both | AskUserQuestion |
+| Input       | Source                                                                                                                                | Fallback        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Skill Path  | Auto-resolve from `${SKILL_HOOKS}` env var (strip `/hooks` suffix). If unset → hardcoded `~/.claude/skills/sf-ai-agentforce-testing`. | Hardcoded path  |
+| Agent Name  | User provided or auto-discover via `agent_discovery.py`                                                                               | AskUserQuestion |
+| Org Alias   | User provided or `sfdx-config.json` → `target-org`                                                                                    | AskUserQuestion |
+| Description | ALWAYS ask — used for test generation context                                                                                         | AskUserQuestion |
+| Test Type   | User selects: CLI / API / Both                                                                                                        | AskUserQuestion |
 
 ```
 AskUserQuestion:
@@ -55,17 +55,18 @@ AskUserQuestion:
 ```
 
 **Auto-runs after Step 1:**
+
 - Skill path resolution (`SKILL_HOOKS` env var or hardcoded fallback)
 - Agent metadata retrieval: `python3 {SKILL_PATH}/hooks/scripts/agent_discovery.py live --target-org {org} --agent-name {agent}`
 - Testing Center availability check: `sf agent test list -o {org}`
 
 ## Step 2: Test Conditions
 
-| Input | Source | Fallback |
-|-------|--------|----------|
+| Input             | Source                                                                                | Fallback        |
+| ----------------- | ------------------------------------------------------------------------------------- | --------------- |
 | Context Variables | Extract from agent metadata (`attributeMappings` where `mappingType=ContextVariable`) | AskUserQuestion |
-| Record IDs | User provides or auto-discover from org | AskUserQuestion |
-| Credentials | Auto-discover via `credential_manager.py` (API only) | AskUserQuestion |
+| Record IDs        | User provides or auto-discover from org                                               | AskUserQuestion |
+| Credentials       | Auto-discover via `credential_manager.py` (API only)                                  | AskUserQuestion |
 
 ```
 AskUserQuestion:
@@ -95,12 +96,14 @@ AskUserQuestion:
 Claude generates test cases based on agent metadata, then presents for review.
 
 **Generation inputs:**
+
 - Agent topics + `classificationDescription` from each topic
 - System instructions + guardrails from agent metadata
 - Description from Step 1 (guides test focus)
 - Context variables from Step 2
 
 **Generation rules:**
+
 - ALWAYS include `expectedOutcome` with behavioral description
 - Group by category: auth routing, escalation, guardrail, edge cases, global instructions
 - Include `$Context.` variables on every test case that needs session context
@@ -148,6 +151,7 @@ AskUserQuestion:
 ```
 
 **After confirmation:**
+
 1. Save test plan as `test-plan-{agent_name}.yaml`
 2. Deploy suites via `sf agent test create --spec`
 3. Run suites via `sf agent test run`

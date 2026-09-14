@@ -73,7 +73,7 @@ testCases:
         message: "<agent greeting/prompt asking for the action input>"
     expectedTopic: <topic_name>
     expectedActions:
-      - <action_definition_name>    # Level 1 name from topic.actions block
+      - <action_definition_name> # Level 1 name from topic.actions block
     expectedOutcome: "<expected result, e.g., 'Agent retrieves and displays order details'>"
 
   # ═══════════════════════════════════════════════════════════════════

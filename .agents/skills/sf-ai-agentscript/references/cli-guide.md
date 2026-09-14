@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Agent Script CLI Quick Reference
 
 > Pro-Code Lifecycle: Git, CI/CD, and CLI for Agent Development
@@ -7,23 +8,23 @@
 
 ## The sf agent Commands
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `sf project retrieve start` | Pull agent from org | `sf project retrieve start --metadata Agent:MyAgent --target-org sandbox` |
-| `sf agent validate authoring-bundle` | Check syntax before deploy | `sf agent validate authoring-bundle --api-name MyAgent -o TARGET_ORG` |
-| `sf agent publish authoring-bundle` | Publish agent to org | `sf agent publish authoring-bundle --api-name MyAgent -o TARGET_ORG --json` |
-| `sf agent test run` | Run batch tests | `sf agent test run --api-name MyTestDef --wait 10 -o TARGET_ORG --json` |
-| `sf agent create` | Create agent from spec file | `sf agent create --api-name MyAgent --spec agent-spec.yaml -o TARGET_ORG --json` |
-| `sf agent generate agent-spec` | Generate agent specification | `sf agent generate agent-spec --type customer --role "Service Rep" --output-file agent-spec.yaml` |
-| `sf agent generate authoring-bundle` | Scaffold authoring bundle | `sf agent generate authoring-bundle --no-spec --name "My Agent" -o TARGET_ORG --json` |
-| `sf agent generate template` | Generate agent template (ISV packaging) | `sf agent generate template --agent-file MyAgent.agent --agent-version 1.0 --json` |
-| `sf agent activate` | Activate agent (make live) | `sf agent activate --api-name MyAgent -o TARGET_ORG --json` |
-| `sf agent deactivate` | Deactivate agent (take offline) | `sf agent deactivate --api-name MyAgent -o TARGET_ORG --json` |
-| `sf agent preview start` | Start programmatic preview session | `sf agent preview start --api-name MyAgent -o TARGET_ORG --json` (or `--authoring-bundle`) |
-| `sf agent preview send` | Send utterance to preview session | `sf agent preview send --session-id <id> --utterance "Hello" --json` |
-| `sf agent preview end` | End preview session | `sf agent preview end --session-id <id> --json` |
-| `sf org open agent` | Open Agent Builder in browser | `sf org open agent --api-name MyAgent -o TARGET_ORG` |
-| `sf org open authoring-bundle` | Open Agentforce Studio list view | `sf org open authoring-bundle -o TARGET_ORG` |
+| Command                              | Purpose                                 | Example                                                                                           |
+| ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `sf project retrieve start`          | Pull agent from org                     | `sf project retrieve start --metadata Agent:MyAgent --target-org sandbox`                         |
+| `sf agent validate authoring-bundle` | Check syntax before deploy              | `sf agent validate authoring-bundle --api-name MyAgent -o TARGET_ORG`                             |
+| `sf agent publish authoring-bundle`  | Publish agent to org                    | `sf agent publish authoring-bundle --api-name MyAgent -o TARGET_ORG --json`                       |
+| `sf agent test run`                  | Run batch tests                         | `sf agent test run --api-name MyTestDef --wait 10 -o TARGET_ORG --json`                           |
+| `sf agent create`                    | Create agent from spec file             | `sf agent create --api-name MyAgent --spec agent-spec.yaml -o TARGET_ORG --json`                  |
+| `sf agent generate agent-spec`       | Generate agent specification            | `sf agent generate agent-spec --type customer --role "Service Rep" --output-file agent-spec.yaml` |
+| `sf agent generate authoring-bundle` | Scaffold authoring bundle               | `sf agent generate authoring-bundle --no-spec --name "My Agent" -o TARGET_ORG --json`             |
+| `sf agent generate template`         | Generate agent template (ISV packaging) | `sf agent generate template --agent-file MyAgent.agent --agent-version 1.0 --json`                |
+| `sf agent activate`                  | Activate agent (make live)              | `sf agent activate --api-name MyAgent -o TARGET_ORG --json`                                       |
+| `sf agent deactivate`                | Deactivate agent (take offline)         | `sf agent deactivate --api-name MyAgent -o TARGET_ORG --json`                                     |
+| `sf agent preview start`             | Start programmatic preview session      | `sf agent preview start --api-name MyAgent -o TARGET_ORG --json` (or `--authoring-bundle`)        |
+| `sf agent preview send`              | Send utterance to preview session       | `sf agent preview send --session-id <id> --utterance "Hello" --json`                              |
+| `sf agent preview end`               | End preview session                     | `sf agent preview end --session-id <id> --json`                                                   |
+| `sf org open agent`                  | Open Agent Builder in browser           | `sf org open agent --api-name MyAgent -o TARGET_ORG`                                              |
+| `sf org open authoring-bundle`       | Open Agentforce Studio list view        | `sf org open authoring-bundle -o TARGET_ORG`                                                      |
 
 > ⚠️ **CRITICAL**: Use `sf agent publish authoring-bundle` for Agent Script deployment, NOT `sf project deploy start`. The metadata API deploy will fail with "Required fields are missing: [BundleType]".
 
@@ -43,7 +44,7 @@ force-app/main/default/aiAuthoringBundles/
 ### AgentName.bundle-meta.xml Content
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <AiAuthoringBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <bundleType>AGENT</bundleType>
 </AiAuthoringBundle>
@@ -53,11 +54,11 @@ force-app/main/default/aiAuthoringBundles/
 
 ### Bundle Naming Rules
 
-| Component | Convention | Example |
-|-----------|------------|---------|
-| Folder name | PascalCase or snake_case | `ProntoRefund/` or `Pronto_Refund/` |
-| Agent script | Same as folder + `.agent` | `ProntoRefund.agent` |
-| Metadata XML | Same as folder + `.bundle-meta.xml` | `ProntoRefund.bundle-meta.xml` |
+| Component    | Convention                          | Example                             |
+| ------------ | ----------------------------------- | ----------------------------------- |
+| Folder name  | PascalCase or snake_case            | `ProntoRefund/` or `Pronto_Refund/` |
+| Agent script | Same as folder + `.agent`           | `ProntoRefund.agent`                |
+| Metadata XML | Same as folder + `.bundle-meta.xml` | `ProntoRefund.bundle-meta.xml`      |
 
 ### Deployment Command (NOT sf project deploy!)
 
@@ -140,12 +141,12 @@ sf agent test run --api-name MyTestDef --wait 10 -o TARGET_ORG --json
 
 ### Common Validation Errors
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `Internal Error, try again later` | Invalid `default_agent_user` | Query for Einstein Agent Users |
-| `SyntaxError: You cannot mix spaces and tabs` | Mixed indentation | Use consistent spacing |
-| `Transition to undefined topic "@topic.X"` | Typo in topic name | Check spelling |
-| `Variables cannot be both mutable AND linked` | Conflicting modifiers | Choose one modifier |
+| Error                                         | Cause                        | Fix                            |
+| --------------------------------------------- | ---------------------------- | ------------------------------ |
+| `Internal Error, try again later`             | Invalid `default_agent_user` | Query for Einstein Agent Users |
+| `SyntaxError: You cannot mix spaces and tabs` | Mixed indentation            | Use consistent spacing         |
+| `Transition to undefined topic "@topic.X"`    | Typo in topic name           | Check spelling                 |
+| `Variables cannot be both mutable AND linked` | Conflicting modifiers        | Choose one modifier            |
 
 ---
 
@@ -268,18 +269,18 @@ sf agent preview sessions -o TARGET_ORG --json
 
 ### Preview Modes
 
-| Mode | Flag | Behavior |
-|------|------|----------|
-| **Simulated** (default) | *(none)* | AI simulates/mocks action responses — no real data changes |
-| **Live** | `--use-live-actions` | Executes real actions in the org (Flows, Apex, APIs) |
+| Mode                    | Flag                 | Behavior                                                   |
+| ----------------------- | -------------------- | ---------------------------------------------------------- |
+| **Simulated** (default) | _(none)_             | AI simulates/mocks action responses — no real data changes |
+| **Live**                | `--use-live-actions` | Executes real actions in the org (Flows, Apex, APIs)       |
 
 Additional preview flags:
 
-| Flag | Purpose |
-|------|---------|
-| `--apex-debug` | Enable Apex debug logging during preview session |
-| `--output-dir <path>` | Save conversation transcripts to directory |
-| `--authoring-bundle` | Specify authoring bundle name instead of `--api-name` |
+| Flag                  | Purpose                                               |
+| --------------------- | ----------------------------------------------------- |
+| `--apex-debug`        | Enable Apex debug logging during preview session      |
+| `--output-dir <path>` | Save conversation transcripts to directory            |
+| `--authoring-bundle`  | Specify authoring bundle name instead of `--api-name` |
 
 ```bash
 # Live preview with Apex debug logging and transcript saving
@@ -333,23 +334,23 @@ sf agent generate authoring-bundle --spec agent-spec.yaml --name "My Agent" -o T
 
 ## Generate Agent Spec — Full Flag Reference
 
-| Flag | Values / Type | Description |
-|------|---------------|-------------|
-| `--type` | `customer \| internal` | **Required.** Agent audience type |
-| `--role` | string | **Required.** Agent's role description |
-| `--company-name` | string | Company name for context |
-| `--company-description` | string | Company description for context |
-| `--company-website` | URL | Company website URL for grounding |
-| `--tone` | `formal \| casual \| neutral` | Conversational style |
-| `--enrich-logs` | `true \| false` | Add agent conversation data to event logs |
-| `--max-topics` | number | Maximum topics to generate (default: 5) |
-| `--agent-user` | username | Einstein Agent User to assign |
-| `--output-file` | path | Output path (default: `specs/agentSpec.yaml`) |
-| `--full-interview` | *(flag)* | Prompt for both required AND optional flags |
-| `--spec` | file path | Use existing spec for iterative refinement |
-| `--prompt-template` | API name | Custom prompt template reference |
-| `--grounding-context` | string | Context value for custom prompt template |
-| `--force-overwrite` | *(flag)* | Overwrite existing spec without confirmation |
+| Flag                    | Values / Type                 | Description                                   |
+| ----------------------- | ----------------------------- | --------------------------------------------- |
+| `--type`                | `customer \| internal`        | **Required.** Agent audience type             |
+| `--role`                | string                        | **Required.** Agent's role description        |
+| `--company-name`        | string                        | Company name for context                      |
+| `--company-description` | string                        | Company description for context               |
+| `--company-website`     | URL                           | Company website URL for grounding             |
+| `--tone`                | `formal \| casual \| neutral` | Conversational style                          |
+| `--enrich-logs`         | `true \| false`               | Add agent conversation data to event logs     |
+| `--max-topics`          | number                        | Maximum topics to generate (default: 5)       |
+| `--agent-user`          | username                      | Einstein Agent User to assign                 |
+| `--output-file`         | path                          | Output path (default: `specs/agentSpec.yaml`) |
+| `--full-interview`      | _(flag)_                      | Prompt for both required AND optional flags   |
+| `--spec`                | file path                     | Use existing spec for iterative refinement    |
+| `--prompt-template`     | API name                      | Custom prompt template reference              |
+| `--grounding-context`   | string                        | Context value for custom prompt template      |
+| `--force-overwrite`     | _(flag)_                      | Overwrite existing spec without confirmation  |
 
 ```bash
 # Full example with optional flags
@@ -399,11 +400,11 @@ sf org open agent --api-name MyAgent -o TARGET_ORG --url-only
 └─────────────┘      └─────────────┘      └─────────────┘
 ```
 
-| Phase | Capabilities |
-|-------|--------------|
-| **Draft** | Edit freely, preview, run batch tests |
-| **Commit** | Script frozen, version assigned, bundle compiled |
-| **Activate** | Assign to Connections, go live, monitor |
+| Phase        | Capabilities                                     |
+| ------------ | ------------------------------------------------ |
+| **Draft**    | Edit freely, preview, run batch tests            |
+| **Commit**   | Script frozen, version assigned, bundle compiled |
+| **Activate** | Assign to Connections, go live, monitor          |
 
 > **Key Insight**: Commit doesn't deploy - it freezes. Activate makes it live.
 
@@ -413,11 +414,11 @@ sf org open agent --api-name MyAgent -o TARGET_ORG --url-only
 
 Agent versions share the same `agentId` (the `BotDefinition` / `Agent` record) but have **distinct version IDs**.
 
-| Concept | Description |
-|---------|-------------|
-| `agentId` / `BotDefinition.Id` | Unique per agent — does NOT change between versions |
-| `versionId` / `BotVersion.Id` | Unique per version — changes with each commit |
-| Default API behavior | API calls target the **active** version unless a specific `versionId` is provided |
+| Concept                        | Description                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `agentId` / `BotDefinition.Id` | Unique per agent — does NOT change between versions                               |
+| `versionId` / `BotVersion.Id`  | Unique per version — changes with each commit                                     |
+| Default API behavior           | API calls target the **active** version unless a specific `versionId` is provided |
 
 ```bash
 # The Agent Runtime API defaults to the active version:

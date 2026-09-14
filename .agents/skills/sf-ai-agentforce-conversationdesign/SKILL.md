@@ -26,12 +26,14 @@ Conversation design is the discipline of crafting agent interactions that feel n
 ## ⚡ Quick Start
 
 **New agent?** Start here:
+
 1. Design your persona → [Persona Design Guide](references/persona-design-guide.md)
 2. Architect your topics → [Topic Architecture Guide](references/topic-architecture-guide.md)
 3. Write instructions → [Instruction Writing Guide](references/instruction-writing-guide.md)
 4. Score your design → [Quality Scorecard](assets/quality-scorecard.md)
 
 **Existing agent needs improvement?** Start here:
+
 1. Run the [Quality Scorecard](assets/quality-scorecard.md) assessment
 2. Review [Anti-Patterns](references/anti-patterns.md) for quick wins
 3. Build an [Improvement Plan](assets/improvement-plan.md)
@@ -41,47 +43,52 @@ Conversation design is the discipline of crafting agent interactions that feel n
 ## 📚 Document Map
 
 ### Tier 1 — Start Here
-| Document | Purpose |
-|----------|---------|
+
+| Document                 | Purpose                                               |
+| ------------------------ | ----------------------------------------------------- |
 | **This file (SKILL.md)** | Scoring rubric, methodology overview, core principles |
-| [README.md](README.md) | Quick start, prerequisites, getting started |
+| [README.md](README.md)   | Quick start, prerequisites, getting started           |
 
 ### Tier 1.5 — Reference Guides (Extracted)
-| Document | Purpose |
-|----------|---------|
-| [Scoring Rubric](references/scoring-rubric.md) | Full 8-category detailed criteria tables |
-| [Quality Assessment](references/quality-assessment.md) | Assessment process + quick health check |
+
+| Document                                                       | Purpose                                   |
+| -------------------------------------------------------------- | ----------------------------------------- |
+| [Scoring Rubric](references/scoring-rubric.md)                 | Full 8-category detailed criteria tables  |
+| [Quality Assessment](references/quality-assessment.md)         | Assessment process + quick health check   |
 | [Continuous Improvement](references/continuous-improvement.md) | Iteration cycle, KPIs, utterance analysis |
 
 ### Tier 2 — Design Guides
-| Document | Purpose |
-|----------|---------|
-| [Persona Design Guide](references/persona-design-guide.md) | How to define agent personality, tone, and communication style |
-| [Topic Architecture Guide](references/topic-architecture-guide.md) | Bottom-up topic design, classification descriptions, scope boundaries |
-| [Instruction Writing Guide](references/instruction-writing-guide.md) | Three-level instruction framework with do's, don'ts, and examples |
+
+| Document                                                             | Purpose                                                               |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [Persona Design Guide](references/persona-design-guide.md)           | How to define agent personality, tone, and communication style        |
+| [Topic Architecture Guide](references/topic-architecture-guide.md)   | Bottom-up topic design, classification descriptions, scope boundaries |
+| [Instruction Writing Guide](references/instruction-writing-guide.md) | Three-level instruction framework with do's, don'ts, and examples     |
 
 ### Tier 3 — Reference Resources
-| Document | Purpose |
-|----------|---------|
-| [Conversation Patterns](references/conversation-patterns.md) | IBM's 5 patterns mapped to Agentforce implementation |
-| [Industry Frameworks](references/industry-frameworks.md) | Google, IBM, PatternFly, Salesforce framework mappings |
-| [Anti-Patterns](references/anti-patterns.md) | Common mistakes with examples and fixes |
-| [Guardrail Hierarchy](references/guardrail-hierarchy.md) | Four-layer guardrail model for safety |
-| [Escalation Patterns](references/escalation-patterns.md) | Trigger catalog and Omni-Channel routing |
-| [Quality Metrics](references/quality-metrics.md) | KPI definitions, benchmarks, measurement methods |
+
+| Document                                                     | Purpose                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------ |
+| [Conversation Patterns](references/conversation-patterns.md) | IBM's 5 patterns mapped to Agentforce implementation   |
+| [Industry Frameworks](references/industry-frameworks.md)     | Google, IBM, PatternFly, Salesforce framework mappings |
+| [Anti-Patterns](references/anti-patterns.md)                 | Common mistakes with examples and fixes                |
+| [Guardrail Hierarchy](references/guardrail-hierarchy.md)     | Four-layer guardrail model for safety                  |
+| [Escalation Patterns](references/escalation-patterns.md)     | Trigger catalog and Omni-Channel routing               |
+| [Quality Metrics](references/quality-metrics.md)             | KPI definitions, benchmarks, measurement methods       |
 
 ### Tier 4 — Templates & Examples
-| Document | Purpose |
-|----------|---------|
-| [Persona Document](assets/persona-document.md) | Fill-in persona template |
-| [Topic Architecture](assets/topic-architecture.md) | Topic mapping worksheet |
-| [Utterance Library](assets/utterance-library.csv) | Structured utterance collection template |
-| [Escalation Matrix](assets/escalation-matrix.md) | Escalation decision matrix |
-| [Quality Scorecard](assets/quality-scorecard.md) | 120-point assessment template |
-| [Improvement Plan](assets/improvement-plan.md) | Prioritized improvement template |
-| [Service Agent Persona](references/service-agent-persona.md) | Example: SaaS customer service persona |
-| [Retail Topic Architecture](references/retail-topic-architecture.md) | Example: retail agent topic hierarchy |
-| [Healthcare Escalation](references/healthcare-escalation.md) | Example: healthcare escalation matrix |
+
+| Document                                                             | Purpose                                  |
+| -------------------------------------------------------------------- | ---------------------------------------- |
+| [Persona Document](assets/persona-document.md)                       | Fill-in persona template                 |
+| [Topic Architecture](assets/topic-architecture.md)                   | Topic mapping worksheet                  |
+| [Utterance Library](assets/utterance-library.csv)                    | Structured utterance collection template |
+| [Escalation Matrix](assets/escalation-matrix.md)                     | Escalation decision matrix               |
+| [Quality Scorecard](assets/quality-scorecard.md)                     | 120-point assessment template            |
+| [Improvement Plan](assets/improvement-plan.md)                       | Prioritized improvement template         |
+| [Service Agent Persona](references/service-agent-persona.md)         | Example: SaaS customer service persona   |
+| [Retail Topic Architecture](references/retail-topic-architecture.md) | Example: retail agent topic hierarchy    |
+| [Healthcare Escalation](references/healthcare-escalation.md)         | Example: healthcare escalation matrix    |
 
 ---
 
@@ -91,27 +98,27 @@ Conversation design is the discipline of crafting agent interactions that feel n
 
 ### Category Summary
 
-| # | Category | Points | Weight |
-|---|----------|--------|--------|
-| 1 | Persona & Tone | 15 | 12.5% |
-| 2 | Topic Architecture | 20 | 16.7% |
-| 3 | Instruction Quality | 20 | 16.7% |
-| 4 | Dialog Flow Design | 15 | 12.5% |
-| 5 | Utterance Coverage | 15 | 12.5% |
-| 6 | Escalation Design | 15 | 12.5% |
-| 7 | Guardrails & Safety | 10 | 8.3% |
-| 8 | Continuous Improvement | 10 | 8.3% |
-| | **TOTAL** | **120** | **100%** |
+| #   | Category               | Points  | Weight   |
+| --- | ---------------------- | ------- | -------- |
+| 1   | Persona & Tone         | 15      | 12.5%    |
+| 2   | Topic Architecture     | 20      | 16.7%    |
+| 3   | Instruction Quality    | 20      | 16.7%    |
+| 4   | Dialog Flow Design     | 15      | 12.5%    |
+| 5   | Utterance Coverage     | 15      | 12.5%    |
+| 6   | Escalation Design      | 15      | 12.5%    |
+| 7   | Guardrails & Safety    | 10      | 8.3%     |
+| 8   | Continuous Improvement | 10      | 8.3%     |
+|     | **TOTAL**              | **120** | **100%** |
 
 ### Grade Scale
 
-| Grade | Score Range | Description |
-|-------|------------|-------------|
-| **A** | 108-120 | Production-ready, exceptional design |
-| **B** | 96-107 | Good design, minor gaps |
-| **C** | 84-95 | Adequate, needs targeted improvements |
-| **D** | 72-83 | Significant gaps, not production-ready |
-| **F** | <72 | Major redesign required |
+| Grade | Score Range | Description                            |
+| ----- | ----------- | -------------------------------------- |
+| **A** | 108-120     | Production-ready, exceptional design   |
+| **B** | 96-107      | Good design, minor gaps                |
+| **C** | 84-95       | Adequate, needs targeted improvements  |
+| **D** | 72-83       | Significant gaps, not production-ready |
+| **F** | <72         | Major redesign required                |
 
 ---
 
@@ -148,12 +155,12 @@ Topics group related actions under classification descriptions for routing. Use 
 
 ### Architecture Rules
 
-| Rule | Guideline | Rationale |
-|------|-----------|-----------|
-| Topic count | <=10 per agent | More topics = more classification ambiguity |
-| Actions per topic | <=5 per topic | Keeps topics focused and testable |
-| Classification overlap | <30% shared vocabulary | Prevents misrouting between similar topics |
-| Scope boundaries | Explicit out-of-scope list | Prevents hallucination on unknown intents |
+| Rule                   | Guideline                  | Rationale                                   |
+| ---------------------- | -------------------------- | ------------------------------------------- |
+| Topic count            | <=10 per agent             | More topics = more classification ambiguity |
+| Actions per topic      | <=5 per topic              | Keeps topics focused and testable           |
+| Classification overlap | <30% shared vocabulary     | Prevents misrouting between similar topics  |
+| Scope boundaries       | Explicit out-of-scope list | Prevents hallucination on unknown intents   |
 
 ### Classification Descriptions
 
@@ -193,6 +200,7 @@ Instructions operate at three levels: **Agent-level** (persona, global rules, 20
 Every conversation follows a **six-phase lifecycle**: Greeting → Classification → Gathering → Processing → Response → Close.
 
 **Key design rules:**
+
 - **Progressive disclosure**: Max 2-3 choices per turn. If more options exist, ask a qualifying question first.
 - **Context preservation**: Reference prior turns, avoid re-asking for information already provided.
 - **Error recovery**: Define clarification prompts, disambiguation paths, and graceful fallbacks for every phase.
@@ -206,13 +214,13 @@ Utterances are test cases for your topic architecture — they validate that cla
 
 ### Categories & Targets
 
-| Category | Purpose | Target per Topic |
-|----------|---------|-----------------|
-| **Happy Path** | Primary intent, clear phrasing | >=5 |
-| **Synonym** | Alternate vocabulary | >=3 |
-| **Edge Case** | Ambiguous, multi-intent | >=2 |
-| **Adversarial** | Injection, manipulation (global) | >=5 |
-| **Out-of-Scope** | Should NOT match (global) | >=5 |
+| Category         | Purpose                          | Target per Topic |
+| ---------------- | -------------------------------- | ---------------- |
+| **Happy Path**   | Primary intent, clear phrasing   | >=5              |
+| **Synonym**      | Alternate vocabulary             | >=3              |
+| **Edge Case**    | Ambiguous, multi-intent          | >=2              |
+| **Adversarial**  | Injection, manipulation (global) | >=5              |
+| **Out-of-Scope** | Should NOT match (global)        | >=5              |
 
 **Process:** Start with real data (CRM cases, chat logs) → brainstorm synonyms → add edge cases → include adversarial → test in Testing Center → iterate on failures.
 
@@ -226,14 +234,14 @@ Escalation is not failure — it's a safety net ensuring customers always reach 
 
 ### Trigger Catalog
 
-| Trigger Type | Condition | Priority |
-|-------------|-----------|----------|
-| **Explicit** | Customer requests human agent | P1 |
-| **Safety** | Self-harm, threats, emergency, legal | P1 |
-| **Sentiment** | Customer frustration or anger | P2 |
-| **Complexity** | >6 turns without resolution | P2 |
-| **Policy** | Request exceeds agent authority | P2 |
-| **Technical** | Action failure, system error | P3 |
+| Trigger Type   | Condition                            | Priority |
+| -------------- | ------------------------------------ | -------- |
+| **Explicit**   | Customer requests human agent        | P1       |
+| **Safety**     | Self-harm, threats, emergency, legal | P1       |
+| **Sentiment**  | Customer frustration or anger        | P2       |
+| **Complexity** | >6 turns without resolution          | P2       |
+| **Policy**     | Request exceeds agent authority      | P2       |
+| **Technical**  | Action failure, system error         | P3       |
 
 When escalating, pass: conversation transcript, customer identity, issue summary, actions taken, and escalation reason. Agentforce provides a pre-built Escalation Topic that routes via Omni-Channel.
 
@@ -261,18 +269,18 @@ Safety operates through four layers: **Einstein Trust Layer** (platform — toxi
 
 ## ⚠️ Anti-Patterns
 
-| # | Anti-Pattern | Impact | Fix |
-|---|-------------|--------|-----|
-| 1 | **Negative instructions** | Confuses LLM reasoning | Reframe positively |
-| 2 | **Over-constraining** | Rigid, brittle responses | Use guiding principles |
-| 3 | **Business rules in instructions** | Inconsistent enforcement | Move to Flow/Apex |
-| 4 | **Monolithic topics** | Poor classification accuracy | Split into focused topics |
-| 5 | **Overlapping classifications** | Misrouting | Make descriptions distinct |
-| 6 | **Missing escalation paths** | Dead-end conversations | Define triggers for all failure modes |
-| 7 | **No utterance testing** | Untested classification | Build utterance library |
-| 8 | **Hard-coded policies** | Stale information | Use Knowledge actions |
-| 9 | **Ignoring context** | Repetitive re-asking | Leverage conversation state |
-| 10 | **Happy-path-only testing** | Fragile in production | Test edge cases and adversarial |
+| #   | Anti-Pattern                       | Impact                       | Fix                                   |
+| --- | ---------------------------------- | ---------------------------- | ------------------------------------- |
+| 1   | **Negative instructions**          | Confuses LLM reasoning       | Reframe positively                    |
+| 2   | **Over-constraining**              | Rigid, brittle responses     | Use guiding principles                |
+| 3   | **Business rules in instructions** | Inconsistent enforcement     | Move to Flow/Apex                     |
+| 4   | **Monolithic topics**              | Poor classification accuracy | Split into focused topics             |
+| 5   | **Overlapping classifications**    | Misrouting                   | Make descriptions distinct            |
+| 6   | **Missing escalation paths**       | Dead-end conversations       | Define triggers for all failure modes |
+| 7   | **No utterance testing**           | Untested classification      | Build utterance library               |
+| 8   | **Hard-coded policies**            | Stale information            | Use Knowledge actions                 |
+| 9   | **Ignoring context**               | Repetitive re-asking         | Leverage conversation state           |
+| 10  | **Happy-path-only testing**        | Fragile in production        | Test edge cases and adversarial       |
 
 > **Deep Dive:** [Anti-Patterns](references/anti-patterns.md) — Full examples with before/after fixes.
 
@@ -282,13 +290,13 @@ Safety operates through four layers: **Einstein Trust Layer** (platform — toxi
 
 This skill is the **first step** in the Agentforce development chain:
 
-| From This Skill | To Skill | What's Handed Off |
-|-----------------|----------|-------------------|
-| Topic architecture | sf-ai-agentscript | Topic names, actions, classification descriptions |
-| Instruction sets | sf-ai-agentscript | Three-level instructions for agent script |
-| Utterance library | sf-ai-agentforce-testing | Test cases for multi-turn testing |
-| Escalation matrix | sf-flow | Escalation flow logic |
-| Action definitions | sf-apex / sf-flow | Action implementation requirements |
+| From This Skill    | To Skill                 | What's Handed Off                                 |
+| ------------------ | ------------------------ | ------------------------------------------------- |
+| Topic architecture | sf-ai-agentscript        | Topic names, actions, classification descriptions |
+| Instruction sets   | sf-ai-agentscript        | Three-level instructions for agent script         |
+| Utterance library  | sf-ai-agentforce-testing | Test cases for multi-turn testing                 |
+| Escalation matrix  | sf-flow                  | Escalation flow logic                             |
+| Action definitions | sf-apex / sf-flow        | Action implementation requirements                |
 
 ---
 

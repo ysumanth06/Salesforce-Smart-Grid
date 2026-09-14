@@ -38,19 +38,20 @@ Provide an existing persona.md to generate Agent Builder field values, platform 
 ## Output
 
 Three Markdown files:
+
 - **Persona document** (`_local/generated/[agent-name]-persona.md`) — design artifact defining who the agent is, how it sounds, what it never does, with sample dialog
 - **Scorecard** (`_local/generated/[agent-name]-persona-scorecard.md`) — 50-point rubric evaluation (on request)
 - **Encoding output** (`_local/generated/[agent-name]-persona-encoding.md`) — Agent Builder field values, platform settings, and reusable instruction blocks (via Encode flow)
 
 ## Files
 
-| File | Purpose |
-|---|---|
-| `SKILL.md` | Skill definition — Design flow + Encode flow + scoring rubric |
-| `references/persona-framework.md` | Identity + 5 categories, 12 attributes + persona archetype presets |
-| `references/persona-encoding-guide.md` | How to encode persona into Agentforce Agent Builder |
-| `assets/persona-template.md` | Persona document output template |
-| `assets/persona-encoding-template.md` | Agent Builder encoding output template |
+| File                                   | Purpose                                                            |
+| -------------------------------------- | ------------------------------------------------------------------ |
+| `SKILL.md`                             | Skill definition — Design flow + Encode flow + scoring rubric      |
+| `references/persona-framework.md`      | Identity + 5 categories, 12 attributes + persona archetype presets |
+| `references/persona-encoding-guide.md` | How to encode persona into Agentforce Agent Builder                |
+| `assets/persona-template.md`           | Persona document output template                                   |
+| `assets/persona-encoding-template.md`  | Agent Builder encoding output template                             |
 
 ## Process Overview
 
@@ -110,7 +111,7 @@ flowchart TD
 - **Tone** (2 attributes)
   - **Emotional Coloring** — Blunt / Clinical / Neutral / Encouraging / Enthusiastic
   - **Empathy Level** — Minimal / Understated / Moderate / High
-  - *+ Tone Boundaries, Tone Flex*
+  - _+ Tone Boundaries, Tone Flex_
 - **Delivery** (2 attributes)
   - **Brevity** — Terse / Concise / Moderate / Expansive
   - **Humor** — None / Dry / Warm / Playful
@@ -122,11 +123,11 @@ flowchart TD
 
 **Persona archetype presets** provide 6 starting points that pre-populate all 12 attributes:
 
-| Use Case | Conservative | Outlandish |
-|---|---|---|
-| Internal Sales Coach | The Steady Hand | Drover |
-| External Customer Service | The Concierge | Y.T. |
-| Lead Generation | The Qualifier | Bluebonnet |
+| Use Case                  | Conservative    | Outlandish |
+| ------------------------- | --------------- | ---------- |
+| Internal Sales Coach      | The Steady Hand | Drover     |
+| External Customer Service | The Concierge   | Y.T.       |
+| Lead Generation           | The Qualifier   | Bluebonnet |
 
 Attributes are ordered by dependency — upstream choices constrain downstream ones. The persona document also includes a **Phrase Book**, **Never-Say List**, **Tone Flex** rules, and optional **Lexicon** for per-topic vocabulary.
 

@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Analysis Cookbook
 
 Common analysis patterns using Polars for session tracing data.

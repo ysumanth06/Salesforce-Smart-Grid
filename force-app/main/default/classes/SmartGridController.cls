@@ -384,6 +384,7 @@ public with sharing class SmartGridController {
    * @return SaveResult containing overall success status, row-level errors, and table-level errors
    */
   @AuraEnabled
+  @SuppressWarnings('PMD.ApexCRUDViolation, sfge:ApexFlsViolation')
   public static SaveResult saveRecords(List<SObject> records) {
     SaveResult result = new SaveResult();
     if (records == null || records.isEmpty()) {
@@ -430,7 +431,11 @@ public with sharing class SmartGridController {
     result.isSuccess = true;
 
     if (!inserts.isEmpty()) {
-      Database.SaveResult[] insertResults = Database.insert(inserts, false);
+      Database.SaveResult[] insertResults = Database.insert(
+        inserts,
+        false,
+        AccessLevel.USER_MODE
+      );
       for (Integer i = 0; i < insertResults.size(); i++) {
         Database.SaveResult sr = insertResults[i];
         if (!sr.isSuccess()) {
@@ -457,7 +462,11 @@ public with sharing class SmartGridController {
     }
 
     if (!updates.isEmpty()) {
-      Database.SaveResult[] updateResults = Database.update(updates, false);
+      Database.SaveResult[] updateResults = Database.update(
+        updates,
+        false,
+        AccessLevel.USER_MODE
+      );
       for (Integer i = 0; i < updateResults.size(); i++) {
         Database.SaveResult sr = updateResults[i];
         if (!sr.isSuccess()) {

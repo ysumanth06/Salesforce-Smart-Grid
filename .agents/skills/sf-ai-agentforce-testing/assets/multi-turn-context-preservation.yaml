@@ -117,5 +117,5 @@ evaluation:
   fail_categories:
     - CONTEXT_PRESERVATION_FAILURE
   scoring:
-    weight: 15  # Out of 100 total points
+    weight: 15 # Out of 100 total points
     per_scenario: true

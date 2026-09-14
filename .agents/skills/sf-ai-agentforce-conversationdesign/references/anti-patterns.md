@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Anti-Patterns in Agentforce Conversation Design
 
 This guide catalogs common mistakes in conversation design with concrete examples and solutions. Learn from these anti-patterns to build better Agentforce agents.
@@ -12,6 +13,7 @@ This guide catalogs common mistakes in conversation design with concrete example
 **The Problem:** Using "must", "always", "never" in instructions creates brittle behavior that fails in edge cases.
 
 #### ❌ BAD: Absolute Constraint
+
 ```yaml
 Topic: Order Status
 Instructions: |
@@ -20,11 +22,13 @@ Instructions: |
 ```
 
 **Why It's Bad:**
+
 - Customer might say "What's the status of my order #12345?" — already provided order number
 - Agent will re-ask unnecessarily, frustrating user
 - LLM interprets "must" and "never" rigidly, ignoring context
 
 #### ✅ GOOD: Context-Aware Guidance
+
 ```yaml
 Topic: Order Status
 Instructions: |
@@ -37,6 +41,7 @@ Instructions: |
 ```
 
 **Fix Applied:**
+
 - Uses "you need" (requirement) without "must" (rigid command)
 - Explicitly handles case where info is already provided
 - Trusts LLM to track conversational context
@@ -48,6 +53,7 @@ Instructions: |
 **The Problem:** Telling the agent what NOT to do is less effective than telling it what TO do.
 
 #### ❌ BAD: Negative Instructions
+
 ```yaml
 Agent-Level Instructions: |
   Don't ask for the customer's credit card number.
@@ -57,11 +63,13 @@ Agent-Level Instructions: |
 ```
 
 **Why It's Bad:**
+
 - LLMs are better at following positive instructions than avoiding negatives
 - Doesn't provide alternative behavior (what SHOULD the agent do?)
 - Creates ambiguity ("if I don't ask for credit card, how do I verify payment?")
 
 #### ✅ GOOD: Positive Instructions
+
 ```yaml
 Agent-Level Instructions: |
   To verify payment information, guide the customer to their account settings
@@ -82,6 +90,7 @@ Agent-Level Instructions: |
 ```
 
 **Fix Applied:**
+
 - Each "don't" is replaced with a "do" (what to do instead)
 - Provides specific alternatives and phrasing
 - Actionable instructions that guide behavior
@@ -93,6 +102,7 @@ Agent-Level Instructions: |
 **The Problem:** Encoding complex business logic (calculations, validations, conditional rules) in natural language instructions instead of Flow/Apex.
 
 #### ❌ BAD: Business Logic in Instructions
+
 ```yaml
 Topic: Refund Request
 Instructions: |
@@ -108,12 +118,14 @@ Instructions: |
 ```
 
 **Why It's Bad:**
+
 - LLMs can misinterpret complex conditionals
 - Business rules change over time — updating instructions is error-prone
 - No guarantee of accurate calculations
 - Can't enforce hard constraints (e.g., prevent refund if ineligible)
 
 #### ✅ GOOD: Flow for Business Rules
+
 ```yaml
 Topic: Refund Request
 Instructions: |
@@ -152,6 +164,7 @@ Logic:
 ```
 
 **Fix Applied:**
+
 - Deterministic logic in Flow (accurate, testable, maintainable)
 - Instructions focus on WHEN to call the action and HOW to interpret results
 - Clear separation: LLM handles conversation, Flow handles rules
@@ -163,6 +176,7 @@ Logic:
 **The Problem:** Asking the LLM to validate email addresses, phone numbers, or other formats.
 
 #### ❌ BAD: LLM Format Validation
+
 ```yaml
 Topic: Update Contact Info
 Instructions: |
@@ -175,11 +189,13 @@ Instructions: |
 ```
 
 **Why It's Bad:**
+
 - LLMs are unreliable at pattern matching (they may accept invalid formats)
 - Users provide formats in many valid ways: "+1-555-123-4567", "555.123.4567"
 - Wastes tokens on a task better suited for regex
 
 #### ✅ GOOD: Flow/Apex Validation
+
 ```yaml
 Topic: Update Contact Info
 Instructions: |
@@ -228,6 +244,7 @@ public static List<Result> validateAndUpdate(List<Request> requests) {
 ```
 
 **Fix Applied:**
+
 - Deterministic regex validation in Apex
 - Agent instructions focus on conversation flow, not validation logic
 - Normalization (removing dashes, parentheses) handled in code
@@ -241,6 +258,7 @@ public static List<Result> validateAndUpdate(List<Request> requests) {
 **The Problem:** Cramming too many actions into a single topic.
 
 #### ❌ BAD: One Topic for Everything
+
 ```yaml
 Topic: Customer Service
 Classification Description: |
@@ -266,12 +284,14 @@ Actions (20+ actions):
 ```
 
 **Why It's Bad:**
+
 - Topic classification becomes too broad (everything matches)
 - LLM struggles to choose the right action from 20+ options
 - Maintenance nightmare (changes to one action risk affecting others)
 - Can't optimize instructions for specific workflows
 
 #### ✅ GOOD: Focused Topics
+
 ```yaml
 Topic: Order Management
 Classification Description: |
@@ -320,6 +340,7 @@ Actions (4 actions):
 ```
 
 **Fix Applied:**
+
 - 20 actions → 3 topics with 4-5 actions each
 - Each topic has clear scope and focused classification description
 - Instructions can be topic-specific (e.g., Returns requires empathy, Order Management requires urgency)
@@ -333,6 +354,7 @@ Actions (4 actions):
 **The Problem:** Two topics have similar classification descriptions, causing misrouting.
 
 #### ❌ BAD: Ambiguous Overlap
+
 ```yaml
 Topic A: Technical Support
 Classification Description: |
@@ -346,6 +368,7 @@ Classification Description: |
 ```
 
 **Overlap Example:**
+
 ```
 User: "The app isn't syncing my data."
 
@@ -353,11 +376,13 @@ Is this Topic A (problem = technical support) or Topic B (how to use sync = prod
 ```
 
 **Why It's Bad:**
+
 - Ambiguity causes misclassification
 - User gets routed to wrong topic, needs re-routing (bad UX)
 - Similar keywords in both descriptions confuse the classifier
 
 #### ✅ GOOD: Clear Boundaries
+
 ```yaml
 Topic A: Technical Support
 Classification Description: |
@@ -377,6 +402,7 @@ Scope: Teaching expected functionality, not troubleshooting errors.
 ```
 
 **Disambiguation:**
+
 ```
 User: "The app isn't syncing my data."
 
@@ -390,6 +416,7 @@ Topic B matches ("How do I" = learning task → Feature Education)
 ```
 
 **Fix Applied:**
+
 - Topic A = things that SHOULD work but DON'T (errors, bugs)
 - Topic B = things that DO work, user needs to learn HOW (education)
 - Clear keyword distinctions: "error", "crash", "broken" vs. "how do I", "where is", "show me"
@@ -401,6 +428,7 @@ Topic B matches ("How do I" = learning task → Feature Education)
 **The Problem:** No clear path to human agent when AI can't resolve the issue.
 
 #### ❌ BAD: Dead-End Conversation
+
 ```
 User: I've tried resetting my password 3 times and it's still not working.
 
@@ -414,11 +442,13 @@ User: [gives up and leaves]
 ```
 
 **Why It's Bad:**
+
 - Agent stuck in loop, repeating same solution
 - No recognition of repeated failure
 - User frustration increases, no human fallback
 
 #### ✅ GOOD: Escalation After N Failures
+
 ```yaml
 Topic: Password Reset
 Instructions: |
@@ -434,6 +464,7 @@ Instructions: |
 ```
 
 **Example Conversation:**
+
 ```
 User: I've tried resetting my password 3 times and it's still not working.
 
@@ -447,6 +478,7 @@ Agent: I'm sorry the reset links haven't worked. This sounds like it might be
 ```
 
 **Fix Applied:**
+
 - Instructions explicitly define failure condition (2 attempts)
 - Escalation is automatic after threshold
 - Agent acknowledges frustration and sets expectation
@@ -460,6 +492,7 @@ Agent: I'm sorry the reset links haven't worked. This sounds like it might be
 **The Problem:** Not referencing information the user provided in earlier turns.
 
 #### ❌ BAD: Redundant Questions
+
 ```
 User: I need to return my order. The order number is 12345678 and my email is
       john@example.com.
@@ -474,11 +507,13 @@ User: [frustrated] john@example.com, I already said that!
 ```
 
 **Why It's Bad:**
+
 - User explicitly provided both pieces of info in first message
 - Agent re-asks both, wasting time and frustrating user
 - Makes agent seem "dumb" and non-conversational
 
 #### ✅ GOOD: Context-Aware Response
+
 ```yaml
 Topic: Returns
 Instructions: |
@@ -491,6 +526,7 @@ Instructions: |
 ```
 
 **Example Conversation:**
+
 ```
 User: I need to return my order. The order number is 12345678 and my email is
       john@example.com.
@@ -505,6 +541,7 @@ Agent: Got it! I have your order number (12345678) and email (john@example.com).
 ```
 
 **Fix Applied:**
+
 - Instructions remind agent to check conversation history
 - Agent acknowledges received info (builds trust)
 - Only asks for missing information
@@ -516,6 +553,7 @@ Agent: Got it! I have your order number (12345678) and email (john@example.com).
 **The Problem:** Writing specific answers in instructions instead of retrieving from Knowledge articles.
 
 #### ❌ BAD: Hard-Coded Answer
+
 ```yaml
 Topic: Shipping FAQs
 Instructions: |
@@ -526,12 +564,14 @@ Instructions: |
 ```
 
 **Why It's Bad:**
+
 - Shipping costs change → instructions become stale
 - Can't update easily (need to edit agent, redeploy)
 - No version control or approval workflow for content changes
 - Doesn't scale (what about 100+ countries?)
 
 #### ✅ GOOD: Knowledge Article Retrieval
+
 ```yaml
 Topic: Shipping FAQs
 Instructions: |
@@ -551,6 +591,7 @@ Filters: ArticleType = 'Shipping_Policy'
 ```
 
 **Example Knowledge Article:**
+
 ```
 Title: International Shipping Costs (KB-00482)
 Content:
@@ -561,6 +602,7 @@ Content:
 ```
 
 **Example Conversation:**
+
 ```
 User: How much is shipping to Canada?
 
@@ -572,6 +614,7 @@ Agent: Shipping to Canada is $15 and takes 5-7 business days.
 ```
 
 **Fix Applied:**
+
 - Content lives in Knowledge (managed by non-technical teams)
 - Easy to update (edit article, no agent redeployment)
 - Agent focuses on retrieval and summarization, not content storage
@@ -585,6 +628,7 @@ Agent: Shipping to Canada is $15 and takes 5-7 business days.
 **The Problem:** Only testing successful scenarios, ignoring edge cases and failures.
 
 #### ❌ BAD: Happy-Path-Only Test Cases
+
 ```yaml
 Test Case 1: Successful password reset
   User: "I forgot my password"
@@ -598,11 +642,13 @@ Test Case 3: Successful return
 ```
 
 **Why It's Bad:**
+
 - Doesn't test error handling (API failures, invalid inputs, out-of-scope requests)
 - Doesn't test edge cases (order number not found, reset link expired, ineligible return)
 - Real users will encounter these scenarios — agent will fail in production
 
 #### ✅ GOOD: Comprehensive Test Coverage
+
 ```yaml
 # Happy Path
 Test Case 1: Successful password reset
@@ -637,6 +683,7 @@ Test Case 6: SQL injection attempt
 ```
 
 **Fix Applied:**
+
 - 80/20 rule: 20% happy path, 80% edge cases/errors
 - Test error recovery (expired links, API failures)
 - Test topic switching and out-of-scope handling
@@ -651,6 +698,7 @@ Test Case 6: SQL injection attempt
 **The Problem:** Using formal, impersonal language that sounds like a legal document.
 
 #### ❌ BAD: Corporate Jargon
+
 ```
 Agent: Your inquiry has been received and is currently being processed by our
        fulfillment system. Please be advised that order modifications are subject
@@ -659,11 +707,13 @@ Agent: Your inquiry has been received and is currently being processed by our
 ```
 
 **Why It's Bad:**
+
 - Sounds like a robot, not a conversation
 - Uses jargon ("facilitate", "be advised", "fulfillment system")
 - No personality or warmth
 
 #### ✅ GOOD: Conversational Tone
+
 ```yaml
 Agent-Level Instructions (Tone: Casual):
   Use everyday language. Write like you're texting a friend, but professional.
@@ -678,6 +728,7 @@ Agent: Got it! I'm checking if we can still modify your order...
 ```
 
 **Fix Applied:**
+
 - Contractions (I'm, hasn't)
 - Short sentences
 - Active voice ("I'm checking" not "Your inquiry is being processed")
@@ -690,6 +741,7 @@ Agent: Got it! I'm checking if we can still modify your order...
 **The Problem:** Apologizing excessively, making the agent sound insincere or weak.
 
 #### ❌ BAD: Excessive Apologies
+
 ```
 User: My order is late.
 
@@ -700,11 +752,13 @@ Agent: I'm so sorry to hear that your order is late. I sincerely apologize for
 ```
 
 **Why It's Bad:**
+
 - 5 apologies in one message (overkill)
 - Sounds insincere and robotic
 - Wastes time — user wants action, not apologies
 
 #### ✅ GOOD: One Apology + Action
+
 ```yaml
 Agent-Level Instructions:
   When something goes wrong, apologize once, then focus on the solution:
@@ -727,6 +781,7 @@ Agent: I'm sorry your order is delayed. Let me check the status and see what's
 ```
 
 **Fix Applied:**
+
 - One apology at the start
 - Focus shifts immediately to action (checking status)
 - Provides explanation and compensation (solution-oriented)
@@ -738,27 +793,32 @@ Agent: I'm sorry your order is delayed. Let me check the status and see what's
 Before deploying your Agentforce agent, validate against these anti-patterns:
 
 ### Instructions
+
 - [ ] No absolute language ("must", "always", "never")
 - [ ] Positive framing ("do this" not "don't do that")
 - [ ] Business rules in Flow/Apex, not instructions
 - [ ] Format validation in code, not instructions
 
 ### Topic Architecture
+
 - [ ] Topics have 5-7 actions max (not monolithic)
 - [ ] Classification descriptions don't overlap
 - [ ] Escalation paths defined for failure scenarios
 
 ### Context & Memory
+
 - [ ] Agent checks prior turns before re-asking
 - [ ] Content retrieved from Knowledge, not hard-coded
 - [ ] Context carried across topic transitions
 
 ### Testing
+
 - [ ] Tests cover errors and edge cases, not just happy paths
 - [ ] Input sanitization tested (security)
 - [ ] Out-of-scope handling tested
 
 ### Tone & Language
+
 - [ ] Conversational tone (contractions, short sentences)
 - [ ] One apology + action (not excessive apologies)
 - [ ] No corporate jargon or robotic phrasing

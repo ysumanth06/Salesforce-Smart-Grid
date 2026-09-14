@@ -17,16 +17,19 @@ Generates and validates conversation design artifacts for Agentforce agents:
 ## Quick Start
 
 ### Design a New Agent
+
 ```
 "Design a conversation for a customer service Agentforce agent"
 ```
 
 ### Assess an Existing Agent
+
 ```
 "Score my agent's conversation design against best practices"
 ```
 
 ### Fix Conversation Issues
+
 ```
 "Review my agent's instructions for anti-patterns"
 ```
@@ -35,16 +38,16 @@ Generates and validates conversation design artifacts for Agentforce agents:
 
 120 points across 8 categories:
 
-| Category | Points |
-|----------|--------|
-| Persona & Tone | 15 |
-| Topic Architecture | 20 |
-| Instruction Quality | 20 |
-| Dialog Flow Design | 15 |
-| Utterance Coverage | 15 |
-| Escalation Design | 15 |
-| Guardrails & Safety | 10 |
-| Continuous Improvement | 10 |
+| Category               | Points |
+| ---------------------- | ------ |
+| Persona & Tone         | 15     |
+| Topic Architecture     | 20     |
+| Instruction Quality    | 20     |
+| Dialog Flow Design     | 15     |
+| Utterance Coverage     | 15     |
+| Escalation Design      | 15     |
+| Guardrails & Safety    | 10     |
+| Continuous Improvement | 10     |
 
 **Grades:** A (108-120) · B (96-107) · C (84-95) · D (72-83) · F (<72)
 

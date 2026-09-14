@@ -1,0 +1,144 @@
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="dml-modal-title"
+      class="slds-modal slds-fade-in-open dml-modal"
+      data-testid="dml-confirm-modal"
+    >
+      <div class="slds-modal__container dml-container">
+        <!-- Header -->
+        <header class="slds-modal__header dml-header">
+          <button
+            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+            title="Close"
+            onclick={handleCancel}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              alternative-text="Close"
+              size="small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+          <div class="slds-grid slds-grid_vertical-align-center">
+            <lightning-icon
+              icon-name="utility:warning"
+              size="small"
+              variant="warning"
+              class="slds-var-m-right_small"
+            ></lightning-icon>
+            <h2 id="dml-modal-title" class="slds-text-heading_medium">
+              Confirm Bulk {computedOperationLabel}
+            </h2>
+          </div>
+          <p class="slds-var-m-top_x-small slds-text-color_inverse-weak">
+            Review the affected records and field modifications before applying
+            changes.
+          </p>
+        </header>
+
+        <!-- Body: Metrics & Visual Diff Table -->
+        <div class="slds-modal__content slds-var-p-around_medium dml-body">
+          <template lwc:if={isLoading}>
+            <div class="spinner-holder">
+              <lightning-spinner
+                alternative-text="Applying changes..."
+                size="medium"
+                variant="brand"
+              ></lightning-spinner>
+            </div>
+          </template>
+
+          <template lwc:else>
+            <!-- Summary Badges -->
+            <div
+              class="slds-grid slds-wrap slds-var-m-bottom_medium metric-bar"
+            >
+              <div class="metric-badge slds-var-m-right_small">
+                <span class="metric-label">Affected Records:</span>
+                <span class="metric-val" data-testid="affected-count"
+                  >{affectedCount}</span
+                >
+              </div>
+              <div class="metric-badge slds-var-m-right_small">
+                <span class="metric-label">Operation:</span>
+                <span class="metric-val">{operationType}</span>
+              </div>
+              <template lwc:if={hasFields}>
+                <div class="metric-badge">
+                  <span class="metric-label">Fields Modified:</span>
+                  <span class="metric-val">{affectedFieldsList}</span>
+                </div>
+              </template>
+            </div>
+
+            <!-- Visual Diff Table -->
+            <h3 class="slds-text-title_bold slds-var-m-bottom_x-small">
+              Preview of Changes (First 5 Rows):
+            </h3>
+            <div class="diff-table-container">
+              <table
+                class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered diff-table"
+                aria-label="Bulk modification preview"
+              >
+                <thead>
+                  <tr class="slds-line-height_reset">
+                    <th scope="col">Record Name</th>
+                    <th scope="col">Field</th>
+                    <th scope="col">Current Value</th>
+                    <th scope="col">New Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={flattenedRows} for:item="row">
+                    <tr key={row.key} class="diff-row">
+                      <td class="record-name-col">
+                        <span class="slds-truncate" title={row.recordName}
+                          >{row.recordName}</span
+                        >
+                      </td>
+                      <td class="field-name-col">
+                        <span class="field-badge">{row.fieldName}</span>
+                      </td>
+                      <td class="old-val-col">
+                        <span class="old-val-badge">{row.oldValue}</span>
+                      </td>
+                      <td class="new-val-col">
+                        <span class={row.newValClass}>{row.newValue}</span>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </template>
+        </div>
+
+        <!-- Footer -->
+        <footer class="slds-modal__footer dml-footer">
+          <button
+            class="slds-button slds-button_neutral"
+            onclick={handleCancel}
+            disabled={isLoading}
+            data-testid="dml-cancel-btn"
+          >
+            Cancel
+          </button>
+          <button
+            class="slds-button slds-button_brand"
+            onclick={handleConfirm}
+            disabled={isLoading}
+            data-testid="dml-confirm-btn"
+          >
+            Confirm &amp; Apply Changes
+          </button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open dml-backdrop"></div>
+  </template>
+</template>

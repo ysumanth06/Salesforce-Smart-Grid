@@ -11,15 +11,15 @@ If coverage < threshold:
 
 ## Coverage Dimensions
 
-| Dimension | Phase A | Phase B | Target |
-|-----------|---------|---------|--------|
-| Topic Selection | ✅ | ✅ | 100% |
-| Action Invocation | ✅ | ✅ | 100% |
-| Topic Re-matching | ✅ | ❌ | 90%+ |
-| Context Preservation | ✅ | ❌ | 95%+ |
-| Conversation Completion | ✅ | ❌ | 85%+ |
-| Guardrails | ✅ | ✅ | 100% |
-| Escalation | ✅ | ✅ | 100% |
-| Phrasing Diversity | ✅ | ✅ | 3+ per topic |
+| Dimension               | Phase A | Phase B | Target       |
+| ----------------------- | ------- | ------- | ------------ |
+| Topic Selection         | ✅      | ✅      | 100%         |
+| Action Invocation       | ✅      | ✅      | 100%         |
+| Topic Re-matching       | ✅      | ❌      | 90%+         |
+| Context Preservation    | ✅      | ❌      | 95%+         |
+| Conversation Completion | ✅      | ❌      | 85%+         |
+| Guardrails              | ✅      | ✅      | 100%         |
+| Escalation              | ✅      | ✅      | 100%         |
+| Phrasing Diversity      | ✅      | ✅      | 3+ per topic |
 
 See [Coverage Analysis](../references/coverage-analysis.md) for complete metrics and improvement guide.

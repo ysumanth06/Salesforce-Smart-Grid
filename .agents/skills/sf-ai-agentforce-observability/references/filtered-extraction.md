@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Filtered Extraction Examples
 
 Examples for extracting specific subsets of session tracing data.
@@ -88,6 +89,7 @@ stdm-extract extract-tree --org prod \
 ```
 
 This extracts the **complete tree** for each session:
+
 - Session record
 - All interactions (turns)
 - All steps (LLM and actions)
@@ -122,6 +124,7 @@ stdm-extract extract-incremental --org prod
 ```
 
 **Creates:**
+
 - `~/.sf/observability/prod/watermark.json`
 - `./stdm_data/` (with 24h of data)
 
@@ -134,6 +137,7 @@ stdm-extract extract-incremental --org prod
 ```
 
 **Watermark file:**
+
 ```json
 {
   "last_run": "2026-01-28T10:15:23.000Z",

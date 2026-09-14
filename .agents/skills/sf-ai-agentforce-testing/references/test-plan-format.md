@@ -6,15 +6,15 @@ Test plans (`test-plan-{agent}.yaml`) capture the full interview output for reus
 
 ## Key Sections
 
-| Section | Purpose |
-|---------|---------|
-| `metadata` | Agent name, ID, org alias, timestamps |
-| `credentials` | Path to `~/.sfagent/` credentials.env or `use_env: true` |
-| `agent_metadata` | Topics, actions, type — populated by `agent_discovery.py` |
-| `scenarios` | List of YAML scenario files + pattern filters |
-| `partition` | Strategy (`by_category`/`by_count`/`sequential`) + worker count |
-| `session_variables` | Context variables injected into every session |
-| `execution` | Timeout, retry, verbose, rich output settings |
+| Section             | Purpose                                                         |
+| ------------------- | --------------------------------------------------------------- |
+| `metadata`          | Agent name, ID, org alias, timestamps                           |
+| `credentials`       | Path to `~/.sfagent/` credentials.env or `use_env: true`        |
+| `agent_metadata`    | Topics, actions, type — populated by `agent_discovery.py`       |
+| `scenarios`         | List of YAML scenario files + pattern filters                   |
+| `partition`         | Strategy (`by_category`/`by_count`/`sequential`) + worker count |
+| `session_variables` | Context variables injected into every session                   |
+| `execution`         | Timeout, retry, verbose, rich output settings                   |
 
 ## Re-Running from a Saved Plan
 

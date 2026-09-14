@@ -1,25 +1,26 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Apex Naming Conventions
 
 ## Classes
 
 ### Format: PascalCase
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Standard class | `[Domain]Service` | `AccountService` |
-| Controller | `[Page]Controller` | `AccountPageController` |
-| Extension | `[Page]ControllerExt` | `AccountControllerExt` |
-| Trigger Action | `TA_[Object]_[Action]` | `TA_Account_SetDefaults` |
-| Batch | `[Domain]_Batch` | `AccountCleanup_Batch` |
-| Queueable | `[Domain]_Queueable` | `AccountSync_Queueable` |
-| Schedulable | `[Domain]_Schedule` | `DailyReport_Schedule` |
-| Selector | `[Object]Selector` | `AccountSelector` |
-| Domain | `[Object]Domain` | `AccountDomain` |
-| Test class | `[ClassName]Test` | `AccountServiceTest` |
-| Test factory | `TestDataFactory` | `TestDataFactory` |
-| Exception | `[Domain]Exception` | `InsufficientFundsException` |
-| Interface | `I[Name]` or descriptive | `IPaymentProcessor` |
+| Type           | Convention               | Example                      |
+| -------------- | ------------------------ | ---------------------------- |
+| Standard class | `[Domain]Service`        | `AccountService`             |
+| Controller     | `[Page]Controller`       | `AccountPageController`      |
+| Extension      | `[Page]ControllerExt`    | `AccountControllerExt`       |
+| Trigger Action | `TA_[Object]_[Action]`   | `TA_Account_SetDefaults`     |
+| Batch          | `[Domain]_Batch`         | `AccountCleanup_Batch`       |
+| Queueable      | `[Domain]_Queueable`     | `AccountSync_Queueable`      |
+| Schedulable    | `[Domain]_Schedule`      | `DailyReport_Schedule`       |
+| Selector       | `[Object]Selector`       | `AccountSelector`            |
+| Domain         | `[Object]Domain`         | `AccountDomain`              |
+| Test class     | `[ClassName]Test`        | `AccountServiceTest`         |
+| Test factory   | `TestDataFactory`        | `TestDataFactory`            |
+| Exception      | `[Domain]Exception`      | `InsufficientFundsException` |
+| Interface      | `I[Name]` or descriptive | `IPaymentProcessor`          |
 
 ### Examples
 
@@ -37,16 +38,16 @@ public class AccountSelector { }
 
 ### Format: camelCase, Start with Verb
 
-| Purpose | Convention | Example |
-|---------|------------|---------|
-| Get data | `get[Noun]` | `getAccounts()` |
-| Set data | `set[Noun]` | `setAccountStatus()` |
-| Check condition | `is[Adjective]` / `has[Noun]` | `isActive()`, `hasPermission()` |
-| Action | `[verb][Noun]` | `processOrders()`, `validateData()` |
-| Calculate | `calculate[Noun]` | `calculateTotal()` |
-| Create | `create[Noun]` | `createAccount()` |
-| Update | `update[Noun]` | `updateStatus()` |
-| Delete | `delete[Noun]` | `deleteRecords()` |
+| Purpose         | Convention                    | Example                             |
+| --------------- | ----------------------------- | ----------------------------------- |
+| Get data        | `get[Noun]`                   | `getAccounts()`                     |
+| Set data        | `set[Noun]`                   | `setAccountStatus()`                |
+| Check condition | `is[Adjective]` / `has[Noun]` | `isActive()`, `hasPermission()`     |
+| Action          | `[verb][Noun]`                | `processOrders()`, `validateData()` |
+| Calculate       | `calculate[Noun]`             | `calculateTotal()`                  |
+| Create          | `create[Noun]`                | `createAccount()`                   |
+| Update          | `update[Noun]`                | `updateStatus()`                    |
+| Delete          | `delete[Noun]`                | `deleteRecords()`                   |
 
 ### Special Verbs
 
@@ -75,14 +76,14 @@ public Boolean canModifyRecord() { }
 
 ### Format: camelCase, Descriptive
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Local variable | descriptive noun | `account`, `totalAmount` |
-| Loop iterator | single letter (temp) | `i`, `j`, `k` |
-| Boolean | `is[Adjective]` / `has[Noun]` | `isValid`, `hasError` |
-| Collection | plural noun | `accounts`, `contactList` |
-| Map | `[value]By[key]` | `accountsById`, `contactsByEmail` |
-| Set | `[noun]Set` or `[noun]Ids` | `accountIds`, `processedIdSet` |
+| Type           | Convention                    | Example                           |
+| -------------- | ----------------------------- | --------------------------------- |
+| Local variable | descriptive noun              | `account`, `totalAmount`          |
+| Loop iterator  | single letter (temp)          | `i`, `j`, `k`                     |
+| Boolean        | `is[Adjective]` / `has[Noun]` | `isValid`, `hasError`             |
+| Collection     | plural noun                   | `accounts`, `contactList`         |
+| Map            | `[value]By[key]`              | `accountsById`, `contactsByEmail` |
+| Set            | `[noun]Set` or `[noun]Ids`    | `accountIds`, `processedIdSet`    |
 
 ### Anti-Patterns to Avoid
 
@@ -123,10 +124,10 @@ Map<Id, Map<String, Decimal>> metricsByAccountByType;
 
 ```apex
 public class Constants {
-    public static final String STATUS_ACTIVE = 'Active';
-    public static final String STATUS_INACTIVE = 'Inactive';
-    public static final Integer MAX_RETRY_COUNT = 3;
-    public static final Decimal TAX_RATE = 0.08;
+  public static final String STATUS_ACTIVE = 'Active';
+  public static final String STATUS_INACTIVE = 'Inactive';
+  public static final Integer MAX_RETRY_COUNT = 3;
+  public static final Decimal TAX_RATE = 0.08;
 }
 ```
 
@@ -199,19 +200,19 @@ static void testAsStandardUser() { }
 
 ## Quick Reference
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Class | PascalCase | `AccountService` |
-| Interface | I + PascalCase | `IPaymentProcessor` |
-| Method | camelCase verb | `processRecords()` |
-| Variable | camelCase noun | `accountList` |
-| Constant | UPPER_SNAKE | `MAX_RETRIES` |
-| Parameter | camelCase | `accountId` |
-| Boolean | is/has prefix | `isActive` |
-| Map | valueByKey | `accountsById` |
-| Set | nounIds/nounSet | `accountIds` |
-| List | plural noun | `accounts` |
-| Trigger | ObjectTrigger | `AccountTrigger` |
+| Element        | Convention       | Example               |
+| -------------- | ---------------- | --------------------- |
+| Class          | PascalCase       | `AccountService`      |
+| Interface      | I + PascalCase   | `IPaymentProcessor`   |
+| Method         | camelCase verb   | `processRecords()`    |
+| Variable       | camelCase noun   | `accountList`         |
+| Constant       | UPPER_SNAKE      | `MAX_RETRIES`         |
+| Parameter      | camelCase        | `accountId`           |
+| Boolean        | is/has prefix    | `isActive`            |
+| Map            | valueByKey       | `accountsById`        |
+| Set            | nounIds/nounSet  | `accountIds`          |
+| List           | plural noun      | `accounts`            |
+| Trigger        | ObjectTrigger    | `AccountTrigger`      |
 | Trigger Action | TA_Object_Action | `TA_Account_Validate` |
-| Batch | Domain_Batch | `Cleanup_Batch` |
-| Test | ClassTest | `AccountServiceTest` |
+| Batch          | Domain_Batch     | `Cleanup_Batch`       |
+| Test           | ClassTest        | `AccountServiceTest`  |

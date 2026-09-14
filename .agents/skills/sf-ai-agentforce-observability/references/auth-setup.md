@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Authentication Setup
 
 This skill uses JWT Bearer authentication to access the Data Cloud Query API. Authentication is configured via an **External Client App (ECA)** in Salesforce.
@@ -39,12 +40,12 @@ In Salesforce Setup:
 1. **Setup** → **External Client App Manager** → **New External Client App**
 2. Fill in the basic details:
 
-| Field | Value |
-|-------|-------|
-| Name | `Agentforce Observability` |
-| API Name | `Agentforce_Observability` |
-| Description | `JWT Bearer auth for Agentforce STDM extraction via Claude Code` |
-| Distribution State | `Local` |
+| Field              | Value                                                            |
+| ------------------ | ---------------------------------------------------------------- |
+| Name               | `Agentforce Observability`                                       |
+| API Name           | `Agentforce_Observability`                                       |
+| Description        | `JWT Bearer auth for Agentforce STDM extraction via Claude Code` |
+| Distribution State | `Local`                                                          |
 
 3. Click **Save**
 
@@ -52,15 +53,16 @@ In Salesforce Setup:
 
 In the ECA → **OAuth Settings** tab:
 
-| Setting | Value |
-|---------|-------|
-| Enable OAuth | ✅ Checked |
-| Callback URL | `https://login.salesforce.com/services/oauth2/callback` |
-| Selected OAuth Scopes | `cdp_query_api`, `refresh_token, offline_access` |
-| Require PKCE | ❌ Unchecked (not needed for JWT Bearer) |
-| Enable Client Credentials Flow | ❌ Optional |
+| Setting                        | Value                                                   |
+| ------------------------------ | ------------------------------------------------------- |
+| Enable OAuth                   | ✅ Checked                                              |
+| Callback URL                   | `https://login.salesforce.com/services/oauth2/callback` |
+| Selected OAuth Scopes          | `cdp_query_api`, `refresh_token, offline_access`        |
+| Require PKCE                   | ❌ Unchecked (not needed for JWT Bearer)                |
+| Enable Client Credentials Flow | ❌ Optional                                             |
 
 **Upload Certificate:**
+
 1. Check **Use digital signatures**
 2. Click **Choose File**
 3. Upload `~/.sf/jwt/{org}-agentforce-observability.crt`
@@ -70,12 +72,13 @@ In the ECA → **OAuth Settings** tab:
 
 In the ECA → **Policies** tab:
 
-| Setting | Value |
-|---------|-------|
+| Setting         | Value                                       |
+| --------------- | ------------------------------------------- |
 | Permitted Users | **Admin approved users are pre-authorized** |
-| IP Relaxation | Relax IP restrictions (for CLI usage) |
+| IP Relaxation   | Relax IP restrictions (for CLI usage)       |
 
 **Add Your User:**
+
 1. Click **Manage** → **Manage Profiles** or **Manage Permission Sets**
 2. Add your user's profile or an appropriate permission set
 3. Click **Save**
@@ -98,6 +101,7 @@ python3 scripts/cli.py test-auth --org Vivint-DevInt
 ```
 
 **Expected output:**
+
 ```
 Testing Authentication
 Org: Vivint-DevInt
@@ -144,21 +148,21 @@ python3 scripts/cli.py test-auth --org Vivint-DevInt \
 
 ## File Locations
 
-| File | Location | Description |
-|------|----------|-------------|
-| Private Key | `~/.sf/jwt/{org}-agentforce-observability.key` | RSA private key (chmod 600) |
-| Certificate | `~/.sf/jwt/{org}-agentforce-observability.crt` | X.509 cert uploaded to Salesforce |
-| Consumer Key | `$SF_CONSUMER_KEY` or `--consumer-key` | From ECA OAuth Settings |
+| File         | Location                                       | Description                       |
+| ------------ | ---------------------------------------------- | --------------------------------- |
+| Private Key  | `~/.sf/jwt/{org}-agentforce-observability.key` | RSA private key (chmod 600)       |
+| Certificate  | `~/.sf/jwt/{org}-agentforce-observability.crt` | X.509 cert uploaded to Salesforce |
+| Consumer Key | `$SF_CONSUMER_KEY` or `--consumer-key`         | From ECA OAuth Settings           |
 
 ---
 
 ## Required OAuth Scopes
 
-| Scope | Purpose | Required |
-|-------|---------|----------|
-| `cdp_query_api` | Execute Data Cloud SQL queries | ✅ Yes |
-| `refresh_token, offline_access` | Server-to-server access | ✅ Yes |
-| `cdp_profile_api` | Access profile and DMO metadata | Optional |
+| Scope                           | Purpose                         | Required |
+| ------------------------------- | ------------------------------- | -------- |
+| `cdp_query_api`                 | Execute Data Cloud SQL queries  | ✅ Yes   |
+| `refresh_token, offline_access` | Server-to-server access         | ✅ Yes   |
+| `cdp_profile_api`               | Access profile and DMO metadata | Optional |
 
 ---
 
@@ -172,14 +176,15 @@ RuntimeError: Token exchange failed: invalid_grant
 
 **Causes & Fixes:**
 
-| Cause | Fix |
-|-------|-----|
-| Certificate mismatch | Re-upload `.crt` file to ECA |
-| Expired certificate | Regenerate with `openssl` (see Step 1) |
-| User not authorized | Add user to ECA policies (see Step 4) |
-| Wrong login URL | Verify sandbox detection is working |
+| Cause                | Fix                                    |
+| -------------------- | -------------------------------------- |
+| Certificate mismatch | Re-upload `.crt` file to ECA           |
+| Expired certificate  | Regenerate with `openssl` (see Step 1) |
+| User not authorized  | Add user to ECA policies (see Step 4)  |
+| Wrong login URL      | Verify sandbox detection is working    |
 
 **Verify certificate expiry:**
+
 ```bash
 openssl x509 -enddate -noout -in ~/.sf/jwt/Vivint-DevInt-agentforce-observability.crt
 ```
@@ -199,6 +204,7 @@ FileNotFoundError: Private key not found at ~/.sf/jwt/myorg.key
 ```
 
 **Causes:**
+
 1. Key file doesn't exist → Generate with Step 1
 2. Wrong org alias → Check `sf org list` for correct alias
 3. Using old naming convention → Rename to `{org}-agentforce-observability.key`
@@ -210,6 +216,7 @@ PermissionError: [Errno 13] Permission denied: '~/.sf/jwt/...'
 ```
 
 **Fix:**
+
 ```bash
 chmod 600 ~/.sf/jwt/*.key
 ```
@@ -250,6 +257,7 @@ export SF_CONSUMER_KEY="3MVG9..."
 ```
 
 The CLI checks in this order:
+
 1. `--consumer-key` argument
 2. `SF_{ORG_ALIAS}_CONSUMER_KEY` (uppercase, hyphens to underscores)
 3. `SF_CONSUMER_KEY`

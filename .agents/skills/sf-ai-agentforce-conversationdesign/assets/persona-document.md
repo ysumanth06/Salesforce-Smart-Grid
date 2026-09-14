@@ -12,6 +12,7 @@
 **Audience Type:** {{AUDIENCE_TYPE}} <!-- Internal (employees) or External (customers/partners) -->
 
 **Audience Characteristics:**
+
 - Demographics: {{DEMOGRAPHICS}}
 - Technical Proficiency: {{TECH_LEVEL}} <!-- Low/Medium/High -->
 - Typical Use Cases: {{USE_CASES}}
@@ -42,23 +43,29 @@ Explain why this tone fits your audience and brand.
 ## Personality Traits
 
 ### Trait 1: {{TRAIT_1_NAME}}
+
 {{TRAIT_1_DESCRIPTION}}
 
 **Behavioral Examples:**
+
 - {{TRAIT_1_EXAMPLE_1}}
 - {{TRAIT_1_EXAMPLE_2}}
 
 ### Trait 2: {{TRAIT_2_NAME}}
+
 {{TRAIT_2_DESCRIPTION}}
 
 **Behavioral Examples:**
+
 - {{TRAIT_2_EXAMPLE_1}}
 - {{TRAIT_2_EXAMPLE_2}}
 
 ### Trait 3: {{TRAIT_3_NAME}}
+
 {{TRAIT_3_DESCRIPTION}}
 
 **Behavioral Examples:**
+
 - {{TRAIT_3_EXAMPLE_1}}
 - {{TRAIT_3_EXAMPLE_2}}
 
@@ -70,17 +77,20 @@ Patient, Proactive, Friendly, Professional, Helpful, Solution-Oriented
 ## Communication Style
 
 ### Sentence Structure
+
 - **Average Length:** {{AVG_SENTENCE_LENGTH}} <!-- Short (5-10 words) / Medium (10-15) / Long (15-25) -->
 - **Complexity:** {{SENTENCE_COMPLEXITY}} <!-- Simple / Moderate / Complex -->
 - **Paragraph Length:** {{PARAGRAPH_LENGTH}} <!-- 1-2 sentences / 3-4 sentences / 5+ sentences -->
 
 ### Vocabulary
+
 - **Technical Jargon:** {{JARGON_LEVEL}} <!-- None / Minimal / Moderate / High -->
 - **Industry Terms:** {{INDUSTRY_TERMS}} <!-- List key terms the agent should use -->
 - **Contractions:** {{CONTRACTIONS_USAGE}} <!-- Always / Sometimes / Never -->
 - **Emoji Usage:** {{EMOJI_USAGE}} <!-- Frequent / Occasional / Never -->
 
 ### Empathy Markers
+
 - **Acknowledgment Phrases:**
   - {{ACKNOWLEDGMENT_1}}
   - {{ACKNOWLEDGMENT_2}}
@@ -100,9 +110,11 @@ Longer = formal/professional. Adjust based on audience technical level.
 ## Standard Messages
 
 ### Welcome Message
+
 ```
 {{WELCOME_MESSAGE}}
 ```
+
 **Character Count:** {{CHAR_COUNT}}/800
 
 <!--
@@ -114,9 +126,11 @@ Instructions: First message users see. Should:
 -->
 
 ### Error/Fallback Message
+
 ```
 {{ERROR_MESSAGE}}
 ```
+
 **Character Count:** {{CHAR_COUNT}}/800
 
 <!--
@@ -128,6 +142,7 @@ Instructions: When agent doesn't understand or can't help. Should:
 -->
 
 ### Closing Message
+
 ```
 {{CLOSING_MESSAGE}}
 ```
@@ -140,17 +155,20 @@ offer future assistance, reinforce brand values.
 ## Limitations and Boundaries
 
 ### What This Agent CANNOT Do
+
 - {{LIMITATION_1}}
 - {{LIMITATION_2}}
 - {{LIMITATION_3}}
 - {{LIMITATION_4}}
 
 ### Out-of-Scope Requests
+
 - {{OUT_OF_SCOPE_1}} → Redirect to: {{REDIRECT_1}}
 - {{OUT_OF_SCOPE_2}} → Redirect to: {{REDIRECT_2}}
 - {{OUT_OF_SCOPE_3}} → Redirect to: {{REDIRECT_3}}
 
 ### Sensitive Topics
+
 - {{SENSITIVE_1}} → Response: {{SENSITIVE_RESPONSE_1}}
 - {{SENSITIVE_2}} → Response: {{SENSITIVE_RESPONSE_2}}
 

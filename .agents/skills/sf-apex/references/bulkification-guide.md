@@ -1,4 +1,5 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Apex Bulkification Guide
 
 Comprehensive guide to writing bulk-safe Apex code, understanding governor limits, and optimizing collection handling.
@@ -22,27 +23,27 @@ Salesforce enforces per-transaction limits to ensure multi-tenant platform stabi
 
 ### Critical Limits (Synchronous Context)
 
-| Resource | Limit | Notes |
-|----------|-------|-------|
-| **SOQL Queries** | 100 | Includes parent-child queries |
-| **SOQL Query Rows** | 50,000 | Total rows retrieved |
-| **DML Statements** | 150 | insert, update, delete, undelete operations |
-| **DML Rows** | 10,000 | Total records per transaction |
-| **CPU Time** | 10,000ms | Actual CPU time (not wall clock) |
-| **Heap Size** | 6 MB | Memory used by variables |
-| **Callouts** | 100 | HTTP requests |
-| **Callout Time** | 120 seconds | Total time for all callouts |
+| Resource            | Limit       | Notes                                       |
+| ------------------- | ----------- | ------------------------------------------- |
+| **SOQL Queries**    | 100         | Includes parent-child queries               |
+| **SOQL Query Rows** | 50,000      | Total rows retrieved                        |
+| **DML Statements**  | 150         | insert, update, delete, undelete operations |
+| **DML Rows**        | 10,000      | Total records per transaction               |
+| **CPU Time**        | 10,000ms    | Actual CPU time (not wall clock)            |
+| **Heap Size**       | 6 MB        | Memory used by variables                    |
+| **Callouts**        | 100         | HTTP requests                               |
+| **Callout Time**    | 120 seconds | Total time for all callouts                 |
 
 ### Asynchronous Limits (Future, Batch, Queueable)
 
-| Resource | Limit | Notes |
-|----------|-------|-------|
-| **SOQL Queries** | 200 | Double synchronous |
-| **SOQL Query Rows** | 50,000 | Same as sync |
-| **DML Statements** | 150 | Same as sync |
-| **DML Rows** | 10,000 | Same as sync |
-| **CPU Time** | 60,000ms | 6x synchronous |
-| **Heap Size** | 12 MB | 2x synchronous |
+| Resource            | Limit    | Notes              |
+| ------------------- | -------- | ------------------ |
+| **SOQL Queries**    | 200      | Double synchronous |
+| **SOQL Query Rows** | 50,000   | Same as sync       |
+| **DML Statements**  | 150      | Same as sync       |
+| **DML Rows**        | 10,000   | Same as sync       |
+| **CPU Time**        | 60,000ms | 6x synchronous     |
+| **Heap Size**       | 12 MB    | 2x synchronous     |
 
 **Key Insight**: Async has more SOQL queries and CPU time, but DML limits are the same.
 
@@ -53,6 +54,7 @@ Salesforce enforces per-transaction limits to ensure multi-tenant platform stabi
 ### Rule 1: Never Query Inside a Loop
 
 **❌ BAD - Hits SOQL limit at 100 accounts:**
+
 ```apex
 for (Account acc : accounts) {
     List<Contact> contacts = [SELECT Id FROM Contact WHERE AccountId = :acc.Id];
@@ -61,6 +63,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD - Single query handles unlimited accounts:**
+
 ```apex
 // Step 1: Collect all Account IDs
 Set<Id> accountIds = new Set<Id>();
@@ -93,6 +96,7 @@ for (Account acc : accounts) {
 ### Rule 2: Never DML Inside a Loop
 
 **❌ BAD - Hits DML limit at 150 accounts:**
+
 ```apex
 for (Account acc : accounts) {
     acc.Industry = 'Technology';
@@ -101,6 +105,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD - Single DML handles 10,000 accounts:**
+
 ```apex
 for (Account acc : accounts) {
     acc.Industry = 'Technology';
@@ -115,6 +120,7 @@ update accounts;  // DML after loop
 ### Rule 3: Use Collections Efficiently
 
 **❌ BAD - Multiple queries for related data:**
+
 ```apex
 for (Account acc : accounts) {
     List<Contact> contacts = [SELECT Id FROM Contact WHERE AccountId = :acc.Id];
@@ -123,6 +129,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD - Single query with subqueries:**
+
 ```apex
 Map<Id, Account> accountsWithRelated = new Map<Id, Account>([
     SELECT Id, Name,
@@ -207,6 +214,7 @@ public static void processContactsByAccount(List<Contact> contacts) {
 ```
 
 **Alternative using Null Coalescing (API 59+):**
+
 ```apex
 for (Contact con : contacts) {
     List<Contact> existing = contactsByAccount.get(con.AccountId);
@@ -314,13 +322,14 @@ public static void updateAccountsIfChanged(List<Account> accounts, Map<Id, Accou
 
 ### Use the Right Collection Type
 
-| Collection | When to Use | Key Features |
-|------------|-------------|--------------|
-| **List<T>** | Ordered data, duplicates allowed | Index access, iteration |
-| **Set<T>** | Unique values, fast lookups | No duplicates, O(1) contains() |
-| **Map<K,V>** | Key-value pairs, fast lookups | O(1) get(), unique keys |
+| Collection   | When to Use                      | Key Features                   |
+| ------------ | -------------------------------- | ------------------------------ |
+| **List<T>**  | Ordered data, duplicates allowed | Index access, iteration        |
+| **Set<T>**   | Unique values, fast lookups      | No duplicates, O(1) contains() |
+| **Map<K,V>** | Key-value pairs, fast lookups    | O(1) get(), unique keys        |
 
 **Example: Deduplication**
+
 ```apex
 // ❌ BAD - O(n²) complexity
 List<Id> uniqueIds = new List<Id>();
@@ -339,6 +348,7 @@ Set<Id> uniqueIdsSet = new Set<Id>(allAccountIds);  // Automatic deduplication
 ### List Operations
 
 **Creating Lists:**
+
 ```apex
 // Empty list
 List<Account> accounts = new List<Account>();
@@ -352,12 +362,14 @@ List<Id> idList = new List<Id>(idSet);
 ```
 
 **Adding Elements:**
+
 ```apex
 accounts.add(newAccount);           // Add single
 accounts.addAll(moreAccounts);      // Add list
 ```
 
 **Checking Before DML (NOT NEEDED):**
+
 ```apex
 // ❌ UNNECESSARY - Salesforce handles empty lists
 if (!accounts.isEmpty()) {
@@ -373,6 +385,7 @@ update accounts;  // No-op if empty, saves CPU cycles checking
 ### Set Operations
 
 **Union, Intersection, Difference:**
+
 ```apex
 Set<Id> set1 = new Set<Id>{id1, id2, id3};
 Set<Id> set2 = new Set<Id>{id2, id3, id4};
@@ -391,6 +404,7 @@ difference.removeAll(set2);  // {id1}
 ```
 
 **Checking Membership:**
+
 ```apex
 if (accountIds.contains(acc.Id)) {
     // Fast O(1) lookup
@@ -423,6 +437,7 @@ ids.addAll(toAdd);
 ### Map Operations
 
 **Creating Maps:**
+
 ```apex
 // Empty map
 Map<Id, Account> accountMap = new Map<Id, Account>();
@@ -437,6 +452,7 @@ scoreMap.put('Bob', 87);
 ```
 
 **Safe Access with Null Coalescing:**
+
 ```apex
 // Old way
 Integer score = scoreMap.get('Charlie');
@@ -449,6 +465,7 @@ Integer score = scoreMap.get('Charlie') ?? 0;
 ```
 
 **Iterating Maps:**
+
 ```apex
 // Iterate keys
 for (Id accountId : accountMap.keySet()) {
@@ -474,6 +491,7 @@ for (Id accountId : accountMap.keySet()) {
 ### Using Limits Class
 
 **Check current consumption:**
+
 ```apex
 System.debug('SOQL Queries: ' + Limits.getQueries() + '/' + Limits.getLimitQueries());
 System.debug('DML Statements: ' + Limits.getDmlStatements() + '/' + Limits.getLimitDmlStatements());
@@ -482,6 +500,7 @@ System.debug('Heap Size: ' + Limits.getHeapSize() + '/' + Limits.getLimitHeapSiz
 ```
 
 **Strategic placement:**
+
 ```apex
 public static void expensiveOperation() {
     System.debug('=== BEFORE OPERATION ===');
@@ -505,6 +524,7 @@ private static void logLimits() {
 ### Debug Logs Best Practices
 
 **Use log levels strategically:**
+
 ```apex
 System.debug(LoggingLevel.ERROR, 'Critical failure: ' + errorMsg);
 System.debug(LoggingLevel.WARN, 'Warning: potential issue');
@@ -514,6 +534,7 @@ System.debug(LoggingLevel.FINE, 'Detailed trace info');
 ```
 
 **Filter in Setup → Debug Logs:**
+
 - Apex Code: DEBUG
 - Database: INFO
 - Workflow: INFO
@@ -526,12 +547,14 @@ System.debug(LoggingLevel.FINE, 'Detailed trace info');
 ### Query Plan Analysis
 
 **Check query selectivity:**
+
 ```apex
 // Use EXPLAIN in Developer Console or Workbench
 // Or query plan API (requires REST call)
 ```
 
 **Indicators of bad queries:**
+
 - TableScan (full table scan)
 - Cardinality mismatch (estimated vs actual rows)
 - Missing indexes on WHERE clause fields
@@ -547,59 +570,73 @@ System.debug(LoggingLevel.FINE, 'Detailed trace info');
 **Why 251?** Trigger bulkification often breaks between 200-250 records due to chunk processing.
 
 **Test Class Pattern:**
+
 ```apex
 @IsTest
 private class AccountTriggerTest {
+  @TestSetup
+  static void setup() {
+    // Use Test Data Factory to create 251 records
+    TestDataFactory.createAccounts(251);
+  }
 
-    @TestSetup
-    static void setup() {
-        // Use Test Data Factory to create 251 records
-        TestDataFactory.createAccounts(251);
+  @IsTest
+  static void testBulkInsert() {
+    Test.startTest();
+
+    List<Account> accounts = new List<Account>();
+    for (Integer i = 0; i < 251; i++) {
+      accounts.add(
+        new Account(Name = 'Bulk Test ' + i, Industry = 'Technology')
+      );
     }
 
-    @IsTest
-    static void testBulkInsert() {
-        Test.startTest();
+    insert accounts;
 
-        List<Account> accounts = new List<Account>();
-        for (Integer i = 0; i < 251; i++) {
-            accounts.add(new Account(Name = 'Bulk Test ' + i, Industry = 'Technology'));
-        }
+    Test.stopTest();
 
-        insert accounts;
+    // Verify all 251 were processed correctly
+    List<Account> inserted = [
+      SELECT Id, Industry
+      FROM Account
+      WHERE Name LIKE 'Bulk Test%'
+    ];
+    Assert.areEqual(
+      251,
+      inserted.size(),
+      'All 251 accounts should be inserted'
+    );
 
-        Test.stopTest();
+    for (Account acc : inserted) {
+      Assert.areEqual(
+        'Technology',
+        acc.Industry,
+        'Industry should be set for all records'
+      );
+    }
+  }
 
-        // Verify all 251 were processed correctly
-        List<Account> inserted = [SELECT Id, Industry FROM Account WHERE Name LIKE 'Bulk Test%'];
-        Assert.areEqual(251, inserted.size(), 'All 251 accounts should be inserted');
+  @IsTest
+  static void testBulkUpdate() {
+    Test.startTest();
 
-        for (Account acc : inserted) {
-            Assert.areEqual('Technology', acc.Industry, 'Industry should be set for all records');
-        }
+    List<Account> accounts = [SELECT Id, Industry FROM Account];
+    for (Account acc : accounts) {
+      acc.Industry = 'Finance';
     }
 
-    @IsTest
-    static void testBulkUpdate() {
-        Test.startTest();
+    update accounts;
 
-        List<Account> accounts = [SELECT Id, Industry FROM Account];
-        for (Account acc : accounts) {
-            acc.Industry = 'Finance';
-        }
+    Test.stopTest();
 
-        update accounts;
+    // Verify
+    List<Account> updated = [SELECT Id, Industry FROM Account];
+    Assert.areEqual(251, updated.size());
 
-        Test.stopTest();
-
-        // Verify
-        List<Account> updated = [SELECT Id, Industry FROM Account];
-        Assert.areEqual(251, updated.size());
-
-        for (Account acc : updated) {
-            Assert.areEqual('Finance', acc.Industry);
-        }
+    for (Account acc : updated) {
+      Assert.areEqual('Finance', acc.Industry);
     }
+  }
 }
 ```
 
@@ -608,45 +645,50 @@ private class AccountTriggerTest {
 ### Test Data Factory Pattern
 
 **Centralized test data creation:**
+
 ```apex
 @IsTest
 public class TestDataFactory {
+  public static List<Account> createAccounts(Integer count) {
+    List<Account> accounts = new List<Account>();
 
-    public static List<Account> createAccounts(Integer count) {
-        List<Account> accounts = new List<Account>();
-
-        for (Integer i = 0; i < count; i++) {
-            accounts.add(new Account(
-                Name = 'Test Account ' + i,
-                Industry = 'Technology',
-                AnnualRevenue = 1000000
-            ));
-        }
-
-        insert accounts;
-        return accounts;
+    for (Integer i = 0; i < count; i++) {
+      accounts.add(
+        new Account(
+          Name = 'Test Account ' + i,
+          Industry = 'Technology',
+          AnnualRevenue = 1000000
+        )
+      );
     }
 
-    public static List<Contact> createContacts(Integer count, Id accountId) {
-        List<Contact> contacts = new List<Contact>();
+    insert accounts;
+    return accounts;
+  }
 
-        for (Integer i = 0; i < count; i++) {
-            contacts.add(new Contact(
-                LastName = 'Test Contact ' + i,
-                AccountId = accountId,
-                Email = 'test' + i + '@example.com'
-            ));
-        }
+  public static List<Contact> createContacts(Integer count, Id accountId) {
+    List<Contact> contacts = new List<Contact>();
 
-        insert contacts;
-        return contacts;
+    for (Integer i = 0; i < count; i++) {
+      contacts.add(
+        new Contact(
+          LastName = 'Test Contact ' + i,
+          AccountId = accountId,
+          Email = 'test' + i + '@example.com'
+        )
+      );
     }
 
-    // Add more factory methods as needed
+    insert contacts;
+    return contacts;
+  }
+
+  // Add more factory methods as needed
 }
 ```
 
 **Benefits**:
+
 - Centralized data creation
 - Consistent test data
 - Easy to create 251+ records
@@ -657,6 +699,7 @@ public class TestDataFactory {
 ### Performance Testing
 
 **Measure CPU time and SOQL:**
+
 ```apex
 @IsTest
 static void testPerformance() {
@@ -691,30 +734,34 @@ static void testPerformance() {
 ### Lazy Loading Pattern
 
 **Defer expensive operations until needed:**
+
 ```apex
 public class AccountProcessor {
+  private Map<Id, List<Contact>> contactsCache;
 
-    private Map<Id, List<Contact>> contactsCache;
-
-    public List<Contact> getContactsForAccount(Id accountId) {
-        // Lazy load - only query when first accessed
-        if (contactsCache == null) {
-            loadAllContacts();
-        }
-
-        return contactsCache.get(accountId) ?? new List<Contact>();
+  public List<Contact> getContactsForAccount(Id accountId) {
+    // Lazy load - only query when first accessed
+    if (contactsCache == null) {
+      loadAllContacts();
     }
 
-    private void loadAllContacts() {
-        contactsCache = new Map<Id, List<Contact>>();
+    return contactsCache.get(accountId) ?? new List<Contact>();
+  }
 
-        for (Contact con : [SELECT Id, AccountId FROM Contact WHERE AccountId IN :accountIds]) {
-            if (!contactsCache.containsKey(con.AccountId)) {
-                contactsCache.put(con.AccountId, new List<Contact>());
-            }
-            contactsCache.get(con.AccountId).add(con);
-        }
+  private void loadAllContacts() {
+    contactsCache = new Map<Id, List<Contact>>();
+
+    for (Contact con : [
+      SELECT Id, AccountId
+      FROM Contact
+      WHERE AccountId IN :accountIds
+    ]) {
+      if (!contactsCache.containsKey(con.AccountId)) {
+        contactsCache.put(con.AccountId, new List<Contact>());
+      }
+      contactsCache.get(con.AccountId).add(con);
     }
+  }
 }
 ```
 
@@ -723,25 +770,27 @@ public class AccountProcessor {
 ### Platform Cache for Expensive Queries
 
 **Cache frequently accessed data:**
+
 ```apex
 public class CachedMetadataService {
+  private static final String CACHE_PARTITION = 'local.MetadataCache';
 
-    private static final String CACHE_PARTITION = 'local.MetadataCache';
+  public static List<Config__c> getConfigurations() {
+    // Try cache first
+    List<Config__c> cached = (List<Config__c>) Cache.Org.get(
+      CACHE_PARTITION + '.configs'
+    );
 
-    public static List<Config__c> getConfigurations() {
-        // Try cache first
-        List<Config__c> cached = (List<Config__c>) Cache.Org.get(CACHE_PARTITION + '.configs');
-
-        if (cached != null) {
-            return cached;
-        }
-
-        // Cache miss - query and store
-        List<Config__c> configs = [SELECT Id, Name, Value__c FROM Config__c];
-        Cache.Org.put(CACHE_PARTITION + '.configs', configs, 3600); // 1 hour TTL
-
-        return configs;
+    if (cached != null) {
+      return cached;
     }
+
+    // Cache miss - query and store
+    List<Config__c> configs = [SELECT Id, Name, Value__c FROM Config__c];
+    Cache.Org.put(CACHE_PARTITION + '.configs', configs, 3600); // 1 hour TTL
+
+    return configs;
+  }
 }
 ```
 
@@ -750,6 +799,7 @@ public class CachedMetadataService {
 ## Reference
 
 **Full Documentation**: See `references/` folder for comprehensive guides:
+
 - `best-practices.md` - Bulkification patterns
 - `testing-guide.md` - Test Data Factory and bulk testing
 - `code-review-checklist.md` - Bulkification scoring criteria

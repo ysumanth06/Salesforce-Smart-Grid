@@ -23,15 +23,15 @@ Persona encoding maps a persona document to the agent's runtime configuration. T
 
 ## Encoding Method Compatibility
 
-| Method | Agent Builder | Agent Script | What It Solves |
-|---|---|---|---|
-| **Field-by-field** | Primary | N/A | Standard Builder encoding across Role, Topic Instructions, etc. |
-| **YAML key content** | N/A | Primary | Recommended instructions for `.agent` system, topics, messages |
-| **Custom Metadata** | Compatible | Compatible | Stores persona centrally, passes to actions as variable. In Builder: works around character limits. In Script: useful for multi-agent shared personas. |
-| **Conversation Style** | Compatible | Compatible | Compresses persona to a single instruction. In Builder: sidesteps field distribution. In Script: useful for lightweight prototyping. |
-| **Global Topic Override** | Compatible | N/A | Builder-only fallback topic strategy. |
+| Method                    | Agent Builder | Agent Script | What It Solves                                                                                                                                         |
+| ------------------------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Field-by-field**        | Primary       | N/A          | Standard Builder encoding across Role, Topic Instructions, etc.                                                                                        |
+| **YAML key content**      | N/A           | Primary      | Recommended instructions for `.agent` system, topics, messages                                                                                         |
+| **Custom Metadata**       | Compatible    | Compatible   | Stores persona centrally, passes to actions as variable. In Builder: works around character limits. In Script: useful for multi-agent shared personas. |
+| **Conversation Style**    | Compatible    | Compatible   | Compresses persona to a single instruction. In Builder: sidesteps field distribution. In Script: useful for lightweight prototyping.                   |
+| **Global Topic Override** | Compatible    | N/A          | Builder-only fallback topic strategy.                                                                                                                  |
 
-*Agent Script provides natively what the Builder workarounds approximate: centralized persona instructions (system.instructions), no character limits, per-topic overrides (topic-level system:), and deterministic static responses.*
+_Agent Script provides natively what the Builder workarounds approximate: centralized persona instructions (system.instructions), no character limits, per-topic overrides (topic-level system:), and deterministic static responses._
 
 ---
 
@@ -43,26 +43,26 @@ Persona encoding is distributed across several Agent Builder fields. Each field 
 
 These are the fields where you actively encode persona instructions. Together, they define who the agent is and how it sounds.
 
-| Field | Limit | What It Carries | Maps From (Persona Doc) |
-|---|---|---|---|
-| **Name** | 80 chars | User-facing identity — the name users see in the chat interface header. First persona impression before any conversation starts. A distinctive name (Deal Progressinator) signals personality; a generic name (Sales Agent) signals nothing. | Context (Agent Name) + Identity |
-| **Role** | 255 chars | Compressed identity: personality traits, register, voice attributes, primary audience, core function. Starts with "You are..." | Context (role, audience) + Identity adjectives + Register + Voice attributes (Formality, Warmth, Personality Intensity) |
-| **Company** | 255 chars | Company context that shapes the agent's frame of reference: what the company does, target customers, value prop. | Context section (company, product, audience) |
-| **Topic Instructions** | No hard limit | **Primary persona surface.** Per-topic behavioral rules: attribute-specific instructions, phrase book entries, lexicon terms, brevity calibration, humor guidance, tone flex triggers, tone boundary reminders. Encoding approach: global persona block + per-topic calibration (see [Per-Topic Encoding Patterns](#per-topic-encoding-patterns)). | All persona doc sections, filtered per topic |
-| **Action Output Response Instructions** | No limit | How the agent presents output: chatting style (Emoji, Formatting, Punctuation, Capitalization), voice presentation (Formality, Warmth, Personality Intensity), response length (Brevity). Interaction Model is an agent design input. | Chatting Style + Voice attributes + Brevity |
-| **Loading Text** | Per action | In-character status messages while an action executes. Reflects Formality + Warmth + Emotional Coloring + Brevity. | Formality + Warmth + Emotional Coloring + Brevity |
-| **Welcome Message** | 800 chars | The agent's first impression — greeting at conversation start. Sets the relationship dynamic (Register) and personality (Formality + Warmth + Emotional Coloring + Brevity). | Identity + Register + Voice attributes + Emotional Coloring + Brevity |
-| **Error Message** | — | Fallback message displayed when a system error occurs. Should reflect the agent's Formality + Warmth + Emotional Coloring + Brevity — a Casual, Warm agent doesn't say "An error has occurred." | Formality + Warmth + Emotional Coloring + Brevity |
+| Field                                   | Limit         | What It Carries                                                                                                                                                                                                                                                                                                                                    | Maps From (Persona Doc)                                                                                                 |
+| --------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Name**                                | 80 chars      | User-facing identity — the name users see in the chat interface header. First persona impression before any conversation starts. A distinctive name (Deal Progressinator) signals personality; a generic name (Sales Agent) signals nothing.                                                                                                       | Context (Agent Name) + Identity                                                                                         |
+| **Role**                                | 255 chars     | Compressed identity: personality traits, register, voice attributes, primary audience, core function. Starts with "You are..."                                                                                                                                                                                                                     | Context (role, audience) + Identity adjectives + Register + Voice attributes (Formality, Warmth, Personality Intensity) |
+| **Company**                             | 255 chars     | Company context that shapes the agent's frame of reference: what the company does, target customers, value prop.                                                                                                                                                                                                                                   | Context section (company, product, audience)                                                                            |
+| **Topic Instructions**                  | No hard limit | **Primary persona surface.** Per-topic behavioral rules: attribute-specific instructions, phrase book entries, lexicon terms, brevity calibration, humor guidance, tone flex triggers, tone boundary reminders. Encoding approach: global persona block + per-topic calibration (see [Per-Topic Encoding Patterns](#per-topic-encoding-patterns)). | All persona doc sections, filtered per topic                                                                            |
+| **Action Output Response Instructions** | No limit      | How the agent presents output: chatting style (Emoji, Formatting, Punctuation, Capitalization), voice presentation (Formality, Warmth, Personality Intensity), response length (Brevity). Interaction Model is an agent design input.                                                                                                              | Chatting Style + Voice attributes + Brevity                                                                             |
+| **Loading Text**                        | Per action    | In-character status messages while an action executes. Reflects Formality + Warmth + Emotional Coloring + Brevity.                                                                                                                                                                                                                                 | Formality + Warmth + Emotional Coloring + Brevity                                                                       |
+| **Welcome Message**                     | 800 chars     | The agent's first impression — greeting at conversation start. Sets the relationship dynamic (Register) and personality (Formality + Warmth + Emotional Coloring + Brevity).                                                                                                                                                                       | Identity + Register + Voice attributes + Emotional Coloring + Brevity                                                   |
+| **Error Message**                       | —             | Fallback message displayed when a system error occurs. Should reflect the agent's Formality + Warmth + Emotional Coloring + Brevity — a Casual, Warm agent doesn't say "An error has occurred."                                                                                                                                                    | Formality + Warmth + Emotional Coloring + Brevity                                                                       |
 
 ### Agent Settings That Affect Persona
 
 These aren't text fields you write — they're toggles and dropdowns — but they influence how the persona is expressed.
 
-| Setting | Type | Persona Mapping |
-|---|---|---|
-| **Tone** | Dropdown: Casual / Neutral / Formal | Coarse-grained shortcut that maps to Register + Formality. See [Platform Tone Setting](#platform-tone-setting) below. |
-| **Conversation Recommendations on Welcome Screen** | Toggle | Whether suggested conversation starters appear. Agents with defined use cases benefit from these. |
-| **Conversation Recommendations in Agent Responses** | Toggle | Whether clickable next-action chips appear. Maps to the agent's Interaction Model (an agent design input) — Proactive Drafter and Autonomous Operator benefit from these. |
+| Setting                                             | Type                                | Persona Mapping                                                                                                                                                           |
+| --------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tone**                                            | Dropdown: Casual / Neutral / Formal | Coarse-grained shortcut that maps to Register + Formality. See [Platform Tone Setting](#platform-tone-setting) below.                                                     |
+| **Conversation Recommendations on Welcome Screen**  | Toggle                              | Whether suggested conversation starters appear. Agents with defined use cases benefit from these.                                                                         |
+| **Conversation Recommendations in Agent Responses** | Toggle                              | Whether clickable next-action chips appear. Maps to the agent's Interaction Model (an agent design input) — Proactive Drafter and Autonomous Operator benefit from these. |
 
 ---
 
@@ -70,11 +70,11 @@ These aren't text fields you write — they're toggles and dropdowns — but the
 
 These settings control how action output renders in the conversation. They constrain Chatting Style — a persona with Heavy Formatting won't render rich text if the action's Output Format is set to Plain.
 
-| Location | Setting | Type | What It Controls |
-|---|---|---|---|
-| Action | **Output Format** | Plain / Rich Text | Whether the action can render rich text (bold, links, lists) or plain text only. Must be Rich Text for HTML prompt output to render. |
-| Action | **Show in Conversation** | Checkbox | Whether the action's output displays in the chat. When enabled with an HTML prompt template, HTML tags may render as literal text rather than formatted output. |
-| Prompt Template | **Output Format** | Plain Text / HTML / JSON | The format the template produces. HTML enables rich rendering when paired with a Rich Text action. JSON is for structured data consumed by downstream logic. |
+| Location        | Setting                  | Type                     | What It Controls                                                                                                                                                |
+| --------------- | ------------------------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Action          | **Output Format**        | Plain / Rich Text        | Whether the action can render rich text (bold, links, lists) or plain text only. Must be Rich Text for HTML prompt output to render.                            |
+| Action          | **Show in Conversation** | Checkbox                 | Whether the action's output displays in the chat. When enabled with an HTML prompt template, HTML tags may render as literal text rather than formatted output. |
+| Prompt Template | **Output Format**        | Plain Text / HTML / JSON | The format the template produces. HTML enables rich rendering when paired with a Rich Text action. JSON is for structured data consumed by downstream logic.    |
 
 ---
 
@@ -85,6 +85,7 @@ These settings control how action output renders in the conversation. They const
 The name users see in the chat interface header — the agent's first persona impression before any conversation starts. This is not an internal configuration label; it's a user-facing identity signal.
 
 A good agent name:
+
 - **Aligns with Identity** — a Direct, No-nonsense agent doesn't need a playful name, but a generic one wastes the opportunity
 - **Fits the Register** — a Subordinate agent named "The Boss" creates cognitive dissonance; a Peer named "Your Assistant" undermines the relationship dynamic
 - **Signals personality** — "Deal Progressinator" conveys energy and purpose; "Sales Agent" conveys nothing
@@ -106,6 +107,7 @@ The 255-character limit means this is a compressed summary, not the full persona
 - One sentence on core function
 
 **Example** (Deal Progressinator):
+
 > You are a decisive, analytical sales co-pilot for enterprise sellers. You lead with clear recommendations grounded in pipeline data, draft deliverables alongside your analysis, and push back when deal gaps need attention. Direct, proactive, no filler.
 
 **Anti-pattern:** Don't write a generic job description. "You are a helpful assistant that helps users with their tasks" wastes 255 characters saying nothing distinctive.
@@ -121,6 +123,7 @@ Map from the persona document's Context section (company, product, audience).
 The primary surface for detailed persona encoding. No hard character limit — this is where the full persona lives.
 
 Each topic can carry:
+
 - **Attribute-specific behavioral rules** relevant to that topic's use case
 - **Phrase book entries** for that context (preferred phrasings, vocabulary)
 - **Lexicon entries** (domain vocabulary scoped to this topic)
@@ -129,9 +132,10 @@ Each topic can carry:
 - **Tone flex triggers** (how Emotional Coloring and Empathy Level shift in this topic's context)
 - **Tone boundary reminders** (what the agent must never sound like in this topic)
 
-*The more specific the instruction, the more consistent the output.* Per-topic persona encoding beats generic global instructions for consistency.
+_The more specific the instruction, the more consistent the output._ Per-topic persona encoding beats generic global instructions for consistency.
 
 **Example** (Deal Progressinator — deal summary topic):
+
 > When summarizing a deal, lead with a compact status line: emoji health indicator, deal name, stage, and score. Follow with a checklist of exit criteria (met / unmet). End with a concrete next step — not a list of options, a single recommendation. Use Salesforce record links for all referenced opportunities and contacts. If data is stale (last activity >2 weeks), flag it before summarizing.
 
 <a id="per-topic-encoding-patterns"></a>
@@ -151,9 +155,11 @@ Each topic gets a persona instruction block that calibrates the global persona f
 - **Lexicon entries** — Domain vocabulary scoped to this topic (see [Per-Topic Lexicon](#per-topic-lexicon) below)
 
 **Example** — status check topic (terse):
+
 > Brevity: Terse. One-line status, emoji health indicator, no commentary. If the user asks a follow-up, answer it — don't volunteer context they didn't request.
 
 **Example** — deal analysis topic (moderate):
+
 > Brevity: Moderate. Lead with a recommendation and its rationale. Include supporting data points. Use bullet formatting for multi-factor analysis. End with a single next step.
 
 <a id="per-topic-lexicon"></a>
@@ -163,18 +169,21 @@ Each topic gets a persona instruction block that calibrates the global persona f
 When an agent operates across multiple topics, each topic may have its own vocabulary — technical terms, brand-specific language, industry jargon. Lexicon defines which words belong where, loaded only in the topics where they're relevant rather than globally.
 
 **How Lexicon differs from Phrase Book:**
-- **Phrase Book** = how the agent *sounds* in common situations — organized by situation (acknowledgement, apology, redirect)
-- **Lexicon** = what *words and terms* the agent uses in specific domains — organized by topic
+
+- **Phrase Book** = how the agent _sounds_ in common situations — organized by situation (acknowledgement, apology, redirect)
+- **Lexicon** = what _words and terms_ the agent uses in specific domains — organized by topic
 
 **Pattern:** Add a `Lexicon:` block within each topic's persona instructions.
 
 **Example** — a luxury watch agent:
 
 In product topics:
+
 > Lexicon: movement, chronograph, caliber, complication, bezel, case back, power reserve. Use these terms naturally — the audience expects them. Don't define them unless the user asks.
 
 In order-tracking topics:
-> *(No lexicon block — generic service vocabulary applies. Don't use watch terminology in shipping status responses.)*
+
+> _(No lexicon block — generic service vocabulary applies. Don't use watch terminology in shipping status responses.)_
 
 The distinction matters because loading specialized vocabulary globally wastes context and can cause the agent to over-use jargon in simple service interactions. Scope vocabulary to where it belongs.
 
@@ -185,17 +194,21 @@ The distinction matters because loading specialized vocabulary globally wastes c
 Tone Flex rules from the persona document map directly to per-topic instructions. The persona document defines how Emotional Coloring and Empathy Level shift by context; Topic Instructions encode those shifts.
 
 **Pattern:**
+
 > In [topic], shift Emotional Coloring toward [direction]. Shift Empathy Level toward [direction].
 
 **Example** — an agent with Neutral Emotional Coloring and Understated Empathy Level as baseline:
 
 In escalation topics:
+
 > Tone: Shift Emotional Coloring toward Encouraging. Shift Empathy Level toward Moderate. Acknowledge the difficulty briefly, then show the path forward. Never minimize the user's frustration.
 
 In data retrieval topics:
+
 > Tone: Maintain Neutral Emotional Coloring and Understated Empathy Level. State findings without editorial. Confidence labeling matters most here — label confirmed data vs. inferred data.
 
 In success/celebration contexts:
+
 > Tone: Shift Emotional Coloring toward Encouraging briefly. "Done. Nice progress." Then return to baseline. Don't overdo it.
 
 Tone Flex encoding makes the persona dynamic across topics while keeping it consistent — the same persona, expressed differently depending on context.
@@ -203,16 +216,18 @@ Tone Flex encoding makes the persona dynamic across topics while keeping it cons
 ### Action Output Response Instructions
 
 Controls how output from a specific action is formatted and presented. Maps to:
+
 - **Chatting Style** — emoji (None, Functional, Expressive), formatting (Plain, Selective, Heavy), punctuation (Conservative, Standard, Expressive), capitalization (Standard, Casual)
 - **Voice attributes** — Formality (how polished), Warmth (how approachable), Personality Intensity (how much character)
 - **Brevity** — response length (terse = minimal prose, expansive = full context)
 - **Guardrails** — persona consistency rules (emoji vocabulary, link formatting, prohibited phrases)
 
-*Note: The agent's Information Architecture (output structure patterns like progressive disclosure) is defined in agent design, not persona. Encoding output structure follows the agent design spec; encoding visual expression (Chatting Style, Voice attributes, Brevity) follows the persona document. The action's Output Format and prompt template's Output Format must also support the Chatting Style — see [Action and Template Settings That Affect Formatting](#action-and-template-settings-that-affect-formatting).*
+_Note: The agent's Information Architecture (output structure patterns like progressive disclosure) is defined in agent design, not persona. Encoding output structure follows the agent design spec; encoding visual expression (Chatting Style, Voice attributes, Brevity) follows the persona document. The action's Output Format and prompt template's Output Format must also support the Chatting Style — see [Action and Template Settings That Affect Formatting](#action-and-template-settings-that-affect-formatting)._
 
-**Anti-pattern:** Don't put identity lines ("You are Deal Progressinator...") here. Identity belongs in Role. These instructions shape *how output looks and reads*, not *who the agent is*. Identity lines in output instructions either leak into the response text or get ignored.
+**Anti-pattern:** Don't put identity lines ("You are Deal Progressinator...") here. Identity belongs in Role. These instructions shape _how output looks and reads_, not _who the agent is_. Identity lines in output instructions either leak into the response text or get ignored.
 
 **Example** (Deal Progressinator — comparable deals action):
+
 > Present results as a compact numbered list. Each entry: linked deal name, closed amount, discount percentage, approver (if available). End with a median or range summary in bold. No editorial commentary on whether the discount is good or bad — present the data and let the seller decide.
 
 ### Welcome Message (800 chars)
@@ -229,30 +244,34 @@ A Professional Formality + Neutral Warmth agent with Terse Brevity doesn't say "
 - Optionally surface conversation starters (if Conversation Recommendations on Welcome Screen is enabled)
 
 **Example** (Deal Progressinator — Casual Formality + Neutral Warmth + Encouraging Coloring + Concise Brevity + Peer Register):
+
 > What deal are we looking at?
 
 **Example** (formal support agent — Formal Formality + Warm + Neutral Coloring + Moderate Brevity + Subordinate Register):
+
 > I can help with account inquiries, billing questions, and technical support. How can I assist you?
 
 ### Loading Text
 
 Short, in-character status messages displayed while an action executes. Should reflect Formality + Warmth + Emotional Coloring + Brevity and signal which action was triggered so the user knows the right thing is happening.
 
-| Persona Attributes | Example Loading Text |
-|---|---|
-| Professional + Terse | "Pulling case data..." / "Running search..." |
-| Formal + Moderate | "Retrieving the requested case information..." |
-| Casual + Concise | "Grabbing that deal info..." / "Checking the exit criteria..." |
-| Casual + Warm + Moderate | "Let me grab that for you..." / "Searching for a match..." |
+| Persona Attributes       | Example Loading Text                                           |
+| ------------------------ | -------------------------------------------------------------- |
+| Professional + Terse     | "Pulling case data..." / "Running search..."                   |
+| Formal + Moderate        | "Retrieving the requested case information..."                 |
+| Casual + Concise         | "Grabbing that deal info..." / "Checking the exit criteria..." |
+| Casual + Warm + Moderate | "Let me grab that for you..." / "Searching for a match..."     |
 
 ### Error Message
 
 Fallback message displayed when a system error occurs. Should reflect the agent's Formality + Warmth + Emotional Coloring + Brevity — the error message is a persona surface, not a system log.
 
 **Example** (Casual + Neutral Warmth + Terse):
+
 > Something broke on my end. Try again — if it persists, escalate to the platform team.
 
 **Example** (Professional + Warm + Moderate):
+
 > I ran into an issue retrieving that information. Let me try again — if the problem continues, I'll connect you with someone who can help.
 
 **Anti-pattern:** A Casual, Warm agent doesn't say "An error has occurred. Please contact your system administrator." Match the error message to the persona, not to a system template.
@@ -263,13 +282,14 @@ Fallback message displayed when a system error occurs. Should reflect the agent'
 
 The Tone dropdown (Casual / Neutral / Formal) is a coarse-grained platform shortcut. It gives the agent a general formality nudge but captures very little of what a persona document defines.
 
-| Tone Setting | Approximate Framework Mapping |
-|---|---|
-| **Casual** | Register: Peer. Formality: Casual or Informal. Contractions, informal phrasing. |
-| **Neutral** | Register: Peer or Advisor. Formality: Professional. Standard prose, no strong personality. |
-| **Formal** | Register: Subordinate or Coach. Formality: Formal. No contractions, structured phrasing. |
+| Tone Setting | Approximate Framework Mapping                                                              |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| **Casual**   | Register: Peer. Formality: Casual or Informal. Contractions, informal phrasing.            |
+| **Neutral**  | Register: Peer or Advisor. Formality: Professional. Standard prose, no strong personality. |
+| **Formal**   | Register: Subordinate or Coach. Formality: Formal. No contractions, structured phrasing.   |
 
 **What the dropdown doesn't capture:**
+
 - **Emotional Coloring** (Blunt / Clinical / Neutral / Encouraging / Enthusiastic) — the emotional axis is independent of formality
 - **Warmth** (Cool / Neutral / Warm / Bright / Radiant) — interpersonal temperature is independent of formality
 - **Personality Intensity** (Reserved / Moderate / Distinctive / Bold) — character volume is orthogonal to formality
@@ -304,12 +324,15 @@ A lightweight encoding pattern that achieves strong persona expression in a sing
 A single `Conversation Style:` instruction in global or topic instructions compresses the persona into one paragraph. The key `Conversation Style` (rather than `tone`) reduces conflict with the system-level Tone dropdown setting.
 
 **Template:**
+
 > Conversation Style: [Register/relationship] who [core behavior]. [Emotional coloring and empathy approach]. [Formality and warmth signals]. [Brevity calibration]. [Distinctive voice markers if any].
 
 **Example** (internal sales coach):
+
 > Conversation Style: Peer advisor who leads with data and clear recommendations. Neutral, matter-of-fact — state outcomes as facts, no dramatization. Professional language, occasional contractions, no filler. Keep responses concise — every sentence earns its place. Push back when deal gaps need attention.
 
 **Example** (customer-facing service agent with regional voice):
+
 > Conversation Style: Trusted ally who sounds like a knowledgeable close friend. Respond with empathy and understanding — acknowledge their circumstances before solving. Warm, casual language. Keep messages short but continue the conversation for 2-3 exchanges to build rapport. Use regional colloquialisms naturally when appropriate.
 
 ### When to Use
@@ -375,20 +398,20 @@ Agent Script is GA. A single `.agent` file holds all instructions — no charact
 
 ### Persona-Carrying YAML Keys
 
-| YAML Key | Where | Persona Mapping |
-|---|---|---|
-| `system.instructions` | `system:` block | Full persona. No character limits. Primary surface. |
-| `system.messages.welcome` | `system:` block | Static welcome message. |
-| `system.messages.error` | `system:` block | Static error message. |
-| Topic `system:` | `topic:` block | Per-topic persona override. **Replaces** global instructions for this topic. |
-| `reasoning.instructions` | `topic:` block | Per-topic persona calibration (brevity, lexicon, tone flex). |
+| YAML Key                     | Where             | Persona Mapping                                                                       |
+| ---------------------------- | ----------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `system.instructions`        | `system:` block   | Full persona. No character limits. Primary surface.                                   |
+| `system.messages.welcome`    | `system:` block   | Static welcome message.                                                               |
+| `system.messages.error`      | `system:` block   | Static error message.                                                                 |
+| Topic `system:`              | `topic:` block    | Per-topic persona override. **Replaces** global instructions for this topic.          |
+| `reasoning.instructions`     | `topic:` block    | Per-topic persona calibration (brevity, lexicon, tone flex).                          |
 | `progress_indicator_message` | Action invocation | In-character loading text per action. Requires `include_in_progress_indicator: True`. |
-| `| text` in `if/else` | `instructions: ->` | Deterministic output. Bypasses LLM — must be pre-authored in persona voice. |
+| `                            | text`in`if/else`  | `instructions: ->`                                                                    | Deterministic output. Bypasses LLM — must be pre-authored in persona voice. |
 
 ### Recommended Pattern
 
 1. **`system.instructions`** — Put the bulk of persona content here: Identity, attribute behavioral rules, phrase book, chatting style rules, tone boundaries, never-say list. This is the primary persona surface in Agent Script — the equivalent of Role + Topic Instructions combined in Agent Builder. No character limits apply, so the full persona document can live here.
-2. **Topic-level `system:` and `reasoning.instructions`** — Topic-level `system:` **replaces** global `system.instructions` for that topic — use it only when a topic requires a significant persona shift (e.g., escalation shifts Register from Peer to Advisor). For lighter calibration (brevity, lexicon, tone flex triggers), use `reasoning.instructions` within the topic, which extends rather than replaces the global persona. To ensure the agent keeps its persona in context during extended sessions, include **pointers** — short directives that reference back to the system-level persona. Example: *"Remember, you are [Name]: succinct, friendly, casual. Respond in line with the detailed persona defined in system instructions."* Pointers are especially important for topics where conversation may run long.
+2. **Topic-level `system:` and `reasoning.instructions`** — Topic-level `system:` **replaces** global `system.instructions` for that topic — use it only when a topic requires a significant persona shift (e.g., escalation shifts Register from Peer to Advisor). For lighter calibration (brevity, lexicon, tone flex triggers), use `reasoning.instructions` within the topic, which extends rather than replaces the global persona. To ensure the agent keeps its persona in context during extended sessions, include **pointers** — short directives that reference back to the system-level persona. Example: _"Remember, you are [Name]: succinct, friendly, casual. Respond in line with the detailed persona defined in system instructions."_ Pointers are especially important for topics where conversation may run long.
 3. **`progress_indicator_message`** — Write static, in-character loading text for each action. Match Formality + Warmth + Emotional Coloring + Brevity. Requires `include_in_progress_indicator: True` on the action invocation.
 4. **`system.messages.welcome`** — Write a static welcome message reflecting Identity + Register + Formality + Warmth + Brevity.
 5. **`system.messages.error`** — Fallback message for system errors. Should reflect Formality + Warmth + Emotional Coloring + Brevity — same guidance as the Agent Builder Error Message field.
@@ -398,12 +421,12 @@ Agent Script is GA. A single `.agent` file holds all instructions — no charact
 
 Several Agent Script message types are static (not LLM-generated) and must be authored to align with the persona:
 
-| Message Type | YAML Key | Persona Guidance |
-|---|---|---|
-| **Welcome** | `system.messages.welcome` | Identity + Register + Formality + Warmth + Brevity |
-| **Error** | `system.messages.error` | Formality + Warmth + Emotional Coloring + Brevity |
-| **Loading** | `progress_indicator_message` | Formality + Warmth + Emotional Coloring + Brevity |
-| **Deterministic responses** | `| text` in `if`/`else` | Full persona — write exactly as it should appear |
+| Message Type                | YAML Key                     | Persona Guidance                                   |
+| --------------------------- | ---------------------------- | -------------------------------------------------- | ------------------------------------------------ |
+| **Welcome**                 | `system.messages.welcome`    | Identity + Register + Formality + Warmth + Brevity |
+| **Error**                   | `system.messages.error`      | Formality + Warmth + Emotional Coloring + Brevity  |
+| **Loading**                 | `progress_indicator_message` | Formality + Warmth + Emotional Coloring + Brevity  |
+| **Deterministic responses** | `                            | text`in`if`/`else`                                 | Full persona — write exactly as it should appear |
 
 ## Model Parameters
 
@@ -411,13 +434,14 @@ Several Agent Script message types are static (not LLM-generated) and must be au
 
 Temperature, frequency penalty, and presence penalty are configured in **Einstein Studio**, not Agent Builder. They affect the reasoning engine's output diversity, not the persona intent — but they interact with persona in ways that can undermine or reinforce it.
 
-| Parameter | What It Controls |
-|---|---|
-| **Temperature** | Randomness/creativity. Lower = more deterministic and predictable. Higher = more varied and creative. |
-| **Frequency Penalty** | Discourages word/phrase repetition. Higher = more varied vocabulary. |
-| **Presence Penalty** | Encourages introducing new topics/words. Higher = broader coverage, less depth. |
+| Parameter             | What It Controls                                                                                      |
+| --------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Temperature**       | Randomness/creativity. Lower = more deterministic and predictable. Higher = more varied and creative. |
+| **Frequency Penalty** | Discourages word/phrase repetition. Higher = more varied vocabulary.                                  |
+| **Presence Penalty**  | Encourages introducing new topics/words. Higher = broader coverage, less depth.                       |
 
 **Key interactions with persona:**
+
 - **Low temperature + specific persona instructions** = most consistent persona. Best for production agents.
 - **High temperature + vague persona instructions** = inconsistent persona. The agent drifts.
 - **High frequency penalty** can conflict with Terse Brevity — the model may avoid reusing short, functional words the persona calls for.
@@ -431,18 +455,18 @@ Temperature, frequency penalty, and presence penalty are configured in **Einstei
 
 These fields are required to configure an agent but belong to agent design, not persona design. The persona document does not define them.
 
-| Field | Why It's Not Persona |
-|---|---|
-| **API Name** | System identifier |
-| **Agent Type** | Deployment context (Service Agent, Employee Agent) |
-| **Description** (1000 chars) | Human-readable summary for admins. Not seen by the agent. |
-| **Topics** | Map to jobs-to-be-done — what the agent *can do*, not *who it is* |
-| **Data Sources** | What data the agent can access |
-| **Action Instructions** | What the action does and how to invoke it. Functional, not persona. |
-| **Default / Additional Languages** | Language configuration |
-| **Agent User** | Permissions and data access context |
-| **Enhanced Event Logs** | Observability — conversation transcript recording |
+| Field                              | Why It's Not Persona                                                |
+| ---------------------------------- | ------------------------------------------------------------------- |
+| **API Name**                       | System identifier                                                   |
+| **Agent Type**                     | Deployment context (Service Agent, Employee Agent)                  |
+| **Description** (1000 chars)       | Human-readable summary for admins. Not seen by the agent.           |
+| **Topics**                         | Map to jobs-to-be-done — what the agent _can do_, not _who it is_   |
+| **Data Sources**                   | What data the agent can access                                      |
+| **Action Instructions**            | What the action does and how to invoke it. Functional, not persona. |
+| **Default / Additional Languages** | Language configuration                                              |
+| **Agent User**                     | Permissions and data access context                                 |
+| **Enhanced Event Logs**            | Observability — conversation transcript recording                   |
 
-If you're deciding *what the agent does* and *what data it accesses*, that's agent design. If you're deciding *how the agent sounds and behaves*, that's persona design. The persona skill *can* note when persona decisions have implications for these fields (e.g., a Proactive Drafter interaction model implies certain topic structures).
+If you're deciding _what the agent does_ and _what data it accesses_, that's agent design. If you're deciding _how the agent sounds and behaves_, that's persona design. The persona skill _can_ note when persona decisions have implications for these fields (e.g., a Proactive Drafter interaction model implies certain topic structures).
 
 ---

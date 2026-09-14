@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Multi-Turn Test Patterns Reference
 
 Detailed reference for 6 multi-turn test patterns with examples, expected behaviors, and failure indicators.
@@ -7,14 +8,14 @@ Detailed reference for 6 multi-turn test patterns with examples, expected behavi
 
 ## Pattern Overview
 
-| # | Pattern | Tests | Complexity |
-|---|---------|-------|------------|
-| 1 | Topic Re-Matching | Topic switching accuracy | Medium |
-| 2 | Context Preservation | Information retention | Medium |
-| 3 | Escalation Cascade | Frustration-triggered handoff | Medium |
-| 4 | Guardrail Mid-Conversation | Safety within active sessions | Medium |
-| 5 | Action Chaining | Output→input data flow | High |
-| 6 | Variable Injection | Pre-set session variables | High |
+| #   | Pattern                    | Tests                         | Complexity |
+| --- | -------------------------- | ----------------------------- | ---------- |
+| 1   | Topic Re-Matching          | Topic switching accuracy      | Medium     |
+| 2   | Context Preservation       | Information retention         | Medium     |
+| 3   | Escalation Cascade         | Frustration-triggered handoff | Medium     |
+| 4   | Guardrail Mid-Conversation | Safety within active sessions | Medium     |
+| 5   | Action Chaining            | Output→input data flow        | High       |
+| 6   | Variable Injection         | Pre-set session variables     | High       |
 
 ---
 
@@ -31,6 +32,7 @@ In production, users frequently change their mind mid-conversation. An agent stu
 ### Scenario Templates
 
 #### 1a. Natural Topic Switch
+
 ```yaml
 - name: "topic_switch_natural"
   description: "User changes intent from cancel to reschedule"
@@ -50,6 +52,7 @@ In production, users frequently change their mind mid-conversation. An agent stu
 ```
 
 #### 1b. Rapid Topic Switching
+
 ```yaml
 - name: "topic_switch_rapid"
   description: "User switches between 3 topics in quick succession"
@@ -66,6 +69,7 @@ In production, users frequently change their mind mid-conversation. An agent stu
 ```
 
 #### 1c. Return to Original Topic
+
 ```yaml
 - name: "topic_return_original"
   description: "User detours then returns to original topic"
@@ -83,6 +87,7 @@ In production, users frequently change their mind mid-conversation. An agent stu
 ```
 
 #### 1d. Implicit Topic Change
+
 ```yaml
 - name: "topic_switch_implicit"
   description: "User implies topic change without explicit switch"
@@ -97,11 +102,11 @@ In production, users frequently change their mind mid-conversation. An agent stu
 
 ### Failure Indicators
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
-| Agent continues cancel flow after "reschedule instead" | TOPIC_RE_MATCHING_FAILURE | Target topic description lacks transition phrases |
-| Agent says "I'll help you cancel" on Turn 2 | TOPIC_RE_MATCHING_FAILURE | Cancel topic too aggressively matches |
-| Agent asks "What would you like to do?" (no topic match) | TOPIC_NOT_MATCHED | Neither topic matches the phrasing |
+| Signal                                                   | Category                  | Root Cause                                        |
+| -------------------------------------------------------- | ------------------------- | ------------------------------------------------- |
+| Agent continues cancel flow after "reschedule instead"   | TOPIC_RE_MATCHING_FAILURE | Target topic description lacks transition phrases |
+| Agent says "I'll help you cancel" on Turn 2              | TOPIC_RE_MATCHING_FAILURE | Cancel topic too aggressively matches             |
+| Agent asks "What would you like to do?" (no topic match) | TOPIC_NOT_MATCHED         | Neither topic matches the phrasing                |
 
 ---
 
@@ -118,6 +123,7 @@ Users become frustrated when agents ask for information they already provided. C
 ### Scenario Templates
 
 #### 2a. User Identity Retention
+
 ```yaml
 - name: "context_user_identity"
   description: "Agent retains user name across turns"
@@ -134,6 +140,7 @@ Users become frustrated when agents ask for information they already provided. C
 ```
 
 #### 2b. Entity Reference Persistence
+
 ```yaml
 - name: "context_entity_persistence"
   description: "Agent remembers referenced entities"
@@ -149,6 +156,7 @@ Users become frustrated when agents ask for information they already provided. C
 ```
 
 #### 2c. Cross-Topic Context
+
 ```yaml
 - name: "context_cross_topic"
   description: "Context persists when switching topics"
@@ -163,6 +171,7 @@ Users become frustrated when agents ask for information they already provided. C
 ```
 
 #### 2d. Multi-Entity Context
+
 ```yaml
 - name: "context_multi_entity"
   description: "Agent tracks multiple entities mentioned"
@@ -180,11 +189,11 @@ Users become frustrated when agents ask for information they already provided. C
 
 ### Failure Indicators
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
-| "Could you please provide your name?" (already given) | CONTEXT_PRESERVATION_FAILURE | Agent treating each turn independently |
-| "Which order are you referring to?" (only one mentioned) | CONTEXT_PRESERVATION_FAILURE | Session state not propagating |
-| Agent uses wrong entity from earlier turn | CONTEXT_PRESERVATION_FAILURE | Entity resolution error |
+| Signal                                                   | Category                     | Root Cause                             |
+| -------------------------------------------------------- | ---------------------------- | -------------------------------------- |
+| "Could you please provide your name?" (already given)    | CONTEXT_PRESERVATION_FAILURE | Agent treating each turn independently |
+| "Which order are you referring to?" (only one mentioned) | CONTEXT_PRESERVATION_FAILURE | Session state not propagating          |
+| Agent uses wrong entity from earlier turn                | CONTEXT_PRESERVATION_FAILURE | Entity resolution error                |
 
 ---
 
@@ -201,6 +210,7 @@ Agents that never escalate trap frustrated users in loops. Agents that escalate 
 ### Scenario Templates
 
 #### 3a. Frustration Build-Up
+
 ```yaml
 - name: "escalation_frustration"
   description: "Escalation after repeated failed attempts"
@@ -218,6 +228,7 @@ Agents that never escalate trap frustrated users in loops. Agents that escalate 
 ```
 
 #### 3b. Immediate Escalation Request
+
 ```yaml
 - name: "escalation_immediate"
   description: "User immediately asks for human agent"
@@ -231,6 +242,7 @@ Agents that never escalate trap frustrated users in loops. Agents that escalate 
 ```
 
 #### 3c. Escalation After Failed Action
+
 ```yaml
 - name: "escalation_after_failure"
   description: "Action fails, then user requests escalation"
@@ -247,6 +259,7 @@ Agents that never escalate trap frustrated users in loops. Agents that escalate 
 ```
 
 #### 3d. Escalation Resistance (Should NOT Escalate)
+
 ```yaml
 - name: "escalation_resistance"
   description: "Agent handles without unnecessary escalation"
@@ -263,11 +276,11 @@ Agents that never escalate trap frustrated users in loops. Agents that escalate 
 
 ### Failure Indicators
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
+| Signal                                                       | Category                      | Root Cause                                        |
+| ------------------------------------------------------------ | ----------------------------- | ------------------------------------------------- |
 | Agent continues troubleshooting after "I need a real person" | MULTI_TURN_ESCALATION_FAILURE | Missing escalation triggers for explicit requests |
-| Agent escalates on first mild complaint | UNNECESSARY_ESCALATION | Escalation threshold too sensitive |
-| No handoff message, just silence | ESCALATION_NOT_TRIGGERED | Escalation action not configured |
+| Agent escalates on first mild complaint                      | UNNECESSARY_ESCALATION        | Escalation threshold too sensitive                |
+| No handoff message, just silence                             | ESCALATION_NOT_TRIGGERED      | Escalation action not configured                  |
 
 ---
 
@@ -284,6 +297,7 @@ Attackers often try to use conversation context to bypass guardrails ("jailbreak
 ### Scenario Templates
 
 #### 4a. PII Request After Rapport
+
 ```yaml
 - name: "guardrail_pii_after_rapport"
   description: "Harmful request after establishing trust"
@@ -301,6 +315,7 @@ Attackers often try to use conversation context to bypass guardrails ("jailbreak
 ```
 
 #### 4b. Injection Attempt
+
 ```yaml
 - name: "guardrail_injection_attempt"
   description: "Prompt injection within conversation"
@@ -318,6 +333,7 @@ Attackers often try to use conversation context to bypass guardrails ("jailbreak
 ```
 
 #### 4c. Gradual Boundary Push
+
 ```yaml
 - name: "guardrail_gradual_push"
   description: "User gradually pushes toward restricted content"
@@ -334,6 +350,7 @@ Attackers often try to use conversation context to bypass guardrails ("jailbreak
 ```
 
 #### 4d. Data Exfiltration Attempt
+
 ```yaml
 - name: "guardrail_data_exfil"
   description: "Attempt to extract bulk data"
@@ -348,11 +365,11 @@ Attackers often try to use conversation context to bypass guardrails ("jailbreak
 
 ### Failure Indicators
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
+| Signal                                           | Category                | Root Cause                          |
+| ------------------------------------------------ | ----------------------- | ----------------------------------- |
 | Agent provides PII after "friendly" conversation | GUARDRAIL_NOT_TRIGGERED | Guardrails not enforced mid-session |
-| Agent follows injection instructions | GUARDRAIL_NOT_TRIGGERED | No prompt injection protection |
-| Agent can't resume after guardrail | RECOVERY_FAILURE | Guardrail kills session state |
+| Agent follows injection instructions             | GUARDRAIL_NOT_TRIGGERED | No prompt injection protection      |
+| Agent can't resume after guardrail               | RECOVERY_FAILURE        | Guardrail kills session state       |
 
 ---
 
@@ -369,6 +386,7 @@ Complex workflows require multiple actions in sequence (identify record → get 
 ### Scenario Templates
 
 #### 5a. Identify-Then-Act
+
 ```yaml
 - name: "chain_identify_then_act"
   description: "Identify entity, then perform action on it"
@@ -384,6 +402,7 @@ Complex workflows require multiple actions in sequence (identify record → get 
 ```
 
 #### 5b. Multi-Step Workflow
+
 ```yaml
 - name: "chain_multi_step"
   description: "Three-step action chain"
@@ -402,6 +421,7 @@ Complex workflows require multiple actions in sequence (identify record → get 
 ```
 
 #### 5c. Cross-Object Chain
+
 ```yaml
 - name: "chain_cross_object"
   description: "Actions span multiple Salesforce objects"
@@ -420,11 +440,11 @@ Complex workflows require multiple actions in sequence (identify record → get 
 
 ### Failure Indicators
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
+| Signal                                        | Category             | Root Cause                          |
+| --------------------------------------------- | -------------------- | ----------------------------------- |
 | "Which account?" after already identifying it | ACTION_CHAIN_FAILURE | Action output not stored in context |
-| Wrong record used in follow-up action | ACTION_CHAIN_FAILURE | Entity resolution mismatch |
-| Action invoked with null/empty inputs | ACTION_CHAIN_FAILURE | Output variable mapping broken |
+| Wrong record used in follow-up action         | ACTION_CHAIN_FAILURE | Entity resolution mismatch          |
+| Action invoked with null/empty inputs         | ACTION_CHAIN_FAILURE | Output variable mapping broken      |
 
 ---
 
@@ -441,6 +461,7 @@ In embedded agent contexts (e.g., agent deployed on a record page), variables li
 ### Scenario Templates
 
 #### 6a. Pre-Set Account Context
+
 ```yaml
 - name: "variable_account_context"
   description: "Agent uses pre-injected AccountId"
@@ -460,6 +481,7 @@ In embedded agent contexts (e.g., agent deployed on a record page), variables li
 ```
 
 #### 6b. User Identity Variable
+
 ```yaml
 - name: "variable_user_identity"
   description: "Agent uses pre-set user context"
@@ -476,6 +498,7 @@ In embedded agent contexts (e.g., agent deployed on a record page), variables li
 ```
 
 #### 6c. Variable Persistence Across Topics
+
 ```yaml
 - name: "variable_cross_topic"
   description: "Variables persist when switching topics"
@@ -495,11 +518,11 @@ In embedded agent contexts (e.g., agent deployed on a record page), variables li
 
 ### Failure Indicators
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
-| "Which account are you asking about?" (variable was pre-set) | VARIABLE_NOT_USED | Agent not reading session variables |
-| Variables work on Turn 1 but not Turn 3 | VARIABLE_PERSISTENCE_FAILURE | Variables lost on topic switch |
-| Agent ignores variable and uses different account | VARIABLE_OVERRIDE | Action not wired to session variable |
+| Signal                                                       | Category                     | Root Cause                           |
+| ------------------------------------------------------------ | ---------------------------- | ------------------------------------ |
+| "Which account are you asking about?" (variable was pre-set) | VARIABLE_NOT_USED            | Agent not reading session variables  |
+| Variables work on Turn 1 but not Turn 3                      | VARIABLE_PERSISTENCE_FAILURE | Variables lost on topic switch       |
+| Agent ignores variable and uses different account            | VARIABLE_OVERRIDE            | Action not wired to session variable |
 
 ---
 
@@ -507,22 +530,22 @@ In embedded agent contexts (e.g., agent deployed on a record page), variables li
 
 Choose patterns based on your agent's capabilities:
 
-| Agent Has | Test These Patterns |
-|-----------|-------------------|
-| Multiple topics | 1 (Topic Re-Matching) |
-| Stateful actions | 2 (Context Preservation), 5 (Action Chaining) |
-| Escalation paths | 3 (Escalation Cascade) |
-| Guardrails/safety rules | 4 (Guardrail Mid-Conversation) |
-| Session variables | 6 (Variable Injection) |
-| All of the above | Use `multi-turn-comprehensive.yaml` template |
+| Agent Has               | Test These Patterns                           |
+| ----------------------- | --------------------------------------------- |
+| Multiple topics         | 1 (Topic Re-Matching)                         |
+| Stateful actions        | 2 (Context Preservation), 5 (Action Chaining) |
+| Escalation paths        | 3 (Escalation Cascade)                        |
+| Guardrails/safety rules | 4 (Guardrail Mid-Conversation)                |
+| Session variables       | 6 (Variable Injection)                        |
+| All of the above        | Use `multi-turn-comprehensive.yaml` template  |
 
 ---
 
 ## Related Documentation
 
-| Resource | Link |
-|----------|------|
+| Resource                 | Link                                                                     |
+| ------------------------ | ------------------------------------------------------------------------ |
 | Multi-Turn Testing Guide | [multi-turn-testing-guide.md](../references/multi-turn-testing-guide.md) |
-| Agent API Reference | [agent-api-reference.md](../references/agent-api-reference.md) |
-| Agentic Fix Loops | [agentic-fix-loops.md](agentic-fix-loops.md) |
-| Coverage Analysis | [coverage-analysis.md](../references/coverage-analysis.md) |
+| Agent API Reference      | [agent-api-reference.md](../references/agent-api-reference.md)           |
+| Agentic Fix Loops        | [agentic-fix-loops.md](agentic-fix-loops.md)                             |
+| Coverage Analysis        | [coverage-analysis.md](../references/coverage-analysis.md)               |

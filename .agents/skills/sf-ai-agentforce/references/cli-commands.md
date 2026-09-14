@@ -23,12 +23,12 @@ Makes a published agent available to users.
 sf agent activate --api-name <AgentApiName> --target-org <alias> --json
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--api-name` | Yes | API name of the agent to activate |
-| `--target-org` | Yes | Alias or username of the target org |
-| `--api-version` | No | Override the API version used for the request |
-| `--json` | No | Return output as JSON (recommended) |
+| Flag            | Required | Description                                   |
+| --------------- | -------- | --------------------------------------------- |
+| `--api-name`    | Yes      | API name of the agent to activate             |
+| `--target-org`  | Yes      | Alias or username of the target org           |
+| `--api-version` | No       | Override the API version used for the request |
+| `--json`        | No       | Return output as JSON (recommended)           |
 
 **Prerequisites:** Agent must be published first via `sf agent publish authoring-bundle`.
 
@@ -40,12 +40,12 @@ Deactivates an active agent. Required before making changes to topics, actions, 
 sf agent deactivate --api-name <AgentApiName> --target-org <alias> --json
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--api-name` | Yes | API name of the agent to deactivate |
-| `--target-org` | Yes | Alias or username of the target org |
-| `--api-version` | No | Override the API version used for the request |
-| `--json` | No | Return output as JSON (recommended) |
+| Flag            | Required | Description                                   |
+| --------------- | -------- | --------------------------------------------- |
+| `--api-name`    | Yes      | API name of the agent to deactivate           |
+| `--target-org`  | Yes      | Alias or username of the target org           |
+| `--api-version` | No       | Override the API version used for the request |
+| `--json`        | No       | Return output as JSON (recommended)           |
 
 ### sf agent create
 
@@ -82,23 +82,23 @@ sf agent generate agent-spec \
 sf agent generate agent-spec --spec ./agent-spec.yaml
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--type` | No | Agent type: `customer` or `internal` |
-| `--role` | No | Agent's role description |
-| `--company-name` | No | Company name for agent context |
-| `--company-description` | No | Company description for grounding |
-| `--company-website` | No | Company website URL for enrichment |
-| `--tone` | No | Conversational tone: `formal`, `casual`, or `neutral` |
-| `--full-interview` | No | Interactive prompt for all properties |
-| `--spec` | No | Path to existing spec YAML for iterative refinement |
-| `--prompt-template` | No | Custom prompt template for spec generation |
-| `--grounding-context` | No | Additional context for grounding the agent |
-| `--force-overwrite` | No | Overwrite existing output file without prompting |
-| `--enrich-logs` | No | Include enrichment logs in output |
-| `--max-topics` | No | Maximum number of topics to generate |
-| `--agent-user` | No | Default agent user for the spec |
-| `--output-file` | No | Path for the output spec YAML file |
+| Flag                    | Required | Description                                           |
+| ----------------------- | -------- | ----------------------------------------------------- |
+| `--type`                | No       | Agent type: `customer` or `internal`                  |
+| `--role`                | No       | Agent's role description                              |
+| `--company-name`        | No       | Company name for agent context                        |
+| `--company-description` | No       | Company description for grounding                     |
+| `--company-website`     | No       | Company website URL for enrichment                    |
+| `--tone`                | No       | Conversational tone: `formal`, `casual`, or `neutral` |
+| `--full-interview`      | No       | Interactive prompt for all properties                 |
+| `--spec`                | No       | Path to existing spec YAML for iterative refinement   |
+| `--prompt-template`     | No       | Custom prompt template for spec generation            |
+| `--grounding-context`   | No       | Additional context for grounding the agent            |
+| `--force-overwrite`     | No       | Overwrite existing output file without prompting      |
+| `--enrich-logs`         | No       | Include enrichment logs in output                     |
+| `--max-topics`          | No       | Maximum number of topics to generate                  |
+| `--agent-user`          | No       | Default agent user for the spec                       |
+| `--output-file`         | No       | Path for the output spec YAML file                    |
 
 ### sf agent generate authoring-bundle
 
@@ -108,15 +108,15 @@ Generates an authoring bundle scaffolding from an existing agent in the org.
 sf agent generate authoring-bundle --api-name <AgentApiName> --target-org <alias> --json
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--api-name` | No | API name of the agent to generate from |
-| `--name` | No | Name for the authoring bundle |
-| `--no-spec` | No | Generate without a spec file |
-| `--force-overwrite` | No | Overwrite existing files |
-| `--authoring-bundle` | No | Path to authoring bundle directory |
-| `--target-org` | No | Alias or username of the target org |
-| `--json` | No | Return output as JSON |
+| Flag                 | Required | Description                            |
+| -------------------- | -------- | -------------------------------------- |
+| `--api-name`         | No       | API name of the agent to generate from |
+| `--name`             | No       | Name for the authoring bundle          |
+| `--no-spec`          | No       | Generate without a spec file           |
+| `--force-overwrite`  | No       | Overwrite existing files               |
+| `--authoring-bundle` | No       | Path to authoring bundle directory     |
+| `--target-org`       | No       | Alias or username of the target org    |
+| `--json`             | No       | Return output as JSON                  |
 
 ### sf agent generate template
 
@@ -128,10 +128,10 @@ sf agent generate template \
     --agent-version 1
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--agent-file` | Yes | Path to the `.bot-meta.xml` file |
-| `--agent-version` | Yes | BotVersion number to template |
+| Flag              | Required | Description                      |
+| ----------------- | -------- | -------------------------------- |
+| `--agent-file`    | Yes      | Path to the `.bot-meta.xml` file |
+| `--agent-version` | Yes      | BotVersion number to template    |
 
 The generated BotTemplate wraps Bot, BotVersion, and GenAiPlannerBundle metadata for distribution. Package the template in a managed package for sharing between orgs or publishing on AppExchange.
 
@@ -149,11 +149,11 @@ Validates Agent Script syntax before publishing.
 sf agent validate authoring-bundle --api-name <AgentApiName> --target-org <alias> --json
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--api-name` | Yes | API name of the agent to validate |
-| `--target-org` | Yes | Alias or username of the target org |
-| `--json` | No | Return output as JSON (recommended) |
+| Flag           | Required | Description                         |
+| -------------- | -------- | ----------------------------------- |
+| `--api-name`   | Yes      | API name of the agent to validate   |
+| `--target-org` | Yes      | Alias or username of the target org |
+| `--json`       | No       | Return output as JSON (recommended) |
 
 ### sf agent publish authoring-bundle
 
@@ -163,12 +163,12 @@ Publishes an agent's authoring bundle to the org.
 sf agent publish authoring-bundle --api-name <AgentApiName> --target-org <alias> --json
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--api-name` | Yes | API name of the agent to publish |
-| `--target-org` | Yes | Alias or username of the target org |
-| `--skip-retrieve` | No | Skip metadata retrieval from org (faster for CI/CD, v2.122.6+) |
-| `--json` | No | Return output as JSON (recommended) |
+| Flag              | Required | Description                                                    |
+| ----------------- | -------- | -------------------------------------------------------------- |
+| `--api-name`      | Yes      | API name of the agent to publish                               |
+| `--target-org`    | Yes      | Alias or username of the target org                            |
+| `--skip-retrieve` | No       | Skip metadata retrieval from org (faster for CI/CD, v2.122.6+) |
+| `--json`          | No       | Return output as JSON (recommended)                            |
 
 ### sf agent preview
 
@@ -188,23 +188,23 @@ sf agent preview --api-name <AgentApiName> --output-dir ./logs --apex-debug --ta
 sf agent preview --authoring-bundle <path> --target-org <alias>
 ```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--api-name` | Yes* | API name of the agent to preview |
-| `--authoring-bundle` | Yes* | Path to local authoring bundle (alternative to `--api-name`) |
-| `--target-org` | Yes | Alias or username of the target org |
-| `--use-live-actions` | No | Execute real Apex/Flows instead of LLM simulation |
-| `--output-dir` | No | Directory for preview output/logs |
-| `--apex-debug` | No | Include Apex debug logs in output |
+| Flag                 | Required | Description                                                  |
+| -------------------- | -------- | ------------------------------------------------------------ |
+| `--api-name`         | Yes\*    | API name of the agent to preview                             |
+| `--authoring-bundle` | Yes\*    | Path to local authoring bundle (alternative to `--api-name`) |
+| `--target-org`       | Yes      | Alias or username of the target org                          |
+| `--use-live-actions` | No       | Execute real Apex/Flows instead of LLM simulation            |
+| `--output-dir`       | No       | Directory for preview output/logs                            |
+| `--apex-debug`       | No       | Include Apex debug logs in output                            |
 
-*One of `--api-name` or `--authoring-bundle` is required.
+\*One of `--api-name` or `--authoring-bundle` is required.
 
 ---
 
 ## Cross-Skill References
 
-| Command Area | Skill | Notes |
-|-------------|-------|-------|
-| Agent Script `.agent` files, preview, authoring-bundle | [sf-ai-agentscript](../../sf-ai-agentscript/SKILL.md) | Code-first agent development |
-| Deployment orchestration, CI/CD | [sf-deploy](../../sf-deploy/SKILL.md) | Agent deployment workflows |
-| Test execution, coverage analysis | [sf-ai-agentforce-testing](../../sf-ai-agentforce-testing/SKILL.md) | `sf agent test run/list/results` |
+| Command Area                                           | Skill                                                               | Notes                            |
+| ------------------------------------------------------ | ------------------------------------------------------------------- | -------------------------------- |
+| Agent Script `.agent` files, preview, authoring-bundle | [sf-ai-agentscript](../../sf-ai-agentscript/SKILL.md)               | Code-first agent development     |
+| Deployment orchestration, CI/CD                        | [sf-deploy](../../sf-deploy/SKILL.md)                               | Agent deployment workflows       |
+| Test execution, coverage analysis                      | [sf-ai-agentforce-testing](../../sf-ai-agentforce-testing/SKILL.md) | `sf agent test run/list/results` |

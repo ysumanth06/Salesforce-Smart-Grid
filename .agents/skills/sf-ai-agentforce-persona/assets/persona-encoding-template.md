@@ -13,13 +13,13 @@ date: 2026-03-10
 
 ## Encoding Method
 
-*Method selected based on target platform. See `references/persona-encoding-guide.md` for full guidance on all methods.*
+_Method selected based on target platform. See `references/persona-encoding-guide.md` for full guidance on all methods._
 
-| Method | Selected |
-|---|---|
-| Agent Builder field-by-field | {{Yes / No}} |
-| Agent Script (.agent DSL) | {{Yes / No}} |
-| Custom Metadata | {{Yes / No}} |
+| Method                         | Selected     |
+| ------------------------------ | ------------ |
+| Agent Builder field-by-field   | {{Yes / No}} |
+| Agent Script (.agent DSL)      | {{Yes / No}} |
+| Custom Metadata                | {{Yes / No}} |
 | Conversation Style instruction | {{Yes / No}} |
 
 **Target Platform:** {{Agent Builder / Agent Script}}
@@ -28,7 +28,7 @@ date: 2026-03-10
 
 ## Agent Builder Encoding
 
-*Generated when Target Platform is Agent Builder. Omit for Agent Script.*
+_Generated when Target Platform is Agent Builder. Omit for Agent Script._
 
 ### Agent Configuration Fields
 
@@ -64,15 +64,15 @@ date: 2026-03-10
 
 ### Platform Settings
 
-| Setting | Recommendation | Rationale |
-|---|---|---|
-| **Tone** | {{Casual / Neutral / Formal}} | {{Mapping from Formality attribute}} |
-| **Conversation Recs on Welcome** | {{On / Off}} | {{Based on whether primary use cases are defined}} |
-| **Conversation Recs in Responses** | {{On / Off}} | {{Based on agent proactivity}} |
+| Setting                            | Recommendation                | Rationale                                          |
+| ---------------------------------- | ----------------------------- | -------------------------------------------------- |
+| **Tone**                           | {{Casual / Neutral / Formal}} | {{Mapping from Formality attribute}}               |
+| **Conversation Recs on Welcome**   | {{On / Off}}                  | {{Based on whether primary use cases are defined}} |
+| **Conversation Recs in Responses** | {{On / Off}}                  | {{Based on agent proactivity}}                     |
 
 ### Topic Instructions — Global Persona Block
 
-*Append this block to each Topic Instructions field. Adapt per topic as noted.*
+_Append this block to each Topic Instructions field. Adapt per topic as noted._
 
 ```
 {{GENERATED_PERSONA_BLOCK — synthesized from:
@@ -92,7 +92,7 @@ date: 2026-03-10
 
 ### Per-Topic Persona Instructions
 
-*Tailored persona instructions per topic. Generated when the user provides a topic list.*
+_Tailored persona instructions per topic. Generated when the user provides a topic list._
 
 #### Topic: {{TOPIC_NAME_1}}
 
@@ -117,22 +117,22 @@ Tone calibration:
 {{TONE_FLEX_ENCODING}}
 ```
 
-*Repeat for each topic. Omit this section when no topic list is provided.*
+_Repeat for each topic. Omit this section when no topic list is provided._
 
 ### Per-Topic Lexicon
 
-*Brand terminology and domain vocabulary scoped per topic. Generated when the agent has topic-specific language.*
+_Brand terminology and domain vocabulary scoped per topic. Generated when the agent has topic-specific language._
 
-| Topic | Terms | Usage Notes |
-|---|---|---|
+| Topic       | Terms              | Usage Notes                              |
+| ----------- | ------------------ | ---------------------------------------- |
 | {{Topic 1}} | {{Term 1, Term 2}} | {{How to use these terms in this topic}} |
-| {{Topic 2}} | {{Term 3, Term 4}} | {{Usage notes}} |
+| {{Topic 2}} | {{Term 3, Term 4}} | {{Usage notes}}                          |
 
-*Omit this section when the agent has no specialized vocabulary.*
+_Omit this section when the agent has no specialized vocabulary._
 
 ### Action Output Response Instructions — Block
 
-*Use this block as the starting point for each action's output instructions.*
+_Use this block as the starting point for each action's output instructions._
 
 ```
 {{GENERATED_ACTION_OUTPUT_BLOCK — Chatting Style rules (Emoji vocabulary, Formatting, Punctuation, Capitalization), Voice presentation (Formality + Warmth + Personality Intensity), Brevity calibration}}
@@ -140,48 +140,48 @@ Tone calibration:
 
 ### Loading Text
 
-*In-character status messages while actions execute. Adapt per action.*
+_In-character status messages while actions execute. Adapt per action._
 
 #### Generic Examples
 
-| Example | Mapping |
-|---|---|
+| Example       | Mapping                      |
+| ------------- | ---------------------------- |
 | {{LOADING_1}} | {{Formality + Brevity note}} |
 | {{LOADING_2}} | {{Formality + Brevity note}} |
 | {{LOADING_3}} | {{Formality + Brevity note}} |
 
 #### Per-Action Loading Text
 
-*Generated when the user provides an action list.*
+_Generated when the user provides an action list._
 
-| Action | Loading Text |
-|---|---|
+| Action       | Loading Text                                                 |
+| ------------ | ------------------------------------------------------------ |
 | {{Action 1}} | {{Persona-consistent loading text for this specific action}} |
-| {{Action 2}} | {{Loading text}} |
-| {{Action 3}} | {{Loading text}} |
+| {{Action 2}} | {{Loading text}}                                             |
+| {{Action 3}} | {{Loading text}}                                             |
 
-*Omit per-action section when no action list is provided.*
+_Omit per-action section when no action list is provided._
 
-### Situational Messages *(optional)*
+### Situational Messages _(optional)_
 
-*Pre-authored messages for common conversational situations, written in the persona's voice. Generated when the persona has specific requirements for these moments.*
+_Pre-authored messages for common conversational situations, written in the persona's voice. Generated when the persona has specific requirements for these moments._
 
-| Situation | Message |
-|---|---|
-| Topic transition | "{{message}}" |
+| Situation                          | Message       |
+| ---------------------------------- | ------------- |
+| Topic transition                   | "{{message}}" |
 | Scope boundary (outside knowledge) | "{{message}}" |
-| Escalation to human | "{{message}}" |
-| End of conversation | "{{message}}" |
-| Follow-up / re-engagement | "{{message}}" |
-| {{Custom situation}} | "{{message}}" |
+| Escalation to human                | "{{message}}" |
+| End of conversation                | "{{message}}" |
+| Follow-up / re-engagement          | "{{message}}" |
+| {{Custom situation}}               | "{{message}}" |
 
-*Include only situations relevant to this agent. Omit this section when default platform behavior is acceptable.*
+_Include only situations relevant to this agent. Omit this section when default platform behavior is acceptable._
 
 ---
 
 ## Agent Script Encoding
 
-*Generated when Target Platform is Agent Script. Omit for Agent Builder.*
+_Generated when Target Platform is Agent Script. Omit for Agent Builder._
 
 ### system.instructions
 
@@ -214,7 +214,7 @@ Tone calibration:
 
 ### Per-Topic system: Overrides
 
-*Generated when topics are provided AND a topic's tone flex warrants a system-level override. Topic-level system: replaces global instructions for that topic.*
+_Generated when topics are provided AND a topic's tone flex warrants a system-level override. Topic-level system: replaces global instructions for that topic._
 
 #### Topic: {{TOPIC_NAME}}
 
@@ -224,7 +224,7 @@ system: "{{TOPIC_SYSTEM_OVERRIDE — persona shift for this topic. Use when Emot
 
 ### Per-Topic reasoning.instructions
 
-*Per-topic persona calibration. Generated when topics are provided.*
+_Per-topic persona calibration. Generated when topics are provided._
 
 #### Topic: {{TOPIC_NAME}}
 
@@ -239,45 +239,45 @@ system: "{{TOPIC_SYSTEM_OVERRIDE — persona shift for this topic. Use when Emot
 
 ### Per-Action progress_indicator_message
 
-*Generated when actions are provided.*
+_Generated when actions are provided._
 
-| Action | YAML | progress_indicator_message |
-|---|---|---|
-| {{Action 1}} | `include_in_progress_indicator: True` | "{{Loading text}}" |
-| {{Action 2}} | `include_in_progress_indicator: True` | "{{Loading text}}" |
+| Action       | YAML                                  | progress_indicator_message |
+| ------------ | ------------------------------------- | -------------------------- |
+| {{Action 1}} | `include_in_progress_indicator: True` | "{{Loading text}}"         |
+| {{Action 2}} | `include_in_progress_indicator: True` | "{{Loading text}}"         |
 
 ### Deterministic Response Examples
 
-*Example `| text` pipes for common if/else branches, pre-authored in the persona's voice. These bypass the LLM — write exactly as they should appear.*
+_Example `| text` pipes for common if/else branches, pre-authored in the persona's voice. These bypass the LLM — write exactly as they should appear._
 
-| Context | Pipe Output |
-|---|---|
-| {{Error recovery}} | `| {{text}}` |
-| {{Verification success}} | `| {{text}}` |
-| {{Fallback/unknown}} | `| {{text}}` |
+| Context                  | Pipe Output |
+| ------------------------ | ----------- | --------- |
+| {{Error recovery}}       | `           | {{text}}` |
+| {{Verification success}} | `           | {{text}}` |
+| {{Fallback/unknown}}     | `           | {{text}}` |
 
-*Omit this section when no deterministic branches are planned.*
+_Omit this section when no deterministic branches are planned._
 
-### Situational Messages *(optional)*
+### Situational Messages _(optional)_
 
-*Pre-authored messages for common conversational situations, written in the persona's voice. These can be encoded as `| text` deterministic outputs or as guidance in `reasoning.instructions`.*
+_Pre-authored messages for common conversational situations, written in the persona's voice. These can be encoded as `| text` deterministic outputs or as guidance in `reasoning.instructions`._
 
-| Situation | Message |
-|---|---|
-| Topic transition | "{{message}}" |
+| Situation                          | Message       |
+| ---------------------------------- | ------------- |
+| Topic transition                   | "{{message}}" |
 | Scope boundary (outside knowledge) | "{{message}}" |
-| Escalation to human | "{{message}}" |
-| End of conversation | "{{message}}" |
-| Follow-up / re-engagement | "{{message}}" |
-| {{Custom situation}} | "{{message}}" |
+| Escalation to human                | "{{message}}" |
+| End of conversation                | "{{message}}" |
+| Follow-up / re-engagement          | "{{message}}" |
+| {{Custom situation}}               | "{{message}}" |
 
-*Include only situations relevant to this agent. Omit this section when default platform behavior is acceptable.*
+_Include only situations relevant to this agent. Omit this section when default platform behavior is acceptable._
 
 ---
 
 ## Conversation Style Output (lightweight variant)
 
-*When the Conversation Style method is selected, generate a single paragraph instead of the full encoding above. Static messages (Welcome Message, Error Message, Loading Text) still need per-field authoring.*
+_When the Conversation Style method is selected, generate a single paragraph instead of the full encoding above. Static messages (Welcome Message, Error Message, Loading Text) still need per-field authoring._
 
 ```
 Conversation Style: {{GENERATED_CONVERSATION_STYLE — single paragraph compressing Register + Formality + Warmth + Emotional Coloring + Empathy approach + Brevity + distinctive voice markers. Uses the key "Conversation Style" rather than "tone" to reduce conflict with the platform Tone setting.}}
@@ -285,4 +285,4 @@ Conversation Style: {{GENERATED_CONVERSATION_STYLE — single paragraph compress
 
 ---
 
-*For advanced encoding patterns (Custom Metadata, Conversation Style, Global Topic Override), see `references/persona-encoding-guide.md`.*
+_For advanced encoding patterns (Custom Metadata, Conversation Style, Global Topic Override), see `references/persona-encoding-guide.md`._

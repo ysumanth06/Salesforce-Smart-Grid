@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
     HTTP Callout Flow Template for Agent Actions
 
@@ -30,7 +30,8 @@
     <label>{{FlowLabel}}</label>
 
     <!-- Description -->
-    <description>HTTP callout to {{ExternalSystemName}} for agent actions</description>
+    <description
+  >HTTP callout to {{ExternalSystemName}} for agent actions</description>
 
     <!-- Autolaunched Flow (required for agent actions) -->
     <processType>AutoLaunchedFlow</processType>
@@ -54,7 +55,7 @@
         <isInput>true</isInput>
         <isOutput>false</isOutput>
         <value>
-            <stringValue></stringValue>
+            <stringValue />
         </value>
     </variables>
 
@@ -183,7 +184,8 @@
         <name>Request_Body</name>
         <dataType>String</dataType>
         <!-- Build JSON request body -->
-        <expression>'{"param1": "' &amp; {!input_param_1} &amp; '"}'</expression>
+        <expression
+    >'{"param1": "' &amp; {!input_param_1} &amp; '"}'</expression>
     </formulas>
 
     <!--

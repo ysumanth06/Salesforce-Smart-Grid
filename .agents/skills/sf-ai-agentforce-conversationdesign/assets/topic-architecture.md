@@ -16,8 +16,8 @@ The topic architecture should support this purpose.
 
 <!-- List ALL actions before organizing into topics. This prevents overlooking capabilities. -->
 
-| Action ID | Action Name | Type | Backend | Description |
-|-----------|-------------|------|---------|-------------|
+| Action ID       | Action Name       | Type       | Backend       | Description       |
+| --------------- | ----------------- | ---------- | ------------- | ----------------- |
 | {{ACTION_ID_1}} | {{ACTION_NAME_1}} | {{TYPE_1}} | {{BACKEND_1}} | {{DESCRIPTION_1}} |
 | {{ACTION_ID_2}} | {{ACTION_NAME_2}} | {{TYPE_2}} | {{BACKEND_2}} | {{DESCRIPTION_2}} |
 | {{ACTION_ID_3}} | {{ACTION_NAME_3}} | {{TYPE_3}} | {{BACKEND_3}} | {{DESCRIPTION_3}} |
@@ -36,11 +36,13 @@ Add rows as needed for all actions.
 ### Topic 1: {{TOPIC_1_NAME}}
 
 **Classification Description:**
+
 ```
 {{TOPIC_1_CLASSIFICATION}}
 ```
 
 **Actions Assigned:**
+
 - {{ACTION_1_1}}
 - {{ACTION_1_2}}
 - {{ACTION_1_3}}
@@ -56,11 +58,13 @@ Add rows as needed for all actions.
 ### Topic 2: {{TOPIC_2_NAME}}
 
 **Classification Description:**
+
 ```
 {{TOPIC_2_CLASSIFICATION}}
 ```
 
 **Actions Assigned:**
+
 - {{ACTION_2_1}}
 - {{ACTION_2_2}}
 - {{ACTION_2_3}}
@@ -76,11 +80,13 @@ Add rows as needed for all actions.
 ### Topic 3: {{TOPIC_3_NAME}}
 
 **Classification Description:**
+
 ```
 {{TOPIC_3_CLASSIFICATION}}
 ```
 
 **Actions Assigned:**
+
 - {{ACTION_3_1}}
 - {{ACTION_3_2}}
 
@@ -102,8 +108,8 @@ Instructions: Add more topics as needed. Guidelines:
 
 ## Topic Distinctness Matrix
 
-| Topic Pair | Semantic Overlap | Confusable Utterances | Mitigation |
-|------------|------------------|----------------------|------------|
+| Topic Pair                | Semantic Overlap  | Confusable Utterances | Mitigation              |
+| ------------------------- | ----------------- | --------------------- | ----------------------- |
 | {{TOPIC_A}} ↔ {{TOPIC_B}} | {{OVERLAP_LEVEL}} | {{EXAMPLE_UTTERANCE}} | {{MITIGATION_STRATEGY}} |
 | {{TOPIC_C}} ↔ {{TOPIC_D}} | {{OVERLAP_LEVEL}} | {{EXAMPLE_UTTERANCE}} | {{MITIGATION_STRATEGY}} |
 
@@ -116,10 +122,10 @@ Instructions: Identify topics that might overlap. For each pair:
 
 ## Cross-Topic Interaction Matrix
 
-| From Topic | To Topic | Interaction Type | Trigger | Example |
-|------------|----------|------------------|---------|---------|
-| {{FROM_1}} | {{TO_1}} | {{TYPE_1}} | {{TRIGGER_1}} | {{EXAMPLE_1}} |
-| {{FROM_2}} | {{TO_2}} | {{TYPE_2}} | {{TRIGGER_2}} | {{EXAMPLE_2}} |
+| From Topic | To Topic | Interaction Type | Trigger       | Example       |
+| ---------- | -------- | ---------------- | ------------- | ------------- |
+| {{FROM_1}} | {{TO_1}} | {{TYPE_1}}       | {{TRIGGER_1}} | {{EXAMPLE_1}} |
+| {{FROM_2}} | {{TO_2}} | {{TYPE_2}}       | {{TRIGGER_2}} | {{EXAMPLE_2}} |
 
 <!--
 Interaction Types:
@@ -156,16 +162,19 @@ restrictions (e.g., "no password resets", "no medical advice").
 ## Topic-Level Instructions
 
 ### {{TOPIC_1_NAME}} Instructions
+
 ```
 {{TOPIC_1_INSTRUCTIONS}}
 ```
 
 ### {{TOPIC_2_NAME}} Instructions
+
 ```
 {{TOPIC_2_INSTRUCTIONS}}
 ```
 
 ### {{TOPIC_3_NAME}} Instructions
+
 ```
 {{TOPIC_3_INSTRUCTIONS}}
 ```
@@ -185,15 +194,18 @@ Instructions: Write 2-5 sentences per topic. Should cover:
 ### {{TOPIC_1_NAME}} Utterances
 
 **Happy Path:**
+
 - {{UTTERANCE_1}}
 - {{UTTERANCE_2}}
 - {{UTTERANCE_3}}
 
 **Synonyms/Variants:**
+
 - {{UTTERANCE_4}}
 - {{UTTERANCE_5}}
 
 **Edge Cases:**
+
 - {{UTTERANCE_6}}
 - {{UTTERANCE_7}}
 
@@ -202,15 +214,18 @@ Instructions: Write 2-5 sentences per topic. Should cover:
 ### {{TOPIC_2_NAME}} Utterances
 
 **Happy Path:**
+
 - {{UTTERANCE_1}}
 - {{UTTERANCE_2}}
 - {{UTTERANCE_3}}
 
 **Synonyms/Variants:**
+
 - {{UTTERANCE_4}}
 - {{UTTERANCE_5}}
 
 **Edge Cases:**
+
 - {{UTTERANCE_6}}
 - {{UTTERANCE_7}}
 
@@ -224,6 +239,7 @@ Repeat for all topics. Aim for 10-15 utterances per topic covering:
 ## Topic Architecture Validation
 
 ### Semantic Distinctness Checklist
+
 - [ ] No two topics have >40% classification description overlap
 - [ ] Each topic name clearly indicates its purpose
 - [ ] Classification descriptions use user language, not technical jargon
@@ -231,6 +247,7 @@ Repeat for all topics. Aim for 10-15 utterances per topic covering:
 - [ ] Cross-topic interactions are documented
 
 ### Completeness Checklist
+
 - [ ] All actions from inventory are assigned to a topic
 - [ ] Each topic has 2+ actions (no single-action topics)
 - [ ] Agent-level out-of-scope is defined
@@ -238,6 +255,7 @@ Repeat for all topics. Aim for 10-15 utterances per topic covering:
 - [ ] Utterance coverage plan includes edge cases
 
 ### Performance Checklist
+
 - [ ] Total topics: 3-7 (optimal range)
 - [ ] Topic count justification: {{JUSTIFICATION}}
 - [ ] No topics with >50% overlap in classification descriptions

@@ -1,0 +1,166 @@
+<template>
+  <template lwc:if={isOpen}>
+    <div class="quality-drawer slds-is-fixed" data-testid="quality-drawer">
+      <!-- Drawer Header -->
+      <div class="drawer-header slds-grid slds-grid_vertical-align-center">
+        <div class="slds-grid slds-grid_vertical-align-center slds-grow">
+          <lightning-icon
+            icon-name="utility:heart"
+            size="small"
+            class="health-icon slds-var-m-right_small"
+          ></lightning-icon>
+          <div>
+            <h2 class="drawer-title">Data Quality &amp; Health</h2>
+            <p class="drawer-subtitle">{objectApiName} Health Inspection</p>
+          </div>
+        </div>
+        <button
+          class="slds-button slds-button_icon slds-button_icon-inverse"
+          title="Close Panel"
+          onclick={handleClose}
+          data-testid="close-drawer-btn"
+        >
+          <lightning-icon
+            icon-name="utility:close"
+            size="x-small"
+            variant="inverse"
+          ></lightning-icon>
+          <span class="slds-assistive-text">Close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Content -->
+      <div class="drawer-body slds-var-p-around_medium">
+        <template lwc:if={isLoading}>
+          <div
+            class="loading-state slds-var-p-around_large slds-text-align_center"
+          >
+            <lightning-spinner
+              alternative-text="Analyzing dataset health..."
+              size="medium"
+              variant="brand"
+            ></lightning-spinner>
+            <p class="slds-var-m-top_large slds-text-color_weak">
+              Scanning dataset for duplicates and anomalies...
+            </p>
+          </div>
+        </template>
+
+        <template lwc:else>
+          <!-- Health Score Banner -->
+          <div
+            class="score-card slds-var-p-around_medium slds-var-m-bottom_medium"
+          >
+            <div
+              class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread"
+            >
+              <div>
+                <span class="score-label">Overall Health Score</span>
+                <div class="score-number" data-testid="health-score-val">
+                  {healthScore}%
+                </div>
+              </div>
+              <div class="score-badge-wrap">
+                <span class={healthBadgeClass}>{healthStatusLabel}</span>
+              </div>
+            </div>
+            <div class="progress-track slds-var-m-top_small">
+              <div class={progressFillClass} style={progressFillStyle}></div>
+            </div>
+          </div>
+
+          <!-- Metrics Row -->
+          <div class="metrics-grid slds-grid slds-var-m-bottom_medium">
+            <div
+              class="metric-box slds-col slds-var-p-around_small slds-var-m-right_xx-small"
+            >
+              <span class="box-title">Evaluated</span>
+              <span class="box-val">{totalEvaluated}</span>
+            </div>
+            <div
+              class="metric-box slds-col slds-var-p-around_small slds-var-m-right_xx-small"
+            >
+              <span class="box-title">Duplicates</span>
+              <span class="box-val text-amber">{duplicateCount}</span>
+            </div>
+            <div class="metric-box slds-col slds-var-p-around_small">
+              <span class="box-title">Missing Data</span>
+              <span class="box-val text-red">{missingDataCount}</span>
+            </div>
+          </div>
+
+          <!-- Issues List -->
+          <template lwc:if={hasIssues}>
+            <h3 class="section-title slds-var-m-bottom_x-small">
+              Detected Insights &amp; Suggestions ({issuesCount})
+            </h3>
+            <div class="issues-list">
+              <template for:each={issuesList} for:item="issue">
+                <div
+                  key={issue.id}
+                  class="issue-card slds-var-p-around_small slds-var-m-bottom_small"
+                >
+                  <div
+                    class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-var-m-bottom_xx-small"
+                  >
+                    <span class={issue.typeBadgeClass}>{issue.issueType}</span>
+                    <span class={issue.severityBadgeClass}
+                      >{issue.severity}</span
+                    >
+                  </div>
+                  <h4 class="issue-field-title">
+                    {issue.fieldLabel} ({issue.fieldName})
+                  </h4>
+                  <p class="issue-desc">{issue.description}</p>
+
+                  <template lwc:if={issue.hasSampleValues}>
+                    <div class="sample-chips slds-var-m-top_xx-small">
+                      <template for:each={issue.sampleValues} for:item="val">
+                        <span key={val} class="sample-tag">{val}</span>
+                      </template>
+                    </div>
+                  </template>
+
+                  <div
+                    class="slds-grid slds-grid_align-end slds-var-m-top_small"
+                  >
+                    <button
+                      class="slds-button slds-button_neutral slds-button_stretch fix-filter-btn"
+                      data-field={issue.fieldName}
+                      data-type={issue.issueType}
+                      onclick={handleFilterIssue}
+                      data-testid="filter-issue-btn"
+                    >
+                      Filter Grid to Review
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <template lwc:else>
+            <div
+              class="clean-state slds-text-align_center slds-var-p-around_large"
+            >
+              <lightning-icon
+                icon-name="utility:like"
+                size="large"
+                variant="success"
+                class="slds-var-m-bottom_small"
+              ></lightning-icon>
+              <h3 class="slds-text-heading_small slds-text-title_bold">
+                Excellent Data Quality!
+              </h3>
+              <p class="slds-text-color_weak slds-var-m-top_xx-small">
+                No duplicate clusters, missing data spikes, or value anomalies
+                detected.
+              </p>
+            </div>
+          </template>
+        </template>
+      </div>
+    </div>
+    <div class="drawer-backdrop" onclick={handleClose}></div>
+  </template>
+</template>

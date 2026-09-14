@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Prompt Template Actions
 
 > Invoking Salesforce Prompt Templates as actions within Agent Script
@@ -40,12 +41,12 @@ actions:
 
 ### Critical syntax rules
 
-| Rule | Example |
-|------|---------|
-| Target protocol | `"generatePromptResponse://TemplateName"` |
-| Input names **must be quoted** | `"Input:email"` not `Input:email` |
-| Input prefix is `Input:` | Matches the template's input field API name |
-| Output field is always `promptResponse` | Single string output from the template |
+| Rule                                    | Example                                     |
+| --------------------------------------- | ------------------------------------------- |
+| Target protocol                         | `"generatePromptResponse://TemplateName"`   |
+| Input names **must be quoted**          | `"Input:email"` not `Input:email`           |
+| Input prefix is `Input:`                | Matches the template's input field API name |
+| Output field is always `promptResponse` | Single string output from the template      |
 
 ---
 
@@ -64,6 +65,7 @@ topic schedule_generation:
 ```
 
 **Input binding patterns** (same as regular actions):
+
 - `@variables.user_email` — variable binding (data from prior turns)
 - `...` — LLM slot-filling (extract from conversation)
 - `"professional"` — fixed value (business rule constant)
@@ -90,6 +92,7 @@ actions:
 ```
 
 The template itself (configured in Prompt Builder) includes:
+
 - **Data Provider**: Apex class fetching customer purchase history
 - **Grounding**: Recent orders, preferences, browsing history
 - **Template instructions**: How to format recommendations using the grounded data
@@ -151,12 +154,12 @@ generate_summary: @actions.Generate_Order_Summary
 
 ## Common Errors
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `SyntaxError` on input binding | Missing quotes on parameter name | Use `"Input:email"` not `Input:email` |
-| Template not found | Wrong protocol or template name | Verify `generatePromptResponse://ExactTemplateName` |
-| Empty `promptResponse` | Template inactive or missing required inputs | Activate template in Setup, check all `is_required: True` inputs are bound |
-| Input not mapped | API name mismatch | Input field name after `Input:` must exactly match template's input API name |
+| Error                          | Cause                                        | Fix                                                                          |
+| ------------------------------ | -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `SyntaxError` on input binding | Missing quotes on parameter name             | Use `"Input:email"` not `Input:email`                                        |
+| Template not found             | Wrong protocol or template name              | Verify `generatePromptResponse://ExactTemplateName`                          |
+| Empty `promptResponse`         | Template inactive or missing required inputs | Activate template in Setup, check all `is_required: True` inputs are bound   |
+| Input not mapped               | API name mismatch                            | Input field name after `Input:` must exactly match template's input API name |
 
 ---
 
@@ -171,4 +174,4 @@ generate_summary: @actions.Generate_Order_Summary
 
 ---
 
-*Consolidated from @kunello's [PR #20](https://github.com/Jaganpro/sf-skills/pull/20) research on Agent Script Recipes action configuration patterns.*
+_Consolidated from @kunello's [PR #20](https://github.com/Jaganpro/sf-skills/pull/20) research on Agent Script Recipes action configuration patterns._

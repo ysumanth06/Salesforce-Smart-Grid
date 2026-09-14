@@ -6,19 +6,19 @@
 
 > **Key insight**: Framework operations are FREE. Only actions that invoke external services consume credits.
 
-| Operation | Credits | Notes |
-|-----------|---------|-------|
-| `@utils.transition` | FREE | Framework navigation |
-| `@utils.setVariables` | FREE | Framework state management |
-| `@utils.escalate` | FREE | Framework escalation |
-| `if`/`else` control flow | FREE | Deterministic resolution |
-| `before_reasoning` | FREE | Deterministic pre-processing (see note below) |
-| `after_reasoning` | FREE | Deterministic post-processing (see note below) |
-| `reasoning` (LLM turn) | FREE | LLM reasoning itself is not billed |
-| Prompt Templates | 2-16 | Per invocation (varies by complexity) |
-| Flow actions | 20 | Per action execution |
-| Apex actions | 20 | Per action execution |
-| Any other action | 20 | Per action execution |
+| Operation                | Credits | Notes                                          |
+| ------------------------ | ------- | ---------------------------------------------- |
+| `@utils.transition`      | FREE    | Framework navigation                           |
+| `@utils.setVariables`    | FREE    | Framework state management                     |
+| `@utils.escalate`        | FREE    | Framework escalation                           |
+| `if`/`else` control flow | FREE    | Deterministic resolution                       |
+| `before_reasoning`       | FREE    | Deterministic pre-processing (see note below)  |
+| `after_reasoning`        | FREE    | Deterministic post-processing (see note below) |
+| `reasoning` (LLM turn)   | FREE    | LLM reasoning itself is not billed             |
+| Prompt Templates         | 2-16    | Per invocation (varies by complexity)          |
+| Flow actions             | 20      | Per action execution                           |
+| Apex actions             | 20      | Per action execution                           |
+| Any other action         | 20      | Per action execution                           |
 
 > **✅ Lifecycle Hooks Validated (v1.3.0)**: The `before_reasoning:` and `after_reasoning:` lifecycle hooks are now TDD-validated. Content goes **directly** under the block (no `instructions:` wrapper). See "Lifecycle Hooks" section below for correct syntax.
 
@@ -53,12 +53,14 @@ topic main:
 ```
 
 **Key Points:**
+
 - Content goes **directly** under `before_reasoning:` / `after_reasoning:` (NO `instructions:` wrapper)
 - Supports `set`, `if`, `run` statements (same as procedural `instructions: ->`)
 - `before_reasoning:` is FREE (no credit cost) - use for data prep
 - `after_reasoning:` is FREE (no credit cost) - use for logging, cleanup
 
 **❌ WRONG Syntax (causes compile error):**
+
 ```yaml
 before_reasoning:
    instructions: ->      # ❌ NO! Don't wrap with instructions:
@@ -66,17 +68,17 @@ before_reasoning:
 ```
 
 **✅ CORRECT Syntax:**
+
 ```yaml
-before_reasoning:
-   set @variables.x = True   # ✅ Direct content under the block
+before_reasoning: set @variables.x = True # ✅ Direct content under the block
 ```
 
 ## Supervision vs Handoff (Clarified Terminology)
 
-| Term | Syntax | Behavior | Use When |
-|------|--------|----------|----------|
-| **Handoff** | `@utils.transition to @topic.X` | Control transfers completely, child generates final response | Checkout, escalation, terminal states |
-| **Supervision** | `@topic.X` (as action reference) | Parent orchestrates, child returns, parent synthesizes | Expert consultation, sub-tasks |
+| Term            | Syntax                           | Behavior                                                     | Use When                              |
+| --------------- | -------------------------------- | ------------------------------------------------------------ | ------------------------------------- |
+| **Handoff**     | `@utils.transition to @topic.X`  | Control transfers completely, child generates final response | Checkout, escalation, terminal states |
+| **Supervision** | `@topic.X` (as action reference) | Parent orchestrates, child returns, parent synthesizes       | Expert consultation, sub-tasks        |
 
 ```yaml
 # HANDOFF - child topic takes over completely:
@@ -98,12 +100,13 @@ get_advice: @topic.product_expert
 
 When defining actions in Agentforce Assets, use these output flags:
 
-| Flag | Effect | Use When |
-|------|--------|----------|
-| `is_displayable: False` | LLM **cannot** show this value to user | Preventing hallucinated responses |
-| `is_used_by_planner: True` | LLM **can** reason about this value | Decision-making, routing |
+| Flag                       | Effect                                 | Use When                          |
+| -------------------------- | -------------------------------------- | --------------------------------- |
+| `is_displayable: False`    | LLM **cannot** show this value to user | Preventing hallucinated responses |
+| `is_used_by_planner: True` | LLM **can** reason about this value    | Decision-making, routing          |
 
 **Zero-Hallucination Intent Classification Pattern:**
+
 ```yaml
 # In Agentforce Assets - Action Definition outputs:
 outputs:
@@ -130,37 +133,38 @@ topic intent_router:
 
 **Action-Level Properties:**
 
-| Property | Type | Effect | TDD Status |
-|----------|------|--------|------------|
-| `label` | String | Display name in UI | ✅ v2.2.0 |
-| `description` | String | LLM reads this for decision-making | ✅ v1.3.0 |
-| `require_user_confirmation` | Boolean | Request user confirmation before execution | ✅ Compiles (runtime Issue 6) |
-| `include_in_progress_indicator` | Boolean | Show spinner during execution | ✅ v2.2.0 |
-| `progress_indicator_message` | String | Custom spinner text | ✅ v2.2.0 |
+| Property                        | Type    | Effect                                     | TDD Status                    |
+| ------------------------------- | ------- | ------------------------------------------ | ----------------------------- |
+| `label`                         | String  | Display name in UI                         | ✅ v2.2.0                     |
+| `description`                   | String  | LLM reads this for decision-making         | ✅ v1.3.0                     |
+| `require_user_confirmation`     | Boolean | Request user confirmation before execution | ✅ Compiles (runtime Issue 6) |
+| `include_in_progress_indicator` | Boolean | Show spinner during execution              | ✅ v2.2.0                     |
+| `progress_indicator_message`    | String  | Custom spinner text                        | ✅ v2.2.0                     |
 
 **Input Properties:**
 
-| Property | Type | Effect | TDD Status |
-|----------|------|--------|------------|
-| `description` | String | Explains parameter to LLM | ✅ v1.3.0 |
-| `label` | String | Display name in UI | ✅ v2.2.0 |
-| `is_required` | Boolean | Marks input as mandatory for LLM | ✅ v2.2.0 |
-| `is_user_input` | Boolean | LLM extracts value from conversation | ✅ v2.2.0 |
-| `complex_data_type_name` | String | Lightning type mapping | ✅ v2.1.0 |
+| Property                 | Type    | Effect                               | TDD Status |
+| ------------------------ | ------- | ------------------------------------ | ---------- |
+| `description`            | String  | Explains parameter to LLM            | ✅ v1.3.0  |
+| `label`                  | String  | Display name in UI                   | ✅ v2.2.0  |
+| `is_required`            | Boolean | Marks input as mandatory for LLM     | ✅ v2.2.0  |
+| `is_user_input`          | Boolean | LLM extracts value from conversation | ✅ v2.2.0  |
+| `complex_data_type_name` | String  | Lightning type mapping               | ✅ v2.1.0  |
 
 **Output Properties:**
 
-| Property | Type | Effect | TDD Status |
-|----------|------|--------|------------|
-| `description` | String | Explains output to LLM | ✅ v1.3.0 |
-| `label` | String | Display name in UI | ✅ v2.2.0 |
-| `is_displayable` | Boolean | `False` = hide from user (alias: `filter_from_agent`) | ✅ v2.2.0 |
-| `is_used_by_planner` | Boolean | `True` = LLM can reason about value | ✅ v2.2.0 |
-| `complex_data_type_name` | String | Lightning type mapping | ✅ v2.1.0 |
+| Property                 | Type    | Effect                                                | TDD Status |
+| ------------------------ | ------- | ----------------------------------------------------- | ---------- |
+| `description`            | String  | Explains output to LLM                                | ✅ v1.3.0  |
+| `label`                  | String  | Display name in UI                                    | ✅ v2.2.0  |
+| `is_displayable`         | Boolean | `False` = hide from user (alias: `filter_from_agent`) | ✅ v2.2.0  |
+| `is_used_by_planner`     | Boolean | `True` = LLM can reason about value                   | ✅ v2.2.0  |
+| `complex_data_type_name` | String  | Lightning type mapping                                | ✅ v2.1.0  |
 
 > **Cross-reference**: `filter_from_agent: True` (in actions-reference.md) is equivalent to `is_displayable: False`.
 
 **User Input Pattern** (`is_user_input: True`):
+
 ```yaml
 inputs:
    customer_name: string
@@ -224,12 +228,12 @@ topic verification:
 
 ## Token & Size Limits
 
-| Limit Type | Value | Notes |
-|------------|-------|-------|
-| Max response size | 1,048,576 bytes (1MB) | Per agent response |
-| Plan trace limit (Frontend) | 1M characters | For debugging UI |
-| Transformed plan trace (Backend) | 32k tokens | Internal processing |
-| Active/Committed Agents per org | 100 max | Org limit |
+| Limit Type                       | Value                 | Notes               |
+| -------------------------------- | --------------------- | ------------------- |
+| Max response size                | 1,048,576 bytes (1MB) | Per agent response  |
+| Plan trace limit (Frontend)      | 1M characters         | For debugging UI    |
+| Transformed plan trace (Backend) | 32k tokens            | Internal processing |
+| Active/Committed Agents per org  | 100 max               | Org limit           |
 
 ## Progress Indicators
 

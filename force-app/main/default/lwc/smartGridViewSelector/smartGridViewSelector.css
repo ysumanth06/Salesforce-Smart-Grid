@@ -5,11 +5,11 @@
 
 .view-combobox {
   min-width: 180px;
-  max-width: 240px;
+  max-width: var(--lwc-sizeSmall, 240px);
 }
 
 .modified-badge {
-  font-weight: 700;
+  font-weight: var(--lwc-fontWeightBold, 700);
   font-size: 0.7rem;
   letter-spacing: 0.5px;
   text-transform: uppercase;

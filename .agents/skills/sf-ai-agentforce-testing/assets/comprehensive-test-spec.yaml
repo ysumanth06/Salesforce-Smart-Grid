@@ -160,8 +160,8 @@ testCases:
       - [action_name]
     expectedOutcome: "Agent should [expected behavior with context]"
     contextVariables:
-      - name: "$Context.RoutableId"      # Prefixed format (recommended) — bare RoutableId also works
-        value: "[MessagingSession_Id]"  # e.g., 0Mwbb000007MGoTCAW
+      - name: "$Context.RoutableId" # Prefixed format (recommended) — bare RoutableId also works
+        value: "[MessagingSession_Id]" # e.g., 0Mwbb000007MGoTCAW
 
   - utterance: "[Another message triggering a different action with context]"
     expectedTopic: [another_topic]
@@ -171,14 +171,13 @@ testCases:
       - name: RoutableId
         value: "[MessagingSession_Id]"
       - name: CaseId
-        value: "[Case_Id]"             # e.g., 500XX0000000001
+        value: "[Case_Id]" # e.g., 500XX0000000001
 
   # ═══════════════════════════════════════════════════════════════
   # METRICS — add to any test case for quality scoring
   # Recommended: coherence + output_latency_milliseconds
   # Skip: conciseness (broken), completeness (misleading for routing)
   # ═══════════════════════════════════════════════════════════════
-
   - utterance: "[Message to quality-check]"
     expectedTopic: [topic_name]
     expectedOutcome: "Agent should provide clear, helpful response"

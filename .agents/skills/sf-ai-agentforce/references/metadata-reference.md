@@ -7,11 +7,13 @@ Use this document for the metadata-heavy parts of `sf-ai-agentforce` that do not
 A `GenAiFunction` registers one callable agent action.
 
 ### Common target types
+
 - `flow`
 - `apex`
 - `prompt`
 
 ### Validate before deploy
+
 - target exists
 - target is active / deployable
 - input names match the target contract
@@ -23,12 +25,14 @@ A `GenAiFunction` registers one callable agent action.
 A `GenAiPlugin` groups related `GenAiFunction` records.
 
 Use it when:
+
 - multiple functions belong to one business domain
 - you want cleaner packaging for Builder-based actions
 
 ## PromptTemplate integration
 
 Use PromptTemplate-backed actions when:
+
 - the output is generated content
 - the user needs a draft, summary, rewrite, or recommendation
 
@@ -37,6 +41,7 @@ Do not use PromptTemplate as a substitute for deterministic business logic.
 ## Models API
 
 Use `aiplatform.ModelsAPI` when:
+
 - the requirement is Apex-driven AI logic
 - the work belongs in custom server-side orchestration
 - Builder-only action patterns are insufficient
@@ -44,6 +49,7 @@ Use `aiplatform.ModelsAPI` when:
 ## Custom Lightning Types
 
 Use `LightningTypeBundle` when actions need:
+
 - structured input collection
 - richer output rendering
 - UI-driven agent interaction patterns
@@ -51,6 +57,7 @@ Use `LightningTypeBundle` when actions need:
 ## Deployment rule of thumb
 
 Supporting metadata first:
+
 - objects / fields
 - Apex
 - Flows

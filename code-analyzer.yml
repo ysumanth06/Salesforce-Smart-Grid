@@ -1,0 +1,11 @@
+rules:
+  pmd:
+    GlobalVariable:
+      disabled: true
+
+engines:
+  pmd:
+    file_extensions:
+      javascript: []
+  eslint:
+    auto_discover_eslint_config: true

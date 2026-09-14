@@ -20,25 +20,26 @@ The v1.1 trace format contains a top-level `steps` array. Each step has a `stepT
 
 ### 13 Step Types
 
-| # | Step Type | Phase | Purpose |
-|---|-----------|-------|---------|
-| 1 | `UserInputStep` | Input | User's utterance entering the planner |
-| 2 | `SessionInitialStateStep` | Init | Session-level state at conversation start |
-| 3 | `NodeEntryStateStep` | Init | Per-node (topic) state on entry |
-| 4 | `VariableUpdateStep` | State | Variable mutations during execution |
-| 5 | `BeforeReasoningStep` | Pre-LLM | State snapshot before LLM reasoning begins |
-| 6 | `BeforeReasoningIterationStep` | Pre-LLM | Per-iteration context (iteration count, available tools) |
-| 7 | `EnabledToolsStep` | Pre-LLM | Tools visible to LLM this iteration |
-| 8 | `LLMStep` | LLM | Full prompt, response, tokens, latency |
-| 9 | `ReasoningStep` | LLM | Grounding assessment (GROUNDED/UNGROUNDED) |
-| 10 | `FunctionStep` | Action | Action execution with inputs, outputs, errors |
-| 11 | `TransitionStep` | Routing | Topic-to-topic transitions (from → to) |
-| 12 | `AfterReasoningStep` | Post-LLM | State after reasoning completes |
-| 13 | `PlannerResponseStep` | Response | Final response with safety scores |
+| #   | Step Type                      | Phase    | Purpose                                                  |
+| --- | ------------------------------ | -------- | -------------------------------------------------------- |
+| 1   | `UserInputStep`                | Input    | User's utterance entering the planner                    |
+| 2   | `SessionInitialStateStep`      | Init     | Session-level state at conversation start                |
+| 3   | `NodeEntryStateStep`           | Init     | Per-node (topic) state on entry                          |
+| 4   | `VariableUpdateStep`           | State    | Variable mutations during execution                      |
+| 5   | `BeforeReasoningStep`          | Pre-LLM  | State snapshot before LLM reasoning begins               |
+| 6   | `BeforeReasoningIterationStep` | Pre-LLM  | Per-iteration context (iteration count, available tools) |
+| 7   | `EnabledToolsStep`             | Pre-LLM  | Tools visible to LLM this iteration                      |
+| 8   | `LLMStep`                      | LLM      | Full prompt, response, tokens, latency                   |
+| 9   | `ReasoningStep`                | LLM      | Grounding assessment (GROUNDED/UNGROUNDED)               |
+| 10  | `FunctionStep`                 | Action   | Action execution with inputs, outputs, errors            |
+| 11  | `TransitionStep`               | Routing  | Topic-to-topic transitions (from → to)                   |
+| 12  | `AfterReasoningStep`           | Post-LLM | State after reasoning completes                          |
+| 13  | `PlannerResponseStep`          | Response | Final response with safety scores                        |
 
 ### Common Fields
 
 Every step includes:
+
 - `stepType` — one of the 13 types above
 - `timestamp` — ISO-8601 execution time
 - `data` — type-specific payload (see below)
@@ -46,15 +47,16 @@ Every step includes:
 ### Key Type-Specific Fields
 
 **LLMStep** (richest data):
+
 ```json
 {
   "stepType": "LLMStep",
   "data": {
     "prompt_content": [
-      {"role": "system", "content": "...protocol + resolved instructions..."},
-      {"role": "assistant", "content": "...conversation history..."},
-      {"role": "user", "content": "...current utterance..."},
-      {"role": "system", "content": "...late-injected context..."}
+      { "role": "system", "content": "...protocol + resolved instructions..." },
+      { "role": "assistant", "content": "...conversation history..." },
+      { "role": "user", "content": "...current utterance..." },
+      { "role": "system", "content": "...late-injected context..." }
     ],
     "response_content": "LLM response text",
     "tools_sent": ["Action_1", "Action_2", "Inappropriate_Content"],
@@ -67,6 +69,7 @@ Every step includes:
 ```
 
 **ReasoningStep**:
+
 ```json
 {
   "stepType": "ReasoningStep",
@@ -78,13 +81,14 @@ Every step includes:
 ```
 
 **FunctionStep**:
+
 ```json
 {
   "stepType": "FunctionStep",
   "data": {
     "function": "Get_Order_Status",
-    "arguments": {"orderId": "ORD-123"},
-    "result": {"status": "Shipped"},
+    "arguments": { "orderId": "ORD-123" },
+    "result": { "status": "Shipped" },
     "error": null,
     "executionLatency": 456
   }
@@ -92,6 +96,7 @@ Every step includes:
 ```
 
 **TransitionStep**:
+
 ```json
 {
   "stepType": "TransitionStep",
@@ -103,6 +108,7 @@ Every step includes:
 ```
 
 **VariableUpdateStep**:
+
 ```json
 {
   "stepType": "VariableUpdateStep",
@@ -115,16 +121,23 @@ Every step includes:
 ```
 
 **EnabledToolsStep**:
+
 ```json
 {
   "stepType": "EnabledToolsStep",
   "data": {
-    "enabled_tools": ["Get_Order_Status", "Process_Refund", "Inappropriate_Content", "Prompt_Injection"]
+    "enabled_tools": [
+      "Get_Order_Status",
+      "Process_Refund",
+      "Inappropriate_Content",
+      "Prompt_Injection"
+    ]
   }
 }
 ```
 
 **PlannerResponseStep**:
+
 ```json
 {
   "stepType": "PlannerResponseStep",
@@ -146,12 +159,12 @@ Every step includes:
 
 Each `LLMStep.data.prompt_content` contains exactly 4 messages:
 
-| # | Role | Content | Source |
-|---|------|---------|--------|
-| 1 | `system` | Protocol + compiled instructions | Agent Script DSL compilation |
-| 2 | `assistant` | Conversation history | Prior turns |
-| 3 | `user` | Current utterance | User input |
-| 4 | `system` | Late-injected context | `when` blocks + resolved variables |
+| #   | Role        | Content                          | Source                             |
+| --- | ----------- | -------------------------------- | ---------------------------------- |
+| 1   | `system`    | Protocol + compiled instructions | Agent Script DSL compilation       |
+| 2   | `assistant` | Conversation history             | Prior turns                        |
+| 3   | `user`      | Current utterance                | User input                         |
+| 4   | `system`    | Late-injected context            | `when` blocks + resolved variables |
 
 ### System Message 1 Sections (in order)
 
@@ -166,6 +179,7 @@ Each `LLMStep.data.prompt_content` contains exactly 4 messages:
 9. Resolved `system.instructions` from Agent Script
 
 Header varies by stage:
+
 - **Topic Selector**: `"Topic Selector & Safety Router"`
 - **Topic Agent**: `"Specialized Topic Agent"`
 
@@ -328,9 +342,9 @@ python3 hooks/scripts/trace_analyzer.py \
 
 ## Cross-Skill References
 
-| Topic | Skill | Document |
-|-------|-------|----------|
-| DSL compilation output | `sf-ai-agentscript` | `references/instruction-resolution.md` § "What the LLM Actually Receives" |
-| Programmatic trace access | `sf-ai-agentscript` | `references/debugging-guide.md` § "Programmatic Trace Access via CLI" |
-| Historical session data (STDM) | `sf-ai-agentforce-observability` | `SKILL.md` — Data Cloud extraction pipeline |
-| Builder trace architecture | `sf-ai-agentforce-observability` | `references/builder-trace-api.md` — v1.1 endpoint discovery |
+| Topic                          | Skill                            | Document                                                                  |
+| ------------------------------ | -------------------------------- | ------------------------------------------------------------------------- |
+| DSL compilation output         | `sf-ai-agentscript`              | `references/instruction-resolution.md` § "What the LLM Actually Receives" |
+| Programmatic trace access      | `sf-ai-agentscript`              | `references/debugging-guide.md` § "Programmatic Trace Access via CLI"     |
+| Historical session data (STDM) | `sf-ai-agentforce-observability` | `SKILL.md` — Data Cloud extraction pipeline                               |
+| Builder trace architecture     | `sf-ai-agentforce-observability` | `references/builder-trace-api.md` — v1.1 endpoint discovery               |

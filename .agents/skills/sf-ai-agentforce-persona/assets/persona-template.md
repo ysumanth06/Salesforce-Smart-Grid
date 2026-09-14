@@ -13,45 +13,45 @@ date: 2026-03-10
 
 ## Context
 
-*Minimal context gathered during design. Fields are populated only when provided.*
+_Minimal context gathered during design. Fields are populated only when provided._
 
-| Field | Value |
-|---|---|
-| **Agent Name** | {{AGENT_NAME}} |
-| **Audience** | {{Internal / External — or omit if not gathered}} |
-| **Primary Use Cases** | {{USE_CASES — or omit if not gathered}} |
+| Field                 | Value                                             |
+| --------------------- | ------------------------------------------------- |
+| **Agent Name**        | {{AGENT_NAME}}                                    |
+| **Audience**          | {{Internal / External — or omit if not gathered}} |
+| **Primary Use Cases** | {{USE_CASES — or omit if not gathered}}           |
 
-*Additional context (role, agent type, surface, topics) is gathered during encoding, not persona design.*
+_Additional context (role, agent type, surface, topics) is gathered during encoding, not persona design._
 
 ---
 
 ## Identity
 
-*3-5 personality adjectives that anchor every design decision.*
+_3-5 personality adjectives that anchor every design decision._
 
 - **{{Adjective 1}}** — {{Behavioral definition: what this looks like in the agent's actual responses}}
 - **{{Adjective 2}}** — {{Behavioral definition}}
 - **{{Adjective 3}}** — {{Behavioral definition}}
-- **{{Adjective 4}}** *(optional)* — {{Behavioral definition}}
-- **{{Adjective 5}}** *(optional)* — {{Behavioral definition}}
+- **{{Adjective 4}}** _(optional)_ — {{Behavioral definition}}
+- **{{Adjective 5}}** _(optional)_ — {{Behavioral definition}}
 
-### What You're Not *(optional)*
+### What You're Not _(optional)_
 
-*Character-level anti-patterns. What this agent fundamentally is not — broader than tone boundaries or specific phrases.*
+_Character-level anti-patterns. What this agent fundamentally is not — broader than tone boundaries or specific phrases._
 
 - Not a {{character anti-pattern 1}} — {{why this matters for this persona}}
 - Not a {{character anti-pattern 2}} — {{why this matters}}
 
-### Values *(optional — explicit input only)*
+### Values _(optional — explicit input only)_
 
-*What this agent believes. Populated only from explicit user input — never inferred.*
+_What this agent believes. Populated only from explicit user input — never inferred._
 
 - {{Belief 1}} — {{observable behavior it generates}}
 - {{Belief 2}} — {{observable behavior}}
 
-### Backstory *(optional)*
+### Backstory _(optional)_
 
-*A fictional background that informs the designer's word choice. The agent never says this aloud.*
+_A fictional background that informs the designer's word choice. The agent never says this aloud._
 
 {{1-2 sentences of backstory, or omit section if not applicable.}}
 
@@ -59,34 +59,34 @@ date: 2026-03-10
 
 ## Persona Profile
 
-*All 12 attributes with selected values and confidence annotations.*
+_All 12 attributes with selected values and confidence annotations._
 
-| Category | Attribute | Value | Signal |
-|---|---|---|---|
-| Register | Register | {{Value}} | {{strong / default}} |
-| Voice | Formality | {{Value}} | {{strong / default}} |
-| Voice | Warmth | {{Value}} | {{strong / default}} |
-| Voice | Personality Intensity | {{Value}} | {{strong / default}} |
-| Tone | Emotional Coloring | {{Value}} | {{strong / default}} |
-| Tone | Empathy Level | {{Value}} | {{strong / default}} |
-| Delivery | Brevity | {{Value}} | {{strong / default}} |
-| Delivery | Humor | {{Value}} | {{strong / default}} |
-| Chatting Style | Emoji | {{Value}} | {{strong / default}} |
-| Chatting Style | Formatting | {{Value}} | {{strong / default}} |
-| Chatting Style | Punctuation | {{Value}} | {{strong / default}} |
-| Chatting Style | Capitalization | {{Value}} | {{strong / default}} |
+| Category       | Attribute             | Value     | Signal               |
+| -------------- | --------------------- | --------- | -------------------- |
+| Register       | Register              | {{Value}} | {{strong / default}} |
+| Voice          | Formality             | {{Value}} | {{strong / default}} |
+| Voice          | Warmth                | {{Value}} | {{strong / default}} |
+| Voice          | Personality Intensity | {{Value}} | {{strong / default}} |
+| Tone           | Emotional Coloring    | {{Value}} | {{strong / default}} |
+| Tone           | Empathy Level         | {{Value}} | {{strong / default}} |
+| Delivery       | Brevity               | {{Value}} | {{strong / default}} |
+| Delivery       | Humor                 | {{Value}} | {{strong / default}} |
+| Chatting Style | Emoji                 | {{Value}} | {{strong / default}} |
+| Chatting Style | Formatting            | {{Value}} | {{strong / default}} |
+| Chatting Style | Punctuation           | {{Value}} | {{strong / default}} |
+| Chatting Style | Capitalization        | {{Value}} | {{strong / default}} |
 
-*Constraint check: Do upstream choices align with downstream ones? See constraint notes in the framework for natural pairings. "Strong" = clear evidence in input. "Default" = inferred from preset.*
+_Constraint check: Do upstream choices align with downstream ones? See constraint notes in the framework for natural pairings. "Strong" = clear evidence in input. "Default" = inferred from preset._
 
 ---
 
 ## Attribute Detail
 
-*Behavioral rules for each attribute selection, organized by category. These are the concrete rules that govern the agent's behavior.*
+_Behavioral rules for each attribute selection, organized by category. These are the concrete rules that govern the agent's behavior._
 
 ### Register: {{Position Name}}
 
-*{{One-liner from framework}}*
+_{{One-liner from framework}}_
 
 - {{Behavioral bullet 1}}
 - {{Behavioral bullet 2}}
@@ -110,21 +110,22 @@ date: 2026-03-10
 **Empathy Level: {{Position Name}}** — {{Description from framework. How feelings are handled.}}
 
 **Tone Boundaries:**
+
 - {{What the agent must never sound like — authored per persona}}
 - {{Context-specific boundary based on Emotional Coloring}}
 - {{When Humor is not None: "No humor in error states, escalation, or high-stakes contexts."}}
 
 ### Tone Flex
 
-*How tone shifts from baseline in response to context.*
+_How tone shifts from baseline in response to context._
 
 **Baseline:** Emotional Coloring: {{Position}}, Empathy Level: {{Position}}
 
-| Trigger | Attribute | Shift | Hard Boundary |
-|---|---|---|---|
+| Trigger                                | Attribute     | Shift         | Hard Boundary                |
+| -------------------------------------- | ------------- | ------------- | ---------------------------- |
 | {{Trigger 1, e.g., "User frustrated"}} | {{Attribute}} | {{From → To}} | {{What it must never cross}} |
-| {{Trigger 2}} | {{Attribute}} | {{From → To}} | {{Hard boundary}} |
-| {{Trigger 3}} | {{Attribute}} | {{From → To}} | {{Hard boundary}} |
+| {{Trigger 2}}                          | {{Attribute}} | {{From → To}} | {{Hard boundary}}            |
+| {{Trigger 3}}                          | {{Attribute}} | {{From → To}} | {{Hard boundary}}            |
 
 ### Delivery
 
@@ -146,20 +147,20 @@ date: 2026-03-10
 
 ## Phrase Book
 
-*Example phrases the agent would use in common situations. Categories are selected based on attribute selections — they vary per persona.*
+_Example phrases the agent would use in common situations. Categories are selected based on attribute selections — they vary per persona._
 
-| Situation | Example Phrase(s) |
-|---|---|
+| Situation      | Example Phrase(s)   |
+| -------------- | ------------------- |
 | {{Category 1}} | {{Drafted phrases}} |
 | {{Category 2}} | {{Drafted phrases}} |
 | {{Category 3}} | {{Drafted phrases}} |
-| ... | ... |
+| ...            | ...                 |
 
 ---
 
 ## Never-Say List
 
-*Specific words, phrases, and patterns the agent must never use.*
+_Specific words, phrases, and patterns the agent must never use._
 
 - {{Anti-phrase 1 — e.g., "I'd be happy to help you with that!"}}
 - {{Anti-phrase 2 — e.g., "Great question!"}}
@@ -169,26 +170,26 @@ date: 2026-03-10
 
 ---
 
-## Lexicon *(optional)*
+## Lexicon _(optional)_
 
-*Brand terminology and domain vocabulary. Include when the agent has topic-specific language.*
+_Brand terminology and domain vocabulary. Include when the agent has topic-specific language._
 
-| Term | Usage | Topics |
-|---|---|---|
+| Term       | Usage             | Topics           |
+| ---------- | ----------------- | ---------------- |
 | {{Term 1}} | {{How to use it}} | {{Which topics}} |
 | {{Term 2}} | {{How to use it}} | {{Which topics}} |
 
-*Omit this section when the agent has no specialized vocabulary.*
+_Omit this section when the agent has no specialized vocabulary._
 
 ---
 
 ## Sample Dialog
 
-*Conversations demonstrating the persona in action. Each should be 3-5 turns and distinctively reflect the chosen Identity, Voice, Tone, and Chatting Style.*
+_Conversations demonstrating the persona in action. Each should be 3-5 turns and distinctively reflect the chosen Identity, Voice, Tone, and Chatting Style._
 
 ### Scenario 1: Happy Path
 
-*{{Brief description of the routine scenario}}*
+_{{Brief description of the routine scenario}}_
 
 > **User:** {{User message}}
 >
@@ -200,7 +201,7 @@ date: 2026-03-10
 
 ### Scenario 2: Uncertainty / Low Confidence
 
-*{{Brief description of a scenario where the agent doesn't have a clear answer}}*
+_{{Brief description of a scenario where the agent doesn't have a clear answer}}_
 
 > **User:** {{User message}}
 >
@@ -212,7 +213,7 @@ date: 2026-03-10
 
 ### Scenario 3: Persona Boundary
 
-*{{Brief description of a scenario where the agent's tone or persona is tested}}*
+_{{Brief description of a scenario where the agent's tone or persona is tested}}_
 
 > **User:** {{User message that tests persona boundaries}}
 >

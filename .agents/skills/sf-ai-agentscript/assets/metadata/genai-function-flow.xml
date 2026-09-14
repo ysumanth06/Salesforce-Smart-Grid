@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
     GenAiFunction Template: Flow Invocation (Agent Builder UI / GenAiPlannerBundle ONLY)
 
@@ -44,7 +44,6 @@
     <isConfirmationRequired>{{true|false}}</isConfirmationRequired>
     <masterLabel>{{FunctionLabel}}</masterLabel>
 </GenAiFunction>
-
 <!--
     FLOW REQUIREMENTS:
     1. Flow Type: Autolaunched Flow (NOT Screen Flow)

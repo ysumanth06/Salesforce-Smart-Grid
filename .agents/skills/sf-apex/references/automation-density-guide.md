@@ -1,4 +1,5 @@
 <!-- Parent: sf-apex/SKILL.md | Cross-ref: sf-flow/SKILL.md -->
+
 # Automation Density Guide
 
 > **Source**: Salesforce Architect Decision Guides — Record-Triggered Automation
@@ -10,11 +11,11 @@
 
 **Automation density** = the number of automations (triggers, flows, processes) firing on a single object. Higher density increases governor limit risk and debugging complexity.
 
-| Density | Triggers + Flows on Object | Recommended Tool | Rationale |
-|---------|---------------------------|-----------------|-----------|
-| **Low** (0-2) | Few automations, simple logic | **Flow** (Record-Triggered) | Declarative, admin-maintainable, faster to build |
-| **Medium** (3-5) | Multiple automations, some complexity | **Hybrid** (Flow + Invocable Apex) | Flow orchestrates, Apex handles complex logic |
-| **High** (6+) | Many automations, complex interdependencies | **Apex** (TAF or single trigger) | Full control over execution order and governor limits |
+| Density          | Triggers + Flows on Object                  | Recommended Tool                   | Rationale                                             |
+| ---------------- | ------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| **Low** (0-2)    | Few automations, simple logic               | **Flow** (Record-Triggered)        | Declarative, admin-maintainable, faster to build      |
+| **Medium** (3-5) | Multiple automations, some complexity       | **Hybrid** (Flow + Invocable Apex) | Flow orchestrates, Apex handles complex logic         |
+| **High** (6+)    | Many automations, complex interdependencies | **Apex** (TAF or single trigger)   | Full control over execution order and governor limits |
 
 ### Key Decision Factors
 
@@ -30,6 +31,7 @@
 > **Rule**: Each object should have ONE primary entry point for record-triggered automation.
 
 Multiple triggers and record-triggered flows on the same object create:
+
 - **Unpredictable execution order** between triggers and flows
 - **Governor limit stacking** across independent automations
 - **Debugging nightmares** when logic conflicts
@@ -37,14 +39,17 @@ Multiple triggers and record-triggered flows on the same object create:
 ### Implementation Patterns
 
 **Pure Flow (Low Density)**:
+
 - Single Record-Triggered Flow per object per timing (Before Save / After Save)
 - Use Subflows for modularity within that single flow
 
 **Pure Apex (High Density)**:
+
 - Single trigger per object → TAF MetadataTriggerHandler
 - All logic in ordered Trigger Action classes
 
 **Hybrid (Medium Density)**:
+
 - Record-Triggered Flow as entry point
 - Complex logic delegated to `@InvocableMethod` Apex
 
@@ -92,35 +97,34 @@ Record-Triggered Flow (After Save)
 
 ```apex
 public with sharing class ProcessOrderInvocable {
-
-    @InvocableMethod(label='Process Order' category='Orders')
-    public static List<Response> execute(List<Request> requests) {
-        List<Response> responses = new List<Response>();
-        for (Request req : requests) {
-            Response res = new Response();
-            try {
-                // Complex logic here
-                res.isSuccess = true;
-            } catch (Exception e) {
-                res.isSuccess = false;
-                res.errorMessage = e.getMessage();
-            }
-            responses.add(res);
-        }
-        return responses;
+  @InvocableMethod(label='Process Order' category='Orders')
+  public static List<Response> execute(List<Request> requests) {
+    List<Response> responses = new List<Response>();
+    for (Request req : requests) {
+      Response res = new Response();
+      try {
+        // Complex logic here
+        res.isSuccess = true;
+      } catch (Exception e) {
+        res.isSuccess = false;
+        res.errorMessage = e.getMessage();
+      }
+      responses.add(res);
     }
+    return responses;
+  }
 
-    public class Request {
-        @InvocableVariable(label='Record ID' required=true)
-        public Id recordId;
-    }
+  public class Request {
+    @InvocableVariable(label='Record ID' required=true)
+    public Id recordId;
+  }
 
-    public class Response {
-        @InvocableVariable(label='Success')
-        public Boolean isSuccess;
-        @InvocableVariable(label='Error Message')
-        public String errorMessage;
-    }
+  public class Response {
+    @InvocableVariable(label='Success')
+    public Boolean isSuccess;
+    @InvocableVariable(label='Error Message')
+    public String errorMessage;
+  }
 }
 ```
 
@@ -132,13 +136,13 @@ Change Data Capture provides a built-in async mechanism for trigger-like behavio
 
 ### When to Use CDC Instead of After-Save Triggers
 
-| Factor | After-Save Trigger/Flow | CDC Subscriber |
-|--------|------------------------|----------------|
-| **Timing** | Same transaction | Async (separate transaction) |
-| **Failure impact** | Rolls back triggering DML | Isolated — triggering DML succeeds |
-| **Replay** | None | 72-hour replay window |
-| **Governor limits** | Shared with triggering transaction | Separate transaction limits |
-| **Use case** | Critical same-transaction logic | External sync, audit, non-critical updates |
+| Factor              | After-Save Trigger/Flow            | CDC Subscriber                             |
+| ------------------- | ---------------------------------- | ------------------------------------------ |
+| **Timing**          | Same transaction                   | Async (separate transaction)               |
+| **Failure impact**  | Rolls back triggering DML          | Isolated — triggering DML succeeds         |
+| **Replay**          | None                               | 72-hour replay window                      |
+| **Governor limits** | Shared with triggering transaction | Separate transaction limits                |
+| **Use case**        | Critical same-transaction logic    | External sync, audit, non-critical updates |
 
 ### Pattern
 
@@ -147,19 +151,19 @@ Change Data Capture provides a built-in async mechanism for trigger-like behavio
 3. Process changes asynchronously with full replay capability
 
 ```apex
-trigger AccountCDCSubscriber on AccountChangeEvent (after insert) {
-    for (AccountChangeEvent event : Trigger.new) {
-        String changeType = event.ChangeEventHeader.getChangeType();
-        if (changeType == 'UPDATE') {
-            List<String> changedFields = event.ChangeEventHeader.getChangedFields();
-            if (changedFields.contains('Status__c')) {
-                // Queue external sync — isolated from original transaction
-                System.enqueueJob(new ExternalSyncQueueable(
-                    event.ChangeEventHeader.getRecordIds()[0]
-                ));
-            }
-        }
+trigger AccountCDCSubscriber on AccountChangeEvent(after insert) {
+  for (AccountChangeEvent event : Trigger.new) {
+    String changeType = event.ChangeEventHeader.getChangeType();
+    if (changeType == 'UPDATE') {
+      List<String> changedFields = event.ChangeEventHeader.getChangedFields();
+      if (changedFields.contains('Status__c')) {
+        // Queue external sync — isolated from original transaction
+        System.enqueueJob(
+          new ExternalSyncQueueable(event.ChangeEventHeader.getRecordIds()[0])
+        );
+      }
     }
+  }
 }
 ```
 
@@ -183,12 +187,12 @@ For non-time-critical automation, use a scheduled approach instead of trigger-ba
 
 ### Preference: Scheduled Flow over Apex Schedulable
 
-| Factor | Scheduled Flow | Apex Schedulable |
-|--------|---------------|-----------------|
-| **Deployment** | Deployable metadata, packageable | Requires code deployment |
-| **Admin maintenance** | Admins can modify schedule and logic | Developer-only |
-| **Job limit** | No hard limit | 100 scheduled jobs max |
-| **Best for** | Simple-to-medium scheduled tasks | Complex processing needing Batch Apex |
+| Factor                | Scheduled Flow                       | Apex Schedulable                      |
+| --------------------- | ------------------------------------ | ------------------------------------- |
+| **Deployment**        | Deployable metadata, packageable     | Requires code deployment              |
+| **Admin maintenance** | Admins can modify schedule and logic | Developer-only                        |
+| **Job limit**         | No hard limit                        | 100 scheduled jobs max                |
+| **Best for**          | Simple-to-medium scheduled tasks     | Complex processing needing Batch Apex |
 
 > **Recommendation**: Use Scheduled Flow for most scheduled automation. Use Apex `Schedulable` only when you need Batch Apex chaining or complex Apex-only logic.
 

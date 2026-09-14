@@ -16,21 +16,25 @@ This reference expands the Setup UI / Agent Builder workflow for `sf-ai-agentfor
 ## Builder checklist
 
 ### Topics
+
 - Topic descriptions must be concrete and routeable
 - Scope should say what the topic can and cannot do
 - Instructions should be procedural, not vague brand copy
 
 ### Actions
+
 - Flow actions are the safest default for Builder-based agents
 - Apex actions must expose `@InvocableMethod`
 - PromptTemplate actions should be used when the goal is generated content, not deterministic business logic
 
 ### Inputs / Outputs
+
 - Input names must match the target contract exactly
 - Output names should be meaningful to the planner
 - Displayable outputs should be user-facing and concise
 
 ### Agent-level settings
+
 - System instructions should be stable and role-defining
 - Welcome message should orient the user quickly
 - Error message should explain fallback behavior

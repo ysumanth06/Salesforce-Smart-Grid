@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Multi-Turn Testing Guide
 
 Comprehensive guide for designing, executing, and analyzing multi-turn agent conversations using the Agent Runtime API.
@@ -9,38 +10,41 @@ Comprehensive guide for designing, executing, and analyzing multi-turn agent con
 
 Multi-turn testing validates agent behaviors across conversation turns. The table below shows which testing approach supports each behavior:
 
-| Behavior | CLI (no history) | CLI (with `conversationHistory`) | Multi-Turn (API) |
-|----------|-----------------|----------------------------------|------------------|
-| Topic routing accuracy | ✅ | ✅ | ✅ |
-| Action invocation | ✅ | ✅ | ✅ |
-| Topic switching mid-conversation | ❌ | ✅ (simulated) | ✅ (live) |
-| Context retention across turns | ❌ | ✅ (simulated) | ✅ (live) |
-| Escalation after multiple failures | ❌ | ✅ (simulated) | ✅ (live) |
-| Action chaining (output→input) | ❌ | ❌ (no real action execution in history) | ✅ |
-| Guardrail persistence across turns | ❌ | ✅ (simulated) | ✅ (live) |
-| Variable injection and persistence | ❌ | ✅ (per test case) | ✅ (per session) |
-| Real-time state changes across turns | ❌ | ❌ (history is simulated) | ✅ |
-| Live action output chaining | ❌ | ❌ (history turns don't execute actions) | ✅ |
+| Behavior                             | CLI (no history) | CLI (with `conversationHistory`)         | Multi-Turn (API) |
+| ------------------------------------ | ---------------- | ---------------------------------------- | ---------------- |
+| Topic routing accuracy               | ✅               | ✅                                       | ✅               |
+| Action invocation                    | ✅               | ✅                                       | ✅               |
+| Topic switching mid-conversation     | ❌               | ✅ (simulated)                           | ✅ (live)        |
+| Context retention across turns       | ❌               | ✅ (simulated)                           | ✅ (live)        |
+| Escalation after multiple failures   | ❌               | ✅ (simulated)                           | ✅ (live)        |
+| Action chaining (output→input)       | ❌               | ❌ (no real action execution in history) | ✅               |
+| Guardrail persistence across turns   | ❌               | ✅ (simulated)                           | ✅ (live)        |
+| Variable injection and persistence   | ❌               | ✅ (per test case)                       | ✅ (per session) |
+| Real-time state changes across turns | ❌               | ❌ (history is simulated)                | ✅               |
+| Live action output chaining          | ❌               | ❌ (history turns don't execute actions) | ✅               |
 
-> **Key distinction:** `conversationHistory` in CLI tests *simulates* prior turns — no real actions execute during those turns. Only the final test utterance triggers real action execution. Multi-turn API testing executes every turn live, including real action invocations.
+> **Key distinction:** `conversationHistory` in CLI tests _simulates_ prior turns — no real actions execute during those turns. Only the final test utterance triggers real action execution. Multi-turn API testing executes every turn live, including real action invocations.
 
 ---
 
 ## When to Use Multi-Turn Testing
 
 ### Always Use Multi-Turn For:
+
 - Agents with **multiple topics** — test switching between them
 - Agents with **stateful actions** — test data flows across turns
 - Agents with **escalation paths** — test frustration triggers over multiple turns
 - Agents with **personalization** — test if agent remembers user context
 
 ### Single-Turn (CLI) is Sufficient For:
+
 - Basic topic routing validation (utterance → topic)
 - Simple action invocation verification
 - Guardrail trigger testing (single harmful input)
 - Initial smoke testing of new agents
 
 ### CLI with `conversationHistory` is Sufficient For:
+
 - **Protocol activation testing** — trigger a follow-up protocol after a completed business interaction
 - **Mid-protocol stage testing** — test behavior at step N of a multi-step protocol
 - **Action invocation via deep history** — position agent to fire a specific action on the test utterance
@@ -61,15 +65,15 @@ scenario:
   name: "descriptive_name"
   description: "What this scenario validates"
   turns:
-    - user: "First message"       # Turn 1
+    - user: "First message" # Turn 1
       expect:
         response_not_empty: true
         topic_contains: "expected_topic"
-    - user: "Follow-up message"   # Turn 2
+    - user: "Follow-up message" # Turn 2
       expect:
         context_references: "Turn 1 concept"
         action_invoked: "expected_action"
-    - user: "Final message"       # Turn 3
+    - user: "Final message" # Turn 3
       expect:
         conversation_resolved: true
 ```
@@ -95,6 +99,7 @@ scenario:
 #### Scenario Templates
 
 **1a. Natural Topic Switch:**
+
 ```yaml
 - name: "topic_switch_natural"
   description: "User changes intent from cancel to reschedule"
@@ -114,6 +119,7 @@ scenario:
 ```
 
 **1b. Rapid Topic Switching:**
+
 ```yaml
 - name: "topic_switch_rapid"
   description: "User switches between 3 topics in quick succession"
@@ -130,6 +136,7 @@ scenario:
 ```
 
 **1c. Return to Original Topic:**
+
 ```yaml
 - name: "topic_return_original"
   description: "User detours then returns to original topic"
@@ -148,11 +155,11 @@ scenario:
 
 **Failure Indicators:**
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
-| Agent continues cancel flow after "reschedule instead" | TOPIC_RE_MATCHING_FAILURE | Target topic description lacks transition phrases |
-| Agent says "I'll help you cancel" on Turn 2 | TOPIC_RE_MATCHING_FAILURE | Cancel topic too aggressively matches |
-| Agent asks "What would you like to do?" (no topic match) | TOPIC_NOT_MATCHED | Neither topic matches the phrasing |
+| Signal                                                   | Category                  | Root Cause                                        |
+| -------------------------------------------------------- | ------------------------- | ------------------------------------------------- |
+| Agent continues cancel flow after "reschedule instead"   | TOPIC_RE_MATCHING_FAILURE | Target topic description lacks transition phrases |
+| Agent says "I'll help you cancel" on Turn 2              | TOPIC_RE_MATCHING_FAILURE | Cancel topic too aggressively matches             |
+| Agent asks "What would you like to do?" (no topic match) | TOPIC_NOT_MATCHED         | Neither topic matches the phrasing                |
 
 ---
 
@@ -165,6 +172,7 @@ scenario:
 #### Scenario Templates
 
 **2a. User Identity Retention:**
+
 ```yaml
 - name: "context_user_identity"
   description: "Agent retains user name across turns"
@@ -181,6 +189,7 @@ scenario:
 ```
 
 **2b. Entity Reference Persistence:**
+
 ```yaml
 - name: "context_entity_persistence"
   description: "Agent remembers referenced entities"
@@ -196,6 +205,7 @@ scenario:
 ```
 
 **2c. Cross-Topic Context:**
+
 ```yaml
 - name: "context_cross_topic"
   description: "Context persists when switching topics"
@@ -211,10 +221,10 @@ scenario:
 
 **Failure Indicators:**
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
-| "Could you please provide your name?" (already given) | CONTEXT_PRESERVATION_FAILURE | Agent treating each turn independently |
-| "Which order are you referring to?" (only one mentioned) | CONTEXT_PRESERVATION_FAILURE | Session state not propagating |
+| Signal                                                   | Category                     | Root Cause                             |
+| -------------------------------------------------------- | ---------------------------- | -------------------------------------- |
+| "Could you please provide your name?" (already given)    | CONTEXT_PRESERVATION_FAILURE | Agent treating each turn independently |
+| "Which order are you referring to?" (only one mentioned) | CONTEXT_PRESERVATION_FAILURE | Session state not propagating          |
 
 ---
 
@@ -227,6 +237,7 @@ scenario:
 #### Scenario Templates
 
 **3a. Frustration Build-Up:**
+
 ```yaml
 - name: "escalation_frustration"
   description: "Escalation after repeated failed attempts"
@@ -244,6 +255,7 @@ scenario:
 ```
 
 **3b. Escalation Resistance (Should NOT Escalate):**
+
 ```yaml
 - name: "escalation_resistance"
   description: "Agent handles without unnecessary escalation"
@@ -269,6 +281,7 @@ scenario:
 #### Scenario Templates
 
 **4a. PII Request After Rapport:**
+
 ```yaml
 - name: "guardrail_pii_after_rapport"
   description: "Harmful request after establishing trust"
@@ -286,6 +299,7 @@ scenario:
 ```
 
 **4b. Injection Attempt:**
+
 ```yaml
 - name: "guardrail_injection_attempt"
   description: "Prompt injection within conversation"
@@ -313,6 +327,7 @@ scenario:
 #### Scenario Templates
 
 **5a. Identify-Then-Act:**
+
 ```yaml
 - name: "chain_identify_then_act"
   description: "Identify entity, then perform action on it"
@@ -328,6 +343,7 @@ scenario:
 ```
 
 **5b. Cross-Object Chain:**
+
 ```yaml
 - name: "chain_cross_object"
   description: "Actions span multiple Salesforce objects"
@@ -346,11 +362,11 @@ scenario:
 
 **Failure Indicators:**
 
-| Signal | Category | Root Cause |
-|--------|----------|------------|
+| Signal                                        | Category             | Root Cause                          |
+| --------------------------------------------- | -------------------- | ----------------------------------- |
 | "Which account?" after already identifying it | ACTION_CHAIN_FAILURE | Action output not stored in context |
-| Wrong record used in follow-up action | ACTION_CHAIN_FAILURE | Entity resolution mismatch |
-| Action invoked with null/empty inputs | ACTION_CHAIN_FAILURE | Output variable mapping broken |
+| Wrong record used in follow-up action         | ACTION_CHAIN_FAILURE | Entity resolution mismatch          |
+| Action invoked with null/empty inputs         | ACTION_CHAIN_FAILURE | Output variable mapping broken      |
 
 ---
 
@@ -363,6 +379,7 @@ scenario:
 #### Scenario Templates
 
 **6a. Pre-Set Account Context:**
+
 ```yaml
 - name: "variable_account_context"
   description: "Agent uses pre-injected AccountId"
@@ -386,12 +403,12 @@ scenario:
 
 After each turn, evaluate these dimensions:
 
-| Category | Pass | Fail |
-|----------|------|------|
-| **Response Quality** | Non-empty, relevant, appropriate tone | Empty, off-topic, hallucinated |
-| **Topic Matching** | Correct topic selected, switch recognized | Wrong topic, continues with old topic |
-| **Action Execution** | Expected action invoked with valid output | No action, wrong action, null output |
-| **Context Retention** | References prior details, maintains thread | "I don't have that information" |
+| Category              | Pass                                       | Fail                                  |
+| --------------------- | ------------------------------------------ | ------------------------------------- |
+| **Response Quality**  | Non-empty, relevant, appropriate tone      | Empty, off-topic, hallucinated        |
+| **Topic Matching**    | Correct topic selected, switch recognized  | Wrong topic, continues with old topic |
+| **Action Execution**  | Expected action invoked with valid output  | No action, wrong action, null output  |
+| **Context Retention** | References prior details, maintains thread | "I don't have that information"       |
 
 ---
 
@@ -399,22 +416,23 @@ After each turn, evaluate these dimensions:
 
 ### Aggregate Scoring (7 Categories)
 
-| Category | Points | What It Measures |
-|----------|--------|------------------|
-| Topic Selection Coverage | 15 | All topics have single-turn tests |
-| Action Invocation | 15 | All actions tested with valid I/O |
-| **Multi-Turn Topic Re-matching** | **15** | Topic switching accuracy across turns |
-| **Context Preservation** | **15** | Information retention across turns |
-| Edge Case & Guardrail Coverage | 15 | Negative tests, boundaries, guardrails |
-| Test Spec / Scenario Quality | 10 | Well-structured scenarios with clear expectations |
-| Agentic Fix Success | 15 | Auto-fixes resolve within 3 attempts |
-| **Total** | **100** | |
+| Category                         | Points  | What It Measures                                  |
+| -------------------------------- | ------- | ------------------------------------------------- |
+| Topic Selection Coverage         | 15      | All topics have single-turn tests                 |
+| Action Invocation                | 15      | All actions tested with valid I/O                 |
+| **Multi-Turn Topic Re-matching** | **15**  | Topic switching accuracy across turns             |
+| **Context Preservation**         | **15**  | Information retention across turns                |
+| Edge Case & Guardrail Coverage   | 15      | Negative tests, boundaries, guardrails            |
+| Test Spec / Scenario Quality     | 10      | Well-structured scenarios with clear expectations |
+| Agentic Fix Success              | 15      | Auto-fixes resolve within 3 attempts              |
+| **Total**                        | **100** |                                                   |
 
 ---
 
 ## Designing Effective Scenarios
 
 ### Do's
+
 - **Use natural language** — Real users don't speak in keywords
 - **Include typos and informality** — "wanna cancel" not just "I would like to cancel"
 - **Test the unexpected** — Users change their minds, go off-topic, come back
@@ -422,6 +440,7 @@ After each turn, evaluate these dimensions:
 - **Document expected behavior** — Clearly state what "pass" looks like for each turn
 
 ### Don'ts
+
 - **Don't test everything in one scenario** — Focus each scenario on one behavior
 - **Don't use unrealistic inputs** — "Execute function call: cancel_appointment" isn't real user input
 - **Don't skip the baseline** — Always start with a known-good happy path
@@ -431,25 +450,25 @@ After each turn, evaluate these dimensions:
 
 ## Pattern Selection Guide
 
-| Agent Has | Test These Patterns |
-|-----------|-------------------|
-| Multiple topics | 1 (Topic Re-Matching) |
-| Stateful actions | 2 (Context Preservation), 5 (Action Chaining) |
-| Escalation paths | 3 (Escalation Cascade) |
-| Guardrails/safety rules | 4 (Guardrail Mid-Conversation) |
-| Session variables | 6 (Variable Injection) |
-| All of the above | Use `multi-turn-comprehensive.yaml` template |
+| Agent Has               | Test These Patterns                           |
+| ----------------------- | --------------------------------------------- |
+| Multiple topics         | 1 (Topic Re-Matching)                         |
+| Stateful actions        | 2 (Context Preservation), 5 (Action Chaining) |
+| Escalation paths        | 3 (Escalation Cascade)                        |
+| Guardrails/safety rules | 4 (Guardrail Mid-Conversation)                |
+| Session variables       | 6 (Variable Injection)                        |
+| All of the above        | Use `multi-turn-comprehensive.yaml` template  |
 
 ---
 
 ## Failure Analysis for Multi-Turn Tests
 
-| Category | Description | Fix Strategy |
-|----------|-------------|--------------|
-| `TOPIC_RE_MATCHING_FAILURE` | Agent stays on old topic after user switches intent | Improve topic classificationDescriptions with transition phrases |
-| `CONTEXT_PRESERVATION_FAILURE` | Agent forgets information from prior turns | Check session config; improve topic instructions for context usage |
-| `MULTI_TURN_ESCALATION_FAILURE` | Agent doesn't escalate after sustained user frustration | Add escalation triggers for frustration patterns |
-| `ACTION_CHAIN_FAILURE` | Action output not passed to subsequent action | Verify action output variable mappings |
+| Category                        | Description                                             | Fix Strategy                                                       |
+| ------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| `TOPIC_RE_MATCHING_FAILURE`     | Agent stays on old topic after user switches intent     | Improve topic classificationDescriptions with transition phrases   |
+| `CONTEXT_PRESERVATION_FAILURE`  | Agent forgets information from prior turns              | Check session config; improve topic instructions for context usage |
+| `MULTI_TURN_ESCALATION_FAILURE` | Agent doesn't escalate after sustained user frustration | Add escalation triggers for frustration patterns                   |
+| `ACTION_CHAIN_FAILURE`          | Action output not passed to subsequent action           | Verify action output variable mappings                             |
 
 ### Fix Decision Flow
 
@@ -479,21 +498,21 @@ Multi-Turn Test Failed
 
 Pre-built test templates are available in `assets/`:
 
-| Template | Scenarios | Focus |
-|----------|-----------|-------|
-| `multi-turn-topic-routing.yaml` | 4 | Topic switching and re-matching |
-| `multi-turn-context-preservation.yaml` | 4 | Context retention validation |
-| `multi-turn-escalation-flows.yaml` | 4 | Escalation trigger testing |
-| `multi-turn-comprehensive.yaml` | 6 | Full test suite combining all patterns |
+| Template                               | Scenarios | Focus                                  |
+| -------------------------------------- | --------- | -------------------------------------- |
+| `multi-turn-topic-routing.yaml`        | 4         | Topic switching and re-matching        |
+| `multi-turn-context-preservation.yaml` | 4         | Context retention validation           |
+| `multi-turn-escalation-flows.yaml`     | 4         | Escalation trigger testing             |
+| `multi-turn-comprehensive.yaml`        | 6         | Full test suite combining all patterns |
 
 ---
 
 ## Related Documentation
 
-| Resource | Link |
-|----------|------|
-| Agent Runtime API Reference | [agent-api-reference.md](agent-api-reference.md) |
-| ECA Setup Guide | [eca-setup-guide.md](eca-setup-guide.md) |
+| Resource                           | Link                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------ |
+| Agent Runtime API Reference        | [agent-api-reference.md](agent-api-reference.md)                               |
+| ECA Setup Guide                    | [eca-setup-guide.md](eca-setup-guide.md)                                       |
 | Deep Conversation History Patterns | [deep-conversation-history-patterns.md](deep-conversation-history-patterns.md) |
-| Coverage Analysis | [coverage-analysis.md](coverage-analysis.md) |
-| Agentic Fix Loops | [agentic-fix-loops.md](agentic-fix-loops.md) |
+| Coverage Analysis                  | [coverage-analysis.md](coverage-analysis.md)                                   |
+| Agentic Fix Loops                  | [agentic-fix-loops.md](agentic-fix-loops.md)                                   |

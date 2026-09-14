@@ -68,6 +68,14 @@ export default class SmartDataGrid extends LightningElement {
   @track selectedRecordTitle;
   @track showReadingPane = false;
   @track showRelatedGrid = false;
+
+  // Phase 3 AI Command Palette & Filters
+  @track showCommandPalette = false;
+  @track aiFilterPills = [];
+
+  get visibleFieldNames() {
+    return (this.gridColumns || []).map((c) => c.fieldName);
+  }
   @track selectedRowId;
 
   // Task Story 13: In-place column header filters & pinning state
@@ -321,6 +329,7 @@ export default class SmartDataGrid extends LightningElement {
     this.activeHeaderFilters = {};
     this.activeFilterExpression = null;
     this.activeFilterJson = null;
+    this.aiFilterPills = [];
     this.isFilterPanelOpen = false;
     this.applyHeaderFilters();
     this.refreshHeaderActions();
@@ -1679,6 +1688,11 @@ export default class SmartDataGrid extends LightningElement {
       });
     }
 
+    // 4. AI Filters (Phase 3)
+    if (this.aiFilterPills && this.aiFilterPills.length > 0) {
+      pills.push(...this.aiFilterPills);
+    }
+
     this.activeFilterPills = pills;
   }
 
@@ -1711,6 +1725,31 @@ export default class SmartDataGrid extends LightningElement {
       return;
     }
 
+    if (source === "ai") {
+      this.aiFilterPills = (this.aiFilterPills || []).filter(
+        (p) => p.id !== detail.id
+      );
+      if (this.aiFilterPills.length > 0) {
+        const expr = {
+          logic: "AND",
+          conditions: this.aiFilterPills.map((p) => ({
+            field: p.fieldName,
+            operator: p.operator || "=",
+            value: p.value
+          })),
+          groups: []
+        };
+        this.activeFilterJson = JSON.stringify(expr);
+      } else {
+        this.activeFilterJson = null;
+      }
+      this.pageCache.clear();
+      this.currentPage = 1;
+      this.updateActivePills();
+      await this.fetchData(true);
+      return;
+    }
+
     // Default: Quick Combobox / Date range
     if (this.filterFields) {
       const filter = this.filterFields.find((f) => f.fieldName === fieldName);
@@ -1720,6 +1759,58 @@ export default class SmartDataGrid extends LightningElement {
     }
     this.updateActivePills();
     await this.fetchData();
+  }
+
+  // ─── Phase 3 AI Handlers ───
+
+  handleOpenCommandPalette() {
+    this.showCommandPalette = true;
+  }
+
+  handleCloseCommandPalette() {
+    this.showCommandPalette = false;
+  }
+
+  async handleApplyAIFilters(event) {
+    const detail = event.detail || {};
+    const { filters, sortField, sortDirection } = detail;
+
+    if (filters && Array.isArray(filters)) {
+      this.aiFilterPills = filters.map((f, idx) => ({
+        id: `ai_${f.field}_${idx}`,
+        fieldName: f.field,
+        fieldLabel: f.field,
+        value: f.value,
+        displayLabel: `AI: ${f.field} ${f.operator} '${f.value}'`,
+        source: "ai",
+        operator: f.operator
+      }));
+
+      if (filters.length > 0) {
+        const expr = {
+          logic: "AND",
+          conditions: filters.map((f) => ({
+            field: f.field,
+            operator: f.operator,
+            value: f.value
+          })),
+          groups: []
+        };
+        this.activeFilterJson = JSON.stringify(expr);
+      } else {
+        this.activeFilterJson = null;
+      }
+    }
+
+    if (sortField) {
+      this.sortField = sortField;
+      this.sortDirection = (sortDirection || "ASC").toUpperCase();
+    }
+
+    this.pageCache.clear();
+    this.currentPage = 1;
+    this.updateActivePills();
+    await this.fetchData(true);
   }
 
   // ─── Utilities ───

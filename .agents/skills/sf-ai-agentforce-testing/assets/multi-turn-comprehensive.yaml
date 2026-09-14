@@ -181,6 +181,6 @@ evaluation:
     - ACTION_CHAIN_FAILURE
     - VARIABLE_PERSISTENCE_FAILURE
   scoring:
-    total_weight: 45  # Multi-turn categories: 15 + 15 + 15 from scoring system
-    minimum_pass: 60  # Percent of scenarios that must pass
-    production_ready: 85  # Percent for production readiness
+    total_weight: 45 # Multi-turn categories: 15 + 15 + 15 from scoring system
+    minimum_pass: 60 # Percent of scenarios that must pass
+    production_ready: 85 # Percent for production readiness

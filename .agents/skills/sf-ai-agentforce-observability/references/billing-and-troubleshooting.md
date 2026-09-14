@@ -10,12 +10,12 @@ Agentforce Session Tracing consumes **Data 360 credits** for ingestion, storage,
 
 ### Credit Consumption
 
-| Usage Type | Digital Wallet Card | Description |
-|------------|---------------------|-------------|
-| **Batch Data Pipeline** | Data Services | Records ingested via data streams. ~24 records per LLM round-trip. **Primary cost driver**. |
-| **Data Queries** | Data Services | Records processed when running queries, reports, dashboards |
-| **Streaming Calculated Insights** | Data Services | Used for Prompt Builder usage and feedback metrics |
-| **Storage Beyond Allocation** | Data Storage | Storage consumed above allocated amount |
+| Usage Type                        | Digital Wallet Card | Description                                                                                 |
+| --------------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| **Batch Data Pipeline**           | Data Services       | Records ingested via data streams. ~24 records per LLM round-trip. **Primary cost driver**. |
+| **Data Queries**                  | Data Services       | Records processed when running queries, reports, dashboards                                 |
+| **Streaming Calculated Insights** | Data Services       | Used for Prompt Builder usage and feedback metrics                                          |
+| **Storage Beyond Allocation**     | Data Storage        | Storage consumed above allocated amount                                                     |
 
 ### Cost Estimation
 
@@ -33,12 +33,12 @@ Example:
 
 ## Common Issues & Fixes
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `401 Unauthorized` | JWT auth expired/invalid | Refresh token or reconfigure ECA |
-| `No session data` | Tracing not enabled | Enable Session Tracing in Agent Settings |
-| `Query timeout` | Too much data | Add date filters, use incremental |
-| `Memory error` | Loading all data | Use Polars lazy frames |
-| `Missing DMO` | Wrong API version | Use API v60.0+ |
+| Error              | Cause                    | Fix                                      |
+| ------------------ | ------------------------ | ---------------------------------------- |
+| `401 Unauthorized` | JWT auth expired/invalid | Refresh token or reconfigure ECA         |
+| `No session data`  | Tracing not enabled      | Enable Session Tracing in Agent Settings |
+| `Query timeout`    | Too much data            | Add date filters, use incremental        |
+| `Memory error`     | Loading all data         | Use Polars lazy frames                   |
+| `Missing DMO`      | Wrong API version        | Use API v60.0+                           |
 
 See [references/troubleshooting.md](../references/troubleshooting.md) for detailed solutions.

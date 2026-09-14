@@ -145,6 +145,17 @@
           class="slds-var-m-left_x-small"
         ></lightning-button>
       </template>
+      <!-- AI Command Palette Trigger (Cmd+K) (Phase 3) -->
+      <lightning-button-icon
+        icon-name="utility:einstein"
+        alternative-text="AI Command Palette (Cmd+K)"
+        title="AI Command Palette (Cmd+K)"
+        onclick={handleOpenCommandPalette}
+        disabled={isLoading}
+        class="slds-var-m-left_x-small"
+        variant="border-filled"
+        data-testid="toolbar-ai-command-btn"
+      ></lightning-button-icon>
     </div>
     <!-- Active Filter Pills Bar (TS-01) -->
     <c-smart-grid-filter-bar
@@ -441,4 +452,14 @@
     ondiscardall={handleDiscardAll}
     onsave={handleReviewSave}
   ></c-smart-grid-review-modal>
+
+  <!-- Smart Grid Command Palette Modal (Phase 3) -->
+  <c-smart-grid-command-palette
+    is-open={showCommandPalette}
+    object-api-name={objectApiName}
+    available-fields={visibleFieldNames}
+    config-dev-name={gridConfigName}
+    onapplyfilters={handleApplyAIFilters}
+    onclose={handleCloseCommandPalette}
+  ></c-smart-grid-command-palette>
 </template>

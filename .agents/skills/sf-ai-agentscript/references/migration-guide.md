@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Migration Guide: Agentforce Builder UI → Agent Script DSL
 
 > This guide maps every concept from the Agentforce Builder UI (Setup > Agents) to its Agent Script DSL equivalent. Use it when converting existing agents from the visual builder to code.
@@ -7,19 +8,19 @@
 
 ## Builder UI → Agent Script Mapping
 
-| # | Builder UI Concept | Agent Script Equivalent | Notes |
-|---|-------------------|------------------------|-------|
-| 1 | Topic name | `topic my_topic_name:` | Must use snake_case, max 80 chars |
-| 2 | Classification description | `description: "..."` on topic | Helps LLM decide when to enter topic |
-| 3 | Scope / "What this topic can do" | `reasoning.instructions` + available `actions` | Combined: instructions tell LLM what to do, actions tell it what tools are available |
-| 4 | Instructions (numbered text boxes) | `reasoning: instructions:` | Use `->` for logic/expressions, `\|` for literal text |
-| 5 | Flow actions | `target: flow://FlowName` | Flow must be Autolaunched and Active |
-| 6 | Apex actions | `target: apex://ClassName` | Class must have `@InvocableMethod` |
-| 7 | Prompt Template actions | `target: generatePromptResponse://TemplateName` | Template must exist in org |
-| 8 | "Collect from user" input | Slot-fill `...` operator | `with query = ...` — LLM extracts from conversation |
-| 9 | "Show/Hide in conversation" toggle | `filter_from_agent: True` | On action output definitions |
-| 10 | "Require Confirmation" toggle | `require_user_confirmation: True` | On action definitions |
-| 11 | Guard Conditions | `available when` clause | `available when @variables.verified == True` |
+| #   | Builder UI Concept                 | Agent Script Equivalent                         | Notes                                                                                |
+| --- | ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 1   | Topic name                         | `topic my_topic_name:`                          | Must use snake_case, max 80 chars                                                    |
+| 2   | Classification description         | `description: "..."` on topic                   | Helps LLM decide when to enter topic                                                 |
+| 3   | Scope / "What this topic can do"   | `reasoning.instructions` + available `actions`  | Combined: instructions tell LLM what to do, actions tell it what tools are available |
+| 4   | Instructions (numbered text boxes) | `reasoning: instructions:`                      | Use `->` for logic/expressions, `\|` for literal text                                |
+| 5   | Flow actions                       | `target: flow://FlowName`                       | Flow must be Autolaunched and Active                                                 |
+| 6   | Apex actions                       | `target: apex://ClassName`                      | Class must have `@InvocableMethod`                                                   |
+| 7   | Prompt Template actions            | `target: generatePromptResponse://TemplateName` | Template must exist in org                                                           |
+| 8   | "Collect from user" input          | Slot-fill `...` operator                        | `with query = ...` — LLM extracts from conversation                                  |
+| 9   | "Show/Hide in conversation" toggle | `filter_from_agent: True`                       | On action output definitions                                                         |
+| 10  | "Require Confirmation" toggle      | `require_user_confirmation: True`               | On action definitions                                                                |
+| 11  | Guard Conditions                   | `available when` clause                         | `available when @variables.verified == True`                                         |
 
 ---
 
@@ -27,18 +28,18 @@
 
 These capabilities exist ONLY in Agent Script — they cannot be configured through the Builder UI:
 
-| # | Feature | Description | Example |
-|---|---------|-------------|---------|
-| 1 | `before_reasoning:` hook | Deterministic pre-processing before LLM sees instructions | Set variables, load data, enforce gates |
-| 2 | `after_reasoning:` hook | Deterministic post-processing after LLM finishes | Logging, cleanup, audit flags |
-| 3 | Linked variables | Read-only variables bound to session/context sources | `source: @MessagingSession.Id` |
-| 4 | Per-topic `system.instructions` override | Different system prompts for different topics | Customize LLM persona per topic |
-| 5 | Topic delegation (supervision) | Call a topic as a function — it returns to caller | `@topic.expert` in `reasoning.actions` |
-| 6 | Conditional transitions with `if/else` | Deterministic routing based on variable state | `if @variables.risk >= 80: transition to @topic.escalation` |
-| 7 | Template arithmetic | Expression evaluation in text templates | `{!@variables.x + 1}` |
-| 8 | Post-action loop pattern | Topic re-resolves after action, enabling check-at-top pattern | Deterministic post-action routing |
-| 9 | Latch variables | Force topic re-entry after user provides input | Workaround for topic selector limitations |
-| 10 | Connection block | Multi-channel escalation routing (messaging, voice) | Service Agent channel-specific escalation |
+| #   | Feature                                  | Description                                                   | Example                                                     |
+| --- | ---------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------- |
+| 1   | `before_reasoning:` hook                 | Deterministic pre-processing before LLM sees instructions     | Set variables, load data, enforce gates                     |
+| 2   | `after_reasoning:` hook                  | Deterministic post-processing after LLM finishes              | Logging, cleanup, audit flags                               |
+| 3   | Linked variables                         | Read-only variables bound to session/context sources          | `source: @MessagingSession.Id`                              |
+| 4   | Per-topic `system.instructions` override | Different system prompts for different topics                 | Customize LLM persona per topic                             |
+| 5   | Topic delegation (supervision)           | Call a topic as a function — it returns to caller             | `@topic.expert` in `reasoning.actions`                      |
+| 6   | Conditional transitions with `if/else`   | Deterministic routing based on variable state                 | `if @variables.risk >= 80: transition to @topic.escalation` |
+| 7   | Template arithmetic                      | Expression evaluation in text templates                       | `{!@variables.x + 1}`                                       |
+| 8   | Post-action loop pattern                 | Topic re-resolves after action, enabling check-at-top pattern | Deterministic post-action routing                           |
+| 9   | Latch variables                          | Force topic re-entry after user provides input                | Workaround for topic selector limitations                   |
+| 10  | Connection block                         | Multi-channel escalation routing (messaging, voice)           | Service Agent channel-specific escalation                   |
 
 ---
 
@@ -97,6 +98,7 @@ topic order_lookup:
 ```
 
 **Key differences in the Agent Script version:**
+
 - Explicit action definition with typed inputs/outputs and target
 - Post-action check pattern (at TOP of instructions) enables deterministic routing after the action completes
 - Variable injection (`{!@variables.X}`) for dynamic text
@@ -173,6 +175,7 @@ topic identity_verification:
 ```
 
 **Key differences in the Agent Script version:**
+
 - Deterministic gates at top of instructions (cannot be bypassed by LLM)
 - Explicit failure counter with arithmetic
 - `available when` guard ensures the "proceed" action is invisible until verified
@@ -197,14 +200,14 @@ When converting a Builder UI agent to Agent Script:
 
 ## Common Migration Pitfalls
 
-| Pitfall | Description | Fix |
-|---------|-------------|-----|
-| Missing deterministic logic | Builder UI relies on LLM to follow instructions; Agent Script should enforce with code | Add `if/else` gates and `available when` guards |
-| Implicit routing | Builder UI auto-routes between topics; Agent Script needs explicit transitions | Add `@utils.transition` actions for each topic change |
-| Action naming conflicts | Builder UI action names may conflict with reserved words | Rename to avoid `description`, `label`, `escalate` |
-| Missing variable declarations | Builder UI manages state implicitly | Declare all mutable/linked variables explicitly |
-| Wrong instruction syntax | Builder UI text → `\|` (pipe) syntax; conditional logic → `->` (arrow) syntax | Use arrow when you need `if`, `run`, `set`, or `transition` |
+| Pitfall                       | Description                                                                            | Fix                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Missing deterministic logic   | Builder UI relies on LLM to follow instructions; Agent Script should enforce with code | Add `if/else` gates and `available when` guards             |
+| Implicit routing              | Builder UI auto-routes between topics; Agent Script needs explicit transitions         | Add `@utils.transition` actions for each topic change       |
+| Action naming conflicts       | Builder UI action names may conflict with reserved words                               | Rename to avoid `description`, `label`, `escalate`          |
+| Missing variable declarations | Builder UI manages state implicitly                                                    | Declare all mutable/linked variables explicitly             |
+| Wrong instruction syntax      | Builder UI text → `\|` (pipe) syntax; conditional logic → `->` (arrow) syntax          | Use arrow when you need `if`, `run`, `set`, or `transition` |
 
 ---
 
-*Last updated: 2026-02-12*
+_Last updated: 2026-02-12_

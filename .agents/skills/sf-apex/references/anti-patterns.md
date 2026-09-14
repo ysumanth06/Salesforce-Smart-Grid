@@ -1,4 +1,5 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Apex Anti-Patterns
 
 Comprehensive catalog of common Apex anti-patterns, code smells, and how to fix them.
@@ -25,6 +26,7 @@ These patterns will cause immediate failures or security vulnerabilities. **NEVE
 **Problem**: Hits 100 SOQL query limit.
 
 **❌ BAD:**
+
 ```apex
 for (Account acc : accounts) {
     List<Contact> contacts = [SELECT Id FROM Contact WHERE AccountId = :acc.Id];
@@ -34,6 +36,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 Set<Id> accountIds = new Set<Id>();
 for (Account acc : accounts) {
@@ -63,6 +66,7 @@ for (Account acc : accounts) {
 **Problem**: Hits 150 DML statement limit.
 
 **❌ BAD:**
+
 ```apex
 for (Account acc : accounts) {
     acc.Industry = 'Technology';
@@ -72,6 +76,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 for (Account acc : accounts) {
     acc.Industry = 'Technology';
@@ -88,16 +93,18 @@ update accounts;  // Single DML after loop
 **Problem**: Bypasses record-level security by default.
 
 **❌ BAD:**
+
 ```apex
 public class AccountService {
-    // Implicitly "without sharing" - security risk!
+  // Implicitly "without sharing" - security risk!
 }
 ```
 
 **✅ GOOD:**
+
 ```apex
 public with sharing class AccountService {
-    // Respects sharing rules
+  // Respects sharing rules
 }
 ```
 
@@ -110,11 +117,13 @@ public with sharing class AccountService {
 **Problem**: IDs differ between orgs, causing deployment failures.
 
 **❌ BAD:**
+
 ```apex
 Id recordTypeId = '012000000000000AAA';  // Hardcoded ID!
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Option 1: Query at runtime
 Id recordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
@@ -134,6 +143,7 @@ Id recordTypeId = config.Record_Type_Id__c;
 **Problem**: Silently swallows errors, making debugging impossible.
 
 **❌ BAD:**
+
 ```apex
 try {
     insert accounts;
@@ -143,6 +153,7 @@ try {
 ```
 
 **✅ GOOD:**
+
 ```apex
 try {
     insert accounts;
@@ -161,6 +172,7 @@ try {
 **Problem**: User input concatenated into SOQL allows malicious queries.
 
 **❌ BAD:**
+
 ```apex
 String query = 'SELECT Id FROM Account WHERE Name = \'' + userInput + '\'';
 List<Account> accounts = Database.query(query);
@@ -168,6 +180,7 @@ List<Account> accounts = Database.query(query);
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Use bind variables
 List<Account> accounts = [SELECT Id FROM Account WHERE Name = :userInput];
@@ -182,6 +195,7 @@ List<Account> accounts = [SELECT Id FROM Account WHERE Name = :userInput];
 **Problem**: False positive tests that pass even when code fails.
 
 **❌ BAD:**
+
 ```apex
 @IsTest
 static void testAccountCreation() {
@@ -192,6 +206,7 @@ static void testAccountCreation() {
 ```
 
 **✅ GOOD:**
+
 ```apex
 @IsTest
 static void testAccountCreation() {
@@ -211,30 +226,32 @@ static void testAccountCreation() {
 
 These patterns indicate poor code quality and should be refactored.
 
-| Anti-Pattern | Problem | Fix |
-|--------------|---------|-----|
-| **SOQL without WHERE or LIMIT** | Returns all records, slow | Always add `WHERE` clause or `LIMIT` |
-| **Multiple triggers on object** | Unpredictable execution order | Single trigger + Trigger Actions Framework |
-| **Generic `Exception` only** | Masks specific errors | Catch specific exceptions first |
-| **No trigger bypass flag** | Can't disable for data loads | Add Custom Setting bypass |
-| **`System.debug()` everywhere** | Performance impact, clutters logs | Use logging framework with levels |
-| **Unnecessary `isEmpty()` before DML** | Wastes CPU | Remove - DML handles empty lists |
-| **`!= false` comparisons** | Confusing double negative | Use `== true` or just the boolean |
-| **No Test Data Factory** | Duplicated test data setup | Centralize in factory class |
-| **God Class** | Single class does everything | Split into Service/Selector/Domain |
-| **Magic Numbers** | Hardcoded values like `if (score > 75)` | Use named constants |
+| Anti-Pattern                           | Problem                                 | Fix                                        |
+| -------------------------------------- | --------------------------------------- | ------------------------------------------ |
+| **SOQL without WHERE or LIMIT**        | Returns all records, slow               | Always add `WHERE` clause or `LIMIT`       |
+| **Multiple triggers on object**        | Unpredictable execution order           | Single trigger + Trigger Actions Framework |
+| **Generic `Exception` only**           | Masks specific errors                   | Catch specific exceptions first            |
+| **No trigger bypass flag**             | Can't disable for data loads            | Add Custom Setting bypass                  |
+| **`System.debug()` everywhere**        | Performance impact, clutters logs       | Use logging framework with levels          |
+| **Unnecessary `isEmpty()` before DML** | Wastes CPU                              | Remove - DML handles empty lists           |
+| **`!= false` comparisons**             | Confusing double negative               | Use `== true` or just the boolean          |
+| **No Test Data Factory**               | Duplicated test data setup              | Centralize in factory class                |
+| **God Class**                          | Single class does everything            | Split into Service/Selector/Domain         |
+| **Magic Numbers**                      | Hardcoded values like `if (score > 75)` | Use named constants                        |
 
 ---
 
 ### SOQL Without WHERE or LIMIT
 
 **❌ BAD:**
+
 ```apex
 List<Account> accounts = [SELECT Id FROM Account];
 // Returns ALL accounts - could be millions!
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Option 1: Filter
 List<Account> accounts = [SELECT Id FROM Account WHERE Industry = 'Technology'];
@@ -251,6 +268,7 @@ List<Account> accounts = [SELECT Id FROM Account WHERE CreatedDate = THIS_YEAR L
 ### Multiple Triggers on Same Object
 
 **❌ BAD:**
+
 ```apex
 // AccountTrigger1.trigger
 trigger AccountTrigger1 on Account (before insert) {
@@ -264,6 +282,7 @@ trigger AccountTrigger2 on Account (before insert) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Single trigger + TAF
 trigger AccountTrigger on Account (before insert, after insert, before update, after update) {
@@ -280,6 +299,7 @@ public class TA_Account_Validate implements TriggerAction.BeforeInsert { }
 ### Generic Exception Only
 
 **❌ BAD:**
+
 ```apex
 try {
     insert accounts;
@@ -289,6 +309,7 @@ try {
 ```
 
 **✅ GOOD:**
+
 ```apex
 try {
     insert accounts;
@@ -307,6 +328,7 @@ try {
 ### Unnecessary isEmpty() Before DML
 
 **❌ BAD:**
+
 ```apex
 if (!accounts.isEmpty()) {
     update accounts;
@@ -315,6 +337,7 @@ if (!accounts.isEmpty()) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 update accounts;  // No-op if empty, no error thrown
 ```
@@ -324,6 +347,7 @@ update accounts;  // No-op if empty, no error thrown
 ### Double Negative Comparisons
 
 **❌ BAD:**
+
 ```apex
 if (acc.IsActive__c != false) {
     // Confusing logic
@@ -331,6 +355,7 @@ if (acc.IsActive__c != false) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 if (acc.IsActive__c == true) {
     // Clear intent
@@ -349,6 +374,7 @@ if (acc.IsActive__c) {
 ### 1. Nested Loops with SOQL
 
 **❌ BAD:**
+
 ```apex
 for (Account acc : accounts) {
     for (Contact con : [SELECT Id FROM Contact WHERE AccountId = :acc.Id]) {
@@ -358,6 +384,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 Map<Id, Account> accountsWithContacts = new Map<Id, Account>([
     SELECT Id, (SELECT Id FROM Contacts)
@@ -377,32 +404,34 @@ for (Account acc : accountsWithContacts.values()) {
 ### 2. Querying in Constructor
 
 **❌ BAD:**
+
 ```apex
 public class AccountService {
-    private List<Account> accounts;
+  private List<Account> accounts;
 
-    public AccountService() {
-        accounts = [SELECT Id FROM Account];  // Runs on EVERY instantiation
-    }
+  public AccountService() {
+    accounts = [SELECT Id FROM Account]; // Runs on EVERY instantiation
+  }
 }
 ```
 
 **✅ GOOD:**
+
 ```apex
 public class AccountService {
-    private List<Account> accounts;
+  private List<Account> accounts;
 
-    public AccountService(List<Account> accounts) {
-        this.accounts = accounts;  // Inject dependencies
-    }
+  public AccountService(List<Account> accounts) {
+    this.accounts = accounts; // Inject dependencies
+  }
 
-    // Or lazy load only when needed
-    private List<Account> getAccounts() {
-        if (accounts == null) {
-            accounts = [SELECT Id FROM Account LIMIT 200];
-        }
-        return accounts;
+  // Or lazy load only when needed
+  private List<Account> getAccounts() {
+    if (accounts == null) {
+      accounts = [SELECT Id FROM Account LIMIT 200];
     }
+    return accounts;
+  }
 }
 ```
 
@@ -411,6 +440,7 @@ public class AccountService {
 ### 3. Excessive CPU Time
 
 **❌ BAD:**
+
 ```apex
 for (Account acc : accounts) {
     for (Integer i = 0; i < 10000; i++) {
@@ -421,6 +451,7 @@ for (Account acc : accounts) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Move expensive operations outside loops
 String baseHash = EncodingUtil.convertToHex(Crypto.generateDigest('SHA256', Blob.valueOf('base')));
@@ -435,6 +466,7 @@ for (Account acc : accounts) {
 ### 4. Inefficient Collections
 
 **❌ BAD:**
+
 ```apex
 List<Id> uniqueIds = new List<Id>();
 for (Id accountId : allIds) {
@@ -445,6 +477,7 @@ for (Id accountId : allIds) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 Set<Id> uniqueIds = new Set<Id>(allIds);  // O(1) deduplication
 ```
@@ -456,24 +489,26 @@ Set<Id> uniqueIds = new Set<Id>(allIds);  // O(1) deduplication
 ### 1. without sharing Everywhere
 
 **❌ BAD:**
+
 ```apex
 public without sharing class AccountController {
-    @AuraEnabled
-    public static List<Account> getAccounts() {
-        // Bypasses sharing - user sees ALL accounts!
-        return [SELECT Id FROM Account];
-    }
+  @AuraEnabled
+  public static List<Account> getAccounts() {
+    // Bypasses sharing - user sees ALL accounts!
+    return [SELECT Id FROM Account];
+  }
 }
 ```
 
 **✅ GOOD:**
+
 ```apex
 public with sharing class AccountController {
-    @AuraEnabled
-    public static List<Account> getAccounts() {
-        // Respects sharing rules
-        return [SELECT Id FROM Account WITH USER_MODE];
-    }
+  @AuraEnabled
+  public static List<Account> getAccounts() {
+    // Respects sharing rules
+    return [SELECT Id FROM Account WITH USER_MODE];
+  }
 }
 ```
 
@@ -482,6 +517,7 @@ public with sharing class AccountController {
 ### 2. No CRUD/FLS Checks
 
 **❌ BAD:**
+
 ```apex
 public static void updateAccounts(List<Account> accounts) {
     update accounts;  // No permission check!
@@ -489,6 +525,7 @@ public static void updateAccounts(List<Account> accounts) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 public static void updateAccounts(List<Account> accounts) {
     if (!Schema.sObjectType.Account.isUpdateable()) {
@@ -505,11 +542,13 @@ public static void updateAccounts(List<Account> accounts) {
 ### 3. Hardcoded Credentials
 
 **❌ BAD:**
+
 ```apex
 String apiKey = 'sk_live_abc123xyz';  // NEVER hardcode secrets!
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Use Named Credentials
 HttpRequest req = new HttpRequest();
@@ -523,21 +562,23 @@ req.setEndpoint('callout:MyNamedCredential/api');  // Auth handled by platform
 ### 1. @SeeAllData=true
 
 **❌ BAD:**
+
 ```apex
 @IsTest(SeeAllData=true)
 private class AccountServiceTest {
-    // Depends on org data - brittle, slow
+  // Depends on org data - brittle, slow
 }
 ```
 
 **✅ GOOD:**
+
 ```apex
 @IsTest
 private class AccountServiceTest {
-    @TestSetup
-    static void setup() {
-        TestDataFactory.createAccounts(10);  // Isolated test data
-    }
+  @TestSetup
+  static void setup() {
+    TestDataFactory.createAccounts(10); // Isolated test data
+  }
 }
 ```
 
@@ -546,6 +587,7 @@ private class AccountServiceTest {
 ### 2. No Bulk Testing
 
 **❌ BAD:**
+
 ```apex
 @IsTest
 static void testAccountCreation() {
@@ -556,6 +598,7 @@ static void testAccountCreation() {
 ```
 
 **✅ GOOD:**
+
 ```apex
 @IsTest
 static void testBulkAccountCreation() {
@@ -574,6 +617,7 @@ static void testBulkAccountCreation() {
 ### 3. Testing Implementation, Not Behavior
 
 **❌ BAD:**
+
 ```apex
 @IsTest
 static void testGetAccountsCallsQuery() {
@@ -583,6 +627,7 @@ static void testGetAccountsCallsQuery() {
 ```
 
 **✅ GOOD:**
+
 ```apex
 @IsTest
 static void testGetAccountsReturnsCorrectRecords() {
@@ -605,6 +650,7 @@ Based on "Clean Apex Code" by Pablo Gonzalez and clean code principles.
 **Smell**: Method exceeds 30 lines.
 
 **❌ BAD:**
+
 ```apex
 public static void processAccount(Account acc) {
     // 100 lines of mixed logic
@@ -622,6 +668,7 @@ public static void processAccount(Account acc) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 public static void processAccount(Account acc) {
     validateAccount(acc);
@@ -645,20 +692,28 @@ private static void notifyOwner(Account acc) { ... }
 **Smell**: Class exceeds 500 lines or has 20+ methods.
 
 **❌ BAD:**
+
 ```apex
 public class AccountService {
-    // 50 methods mixing concerns:
-    public static void createAccount() { }
-    public static void updateAccount() { }
-    public static void validateAccount() { }
-    public static void calculateScore() { }
-    public static void sendEmail() { }
-    public static void generateReport() { }
-    // ... 44 more methods
+  // 50 methods mixing concerns:
+  public static void createAccount() {
+  }
+  public static void updateAccount() {
+  }
+  public static void validateAccount() {
+  }
+  public static void calculateScore() {
+  }
+  public static void sendEmail() {
+  }
+  public static void generateReport() {
+  }
+  // ... 44 more methods
 }
 ```
 
 **✅ GOOD:**
+
 ```apex
 // Split by responsibility
 public class AccountService { }         // Business logic
@@ -677,6 +732,7 @@ public class AccountReportGenerator { } // Reporting
 **Smell**: Unexplained numeric literals.
 
 **❌ BAD:**
+
 ```apex
 if (acc.Score__c > 75) {
     acc.Rating = 'Hot';
@@ -684,6 +740,7 @@ if (acc.Score__c > 75) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 private static final Integer HOT_LEAD_THRESHOLD = 75;
 
@@ -699,6 +756,7 @@ if (acc.Score__c > HOT_LEAD_THRESHOLD) {
 **Smell**: Method has 5+ parameters.
 
 **❌ BAD:**
+
 ```apex
 public static void createAccount(
     String name,
@@ -712,6 +770,7 @@ public static void createAccount(
 ```
 
 **✅ GOOD:**
+
 ```apex
 public class AccountRequest {
     public String name;
@@ -733,21 +792,27 @@ public static void createAccount(AccountRequest request) { }
 **Smell**: Method uses more methods/fields from another class than its own.
 
 **❌ BAD:**
+
 ```apex
 public class OrderService {
-    public static Decimal calculateDiscount(Order__c order) {
-        Account acc = [SELECT Id, Tier__c FROM Account WHERE Id = :order.Account__c];
-        if (acc.Tier__c == 'Gold') {
-            return order.Amount__c * 0.2;
-        } else if (acc.Tier__c == 'Silver') {
-            return order.Amount__c * 0.1;
-        }
-        return 0;
+  public static Decimal calculateDiscount(Order__c order) {
+    Account acc = [
+      SELECT Id, Tier__c
+      FROM Account
+      WHERE Id = :order.Account__c
+    ];
+    if (acc.Tier__c == 'Gold') {
+      return order.Amount__c * 0.2;
+    } else if (acc.Tier__c == 'Silver') {
+      return order.Amount__c * 0.1;
     }
+    return 0;
+  }
 }
 ```
 
 **✅ GOOD:**
+
 ```apex
 public class Account extends SObject {
     public Decimal getDiscountRate() {
@@ -774,6 +839,7 @@ public class OrderService {
 **Smell**: Using primitives instead of small objects to represent concepts.
 
 **❌ BAD:**
+
 ```apex
 public static void sendEmail(String address, String subject, String body) {
     // Validates email format inline
@@ -782,6 +848,7 @@ public static void sendEmail(String address, String subject, String body) {
 ```
 
 **✅ GOOD:**
+
 ```apex
 public class EmailAddress {
     private String value;
@@ -809,19 +876,21 @@ public static void sendEmail(EmailAddress address, String subject, String body) 
 
 **How to find anti-patterns:**
 
-| Tool | What It Finds |
-|------|---------------|
-| **Salesforce Code Analyzer** | SOQL/DML in loops, security issues |
-| **PMD (via VS Code)** | Code quality, complexity, unused code |
-| **Developer Console** | Test coverage, debug logs |
-| **Grep/Search** | Hardcoded IDs, empty catches, magic numbers |
+| Tool                         | What It Finds                               |
+| ---------------------------- | ------------------------------------------- |
+| **Salesforce Code Analyzer** | SOQL/DML in loops, security issues          |
+| **PMD (via VS Code)**        | Code quality, complexity, unused code       |
+| **Developer Console**        | Test coverage, debug logs                   |
+| **Grep/Search**              | Hardcoded IDs, empty catches, magic numbers |
 
 **VS Code Command:**
+
 ```bash
 sf code-analyzer run --workspace force-app/main/default/classes --output-format table
 ```
 
 **Example output:**
+
 ```
 Severity  File                    Line  Rule                     Message
 ────────────────────────────────────────────────────────────────────────────
@@ -837,30 +906,35 @@ Severity  File                    Line  Rule                     Message
 When reviewing code, check for:
 
 **Bulkification:**
+
 - [ ] No SOQL in loops
 - [ ] No DML in loops
 - [ ] Collections used efficiently (Maps for lookups)
 - [ ] Tested with 251+ records
 
 **Security:**
+
 - [ ] All classes have sharing keyword
 - [ ] SOQL uses `WITH USER_MODE` or `Security.stripInaccessible()`
 - [ ] No hardcoded credentials
 - [ ] No SOQL injection vulnerabilities
 
 **Clean Code:**
+
 - [ ] Methods under 30 lines
 - [ ] Classes under 500 lines
 - [ ] No magic numbers (use constants)
 - [ ] Meaningful variable/method names
 
 **Testing:**
+
 - [ ] All methods covered by tests
 - [ ] Tests have assertions
 - [ ] Bulk tests exist (251+ records)
 - [ ] No `@SeeAllData=true`
 
 **Error Handling:**
+
 - [ ] No empty catch blocks
 - [ ] Specific exceptions before generic
 - [ ] Errors logged with context
@@ -870,6 +944,7 @@ When reviewing code, check for:
 ## Reference
 
 **Full Documentation**: See `references/` folder for comprehensive guides:
+
 - `code-smells-guide.md` - Complete code smell catalog
 - `best-practices.md` - Correct patterns
 - `code-review-checklist.md` - 150-point scoring

@@ -21,38 +21,38 @@ PY
 
 ## Summary
 
-| Outcome | Count | Notes |
-|---|---:|---|
-| Clean (`0 blocking / 0 warnings`) | 1 | Fully self-contained example |
-| Warning-only (`0 blocking / 1+ warnings`) | 16 | Usually complete templates with demo placeholders, portability notes, or style suggestions |
-| Blocking (`1+ blocking`) | 13 | Mostly partial snippets by design; a small number are org-dependent or pattern examples that still need hardening |
+| Outcome                                   | Count | Notes                                                                                                             |
+| ----------------------------------------- | ----: | ----------------------------------------------------------------------------------------------------------------- |
+| Clean (`0 blocking / 0 warnings`)         |     1 | Fully self-contained example                                                                                      |
+| Warning-only (`0 blocking / 1+ warnings`) |    16 | Usually complete templates with demo placeholders, portability notes, or style suggestions                        |
+| Blocking (`1+ blocking`)                  |    13 | Mostly partial snippets by design; a small number are org-dependent or pattern examples that still need hardening |
 
 ## Clean
 
-| File | Notes |
-|---|---|
+| File                                       | Notes                               |
+| ------------------------------------------ | ----------------------------------- |
 | `assets/agents/hello-world-employee.agent` | Clean pass in current repo/context. |
 
 ## Warning-Only Examples / Templates
 
-| File | Dominant rules | Interpretation |
-|---|---|---|
-| `assets/agents/hello-world.agent` | `ASV-CFG-007` | Complete example; uses demo `default_agent_user`. |
-| `assets/agents/multi-topic.agent` | `ASV-CFG-007` | Complete template; placeholders intentionally unresolved. |
-| `assets/agents/production-faq.agent` | `ASV-CFG-007` | Valid example; remaining warning is the demo `default_agent_user`. |
-| `assets/agents/simple-qa.agent` | `ASV-CFG-007` | Complete template with unresolved placeholders. |
-| `assets/components/escalation-setup.agent` | `ASV-CFG-007`, `ASV-RUN-018` | Complete escalation template; placeholders remain unresolved, plus the connection-backed escalation fallback heuristic. |
-| `assets/deterministic-routing.agent` | `ASV-CFG-007` | Complete example; nested-`if` issue fixed during validator audit and inline demo-user comment removed. |
-| `assets/flow-action-lookup.agent` | `ASV-CFG-007` | Complete example with only the demo `default_agent_user` reminder remaining. |
-| `assets/hub-and-spoke.agent` | `ASV-CFG-007` | Complete example with only the demo `default_agent_user` reminder remaining. |
-| `assets/minimal-starter.agent` | `ASV-CFG-007` | Minimal starter is structurally valid; remaining warning is the demo `default_agent_user`. |
-| `assets/patterns/critical-input-collection.agent` | `ASV-RUN-012`, `ASV-RUN-007`, `ASV-CFG-007` | Complete pattern demonstrating planner-hint caveats; warnings are instructional. |
-| `assets/patterns/multi-step-workflow.agent` | `ASV-RUN-007`, `ASV-RUN-012`, `ASV-QLT-005` | Complete pattern; warnings are mostly planner-hint guidance plus one post-action ordering suggestion. |
-| `assets/patterns/procedural-instructions.agent` | `ASV-RUN-007`, `ASV-CFG-007` | Complete pattern with advisory warnings only. |
-| `assets/patterns/prompt-template-action.agent` | `ASV-RUN-005`, `ASV-RUN-007`, `ASV-CFG-007` | Complete pattern intentionally demonstrates risky prompt output displayability / planner hints. |
-| `assets/patterns/system-instruction-overrides.agent` | `ASV-RUN-010`, `ASV-CFG-007` | Complete pattern; lifecycle `run` warnings are expected portability cautions. |
-| `assets/prompt-rag-search.agent` | `ASV-CFG-007` | Complete example with only the demo `default_agent_user` reminder remaining. |
-| `assets/verification-gate.agent` | `ASV-CFG-007` | Complete pattern; undefined `refund_amount` bug was fixed during validator audit and inline demo-user comment removed. |
+| File                                                 | Dominant rules                              | Interpretation                                                                                                          |
+| ---------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `assets/agents/hello-world.agent`                    | `ASV-CFG-007`                               | Complete example; uses demo `default_agent_user`.                                                                       |
+| `assets/agents/multi-topic.agent`                    | `ASV-CFG-007`                               | Complete template; placeholders intentionally unresolved.                                                               |
+| `assets/agents/production-faq.agent`                 | `ASV-CFG-007`                               | Valid example; remaining warning is the demo `default_agent_user`.                                                      |
+| `assets/agents/simple-qa.agent`                      | `ASV-CFG-007`                               | Complete template with unresolved placeholders.                                                                         |
+| `assets/components/escalation-setup.agent`           | `ASV-CFG-007`, `ASV-RUN-018`                | Complete escalation template; placeholders remain unresolved, plus the connection-backed escalation fallback heuristic. |
+| `assets/deterministic-routing.agent`                 | `ASV-CFG-007`                               | Complete example; nested-`if` issue fixed during validator audit and inline demo-user comment removed.                  |
+| `assets/flow-action-lookup.agent`                    | `ASV-CFG-007`                               | Complete example with only the demo `default_agent_user` reminder remaining.                                            |
+| `assets/hub-and-spoke.agent`                         | `ASV-CFG-007`                               | Complete example with only the demo `default_agent_user` reminder remaining.                                            |
+| `assets/minimal-starter.agent`                       | `ASV-CFG-007`                               | Minimal starter is structurally valid; remaining warning is the demo `default_agent_user`.                              |
+| `assets/patterns/critical-input-collection.agent`    | `ASV-RUN-012`, `ASV-RUN-007`, `ASV-CFG-007` | Complete pattern demonstrating planner-hint caveats; warnings are instructional.                                        |
+| `assets/patterns/multi-step-workflow.agent`          | `ASV-RUN-007`, `ASV-RUN-012`, `ASV-QLT-005` | Complete pattern; warnings are mostly planner-hint guidance plus one post-action ordering suggestion.                   |
+| `assets/patterns/procedural-instructions.agent`      | `ASV-RUN-007`, `ASV-CFG-007`                | Complete pattern with advisory warnings only.                                                                           |
+| `assets/patterns/prompt-template-action.agent`       | `ASV-RUN-005`, `ASV-RUN-007`, `ASV-CFG-007` | Complete pattern intentionally demonstrates risky prompt output displayability / planner hints.                         |
+| `assets/patterns/system-instruction-overrides.agent` | `ASV-RUN-010`, `ASV-CFG-007`                | Complete pattern; lifecycle `run` warnings are expected portability cautions.                                           |
+| `assets/prompt-rag-search.agent`                     | `ASV-CFG-007`                               | Complete example with only the demo `default_agent_user` reminder remaining.                                            |
+| `assets/verification-gate.agent`                     | `ASV-CFG-007`                               | Complete pattern; undefined `refund_amount` bug was fixed during validator audit and inline demo-user comment removed.  |
 
 ## Blocking Files
 
@@ -60,26 +60,26 @@ PY
 
 These are not complete agents and are expected to fail a full-agent validator because they are meant to be embedded into a larger file.
 
-| File | Dominant blockers |
-|---|---|
-| `assets/components/apex-action.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/components/error-handling.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/components/flow-action.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/components/n-ary-conditions.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/components/topic-with-actions.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/patterns/action-callbacks.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| File                                            | Dominant blockers                           |
+| ----------------------------------------------- | ------------------------------------------- |
+| `assets/components/apex-action.agent`           | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/components/error-handling.agent`        | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/components/flow-action.agent`           | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/components/n-ary-conditions.agent`      | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/components/topic-with-actions.agent`    | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/patterns/action-callbacks.agent`        | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
 | `assets/patterns/advanced-input-bindings.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/patterns/delegation-routing.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/patterns/lifecycle-events.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/patterns/llm-controlled-actions.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
-| `assets/patterns/open-gate-routing.agent` | `ASV-STR-003`, `ASV-CFG-001` |
-| `assets/patterns/bidirectional-routing.agent` | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-011` |
+| `assets/patterns/delegation-routing.agent`      | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/patterns/lifecycle-events.agent`        | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/patterns/llm-controlled-actions.agent`  | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-004` |
+| `assets/patterns/open-gate-routing.agent`       | `ASV-STR-003`, `ASV-CFG-001`                |
+| `assets/patterns/bidirectional-routing.agent`   | `ASV-STR-003`, `ASV-CFG-001`, `ASV-STR-011` |
 
 ### B. Context / Org-Dependent Blocking Cases
 
-| File | Dominant blockers | Interpretation |
-|---|---|---|
-| `assets/escalation-pattern.agent` | `ASV-ORG-007` | Structurally valid, but the referenced outbound route Flows do not exist in the currently resolved org, so the org-aware validator correctly blocks publish readiness. |
+| File                              | Dominant blockers | Interpretation                                                                                                                                                         |
+| --------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assets/escalation-pattern.agent` | `ASV-ORG-007`     | Structurally valid, but the referenced outbound route Flows do not exist in the currently resolved org, so the org-aware validator correctly blocks publish readiness. |
 
 ## Notes from This Audit
 

@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Agent Runtime API Reference
 
 Reference for Salesforce Einstein Agent Runtime API v1 — the REST API used for multi-turn agent testing.
@@ -11,15 +12,15 @@ The Agent Runtime API provides programmatic access to Agentforce agents via REST
 
 > ⚠️ **Agent API is NOT supported for agents of type "Agentforce (Default)".** Only custom agents created via Agentforce Builder are supported.
 
-| Feature | Agent Testing Center (CLI) | Agent Runtime API |
-|---------|---------------------------|-------------------|
-| Multi-turn conversations | ❌ No | ✅ Yes |
-| Session state management | ❌ No | ✅ Yes |
-| Context preservation testing | ❌ No | ✅ Yes |
-| Topic re-matching validation | ❌ No | ✅ Yes |
-| Requires AiEvaluationDefinition | ✅ Yes | ❌ No |
-| Requires Agent Testing Center feature | ✅ Yes | ❌ No |
-| Auth mechanism | sf CLI org auth | Client Credentials ECA |
+| Feature                               | Agent Testing Center (CLI) | Agent Runtime API      |
+| ------------------------------------- | -------------------------- | ---------------------- |
+| Multi-turn conversations              | ❌ No                      | ✅ Yes                 |
+| Session state management              | ❌ No                      | ✅ Yes                 |
+| Context preservation testing          | ❌ No                      | ✅ Yes                 |
+| Topic re-matching validation          | ❌ No                      | ✅ Yes                 |
+| Requires AiEvaluationDefinition       | ✅ Yes                     | ❌ No                  |
+| Requires Agent Testing Center feature | ✅ Yes                     | ❌ No                  |
+| Auth mechanism                        | sf CLI org auth            | Client Credentials ECA |
 
 ---
 
@@ -59,17 +60,20 @@ python3 ~/.claude/skills/sf-ai-agentforce-testing/hooks/scripts/credential_manag
 Start a new agent conversation session.
 
 **Request:**
+
 ```
 POST /einstein/ai-agent/v1/agents/{agentId}/sessions
 ```
 
 **Headers:**
+
 ```
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
 
 **Body:**
+
 ```json
 {
   "externalSessionKey": "unique-uuid-per-session",
@@ -85,15 +89,16 @@ Content-Type: application/json
 
 **Parameters:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `externalSessionKey` | string | ✅ | Unique identifier for this session (UUID recommended) |
-| `instanceConfig.endpoint` | string | ✅ | Your Salesforce My Domain URL (https://...) |
-| `streamingCapabilities.chunkTypes` | array | ✅ | Response chunk types to receive (`["Text"]`) |
-| `bypassUser` | boolean | ❌ | If `true`, use the agent-assigned user. If `false`, use the token user. Set `true` for Client Credentials testing. |
-| `variables` | array | ❌ | Agent input variables. Each: `{"name": "$Context.X", "type": "Text", "value": "..."}` |
+| Field                              | Type    | Required | Description                                                                                                        |
+| ---------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `externalSessionKey`               | string  | ✅       | Unique identifier for this session (UUID recommended)                                                              |
+| `instanceConfig.endpoint`          | string  | ✅       | Your Salesforce My Domain URL (https://...)                                                                        |
+| `streamingCapabilities.chunkTypes` | array   | ✅       | Response chunk types to receive (`["Text"]`)                                                                       |
+| `bypassUser`                       | boolean | ❌       | If `true`, use the agent-assigned user. If `false`, use the token user. Set `true` for Client Credentials testing. |
+| `variables`                        | array   | ❌       | Agent input variables. Each: `{"name": "$Context.X", "type": "Text", "value": "..."}`                              |
 
 **Response (200 OK):**
+
 ```json
 {
   "sessionId": "8e715939-a121-40ec-80e3-a8d1ac89da33",
@@ -128,13 +133,13 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Meaning | Common Cause |
-|--------|---------|--------------|
-| 400 | Bad Request | Invalid agentId or malformed body |
-| 401 | Unauthorized | Invalid or expired token |
-| 403 | Forbidden | ECA scopes insufficient |
-| 404 | Not Found | Agent not found or not activated |
-| 429 | Rate Limited | Too many concurrent sessions |
+| Status | Meaning      | Common Cause                      |
+| ------ | ------------ | --------------------------------- |
+| 400    | Bad Request  | Invalid agentId or malformed body |
+| 401    | Unauthorized | Invalid or expired token          |
+| 403    | Forbidden    | ECA scopes insufficient           |
+| 404    | Not Found    | Agent not found or not activated  |
+| 429    | Rate Limited | Too many concurrent sessions      |
 
 ---
 
@@ -143,17 +148,20 @@ Content-Type: application/json
 Send a user message within an active session.
 
 **Request:**
+
 ```
 POST /einstein/ai-agent/v1/sessions/{sessionId}/messages
 ```
 
 **Headers:**
+
 ```
 Authorization: Bearer {access_token}
 Content-Type: application/json
 ```
 
 **Body:**
+
 ```json
 {
   "message": {
@@ -166,15 +174,16 @@ Content-Type: application/json
 
 **Parameters:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `message.sequenceId` | integer | ✅ | Incrementing sequence number (1, 2, 3...) |
-| `message.type` | string | ✅ | Message type (always `"Text"`) |
-| `message.text` | string | ✅ | The user's message text |
+| Field                | Type    | Required | Description                               |
+| -------------------- | ------- | -------- | ----------------------------------------- |
+| `message.sequenceId` | integer | ✅       | Incrementing sequence number (1, 2, 3...) |
+| `message.type`       | string  | ✅       | Message type (always `"Text"`)            |
+| `message.text`       | string  | ✅       | The user's message text                   |
 
 > **CRITICAL:** `sequenceId` MUST increment by 1 for each message in the session. Reusing or skipping IDs causes errors.
 
 **Response (200 OK):**
+
 ```json
 {
   "messages": [
@@ -192,38 +201,46 @@ Content-Type: application/json
   ],
   "_links": {
     "self": null,
-    "messages": { "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{sessionId}/messages" },
-    "messagesStream": { "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{sessionId}/messages/stream" },
-    "session": { "href": "https://api.salesforce.com/einstein/ai-agent/v1/agents/{agentId}/sessions" },
-    "end": { "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{sessionId}" }
+    "messages": {
+      "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{sessionId}/messages"
+    },
+    "messagesStream": {
+      "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{sessionId}/messages/stream"
+    },
+    "session": {
+      "href": "https://api.salesforce.com/einstein/ai-agent/v1/agents/{agentId}/sessions"
+    },
+    "end": {
+      "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{sessionId}"
+    }
   }
 }
 ```
 
 **Response Message Fields:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | string | Message type (see types below) |
-| `id` | string | Unique message identifier |
-| `message` | string | The agent's text response |
-| `feedbackId` | string | ID for submitting feedback on this response |
-| `planId` | string | ID of the execution plan |
-| `isContentSafe` | boolean | Whether content passed safety checks |
-| `result` | array | Action result data (empty if no actions executed) |
-| `citedReferences` | array | Cited sources with optional inline metadata |
+| Field             | Type    | Description                                       |
+| ----------------- | ------- | ------------------------------------------------- |
+| `type`            | string  | Message type (see types below)                    |
+| `id`              | string  | Unique message identifier                         |
+| `message`         | string  | The agent's text response                         |
+| `feedbackId`      | string  | ID for submitting feedback on this response       |
+| `planId`          | string  | ID of the execution plan                          |
+| `isContentSafe`   | boolean | Whether content passed safety checks              |
+| `result`          | array   | Action result data (empty if no actions executed) |
+| `citedReferences` | array   | Cited sources with optional inline metadata       |
 
 **Response Message Types:**
 
-| Type | Description | When It Appears |
-|------|-------------|-----------------|
-| `Inform` | Informational response | Standard agent replies |
-| `Confirm` | Confirmation request | Before executing an action |
-| `Escalation` | Handoff to human | Escalation triggered |
-| `SessionEnded` | Session terminated | Agent or system ends conversation |
-| `ProgressIndicator` | Processing notification | Streaming: action in progress |
-| `TextChunk` | Incremental text | Streaming: partial response |
-| `EndOfTurn` | Turn complete | Streaming: response finished |
+| Type                | Description             | When It Appears                   |
+| ------------------- | ----------------------- | --------------------------------- |
+| `Inform`            | Informational response  | Standard agent replies            |
+| `Confirm`           | Confirmation request    | Before executing an action        |
+| `Escalation`        | Handoff to human        | Escalation triggered              |
+| `SessionEnded`      | Session terminated      | Agent or system ends conversation |
+| `ProgressIndicator` | Processing notification | Streaming: action in progress     |
+| `TextChunk`         | Incremental text        | Streaming: partial response       |
+| `EndOfTurn`         | Turn complete           | Streaming: response finished      |
 
 ---
 
@@ -232,11 +249,13 @@ Content-Type: application/json
 Terminate an active session and release resources.
 
 **Request:**
+
 ```
 DELETE /einstein/ai-agent/v1/sessions/{sessionId}
 ```
 
 **Headers:**
+
 ```
 Authorization: Bearer {access_token}
 x-session-end-reason: UserRequest
@@ -245,6 +264,7 @@ x-session-end-reason: UserRequest
 > **IMPORTANT:** The `x-session-end-reason` header is required. Use `UserRequest` for normal session termination.
 
 **Response (200 OK):**
+
 ```json
 {
   "messages": [
@@ -268,6 +288,7 @@ x-session-end-reason: UserRequest
 Variables can be passed at session start and (for editable variables) with messages.
 
 **Session Start with Variables:**
+
 ```json
 {
   "externalSessionKey": "{UUID}",
@@ -284,18 +305,19 @@ Variables can be passed at session start and (for editable variables) with messa
 
 **Variable Types:**
 
-| Type | Description |
-|------|-------------|
-| `Text` | String value |
-| `Number` | Numeric value |
-| `Boolean` | true/false |
-| `Id` | Salesforce record ID |
-| `Date` | Date value |
-| `DateTime` | DateTime value |
-| `Currency` | Currency value |
-| `Object` | Complex object |
+| Type       | Description          |
+| ---------- | -------------------- |
+| `Text`     | String value         |
+| `Number`   | Numeric value        |
+| `Boolean`  | true/false           |
+| `Id`       | Salesforce record ID |
+| `Date`     | Date value           |
+| `DateTime` | DateTime value       |
+| `Currency` | Currency value       |
+| `Object`   | Complex object       |
 
 **Important Notes:**
+
 - Context variables (`$Context.*`) are **read-only after session start** (except `$Context.EndUserLanguage`)
 - Custom variables derived from custom fields: omit the `__c` suffix (e.g., `Conversation_Key__c` → `$Context.Conversation_Key`)
 - Variables must have `Allow value to be set by API` checked in Agentforce Builder
@@ -308,11 +330,13 @@ Variables can be passed at session start and (for editable variables) with messa
 Submit feedback on an agent's response for Data 360 tracking.
 
 **Request:**
+
 ```
 POST /einstein/ai-agent/v1/sessions/{sessionId}/feedback
 ```
 
 **Body:**
+
 ```json
 {
   "feedbackId": "0bc8720e-e010-4129-87bb-70caaa885ee4",
@@ -416,23 +440,23 @@ When analyzing multi-turn responses, check these indicators:
 
 ### Per-Turn Checklist
 
-| Check | What to Look For | Pass Criteria |
-|-------|------------------|---------------|
-| **Non-empty** | Response has text content | `messages[0].message` is not empty |
-| **Topic match** | Response language matches expected topic | Infer from response content and actions |
-| **Action invoked** | Expected actions executed | `result.type` = `ActionResult` present |
-| **Context retained** | References to prior turns | Agent acknowledges prior conversation |
-| **Error-free** | No error indicators | No `Failure` or `Escalation` types (unless expected) |
+| Check                | What to Look For                         | Pass Criteria                                        |
+| -------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| **Non-empty**        | Response has text content                | `messages[0].message` is not empty                   |
+| **Topic match**      | Response language matches expected topic | Infer from response content and actions              |
+| **Action invoked**   | Expected actions executed                | `result.type` = `ActionResult` present               |
+| **Context retained** | References to prior turns                | Agent acknowledges prior conversation                |
+| **Error-free**       | No error indicators                      | No `Failure` or `Escalation` types (unless expected) |
 
 ### Error Indicators in Responses
 
-| Indicator | Meaning | Action |
-|-----------|---------|--------|
-| `"type": "Failure"` | Action execution failed | Check Flow/Apex |
-| `"type": "Escalation"` | Agent escalated to human | May be expected or failure |
-| Empty `messages` array | Agent produced no response | Check agent activation |
-| HTTP 500 on message send | Server-side error | Retry or check agent config |
-| `"result": null` | No plan executed | Topic may not have matched |
+| Indicator                | Meaning                    | Action                      |
+| ------------------------ | -------------------------- | --------------------------- |
+| `"type": "Failure"`      | Action execution failed    | Check Flow/Apex             |
+| `"type": "Escalation"`   | Agent escalated to human   | May be expected or failure  |
+| Empty `messages` array   | Agent produced no response | Check agent activation      |
+| HTTP 500 on message send | Server-side error          | Retry or check agent config |
+| `"result": null`         | No plan executed           | Topic may not have matched  |
 
 ---
 
@@ -440,12 +464,12 @@ When analyzing multi-turn responses, check these indicators:
 
 ### Rate Limits
 
-| Resource | Limit | Notes |
-|----------|-------|-------|
-| Concurrent sessions per org | 10 | End sessions promptly |
-| Messages per session | 50 | Sufficient for testing |
-| Requests per minute | 100 | Per connected app |
-| Session timeout | 15 min | Inactive sessions auto-close |
+| Resource                    | Limit  | Notes                        |
+| --------------------------- | ------ | ---------------------------- |
+| Concurrent sessions per org | 10     | End sessions promptly        |
+| Messages per session        | 50     | Sufficient for testing       |
+| Requests per minute         | 100    | Per connected app            |
+| Session timeout             | 15 min | Inactive sessions auto-close |
 
 ### Best Practices
 
@@ -460,22 +484,22 @@ When analyzing multi-turn responses, check these indicators:
 
 ## Troubleshooting
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| 401 on token request | Wrong Consumer Key/Secret | Verify ECA credentials |
-| 401 on API call | Token expired | Re-authenticate |
-| 404 on session create | Wrong Agent ID | Re-query BotDefinition |
-| 400 "Invalid session" | Session already ended | Create new session |
-| 400 "Invalid sequenceId" | Wrong sequence number | Ensure incrementing from 1 |
-| Empty response | Agent not activated | Activate and publish agent |
-| "Rate limit exceeded" | Too many concurrent sessions | End unused sessions first |
+| Error                    | Cause                        | Fix                        |
+| ------------------------ | ---------------------------- | -------------------------- |
+| 401 on token request     | Wrong Consumer Key/Secret    | Verify ECA credentials     |
+| 401 on API call          | Token expired                | Re-authenticate            |
+| 404 on session create    | Wrong Agent ID               | Re-query BotDefinition     |
+| 400 "Invalid session"    | Session already ended        | Create new session         |
+| 400 "Invalid sequenceId" | Wrong sequence number        | Ensure incrementing from 1 |
+| Empty response           | Agent not activated          | Activate and publish agent |
+| "Rate limit exceeded"    | Too many concurrent sessions | End unused sessions first  |
 
 ---
 
 ## Related Documentation
 
-| Resource | Link |
-|----------|------|
-| ECA Setup | [eca-setup-guide.md](eca-setup-guide.md) |
-| Multi-Turn Testing Guide | [multi-turn-testing-guide.md](multi-turn-testing-guide.md) |
-| Test Patterns | [multi-turn-test-patterns.md](../references/multi-turn-test-patterns.md) |
+| Resource                 | Link                                                                     |
+| ------------------------ | ------------------------------------------------------------------------ |
+| ECA Setup                | [eca-setup-guide.md](eca-setup-guide.md)                                 |
+| Multi-Turn Testing Guide | [multi-turn-testing-guide.md](multi-turn-testing-guide.md)               |
+| Test Patterns            | [multi-turn-test-patterns.md](../references/multi-turn-test-patterns.md) |

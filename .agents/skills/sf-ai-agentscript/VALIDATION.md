@@ -4,59 +4,59 @@ This file tracks the validation history of the sf-ai-agentscript skill. Validati
 
 ## Latest Validation
 
-| Status | Date | Version | Agents Deployed | Test Org |
-|--------|------|---------|-----------------|----------|
-| ✅ PASS | 2026-02-17 | v2.2.0 | 24/24 | AgentforceTesting |
+| Status  | Date       | Version | Agents Deployed | Test Org          |
+| ------- | ---------- | ------- | --------------- | ----------------- |
+| ✅ PASS | 2026-02-17 | v2.2.0  | 24/24           | AgentforceTesting |
 
 ## Validation Agent Results
 
 ### Tier 1: Original Agents (13) — Re-validated
 
-| Agent | Pattern Tested | Publish | Duration | Notes |
-|-------|----------------|---------|----------|-------|
-| Val_Minimal_Syntax | Core block structure | ✅ PASS | 16s | config, system, start_agent, topic blocks |
-| Val_Arithmetic_Ops | +/- operators | ✅ PASS | 11s | Addition and subtraction working |
-| Val_Comparison_Ops | Comparison operators | ✅ PASS | 12s | ==, !=, <, <=, >, >=, and, or, not |
-| Val_Variable_Scopes | @variables namespace | ✅ PASS | 9s | mutable string/number/boolean |
-| Val_Topic_Transitions | @utils.transition | ✅ PASS | 12s | Permanent handoffs between topics |
-| Val_Latch_Pattern | Boolean re-entry | ✅ PASS | 14s | Latch variable for topic re-entry |
-| Val_Loop_Guard | Iteration protection | ✅ PASS | 12s | Counter-based loop guard |
-| Val_Interpolation | Variable injection | ✅ PASS | 9s | {!@variables.x} in strings |
-| Val_Action_Properties | Action property validity | ✅ PASS | 13s | NEGATIVE: confirms invalid properties don't work |
-| Val_Before_Reasoning | before_reasoning lifecycle | ✅ PASS | 9s | Direct content under block (no instructions: wrapper) |
-| Val_After_Reasoning | after_reasoning lifecycle | ✅ PASS | 9s | Direct content under block (no instructions: wrapper) |
-| Val_Label_Property | label: property | ✅ PASS | 9s | NEGATIVE: confirms label is NOT valid on @utils.transition (v2.2.0: IS valid on target-backed actions — see Val_Action_Meta_Props) |
-| Val_Always_Expect_Input | always_expect_input | ✅ PASS | 11s | NEGATIVE: confirms not implemented |
+| Agent                   | Pattern Tested             | Publish | Duration | Notes                                                                                                                              |
+| ----------------------- | -------------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Val_Minimal_Syntax      | Core block structure       | ✅ PASS | 16s      | config, system, start_agent, topic blocks                                                                                          |
+| Val_Arithmetic_Ops      | +/- operators              | ✅ PASS | 11s      | Addition and subtraction working                                                                                                   |
+| Val_Comparison_Ops      | Comparison operators       | ✅ PASS | 12s      | ==, !=, <, <=, >, >=, and, or, not                                                                                                 |
+| Val_Variable_Scopes     | @variables namespace       | ✅ PASS | 9s       | mutable string/number/boolean                                                                                                      |
+| Val_Topic_Transitions   | @utils.transition          | ✅ PASS | 12s      | Permanent handoffs between topics                                                                                                  |
+| Val_Latch_Pattern       | Boolean re-entry           | ✅ PASS | 14s      | Latch variable for topic re-entry                                                                                                  |
+| Val_Loop_Guard          | Iteration protection       | ✅ PASS | 12s      | Counter-based loop guard                                                                                                           |
+| Val_Interpolation       | Variable injection         | ✅ PASS | 9s       | {!@variables.x} in strings                                                                                                         |
+| Val_Action_Properties   | Action property validity   | ✅ PASS | 13s      | NEGATIVE: confirms invalid properties don't work                                                                                   |
+| Val_Before_Reasoning    | before_reasoning lifecycle | ✅ PASS | 9s       | Direct content under block (no instructions: wrapper)                                                                              |
+| Val_After_Reasoning     | after_reasoning lifecycle  | ✅ PASS | 9s       | Direct content under block (no instructions: wrapper)                                                                              |
+| Val_Label_Property      | label: property            | ✅ PASS | 9s       | NEGATIVE: confirms label is NOT valid on @utils.transition (v2.2.0: IS valid on target-backed actions — see Val_Action_Meta_Props) |
+| Val_Always_Expect_Input | always_expect_input        | ✅ PASS | 11s      | NEGATIVE: confirms not implemented                                                                                                 |
 
 ### Tier 2: New Agents (3) — v1.9.0 Patterns
 
-| Agent | Pattern Tested | Publish | Duration | Notes |
-|-------|----------------|---------|----------|-------|
-| Val_Else_Nested_If | else: + nested if | ✅ PASS | 9s | NEGATIVE: else: with nested if does NOT compile (Approach 3 INVALID) |
-| Val_Step_Guard | Step counter re-entry guard | ✅ PASS | 14s | Step variable guards topic selector re-routing |
-| Val_Multiple_Available_When | Multiple available when clauses | ✅ PASS | 14s | POSITIVE: Multiple available when on same action IS valid |
+| Agent                       | Pattern Tested                  | Publish | Duration | Notes                                                                |
+| --------------------------- | ------------------------------- | ------- | -------- | -------------------------------------------------------------------- |
+| Val_Else_Nested_If          | else: + nested if               | ✅ PASS | 9s       | NEGATIVE: else: with nested if does NOT compile (Approach 3 INVALID) |
+| Val_Step_Guard              | Step counter re-entry guard     | ✅ PASS | 14s      | Step variable guards topic selector re-routing                       |
+| Val_Multiple_Available_When | Multiple available when clauses | ✅ PASS | 14s      | POSITIVE: Multiple available when on same action IS valid            |
 
 **Total Duration**: ~183s (16 agents — Tier 1+2 only)
 
 ### Tier 3: Flow/Apex Integration Agents (6) — v2.1.0 Patterns
 
-| Agent | Pattern Tested | Expected | Actual | Notes |
-|-------|----------------|----------|--------|-------|
-| Val_Apex_Bare_Output | Bare @InvocableMethod output naming | ✅ PASS | ❌ FAIL | NEGATIVE FINDING: bare List<String> without @InvocableVariable wrappers is INCOMPATIBLE |
-| Val_Datetime_IO | `datetime` type in action I/O | ✅ PASS | ✅ PASS | datetime maps to lightning__dateTimeStringType |
-| Val_Name_Mismatch | Wrong output name vs Apex field | ❌ FAIL | ❌ FAIL | Expected: "invalid output 'wrong_name'" — confirmed exact-match required |
-| Val_Partial_Output | Subset of target outputs declared | ✅ PASS | ✅ PASS | Can declare fewer outputs than the Apex class exposes |
-| Val_No_Outputs | Inputs-only action (no outputs block) | ❌ FAIL | ❌ FAIL | Expected: "Internal Error" — outputs block specifically required |
-| Val_Level1_Only | Level 1 definition without Level 2 invocation | ✅ PASS | ✅ PASS | Action definitions without @actions.X invocations are valid |
+| Agent                | Pattern Tested                                | Expected | Actual  | Notes                                                                                   |
+| -------------------- | --------------------------------------------- | -------- | ------- | --------------------------------------------------------------------------------------- |
+| Val_Apex_Bare_Output | Bare @InvocableMethod output naming           | ✅ PASS  | ❌ FAIL | NEGATIVE FINDING: bare List<String> without @InvocableVariable wrappers is INCOMPATIBLE |
+| Val_Datetime_IO      | `datetime` type in action I/O                 | ✅ PASS  | ✅ PASS | datetime maps to lightning\_\_dateTimeStringType                                        |
+| Val_Name_Mismatch    | Wrong output name vs Apex field               | ❌ FAIL  | ❌ FAIL | Expected: "invalid output 'wrong_name'" — confirmed exact-match required                |
+| Val_Partial_Output   | Subset of target outputs declared             | ✅ PASS  | ✅ PASS | Can declare fewer outputs than the Apex class exposes                                   |
+| Val_No_Outputs       | Inputs-only action (no outputs block)         | ❌ FAIL  | ❌ FAIL | Expected: "Internal Error" — outputs block specifically required                        |
+| Val_Level1_Only      | Level 1 definition without Level 2 invocation | ✅ PASS  | ✅ PASS | Action definitions without @actions.X invocations are valid                             |
 
 **Apex Test Classes Deployed**: `BareOutputAction.cls` (bare List<String> return), `DateTimeAction.cls` (DateTime with @InvocableVariable wrappers)
 
 ### Tier 4: Action Metadata Properties Agents (2) — v2.2.0 Patterns
 
-| Agent | Pattern Tested | Expected | Actual | Notes |
-|-------|----------------|----------|--------|-------|
-| Val_Action_Meta_Props | Action-level metadata: label (action+topic+I/O), require_user_confirmation, include_in_progress_indicator, progress_indicator_message | ✅ PASS | ✅ PASS | All properties valid on target-backed actions (apex://TestApexAction) |
-| Val_IO_Meta_Props | I/O-level metadata: is_required, is_user_input, is_displayable, is_used_by_planner | ✅ PASS | ✅ PASS | All I/O properties valid on target-backed actions (apex://TestApexAction) |
+| Agent                 | Pattern Tested                                                                                                                        | Expected | Actual  | Notes                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ------------------------------------------------------------------------- |
+| Val_Action_Meta_Props | Action-level metadata: label (action+topic+I/O), require_user_confirmation, include_in_progress_indicator, progress_indicator_message | ✅ PASS  | ✅ PASS | All properties valid on target-backed actions (apex://TestApexAction)     |
+| Val_IO_Meta_Props     | I/O-level metadata: is_required, is_user_input, is_displayable, is_used_by_planner                                                    | ✅ PASS  | ✅ PASS | All I/O properties valid on target-backed actions (apex://TestApexAction) |
 
 **Root Cause of v1.3.0 False Negatives**: `Val_Action_Properties` only tested properties on `@utils.transition` (utility actions without targets). These properties ARE valid on action definitions with `target:` (Level 1 actions). The skill incorrectly generalized "not valid on transitions" → "not valid anywhere."
 
@@ -299,21 +299,21 @@ done
 
 ## Test Org Configuration
 
-| Property | Value |
-|----------|-------|
-| **Target Org Alias** | `AgentforceTesting` |
-| **Einstein Agent User** | `multistepworkflows@00dak00000gdhgd1068670160.ext` |
-| **API Version** | 65.0 |
-| **Instance URL** | `dak00000gdhgdeay-dev-ed.develop.my.salesforce.com` |
+| Property                | Value                                               |
+| ----------------------- | --------------------------------------------------- |
+| **Target Org Alias**    | `AgentforceTesting`                                 |
+| **Einstein Agent User** | `multistepworkflows@00dak00000gdhgd1068670160.ext`  |
+| **API Version**         | 65.0                                                |
+| **Instance URL**        | `dak00000gdhgdeay-dev-ed.develop.my.salesforce.com` |
 
 ## History
 
-| Date | Version | Status | Passed | Failed | Notes |
-|------|---------|--------|--------|--------|-------|
-| 2026-02-17 | v2.2.0 | ✅ PASS | 24/24 | 0 | 2 new action metadata agents (Val_Action_Meta_Props, Val_IO_Meta_Props). Findings: label valid on actions/topics/I/O, require_user_confirmation/include_in_progress_indicator/progress_indicator_message valid on target-backed actions, is_required/is_user_input valid on inputs, is_displayable/is_used_by_planner valid on outputs. Root cause: v1.3.0 only tested @utils.transition |
-| 2026-02-17 | v2.1.0 | ✅ PASS | 22/22 | 0 | 6 new Flow/Apex integration agents. Findings: bare @InvocableMethod INCOMPATIBLE, datetime type WORKS, I/O names must exact-match, partial outputs VALID, outputs block REQUIRED, Level 1 without Level 2 VALID |
-| 2026-02-14 | v1.9.0 | ✅ PASS | 16/16 | 0 | 3 new agents + re-validation against AgentforceTesting. Found: else+nested-if INVALID, <> INVALID, multiple available-when VALID |
-| 2026-01-20 | v1.1.0 | ✅ PASS | 8/8 | 0 | Initial validation framework implementation (R6-Agentforce-SandboxFull) |
+| Date       | Version | Status  | Passed | Failed | Notes                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------- | ------- | ------- | ------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-17 | v2.2.0  | ✅ PASS | 24/24  | 0      | 2 new action metadata agents (Val_Action_Meta_Props, Val_IO_Meta_Props). Findings: label valid on actions/topics/I/O, require_user_confirmation/include_in_progress_indicator/progress_indicator_message valid on target-backed actions, is_required/is_user_input valid on inputs, is_displayable/is_used_by_planner valid on outputs. Root cause: v1.3.0 only tested @utils.transition |
+| 2026-02-17 | v2.1.0  | ✅ PASS | 22/22  | 0      | 6 new Flow/Apex integration agents. Findings: bare @InvocableMethod INCOMPATIBLE, datetime type WORKS, I/O names must exact-match, partial outputs VALID, outputs block REQUIRED, Level 1 without Level 2 VALID                                                                                                                                                                          |
+| 2026-02-14 | v1.9.0  | ✅ PASS | 16/16  | 0      | 3 new agents + re-validation against AgentforceTesting. Found: else+nested-if INVALID, <> INVALID, multiple available-when VALID                                                                                                                                                                                                                                                         |
+| 2026-01-20 | v1.1.0  | ✅ PASS | 8/8    | 0      | Initial validation framework implementation (R6-Agentforce-SandboxFull)                                                                                                                                                                                                                                                                                                                  |
 
 ## Next Validation Due
 
@@ -333,12 +333,12 @@ done
 
 ### Common Issues
 
-| Issue | Cause | Resolution |
-|-------|-------|------------|
-| `Nonexistent flag: --source-dir` | CLI version change | Use `sf agent publish authoring-bundle --api-name` instead |
-| `Unknown error` on publish | Usually successful | Check full JSON output for actual status |
-| `Default agent user not found` | Wrong org or user inactive | Query target org for Einstein Agent User |
-| `AgentCompilationError` on deploy | Server-side compiler stricter than LSP | Fix agent, redeploy. Note: LSP may pass patterns the server rejects |
-| `Unexpected 'if'` inside else: | else: + nested if not valid | Use compound conditions or sequential ifs |
-| `Unexpected '>'` in condition | `<>` not-equal not valid | Use `!=` instead |
-| jq parse errors on `--json` output | sf CLI emits control chars | Pipe through `tr -d '\000-\037'` before jq |
+| Issue                              | Cause                                  | Resolution                                                          |
+| ---------------------------------- | -------------------------------------- | ------------------------------------------------------------------- |
+| `Nonexistent flag: --source-dir`   | CLI version change                     | Use `sf agent publish authoring-bundle --api-name` instead          |
+| `Unknown error` on publish         | Usually successful                     | Check full JSON output for actual status                            |
+| `Default agent user not found`     | Wrong org or user inactive             | Query target org for Einstein Agent User                            |
+| `AgentCompilationError` on deploy  | Server-side compiler stricter than LSP | Fix agent, redeploy. Note: LSP may pass patterns the server rejects |
+| `Unexpected 'if'` inside else:     | else: + nested if not valid            | Use compound conditions or sequential ifs                           |
+| `Unexpected '>'` in condition      | `<>` not-equal not valid               | Use `!=` instead                                                    |
+| jq parse errors on `--json` output | sf CLI emits control chars             | Pipe through `tr -d '\000-\037'` before jq                          |

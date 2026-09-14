@@ -40,8 +40,8 @@ testCases:
       - [action_name]
     expectedOutcome: "Agent should process the request using session context"
     contextVariables:
-      - name: "$Context.RoutableId"      # Prefixed format (recommended) — bare RoutableId also works
-        value: "[MessagingSession_Id]"  # e.g., 0Mwbb000007MGoTCAW
+      - name: "$Context.RoutableId" # Prefixed format (recommended) — bare RoutableId also works
+        value: "[MessagingSession_Id]" # e.g., 0Mwbb000007MGoTCAW
 
   # ═══════════════════════════════════════════════════════════════
   # TEST 2: Action with RoutableId + CaseId context
@@ -57,7 +57,7 @@ testCases:
       - name: RoutableId
         value: "[MessagingSession_Id]"
       - name: "$Context.CaseId"
-        value: "[Case_Id]"             # e.g., 500XX0000000001
+        value: "[Case_Id]" # e.g., 500XX0000000001
 
   # ═══════════════════════════════════════════════════════════════
   # TEST 3: Action with EndUserId context
@@ -70,7 +70,7 @@ testCases:
       - [user_action_name]
     contextVariables:
       - name: "$Context.EndUserId"
-        value: "[Contact_Id]"          # e.g., 003XX0000000001
+        value: "[Contact_Id]" # e.g., 003XX0000000001
 
   # ═══════════════════════════════════════════════════════════════
   # TEST 4: Control test — NO context variables
@@ -78,7 +78,6 @@ testCases:
   # Without RoutableId, the action's recordId gets the topic's internal name.
   # Compare results with Test 1 to verify context variable effect.
   # ═══════════════════════════════════════════════════════════════
-
   - utterance: "[Same message as Test 1 — without context]"
     expectedTopic: [topic_with_action]
     expectedActions:

@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Basic Extraction Examples
 
 Simple examples to get started with STDM extraction.
@@ -20,6 +21,7 @@ stdm-extract extract --org prod
 ```
 
 **Output structure:**
+
 ```
 ./stdm_data/
 ├── sessions/
@@ -59,6 +61,7 @@ stdm-extract extract --org prod --verbose
 ```
 
 **Sample output:**
+
 ```
 🔐 Authenticating to Data Cloud...
    Instance URL: https://myorg.my.salesforce.com
@@ -93,6 +96,7 @@ stdm-extract test-auth --org prod
 ```
 
 **Success:**
+
 ```
 ✅ Authentication successful
    Instance URL: https://myorg.my.salesforce.com
@@ -100,6 +104,7 @@ stdm-extract test-auth --org prod
 ```
 
 **Failure:**
+
 ```
 ❌ Authentication failed
    Error: invalid_grant
@@ -118,6 +123,7 @@ stdm-extract count --org prod --dmo sessions
 ```
 
 **Output:**
+
 ```
 📊 Record counts for prod:
    Sessions: 12,345
@@ -149,10 +155,10 @@ stdm-extract extract --org mysandbox --days 3
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Last 7 days | `stdm-extract extract --org prod` |
-| Last N days | `stdm-extract extract --org prod --days N` |
-| Test auth | `stdm-extract test-auth --org prod` |
-| Check counts | `stdm-extract count --org prod` |
-| Verbose mode | Add `--verbose` to any command |
+| Task         | Command                                    |
+| ------------ | ------------------------------------------ |
+| Last 7 days  | `stdm-extract extract --org prod`          |
+| Last N days  | `stdm-extract extract --org prod --days N` |
+| Test auth    | `stdm-extract test-auth --org prod`        |
+| Check counts | `stdm-extract count --org prod`            |
+| Verbose mode | Add `--verbose` to any command             |

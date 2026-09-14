@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Conversation Patterns for Agentforce
 
 This guide maps IBM's Natural Conversation Framework patterns to Salesforce Agentforce implementations. Each pattern represents a fundamental conversation structure that solves specific user needs.
@@ -12,6 +13,7 @@ This guide maps IBM's Natural Conversation Framework patterns to Salesforce Agen
 The simplest conversation pattern—user asks a question, agent provides an answer. Typically one turn, drawing from a knowledge base or deterministic data source.
 
 **Best for:**
+
 - Knowledge article retrieval
 - FAQ responses
 - Status lookups (order status, case status)
@@ -20,6 +22,7 @@ The simplest conversation pattern—user asks a question, agent provides an answ
 ### Agentforce Implementation
 
 **Topic Configuration:**
+
 ```yaml
 Topic: Product FAQs
 Classification Description: |
@@ -31,11 +34,13 @@ Scope: Questions seeking factual information about products
 ```
 
 **Actions:**
+
 - **Search Knowledge Base** — Salesforce Knowledge article retrieval
 - **Get Product Details** — Autolaunched Flow reading Product2/PricebookEntry
 - **Check Inventory** — Real-time availability lookup
 
 **Instructions (Topic-Level):**
+
 ```
 Provide direct, concise answers to product questions. If multiple
 articles match, offer the top 3 results and ask which is most relevant.
@@ -62,21 +67,23 @@ Agent: Electronics can be returned within 30 days of purchase with original
 
 ### Common Pitfalls
 
-| Pitfall | Impact | Fix |
-|---------|--------|-----|
-| **Returning full article text** | Information overload, poor UX | Summarize key points, offer "Would you like more details?" |
-| **No follow-up offer** | Missed engagement | End with action-oriented question |
-| **Multiple topics for simple FAQs** | Maintenance overhead | Use one "General FAQs" topic with many Knowledge actions |
-| **Hard-coded answers in instructions** | Stale data, hard to update | Always use Knowledge actions or Flow data lookups |
+| Pitfall                                | Impact                        | Fix                                                        |
+| -------------------------------------- | ----------------------------- | ---------------------------------------------------------- |
+| **Returning full article text**        | Information overload, poor UX | Summarize key points, offer "Would you like more details?" |
+| **No follow-up offer**                 | Missed engagement             | End with action-oriented question                          |
+| **Multiple topics for simple FAQs**    | Maintenance overhead          | Use one "General FAQs" topic with many Knowledge actions   |
+| **Hard-coded answers in instructions** | Stale data, hard to update    | Always use Knowledge actions or Flow data lookups          |
 
 ### Topic Boundaries
 
 **In Scope:**
+
 - Factual questions with definitive answers
 - Single-turn exchanges
 - Information retrieval
 
 **Out of Scope:**
+
 - Multi-step processes (use Information Gathering pattern)
 - Troubleshooting requiring diagnosis (use Troubleshooting pattern)
 - Requests requiring human judgment (use Handoff pattern)
@@ -90,6 +97,7 @@ Agent: Electronics can be returned within 30 days of purchase with original
 Multi-turn conversation collecting data to complete a task. Agent asks questions sequentially, validates responses, and uses collected data to trigger an action (create record, start process, etc.).
 
 **Best for:**
+
 - Case creation
 - Lead qualification
 - Survey/feedback collection
@@ -98,6 +106,7 @@ Multi-turn conversation collecting data to complete a task. Agent asks questions
 ### Agentforce Implementation
 
 **Topic Configuration:**
+
 ```yaml
 Topic: Create Support Case
 Classification Description: |
@@ -109,12 +118,14 @@ Scope: Requests to document and track a problem requiring support
 ```
 
 **Actions:**
+
 - **Collect Case Details** — Autolaunched Flow with Input Variables (Subject, Description, Priority)
 - **Validate Product Serial** — Apex action checking warranty status
 - **Create Case Record** — Flow creating Case with gathered data
 - **Send Confirmation** — Flow sending email with case number
 
 **Instructions (Topic-Level):**
+
 ```
 Gather case details through natural conversation, not interrogation.
 Required fields: Subject (brief description), Description (detailed context),
@@ -128,6 +139,7 @@ for response time based on priority.
 ```
 
 **Instructions (Action-Level: Collect Case Details):**
+
 ```
 Use this action when you have Subject, Description, Product, and Priority.
 Don't call this action multiple times—wait until all required data is collected.
@@ -166,13 +178,13 @@ Agent: Perfect. I've created Case #00284731 for this issue: "iOS app crashes
 
 ### Common Pitfalls
 
-| Pitfall | Impact | Fix |
-|---------|--------|-----|
-| **Asking all questions upfront** | Feels like a form, not a conversation | Ask one question per turn, adapt based on answers |
-| **Repeating questions** | Frustrating user experience | Track context—check previous turns before asking |
-| **No validation** | Garbage data in records | Use Flow formulas for email/phone format, Apex for complex rules |
-| **Creating record before confirmation** | Hard to undo, no user control | Summarize collected data and ask "Should I create the case?" |
-| **Ignoring partial info in first message** | Inefficient, redundant | Parse first message—if user says "My email is X, phone is Y", don't re-ask |
+| Pitfall                                    | Impact                                | Fix                                                                        |
+| ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------- |
+| **Asking all questions upfront**           | Feels like a form, not a conversation | Ask one question per turn, adapt based on answers                          |
+| **Repeating questions**                    | Frustrating user experience           | Track context—check previous turns before asking                           |
+| **No validation**                          | Garbage data in records               | Use Flow formulas for email/phone format, Apex for complex rules           |
+| **Creating record before confirmation**    | Hard to undo, no user control         | Summarize collected data and ask "Should I create the case?"               |
+| **Ignoring partial info in first message** | Inefficient, redundant                | Parse first message—if user says "My email is X, phone is Y", don't re-ask |
 
 ### Context Management
 
@@ -187,11 +199,13 @@ phone is Y", respond "Got it, I have your email (X) and phone (Y) recorded."
 ### Topic Boundaries
 
 **In Scope:**
+
 - Collecting 3-8 fields over 3-6 turns
 - Linear data collection (no branching logic)
 - Creating a single record
 
 **Out of Scope:**
+
 - Complex branching (use Step-by-Step pattern)
 - More than 8 fields (break into multiple topics or use web form)
 - Updating existing records (different topic/pattern)
@@ -205,6 +219,7 @@ phone is Y", respond "Got it, I have your email (X) and phone (Y) recorded."
 Transferring the conversation to a human agent when the AI cannot resolve the issue. Includes context passing, routing, and setting user expectations.
 
 **Best for:**
+
 - Frustrated/angry customers
 - Complex edge cases outside AI scope
 - Policy exceptions requiring human judgment
@@ -217,6 +232,7 @@ Transferring the conversation to a human agent when the AI cannot resolve the is
 Agentforce includes a pre-configured **Escalation Topic** that routes to Omni-Channel. Enable it in Setup → Agentforce Agents → [Your Agent] → Topics → Escalation Topic.
 
 **Custom Topic Configuration (for domain-specific escalation):**
+
 ```yaml
 Topic: Request Account Manager
 Classification Description: |
@@ -229,12 +245,14 @@ Scope: Requests for personalized human contact in sales context
 ```
 
 **Actions:**
-- **Get Account Manager** — Flow querying Account.Owner or custom Account_Manager__c field
+
+- **Get Account Manager** — Flow querying Account.Owner or custom Account_Manager\_\_c field
 - **Check Manager Availability** — Omni-Channel API checking online status
 - **Create Omni-Channel Work Item** — Flow creating AgentWork record with context
 - **Send Unavailable Message** — Flow triggering email/SMS if manager offline
 
 **Instructions (Topic-Level):**
+
 ```
 When a customer requests their account manager, look up the assigned
 representative. If the manager is available via Omni-Channel, route the
@@ -279,6 +297,7 @@ Agent: I understand this has been incredibly frustrating, and I'm truly sorry
 ### Omni-Channel Integration
 
 **Configuration Steps:**
+
 1. Create Queue (Setup → Queues → New)
 2. Add Agent Members to Queue
 3. Configure Service Channel (Setup → Service Channels)
@@ -286,6 +305,7 @@ Agent: I understand this has been incredibly frustrating, and I'm truly sorry
 5. Link Escalation Topic to Queue
 
 **Context Passing (AgentWork Record):**
+
 ```apex
 // Example: Custom Apex Action for escalation with context
 AgentWork work = new AgentWork(
@@ -306,17 +326,18 @@ insert work;
 
 ### Common Pitfalls
 
-| Pitfall | Impact | Fix |
-|---------|--------|-----|
-| **No human availability check** | User waits indefinitely, no fallback | Always check Omni-Channel status, offer callback if offline |
-| **Apologizing excessively** | Sounds insincere, wastes time | One apology + action: "I'm sorry. Let me connect you now." |
-| **Not passing context** | Human agent asks same questions | Send conversation summary, key IDs, sentiment |
-| **Vague wait times** | Frustration increases | Give specific estimates: "2-3 minutes" not "shortly" |
-| **Trying to solve after user asks for human** | Ignoring user preference, bad UX | Immediate escalation when explicitly requested |
+| Pitfall                                       | Impact                               | Fix                                                         |
+| --------------------------------------------- | ------------------------------------ | ----------------------------------------------------------- |
+| **No human availability check**               | User waits indefinitely, no fallback | Always check Omni-Channel status, offer callback if offline |
+| **Apologizing excessively**                   | Sounds insincere, wastes time        | One apology + action: "I'm sorry. Let me connect you now."  |
+| **Not passing context**                       | Human agent asks same questions      | Send conversation summary, key IDs, sentiment               |
+| **Vague wait times**                          | Frustration increases                | Give specific estimates: "2-3 minutes" not "shortly"        |
+| **Trying to solve after user asks for human** | Ignoring user preference, bad UX     | Immediate escalation when explicitly requested              |
 
 ### Topic Boundaries
 
 **Trigger Escalation When:**
+
 - User explicitly requests human ("talk to a person", "speak with agent")
 - Sentiment analysis detects frustration/anger
 - Conversation exceeds 8-10 turns without resolution
@@ -324,6 +345,7 @@ insert work;
 - Technical complexity beyond AI training
 
 **Don't Escalate When:**
+
 - User is still engaged and making progress
 - Issue can be resolved with one more action
 - User hasn't indicated frustration
@@ -338,6 +360,7 @@ insert work;
 Multi-turn conversation guiding a user through a linear or branching process. Agent provides instructions, waits for confirmation, adapts to user's progress.
 
 **Best for:**
+
 - Troubleshooting guides
 - Setup/configuration assistance
 - Onboarding flows
@@ -346,6 +369,7 @@ Multi-turn conversation guiding a user through a linear or branching process. Ag
 ### Agentforce Implementation
 
 **Topic Configuration:**
+
 ```yaml
 Topic: Password Reset Assistance
 Classification Description: |
@@ -357,6 +381,7 @@ Scope: Login/authentication issues requiring password reset guidance
 ```
 
 **Actions:**
+
 - **Check Account Status** — Flow checking User.IsActive, IsPasswordLocked
 - **Send Reset Link** — Apex triggering PasswordReset email
 - **Verify Identity** — Flow asking security question or MFA code
@@ -364,6 +389,7 @@ Scope: Login/authentication issues requiring password reset guidance
 - **Confirm Step Complete** — Wait for user confirmation before next step
 
 **Instructions (Topic-Level):**
+
 ```
 Guide the user through password reset step-by-step. Don't provide all
 steps at once—give one step, wait for confirmation, then proceed.
@@ -458,22 +484,24 @@ Decision Element: Next Step Logic
 
 ### Common Pitfalls
 
-| Pitfall | Impact | Fix |
-|---------|--------|-----|
-| **Dumping all steps at once** | Overwhelming, user loses track | One step per turn, wait for confirmation |
-| **Not tracking progress** | Repeating completed steps, confusing | Use Flow variables to track current step |
-| **Assuming user knows what "Done" means** | Miscommunication, false progress | Be explicit: "Let me know when you've clicked the button" |
-| **No error branches** | Dead-end when user hits problem | For every step, anticipate 2-3 common failures |
-| **Technical jargon** | User doesn't understand instructions | Use simple language: "click the blue button" not "invoke the CTA element" |
+| Pitfall                                   | Impact                               | Fix                                                                       |
+| ----------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------- |
+| **Dumping all steps at once**             | Overwhelming, user loses track       | One step per turn, wait for confirmation                                  |
+| **Not tracking progress**                 | Repeating completed steps, confusing | Use Flow variables to track current step                                  |
+| **Assuming user knows what "Done" means** | Miscommunication, false progress     | Be explicit: "Let me know when you've clicked the button"                 |
+| **No error branches**                     | Dead-end when user hits problem      | For every step, anticipate 2-3 common failures                            |
+| **Technical jargon**                      | User doesn't understand instructions | Use simple language: "click the blue button" not "invoke the CTA element" |
 
 ### Topic Boundaries
 
 **In Scope:**
+
 - 5-10 step processes
 - 2-3 decision branches per step
 - User can complete steps independently
 
 **Out of Scope:**
+
 - Processes requiring screen sharing (escalate to human)
 - More than 15 total steps (break into multiple topics or provide link to docs)
 - Steps requiring admin/elevated permissions
@@ -487,6 +515,7 @@ Decision Element: Next Step Logic
 Conversational decision tree identifying the root cause of a problem and providing resolution steps. Agent asks diagnostic questions, narrows down possibilities, and recommends fixes.
 
 **Best for:**
+
 - Technical support
 - Error resolution
 - Performance issues
@@ -495,6 +524,7 @@ Conversational decision tree identifying the root cause of a problem and providi
 ### Agentforce Implementation
 
 **Topic Configuration:**
+
 ```yaml
 Topic: App Troubleshooting
 Classification Description: |
@@ -507,6 +537,7 @@ Scope: Technical issues with the mobile application requiring diagnosis
 ```
 
 **Actions:**
+
 - **Gather Symptoms** — Flow collecting OS version, app version, error message, reproduction steps
 - **Check Service Status** — API call to status.company.com checking outages
 - **Query Known Issues** — Knowledge search for error code or symptom pattern
@@ -514,6 +545,7 @@ Scope: Technical issues with the mobile application requiring diagnosis
 - **Escalate to L2 Support** — Flow creating high-priority case with diagnostics
 
 **Instructions (Topic-Level):**
+
 ```
 Diagnose the issue through targeted questions before recommending solutions.
 Don't guess—ask for specific details:
@@ -598,13 +630,13 @@ START: App Crashing
 
 ### Common Pitfalls
 
-| Pitfall | Impact | Fix |
-|---------|--------|-----|
-| **Jumping to solutions** | Wrong fix, wasted time | Ask 3-5 diagnostic questions first |
-| **Yes/no questions only** | Limited information | Mix with open-ended: "What do you see when...?" |
-| **Not checking service status** | Troubleshooting during outage | Always check status page first |
-| **Giving 5 solutions at once** | Overwhelming, can't track what worked | One solution per turn, wait for result |
-| **No escalation path** | User stuck in loop | After 3 failed solutions, escalate to human |
+| Pitfall                         | Impact                                | Fix                                             |
+| ------------------------------- | ------------------------------------- | ----------------------------------------------- |
+| **Jumping to solutions**        | Wrong fix, wasted time                | Ask 3-5 diagnostic questions first              |
+| **Yes/no questions only**       | Limited information                   | Mix with open-ended: "What do you see when...?" |
+| **Not checking service status** | Troubleshooting during outage         | Always check status page first                  |
+| **Giving 5 solutions at once**  | Overwhelming, can't track what worked | One solution per turn, wait for result          |
+| **No escalation path**          | User stuck in loop                    | After 3 failed solutions, escalate to human     |
 
 ### Einstein Trust Layer Considerations
 
@@ -652,6 +684,7 @@ START: What does the user want to accomplish?
 Real conversations often blend patterns. For example:
 
 **Troubleshooting → Information Gathering → Handoff**
+
 ```
 1. User reports issue (Troubleshooting)
 2. Agent diagnoses problem, but fix requires case creation (Information Gathering)
@@ -659,6 +692,7 @@ Real conversations often blend patterns. For example:
 ```
 
 **Q&A → Step-by-Step**
+
 ```
 1. User asks "How do I reset my password?" (Q&A)
 2. Agent provides link, but user says "I can't find it" (Step-by-Step)
@@ -676,12 +710,12 @@ Agent: I found the answer to your question [Q&A Pattern]. Would you like me
 
 ## Summary: Pattern Comparison
 
-| Pattern | Turns | Complexity | Actions | Best For |
-|---------|-------|------------|---------|----------|
-| **Q&A** | 1-2 | Low | Knowledge retrieval, data lookup | FAQs, simple queries |
-| **Information Gathering** | 3-6 | Medium | Flow with inputs, record creation | Case creation, lead capture |
-| **Handoff** | 1-3 | Medium | Omni-Channel routing, context passing | Escalations, human requests |
-| **Step-by-Step** | 4-10 | High | Sequential instructions, state tracking | Tutorials, configuration |
-| **Troubleshooting** | 4-12 | High | Diagnostic flows, decision trees | Technical support, error resolution |
+| Pattern                   | Turns | Complexity | Actions                                 | Best For                            |
+| ------------------------- | ----- | ---------- | --------------------------------------- | ----------------------------------- |
+| **Q&A**                   | 1-2   | Low        | Knowledge retrieval, data lookup        | FAQs, simple queries                |
+| **Information Gathering** | 3-6   | Medium     | Flow with inputs, record creation       | Case creation, lead capture         |
+| **Handoff**               | 1-3   | Medium     | Omni-Channel routing, context passing   | Escalations, human requests         |
+| **Step-by-Step**          | 4-10  | High       | Sequential instructions, state tracking | Tutorials, configuration            |
+| **Troubleshooting**       | 4-12  | High       | Diagnostic flows, decision trees        | Technical support, error resolution |
 
 Choose simplicity first—if Q&A solves the need, don't over-engineer with Step-by-Step.

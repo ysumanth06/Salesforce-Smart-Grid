@@ -97,7 +97,7 @@ force-app/main/default/
 ### Bundle Metadata XML
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <LightningTypeBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <masterLabel>Order Details</masterLabel>
     <description>Custom type for order information display</description>
@@ -114,92 +114,92 @@ The schema defines your data structure using JSON Schema format:
 
 ```json
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "title": "OrderDetails",
-    "description": "Order information for display in agent conversations",
-    "properties": {
-        "orderId": {
-            "type": "string",
-            "title": "Order ID",
-            "description": "Unique order identifier"
-        },
-        "orderStatus": {
-            "type": "string",
-            "title": "Order Status",
-            "enum": ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
-            "description": "Current order status"
-        },
-        "orderDate": {
-            "type": "string",
-            "format": "date",
-            "title": "Order Date"
-        },
-        "totalAmount": {
-            "type": "number",
-            "title": "Total Amount",
-            "minimum": 0
-        },
-        "items": {
-            "type": "array",
-            "title": "Order Items",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "productName": {
-                        "type": "string"
-                    },
-                    "quantity": {
-                        "type": "integer",
-                        "minimum": 1
-                    },
-                    "price": {
-                        "type": "number",
-                        "minimum": 0
-                    }
-                },
-                "required": ["productName", "quantity", "price"]
-            }
-        }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "OrderDetails",
+  "description": "Order information for display in agent conversations",
+  "properties": {
+    "orderId": {
+      "type": "string",
+      "title": "Order ID",
+      "description": "Unique order identifier"
     },
-    "required": ["orderId", "orderStatus"]
+    "orderStatus": {
+      "type": "string",
+      "title": "Order Status",
+      "enum": ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+      "description": "Current order status"
+    },
+    "orderDate": {
+      "type": "string",
+      "format": "date",
+      "title": "Order Date"
+    },
+    "totalAmount": {
+      "type": "number",
+      "title": "Total Amount",
+      "minimum": 0
+    },
+    "items": {
+      "type": "array",
+      "title": "Order Items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": ["productName", "quantity", "price"]
+      }
+    }
+  },
+  "required": ["orderId", "orderStatus"]
 }
 ```
 
 ### Supported JSON Schema Types
 
-| Type | JSON Schema | Notes |
-|------|-------------|-------|
-| Text | `"type": "string"` | Standard text input |
-| Number | `"type": "number"` | Decimal values |
-| Integer | `"type": "integer"` | Whole numbers only |
-| Boolean | `"type": "boolean"` | True/false checkbox |
-| Enum | `"enum": [...]` | Dropdown selection |
-| Date | `"format": "date"` | Date picker |
+| Type     | JSON Schema             | Notes                |
+| -------- | ----------------------- | -------------------- |
+| Text     | `"type": "string"`      | Standard text input  |
+| Number   | `"type": "number"`      | Decimal values       |
+| Integer  | `"type": "integer"`     | Whole numbers only   |
+| Boolean  | `"type": "boolean"`     | True/false checkbox  |
+| Enum     | `"enum": [...]`         | Dropdown selection   |
+| Date     | `"format": "date"`      | Date picker          |
 | DateTime | `"format": "date-time"` | Date and time picker |
-| Array | `"type": "array"` | List of items |
-| Object | `"type": "object"` | Nested structure |
+| Array    | `"type": "array"`       | List of items        |
+| Object   | `"type": "object"`      | Nested structure     |
 
 ### Validation Keywords
 
 ```json
 {
-    "properties": {
-        "email": {
-            "type": "string",
-            "format": "email",
-            "maxLength": 255
-        },
-        "quantity": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100
-        },
-        "productCode": {
-            "type": "string",
-            "pattern": "^PRD-[0-9]{6}$"
-        }
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 255
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "productCode": {
+      "type": "string",
+      "pattern": "^PRD-[0-9]{6}$"
     }
+  }
 }
 ```
 
@@ -213,95 +213,95 @@ The editor defines how input fields are collected from users:
 
 ```json
 {
-    "component": "lightning-record-edit-form",
-    "attributes": {
-        "objectApiName": "Custom_Lightning_Type"
+  "component": "lightning-record-edit-form",
+  "attributes": {
+    "objectApiName": "Custom_Lightning_Type"
+  },
+  "fields": [
+    {
+      "name": "orderId",
+      "component": "lightning-input",
+      "attributes": {
+        "label": "Order ID",
+        "placeholder": "Enter order number",
+        "required": true
+      }
     },
-    "fields": [
-        {
-            "name": "orderId",
-            "component": "lightning-input",
-            "attributes": {
-                "label": "Order ID",
-                "placeholder": "Enter order number",
-                "required": true
-            }
-        },
-        {
-            "name": "orderStatus",
-            "component": "lightning-combobox",
-            "attributes": {
-                "label": "Order Status",
-                "options": [
-                    { "label": "Pending", "value": "Pending" },
-                    { "label": "Processing", "value": "Processing" },
-                    { "label": "Shipped", "value": "Shipped" },
-                    { "label": "Delivered", "value": "Delivered" },
-                    { "label": "Cancelled", "value": "Cancelled" }
-                ]
-            }
-        },
-        {
-            "name": "orderDate",
-            "component": "lightning-input",
-            "attributes": {
-                "type": "date",
-                "label": "Order Date"
-            }
-        },
-        {
-            "name": "totalAmount",
-            "component": "lightning-input",
-            "attributes": {
-                "type": "number",
-                "label": "Total Amount",
-                "formatter": "currency",
-                "step": "0.01"
-            }
-        }
-    ],
-    "submitButton": {
-        "label": "Submit Order Details",
-        "variant": "brand"
+    {
+      "name": "orderStatus",
+      "component": "lightning-combobox",
+      "attributes": {
+        "label": "Order Status",
+        "options": [
+          { "label": "Pending", "value": "Pending" },
+          { "label": "Processing", "value": "Processing" },
+          { "label": "Shipped", "value": "Shipped" },
+          { "label": "Delivered", "value": "Delivered" },
+          { "label": "Cancelled", "value": "Cancelled" }
+        ]
+      }
+    },
+    {
+      "name": "orderDate",
+      "component": "lightning-input",
+      "attributes": {
+        "type": "date",
+        "label": "Order Date"
+      }
+    },
+    {
+      "name": "totalAmount",
+      "component": "lightning-input",
+      "attributes": {
+        "type": "number",
+        "label": "Total Amount",
+        "formatter": "currency",
+        "step": "0.01"
+      }
     }
+  ],
+  "submitButton": {
+    "label": "Submit Order Details",
+    "variant": "brand"
+  }
 }
 ```
 
 ### Supported Editor Components
 
-| Component | Use Case | Example |
-|-----------|----------|---------|
-| `lightning-input` | Text, number, date, email, etc. | `"type": "text"` |
-| `lightning-combobox` | Dropdown selection | With `options` array |
-| `lightning-checkbox` | Boolean toggle | Single checkbox |
-| `lightning-checkbox-group` | Multiple selections | Array of checkboxes |
-| `lightning-radio-group` | Single selection from options | Radio buttons |
-| `lightning-textarea` | Multi-line text | Long descriptions |
-| `lightning-file-upload` | File attachment | Document upload |
+| Component                  | Use Case                        | Example              |
+| -------------------------- | ------------------------------- | -------------------- |
+| `lightning-input`          | Text, number, date, email, etc. | `"type": "text"`     |
+| `lightning-combobox`       | Dropdown selection              | With `options` array |
+| `lightning-checkbox`       | Boolean toggle                  | Single checkbox      |
+| `lightning-checkbox-group` | Multiple selections             | Array of checkboxes  |
+| `lightning-radio-group`    | Single selection from options   | Radio buttons        |
+| `lightning-textarea`       | Multi-line text                 | Long descriptions    |
+| `lightning-file-upload`    | File attachment                 | Document upload      |
 
 ### Conditional Fields
 
 ```json
 {
-    "fields": [
-        {
-            "name": "hasDiscount",
-            "component": "lightning-checkbox",
-            "attributes": {
-                "label": "Apply Discount?"
-            }
-        },
-        {
-            "name": "discountCode",
-            "component": "lightning-input",
-            "attributes": {
-                "label": "Discount Code"
-            },
-            "conditions": {
-                "hasDiscount": true
-            }
-        }
-    ]
+  "fields": [
+    {
+      "name": "hasDiscount",
+      "component": "lightning-checkbox",
+      "attributes": {
+        "label": "Apply Discount?"
+      }
+    },
+    {
+      "name": "discountCode",
+      "component": "lightning-input",
+      "attributes": {
+        "label": "Discount Code"
+      },
+      "conditions": {
+        "hasDiscount": true
+      }
+    }
+  ]
 }
 ```
 
@@ -315,74 +315,74 @@ The renderer defines how output is displayed to users:
 
 ```json
 {
-    "component": "lightning-card",
-    "attributes": {
-        "title": "Order Details",
-        "iconName": "standard:orders"
-    },
-    "body": [
+  "component": "lightning-card",
+  "attributes": {
+    "title": "Order Details",
+    "iconName": "standard:orders"
+  },
+  "body": [
+    {
+      "component": "lightning-layout",
+      "attributes": {
+        "multipleRows": true
+      },
+      "body": [
         {
-            "component": "lightning-layout",
-            "attributes": {
-                "multipleRows": true
-            },
-            "body": [
-                {
-                    "component": "lightning-layout-item",
-                    "attributes": {
-                        "size": "6"
-                    },
-                    "body": [
-                        {
-                            "component": "lightning-formatted-text",
-                            "attributes": {
-                                "value": "Order #${orderId}"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "component": "lightning-layout-item",
-                    "attributes": {
-                        "size": "6"
-                    },
-                    "body": [
-                        {
-                            "component": "lightning-badge",
-                            "attributes": {
-                                "label": "${orderStatus}"
-                            }
-                        }
-                    ]
-                }
-            ]
+          "component": "lightning-layout-item",
+          "attributes": {
+            "size": "6"
+          },
+          "body": [
+            {
+              "component": "lightning-formatted-text",
+              "attributes": {
+                "value": "Order #${orderId}"
+              }
+            }
+          ]
         },
         {
-            "component": "lightning-formatted-number",
-            "attributes": {
-                "value": "${totalAmount}",
-                "style": "currency",
-                "currencyCode": "USD"
+          "component": "lightning-layout-item",
+          "attributes": {
+            "size": "6"
+          },
+          "body": [
+            {
+              "component": "lightning-badge",
+              "attributes": {
+                "label": "${orderStatus}"
+              }
             }
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "component": "lightning-formatted-number",
+      "attributes": {
+        "value": "${totalAmount}",
+        "style": "currency",
+        "currencyCode": "USD"
+      }
+    }
+  ]
 }
 ```
 
 ### Supported Renderer Components
 
-| Component | Use Case |
-|-----------|----------|
-| `lightning-card` | Container with header |
-| `lightning-layout` | Grid layout |
-| `lightning-formatted-text` | Display text |
-| `lightning-formatted-number` | Currency, percent |
-| `lightning-formatted-date-time` | Date display |
-| `lightning-badge` | Status indicators |
-| `lightning-icon` | Icons |
-| `lightning-button` | Actions |
-| `lightning-datatable` | Tabular data |
-| `lightning-progress-bar` | Progress display |
+| Component                       | Use Case              |
+| ------------------------------- | --------------------- |
+| `lightning-card`                | Container with header |
+| `lightning-layout`              | Grid layout           |
+| `lightning-formatted-text`      | Display text          |
+| `lightning-formatted-number`    | Currency, percent     |
+| `lightning-formatted-date-time` | Date display          |
+| `lightning-badge`               | Status indicators     |
+| `lightning-icon`                | Icons                 |
+| `lightning-button`              | Actions               |
+| `lightning-datatable`           | Tabular data          |
+| `lightning-progress-bar`        | Progress display      |
 
 ### List Rendering
 
@@ -390,16 +390,16 @@ For array data:
 
 ```json
 {
-    "component": "lightning-datatable",
-    "attributes": {
-        "keyField": "productName",
-        "data": "${items}",
-        "columns": [
-            { "label": "Product", "fieldName": "productName" },
-            { "label": "Quantity", "fieldName": "quantity", "type": "number" },
-            { "label": "Price", "fieldName": "price", "type": "currency" }
-        ]
-    }
+  "component": "lightning-datatable",
+  "attributes": {
+    "keyField": "productName",
+    "data": "${items}",
+    "columns": [
+      { "label": "Product", "fieldName": "productName" },
+      { "label": "Quantity", "fieldName": "quantity", "type": "number" },
+      { "label": "Price", "fieldName": "price", "type": "currency" }
+    ]
+  }
 }
 ```
 
@@ -411,40 +411,40 @@ For array data:
 
 ```json
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "title": "CustomerAddress",
-    "properties": {
-        "street": {
-            "type": "string",
-            "title": "Street Address",
-            "maxLength": 255
-        },
-        "city": {
-            "type": "string",
-            "title": "City"
-        },
-        "state": {
-            "type": "string",
-            "title": "State/Province"
-        },
-        "postalCode": {
-            "type": "string",
-            "title": "Postal Code",
-            "pattern": "^[0-9]{5}(-[0-9]{4})?$"
-        },
-        "country": {
-            "type": "string",
-            "title": "Country",
-            "enum": ["United States", "Canada", "Mexico", "United Kingdom"]
-        },
-        "isDefault": {
-            "type": "boolean",
-            "title": "Default Address",
-            "default": false
-        }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "CustomerAddress",
+  "properties": {
+    "street": {
+      "type": "string",
+      "title": "Street Address",
+      "maxLength": 255
     },
-    "required": ["street", "city", "postalCode", "country"]
+    "city": {
+      "type": "string",
+      "title": "City"
+    },
+    "state": {
+      "type": "string",
+      "title": "State/Province"
+    },
+    "postalCode": {
+      "type": "string",
+      "title": "Postal Code",
+      "pattern": "^[0-9]{5}(-[0-9]{4})?$"
+    },
+    "country": {
+      "type": "string",
+      "title": "Country",
+      "enum": ["United States", "Canada", "Mexico", "United Kingdom"]
+    },
+    "isDefault": {
+      "type": "boolean",
+      "title": "Default Address",
+      "default": false
+    }
+  },
+  "required": ["street", "city", "postalCode", "country"]
 }
 ```
 
@@ -452,71 +452,71 @@ For array data:
 
 ```json
 {
-    "layout": "vertical",
-    "fields": [
-        {
-            "name": "street",
-            "component": "lightning-textarea",
-            "attributes": {
-                "label": "Street Address",
-                "placeholder": "Enter your street address",
-                "required": true,
-                "maxLength": 255
-            }
-        },
-        {
-            "name": "city",
-            "component": "lightning-input",
-            "attributes": {
-                "type": "text",
-                "label": "City",
-                "required": true
-            }
-        },
-        {
-            "name": "state",
-            "component": "lightning-input",
-            "attributes": {
-                "type": "text",
-                "label": "State/Province"
-            }
-        },
-        {
-            "name": "postalCode",
-            "component": "lightning-input",
-            "attributes": {
-                "type": "text",
-                "label": "Postal Code",
-                "required": true,
-                "pattern": "[0-9]{5}(-[0-9]{4})?"
-            }
-        },
-        {
-            "name": "country",
-            "component": "lightning-combobox",
-            "attributes": {
-                "label": "Country",
-                "required": true,
-                "options": [
-                    { "label": "United States", "value": "United States" },
-                    { "label": "Canada", "value": "Canada" },
-                    { "label": "Mexico", "value": "Mexico" },
-                    { "label": "United Kingdom", "value": "United Kingdom" }
-                ]
-            }
-        },
-        {
-            "name": "isDefault",
-            "component": "lightning-checkbox",
-            "attributes": {
-                "label": "Set as default address"
-            }
-        }
-    ],
-    "submitButton": {
-        "label": "Save Address",
-        "variant": "brand"
+  "layout": "vertical",
+  "fields": [
+    {
+      "name": "street",
+      "component": "lightning-textarea",
+      "attributes": {
+        "label": "Street Address",
+        "placeholder": "Enter your street address",
+        "required": true,
+        "maxLength": 255
+      }
+    },
+    {
+      "name": "city",
+      "component": "lightning-input",
+      "attributes": {
+        "type": "text",
+        "label": "City",
+        "required": true
+      }
+    },
+    {
+      "name": "state",
+      "component": "lightning-input",
+      "attributes": {
+        "type": "text",
+        "label": "State/Province"
+      }
+    },
+    {
+      "name": "postalCode",
+      "component": "lightning-input",
+      "attributes": {
+        "type": "text",
+        "label": "Postal Code",
+        "required": true,
+        "pattern": "[0-9]{5}(-[0-9]{4})?"
+      }
+    },
+    {
+      "name": "country",
+      "component": "lightning-combobox",
+      "attributes": {
+        "label": "Country",
+        "required": true,
+        "options": [
+          { "label": "United States", "value": "United States" },
+          { "label": "Canada", "value": "Canada" },
+          { "label": "Mexico", "value": "Mexico" },
+          { "label": "United Kingdom", "value": "United Kingdom" }
+        ]
+      }
+    },
+    {
+      "name": "isDefault",
+      "component": "lightning-checkbox",
+      "attributes": {
+        "label": "Set as default address"
+      }
     }
+  ],
+  "submitButton": {
+    "label": "Save Address",
+    "variant": "brand"
+  }
 }
 ```
 
@@ -524,43 +524,44 @@ For array data:
 
 ```json
 {
-    "component": "lightning-card",
-    "attributes": {
-        "title": "Shipping Address",
-        "iconName": "standard:address"
+  "component": "lightning-card",
+  "attributes": {
+    "title": "Shipping Address",
+    "iconName": "standard:address"
+  },
+  "body": [
+    {
+      "component": "lightning-formatted-address",
+      "attributes": {
+        "street": "${street}",
+        "city": "${city}",
+        "province": "${state}",
+        "postalCode": "${postalCode}",
+        "country": "${country}"
+      }
     },
-    "body": [
-        {
-            "component": "lightning-formatted-address",
-            "attributes": {
-                "street": "${street}",
-                "city": "${city}",
-                "province": "${state}",
-                "postalCode": "${postalCode}",
-                "country": "${country}"
-            }
-        },
-        {
-            "component": "lightning-badge",
-            "conditions": {
-                "isDefault": true
-            },
-            "attributes": {
-                "label": "Default",
-                "class": "slds-m-top_small"
-            }
-        }
-    ]
+    {
+      "component": "lightning-badge",
+      "conditions": {
+        "isDefault": true
+      },
+      "attributes": {
+        "label": "Default",
+        "class": "slds-m-top_small"
+      }
+    }
+  ]
 }
 ```
 
 ### 4. CustomerAddress.lightningTypeBundle-meta.xml
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <LightningTypeBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <masterLabel>Customer Address</masterLabel>
-    <description>Structured address for customer shipping information</description>
+    <description
+  >Structured address for customer shipping information</description>
 </LightningTypeBundle>
 ```
 
@@ -674,7 +675,7 @@ topic address_management:
 ### package.xml Entry
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>*</members>
@@ -707,13 +708,13 @@ sf project deploy start -m "LightningTypeBundle:CustomerAddress,GenAiFunction:Co
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| UI not rendering | Enhanced Chat V2 not enabled | Enable Enhanced Chat V2 in Setup |
-| "Type not found" | Custom type not deployed | Deploy LightningTypeBundle first |
-| Schema validation error | Invalid JSON Schema | Validate against JSON Schema draft-07 |
-| Editor fields missing | Incorrect field names | Match `name` in editor.json to schema properties |
-| Renderer empty | Variable syntax error | Use `${propertyName}` for value interpolation |
+| Issue                   | Cause                        | Solution                                         |
+| ----------------------- | ---------------------------- | ------------------------------------------------ |
+| UI not rendering        | Enhanced Chat V2 not enabled | Enable Enhanced Chat V2 in Setup                 |
+| "Type not found"        | Custom type not deployed     | Deploy LightningTypeBundle first                 |
+| Schema validation error | Invalid JSON Schema          | Validate against JSON Schema draft-07            |
+| Editor fields missing   | Incorrect field names        | Match `name` in editor.json to schema properties |
+| Renderer empty          | Variable syntax error        | Use `${propertyName}` for value interpolation    |
 
 ---
 

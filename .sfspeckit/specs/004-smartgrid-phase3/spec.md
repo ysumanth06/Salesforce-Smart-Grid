@@ -70,19 +70,23 @@ All capabilities from Phase 0, Phase 1, and Phase 2 form the prerequisite founda
 
 ## 🛠️ Data Model Enhancements
 
-### New: Smart_Grid_AI_Config\_\_mdt (AI Settings)
+### New: Smart_Grid_AI_Config\_\_mdt (Universal AI Settings & Provider Routing)
 
-| Field Name                | Type                  | Description                                                          |
-| ------------------------- | --------------------- | -------------------------------------------------------------------- |
-| `Grid_Config__c`          | Metadata Relationship | Links to parent `Smart_Grid_Config__mdt`                             |
-| `Enable_NLP__c`           | Checkbox              | Enable/disable NLP command bar per grid                              |
-| `Enable_Suggestions__c`   | Checkbox              | Enable data quality suggestions                                      |
-| `Enable_Chat__c`          | Checkbox              | Enable conversational assistant                                      |
-| `Prompt_Template__c`      | Text (255)            | Name of the `PromptTemplate` metadata record for NLP translation     |
-| `Max_Tokens__c`           | Number (4, 0)         | Token limit for AI responses                                         |
-| `Confidence_Threshold__c` | Number (3, 2)         | Minimum confidence score (0.00–1.00) for auto-executing NLP commands |
+| Field Name                 | Type                  | Description                                                                                                       |
+| -------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `Grid_Config__c`           | Metadata Relationship | Links to parent `Smart_Grid_Config__mdt`                                                                          |
+| `Enable_NLP__c`            | Checkbox              | Enable/disable NLP Command Palette per grid                                                                       |
+| `Enable_Suggestions__c`    | Checkbox              | Enable data quality suggestions                                                                                   |
+| `Enable_Chat__c`           | Checkbox              | Enable conversational assistant                                                                                   |
+| `Provider_Type__c`         | Picklist              | Active AI provider: `Einstein`, `OpenAI_Compatible`, `Anthropic`, `Google_Gemini`, `Custom_Class`, `Offline_Mock` |
+| `Named_Credential__c`      | Text (255)            | Named Credential API name for external callout BYO-LLM models                                                     |
+| `Custom_Provider_Class__c` | Text (255)            | Apex class name implementing `ISmartGridAIProvider` (when `Provider_Type__c` = `Custom_Class`)                    |
+| `Prompt_Template__c`       | Text (255)            | Name of the `PromptTemplate` metadata record (when using `Einstein`)                                              |
+| `Model_Identifier__c`      | Text (255)            | Specific model name (e.g., `gpt-4o`, `claude-3-5-sonnet-20241022`, `gemini-1.5-pro`)                              |
+| `Max_Tokens__c`            | Number (4, 0)         | Token limit for AI responses                                                                                      |
+| `Confidence_Threshold__c`  | Number (3, 2)         | Minimum confidence score (0.00–1.00) for auto-applying NLP commands                                               |
 
-### New: Smart_Grid_Telemetry\_\_c (Platform Event)
+### New: Smart_Grid_Telemetry\_\_e (Platform Event)
 
 | Field Name           | Type          | Description                                                              |
 | -------------------- | ------------- | ------------------------------------------------------------------------ |
@@ -107,68 +111,57 @@ All capabilities from Phase 0, Phase 1, and Phase 2 form the prerequisite founda
 
 ## 🏗️ Technical Architecture Changes
 
-### 1. NLP Command Engine (New Apex + Prompt Template)
+### 1. Universal AI Provider Architecture (Pluggable Adapter Pattern)
 
-- **`SmartGridNLPEngine.cls`**: Receives raw text from the LWC command bar, sends it to Einstein Generative AI via `PromptTemplate`, and parses the structured SOQL response.
-- **Prompt Template**: A `PromptTemplate` metadata record that instructs the LLM to translate natural language into a structured JSON object containing: `{ objectApiName, fields, filters, sortField, sortDirection, limit }`.
-- **Security**: The NLP engine's output is **never executed directly**. It is always passed through `GridQueryBuilder.buildQuery()` for validation, FLS checks, and injection prevention. The AI output is treated as untrusted input.
-- **Confidence Gate**: If the LLM's confidence score is below the configured threshold, the command is shown to the user for confirmation before execution.
+- **`ISmartGridAIProvider.cls`**: Apex interface decoupling the Smart Grid from specific AI vendors:
+  - `SmartGridNLPEngine.TranslationResult translateQuery(SmartGridNLPEngine.TranslationRequest req)`
+  - `SmartGridNLPEngine.AssistantResult answerQuestion(SmartGridNLPEngine.AssistantRequest req)`
+- **`SmartGridEinsteinAIProvider.cls`**: Implements `ISmartGridAIProvider` using native `PromptTemplate` and `ConnectApi.EinsteinLlm` (supports Salesforce Model Builder BYO-LLM via Bedrock, Vertex AI, Azure).
+- **`SmartGridExternalAIProvider.cls`**: Implements `ISmartGridAIProvider` via Named Credentials for direct OpenAI, Anthropic Claude, Google Gemini, or private vLLM/Ollama REST calls.
+- **`SmartGridMockAIProvider.cls`**: High-speed, 0-cost heuristic & regex tokenizer fallback for test automation, scratch orgs, and environments without active LLM licenses.
+- **`SmartGridNLPEngine.cls`**: Orchestrator that reads `Smart_Grid_AI_Config__mdt`, instantiates the configured provider factory, handles caching, and passes structured JSON to `GridQueryBuilder.buildQuery()`.
+- **Security Guarantee**: AI model output is treated as **untrusted input**. Every query passes through `GridQueryBuilder` validation, enforcing FLS and sharing rules regardless of model origin.
 
-### 2. Bulk NLP DML (Apex Service)
+### 2. Modern Command Palette (`Cmd+K`) & Explainability Filter Chips
 
-- **`SmartGridNLPDMLHandler.cls`**: Parses NLP update/delete commands into structured DML operations.
-- **Confirmation Pattern**: NLP DML commands always trigger a confirmation modal showing:
-  - Number of records affected
-  - Fields being modified
-  - Before/after preview (first 5 rows)
-  - "Apply" / "Cancel" buttons
-- **Execution**: Delegates to existing `SmartGridController.saveRecords()` / `deleteRecords()` — no bypass of security pipeline.
+- **`smartGridCommandPalette` (LWC)**: Modal command center triggered globally via `Cmd+K` / `Ctrl+K`. Features search suggestions, recent history, and schema autocomplete chips.
+- **Dual-Tier Fast-Path Parser**: Common structured phrases (`rating = hot`, `sort by revenue desc`) are tokenized client-side in 0 ms. Complex natural language prompts escalate to the configured AI provider.
+- **Explainability Filter Chips**: Translated queries render as removable, editable filter pills directly in `smartGridFilterBar`, giving users full transparency and control over what the AI applied.
 
-### 3. Data Quality Analyzer (Apex + LWC)
+### 3. Bulk NLP DML (Apex Service + Visual Safety Diff)
 
-- **`SmartGridDataQualityService.cls`**: Analyzes the current grid dataset and returns quality metrics:
-  - **Null Analysis**: Fields with >50% null values
-  - **Duplicate Detection**: Fuzzy matching on Name/Email fields (Levenshtein distance)
-  - **Inconsistent Casing**: Mixed case values in the same picklist field
-  - **Outlier Detection**: Numeric values >3 standard deviations from mean
-- **LWC**: `smartGridDataQuality` child component renders a side panel with quality cards, each containing a list of affected records and a "Fix" action.
+- **`SmartGridNLPDMLHandler.cls`**: Translates natural language update/delete commands into validated DML payloads.
+- **`smartGridDmlConfirmModal` (LWC)**: Confirmation modal with high-contrast before/after visual diff table (red/green cells) for affected records.
+- **Execution**: Strictly routed through `SmartGridController.saveRecords()` / `deleteRecords()` to enforce CRUD/FLS and governor limits.
 
-### 4. Conversational Assistant (LWC)
+### 4. Governor-Limit Safe Data Quality Analyzer
 
-- **`smartGridAssistant`**: Embedded chat panel using a local message history.
-- **Backend**: Routes questions through `SmartGridNLPEngine` to generate aggregate SOQL queries, then formats results as natural language responses.
-- **Context Awareness**: The assistant knows the current object, active filters, and visible columns — it can answer contextual questions.
+- **`SmartGridDataQualityService.cls`**:
+  - **Duplicate Detection**: Uses SOQL Aggregate Grouping (`GROUP BY Field HAVING COUNT(Id) > 1`) directly at the database engine level (0 ms Apex CPU time) combined with Soundex/domain blocking keys for fuzzy matching.
+  - **Null Analysis & Outliers**: Calculated via aggregate queries (`AVG`, `MIN`, `MAX`, `COUNT`) and bounded sampling to guarantee zero CPU limit exceptions on large datasets.
+- **`smartGridDataQuality` (LWC)**: Side inspector rendering health metrics with actionable "Fix" workflows.
 
-### 5. Agentforce Integration (GenAiPlugin)
+### 5. Conversational Assistant (Dockable Drawer)
 
-- **`GenAiPlugin: SmartGridAgent`**: Registers the Smart Grid as an Agentforce action.
-- **Topics**: `SmartGrid_Query`, `SmartGrid_Update`, `SmartGrid_Analyze`.
-- **Actions**: Each topic maps to existing controller methods via `@InvocableMethod` annotations on `GridQueryBuilder`.
-- **Reuse**: The `@InvocableMethod` on `GridQueryBuilder.query()` (already annotated in Phase 0) becomes the primary entry point.
+- **`smartGridAssistant` (LWC)**: Non-intrusive slide-out drawer or floating panel preserving grid dimensions.
+- **Context Awareness**: Carries current object, active filter criteria, and visible columns to answer conversational aggregation questions (_"What is the average revenue for Tech accounts?"_).
+- **Quick-Starter Chips**: One-click prompt chips for rapid insights.
 
-### 6. Telemetry Layer (Platform Events)
+### 6. Agentforce Integration (GenAiPlugin & Invocable Actions)
 
-- **Pattern**: Fire-and-forget Platform Events on every significant user action.
-- **Consumer**: A trigger or flow subscriber aggregates events into a reporting custom object or external analytics platform.
-- **Privacy**: No PII in telemetry events — only User IDs, object names, and action types.
+- **`GenAiPlugin: SmartGridAgent`**: Registers Smart Grid actions into Agentforce topics.
+- **Reuse**: Enhances `@InvocableMethod` on `GridQueryBuilder` and `SmartGridController` to serve as native actions for Agentforce agents.
+- **External Agent Support**: Standard Invocable REST API `/services/data/v65.0/actions/custom/apex/GridQueryBuilder` enables integration with LangChain, CrewAI, AutoGen, and Model Context Protocol (MCP) servers.
 
-### 7. AppExchange Packaging
+### 7. Telemetry Layer (True Platform Events)
 
-- **Namespace**: TBD — required for managed package isolation.
-- **Versioning**: Semantic versioning (`v2.0.0` for Phase 2 baseline, `v3.0.0` for AI release).
-- **Upgrade Scripts**: `PostInstallClass` and `UninstallClass` for data migration and cleanup.
-- **Security Review Checklist**:
-  - [ ] All CRUD/FLS enforced (already done)
-  - [ ] No hardcoded IDs (already enforced by constitution)
-  - [ ] CSP-compliant (no external requests without Remote Site Settings)
-  - [ ] Managed sharing model
-  - [ ] `without sharing` justification log (none expected)
-  - [ ] Lightning Locker / LWS compliance verified
+- **`Smart_Grid_Telemetry__e`**: True Platform Event published via `EventBus.publish()` (fire-and-forget, immune to DML transaction rollbacks).
+- **Privacy by Design**: Zero PII collected—tracks only user IDs, object names, action types, durations, and counts.
 
-### 8. License Check Utility
+### 8. AppExchange Packaging & Feature Gating
 
-- **`SmartGridLicenseService.cls`**: Checks `Smart_Grid_License__mdt` and the user's assigned Permission Sets to determine feature access.
-- **LWC Integration**: `@wire` the license check on component init; conditionally render premium features.
+- **`SmartGridLicenseService.cls`**: Server-side permission set and CMDT license verification.
+- **Packaging Compliance**: Clean namespace isolation, `PostInstallClass` default setup, and 100% pass on Salesforce Code Analyzer (`sf scanner run`).
 
 ---
 

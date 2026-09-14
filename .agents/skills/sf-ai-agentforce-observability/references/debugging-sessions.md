@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Debugging Sessions
 
 Examples for debugging specific agent sessions using STDM data.
@@ -14,6 +15,7 @@ stdm-extract debug-session --data-dir ./stdm_data --list-failed
 ```
 
 **Output:**
+
 ```
 Failed/Escalated Sessions (last 10)
 ═══════════════════════════════════════════════════════════
@@ -55,6 +57,7 @@ stdm-extract debug-session --data-dir ./stdm_data --session-id "a0x001"
 ```
 
 **Output:**
+
 ```
 🔍 SESSION TIMELINE
 ══════════════════════════════════════════════════════════════════════
@@ -105,6 +108,7 @@ stdm-extract debug-session --data-dir ./stdm_data --session-id "a0x001" --verbos
 ```
 
 **Output (with steps):**
+
 ```
 2026-01-28T10:15:23 → [INPUT]
    Where is my order #12345?
@@ -131,6 +135,7 @@ stdm-extract debug-session --data-dir ./stdm_data \
 ```
 
 **JSON structure:**
+
 ```json
 {
   "session": {
@@ -184,6 +189,7 @@ python3 assets/analysis/message-timeline.py \
 ### Pattern 1: Why Did It Escalate?
 
 Look for:
+
 1. **Topic switches** - Did topics change unexpectedly?
 2. **Action failures** - Did an action return an error?
 3. **User frustration** - Repeated similar inputs?

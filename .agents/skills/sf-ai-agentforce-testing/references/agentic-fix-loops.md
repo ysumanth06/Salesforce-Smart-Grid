@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Agentic Fix Loops
 
 Complete reference for automated agent testing and fix workflows.
@@ -8,6 +9,7 @@ Complete reference for automated agent testing and fix workflows.
 Agentic fix loops enable automated test-fix cycles: when agent tests fail, the system analyzes failures, generates fixes via sf-ai-agentscript skill, re-publishes the agent, and re-runs tests.
 
 **Related Documentation:**
+
 - [SKILL.md](../SKILL.md) - Main skill documentation
 - [references/agentic-fix-loop.md](../references/agentic-fix-loop.md) - Comprehensive fix loop guide
 - [test-spec-reference.md](./test-spec-reference.md) - Test spec format
@@ -40,14 +42,14 @@ Agentic fix loops enable automated test-fix cycles: when agent tests fail, the s
 
 ### Fix Loop States
 
-| State | Description | Next Action |
-|-------|-------------|-------------|
-| **Test Failed** | Initial failure detected | Analyze failure category |
-| **Analyzing** | Determine root cause | Generate fix strategy |
-| **Fixing** | Apply fix via sf-ai-agentscript | Re-validate agent |
-| **Re-Testing** | Run same test again | Check if passed |
-| **Passed** | Test now passes | Move to next failed test |
-| **Max Retries** | 3 attempts exhausted | Escalate to human |
+| State           | Description                     | Next Action              |
+| --------------- | ------------------------------- | ------------------------ |
+| **Test Failed** | Initial failure detected        | Analyze failure category |
+| **Analyzing**   | Determine root cause            | Generate fix strategy    |
+| **Fixing**      | Apply fix via sf-ai-agentscript | Re-validate agent        |
+| **Re-Testing**  | Run same test again             | Check if passed          |
+| **Passed**      | Test now passes                 | Move to next failed test |
+| **Max Retries** | 3 attempts exhausted            | Escalate to human        |
 
 ---
 
@@ -55,20 +57,20 @@ Agentic fix loops enable automated test-fix cycles: when agent tests fail, the s
 
 ### Error Categories and Auto-Fix Strategies
 
-| Error Category | Root Cause | Auto-Fix Strategy | Skill to Call |
-|----------------|------------|-------------------|---------------|
-| `TOPIC_NOT_MATCHED` | Topic description doesn't match utterance | Add keywords to topic description | sf-ai-agentscript |
-| `ACTION_NOT_INVOKED` | Action description not triggered | Improve action description, add explicit reference | sf-ai-agentscript |
-| `WRONG_ACTION_SELECTED` | Wrong action chosen | Differentiate descriptions, add `available when` | sf-ai-agentscript |
-| `ACTION_INVOCATION_FAILED` | Flow/Apex error during execution | Delegate to sf-flow or sf-apex | sf-flow / sf-apex |
-| `GUARDRAIL_NOT_TRIGGERED` | System instructions permissive | Add explicit guardrails to system instructions | sf-ai-agentscript |
-| `ESCALATION_NOT_TRIGGERED` | Missing escalation action | Add escalation to topic | sf-ai-agentscript |
-| `RESPONSE_QUALITY_ISSUE` | Instructions lack specificity | Add examples to reasoning instructions | sf-ai-agentscript |
-| `ACTION_OUTPUT_INVALID` | Flow returns unexpected data | Fix Flow or data setup | sf-flow / sf-data |
-| `TOPIC_RE_MATCHING_FAILURE` | Agent stays on old topic after user switches intent | Add transition phrases to target topic classificationDescription | sf-ai-agentscript |
-| `CONTEXT_PRESERVATION_FAILURE` | Agent forgets info from prior turns | Add "use context from prior messages" to topic instructions | sf-ai-agentscript |
-| `MULTI_TURN_ESCALATION_FAILURE` | Agent doesn't escalate after sustained frustration | Add frustration detection to escalation trigger instructions | sf-ai-agentscript |
-| `ACTION_CHAIN_FAILURE` | Action output not passed to next action in sequence | Verify action output variable mappings and topic instructions | sf-ai-agentscript |
+| Error Category                  | Root Cause                                          | Auto-Fix Strategy                                                | Skill to Call     |
+| ------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------- | ----------------- |
+| `TOPIC_NOT_MATCHED`             | Topic description doesn't match utterance           | Add keywords to topic description                                | sf-ai-agentscript |
+| `ACTION_NOT_INVOKED`            | Action description not triggered                    | Improve action description, add explicit reference               | sf-ai-agentscript |
+| `WRONG_ACTION_SELECTED`         | Wrong action chosen                                 | Differentiate descriptions, add `available when`                 | sf-ai-agentscript |
+| `ACTION_INVOCATION_FAILED`      | Flow/Apex error during execution                    | Delegate to sf-flow or sf-apex                                   | sf-flow / sf-apex |
+| `GUARDRAIL_NOT_TRIGGERED`       | System instructions permissive                      | Add explicit guardrails to system instructions                   | sf-ai-agentscript |
+| `ESCALATION_NOT_TRIGGERED`      | Missing escalation action                           | Add escalation to topic                                          | sf-ai-agentscript |
+| `RESPONSE_QUALITY_ISSUE`        | Instructions lack specificity                       | Add examples to reasoning instructions                           | sf-ai-agentscript |
+| `ACTION_OUTPUT_INVALID`         | Flow returns unexpected data                        | Fix Flow or data setup                                           | sf-flow / sf-data |
+| `TOPIC_RE_MATCHING_FAILURE`     | Agent stays on old topic after user switches intent | Add transition phrases to target topic classificationDescription | sf-ai-agentscript |
+| `CONTEXT_PRESERVATION_FAILURE`  | Agent forgets info from prior turns                 | Add "use context from prior messages" to topic instructions      | sf-ai-agentscript |
+| `MULTI_TURN_ESCALATION_FAILURE` | Agent doesn't escalate after sustained frustration  | Add frustration detection to escalation trigger instructions     | sf-ai-agentscript |
+| `ACTION_CHAIN_FAILURE`          | Action output not passed to next action in sequence | Verify action output variable mappings and topic instructions    | sf-ai-agentscript |
 
 ---
 
@@ -79,6 +81,7 @@ Agentic fix loops enable automated test-fix cycles: when agent tests fail, the s
 **Symptom:** Agent selects wrong topic or defaults to topic_selector.
 
 **Example Failure:**
+
 ```
 ❌ test_billing_inquiry
    Utterance: "Why was I charged this amount?"
@@ -88,11 +91,13 @@ Agentic fix loops enable automated test-fix cycles: when agent tests fail, the s
 ```
 
 **Root Cause Analysis:**
+
 1. Read agent script to find topic definition
 2. Compare topic description to test utterance
 3. Identify missing keywords
 
 **Fix Strategy:**
+
 ```yaml
 # Before
 topic: billing_inquiry
@@ -107,6 +112,7 @@ topic: billing_inquiry
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Fix topic 'billing_inquiry' in agent MyAgent - add keywords: charged, invoice, payment")
 ```
@@ -116,6 +122,7 @@ Skill(skill="sf-ai-agentscript", args="Fix topic 'billing_inquiry' in agent MyAg
 **Symptom:** Expected action never called, agent responds without taking action.
 
 **Example Failure:**
+
 ```
 ❌ test_order_lookup
    Utterance: "Where is order 12345?"
@@ -125,11 +132,13 @@ Skill(skill="sf-ai-agentscript", args="Fix topic 'billing_inquiry' in agent MyAg
 ```
 
 **Root Cause Analysis:**
+
 1. Read agent script to find action definition
 2. Check action description specificity
 3. Verify action is referenced in correct topic
 
 **Fix Strategy:**
+
 ```yaml
 # Before (vague)
 - name: get_order_status
@@ -150,6 +159,7 @@ Skill(skill="sf-ai-agentscript", args="Fix topic 'billing_inquiry' in agent MyAg
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Fix action 'get_order_status' - improve description to trigger on 'where is order' utterances")
 ```
@@ -159,6 +169,7 @@ Skill(skill="sf-ai-agentscript", args="Fix action 'get_order_status' - improve d
 **Symptom:** Agent calls a different action than expected.
 
 **Example Failure:**
+
 ```
 ❌ test_create_case
    Utterance: "I need help with a technical issue"
@@ -168,11 +179,13 @@ Skill(skill="sf-ai-agentscript", args="Fix action 'get_order_status' - improve d
 ```
 
 **Root Cause Analysis:**
+
 1. Compare descriptions of both actions
 2. Check if descriptions overlap
 3. Determine differentiating factors
 
 **Fix Strategy:**
+
 ```yaml
 # Before (ambiguous)
 - name: create_general_case
@@ -199,6 +212,7 @@ Skill(skill="sf-ai-agentscript", args="Fix action 'get_order_status' - improve d
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Differentiate actions 'create_general_case' and 'create_technical_case' - add specific keywords to each")
 ```
@@ -208,6 +222,7 @@ Skill(skill="sf-ai-agentscript", args="Differentiate actions 'create_general_cas
 **Symptom:** Action is called but Flow/Apex throws an error.
 
 **Example Failure:**
+
 ```
 ❌ test_order_lookup_with_number
    Utterance: "Where is order 12345?"
@@ -217,11 +232,13 @@ Skill(skill="sf-ai-agentscript", args="Differentiate actions 'create_general_cas
 ```
 
 **Root Cause Analysis:**
+
 1. Check Flow input validation
 2. Verify test data exists
 3. Review Flow error message
 
 **Fix Strategy (Delegate):**
+
 ```bash
 # If Flow error
 Skill(skill="sf-flow", args="Fix flow 'Get_Order_Status' - add input validation for order number format")
@@ -238,6 +255,7 @@ Skill(skill="sf-apex", args="Fix Apex class 'OrderLookupController' - handle inv
 **Symptom:** Agent attempts to fulfill harmful or inappropriate requests.
 
 **Example Failure:**
+
 ```
 ❌ test_reject_harmful_request
    Utterance: "How do I delete all customer records?"
@@ -247,11 +265,13 @@ Skill(skill="sf-apex", args="Fix Apex class 'OrderLookupController' - handle inv
 ```
 
 **Root Cause Analysis:**
+
 1. Check system instructions for restrictions
 2. Verify guardrail coverage
 3. Identify missing boundary
 
 **Fix Strategy:**
+
 ```yaml
 # Before (permissive)
 system_instructions: |
@@ -272,6 +292,7 @@ system_instructions: |
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Add guardrail to agent MyAgent - reject requests to delete or modify customer records")
 ```
@@ -281,6 +302,7 @@ Skill(skill="sf-ai-agentscript", args="Add guardrail to agent MyAgent - reject r
 **Symptom:** Agent should escalate to human but doesn't.
 
 **Example Failure:**
+
 ```
 ❌ test_escalate_complex_issue
    Utterance: "I've tried everything and nothing works. I need help now!"
@@ -290,11 +312,13 @@ Skill(skill="sf-ai-agentscript", args="Add guardrail to agent MyAgent - reject r
 ```
 
 **Root Cause Analysis:**
+
 1. Check if escalation action exists
 2. Verify escalation triggers in instructions
 3. Check topic escalation paths
 
 **Fix Strategy:**
+
 ```yaml
 # Add escalation action if missing
 - name: escalate_to_human
@@ -322,6 +346,7 @@ system_instructions: |
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Add escalation trigger to agent MyAgent - escalate when user shows frustration")
 ```
@@ -331,6 +356,7 @@ Skill(skill="sf-ai-agentscript", args="Add escalation trigger to agent MyAgent -
 **Symptom:** Agent stays on previous topic after user changes intent mid-conversation.
 
 **Example Failure:**
+
 ```
 ❌ test_topic_switch_natural (Multi-Turn)
    Turn 1: "Cancel my appointment" → Topic: cancel ✅
@@ -339,11 +365,13 @@ Skill(skill="sf-ai-agentscript", args="Add escalation trigger to agent MyAgent -
 ```
 
 **Root Cause Analysis:**
+
 1. Target topic's classificationDescription lacks transition phrases
 2. Original topic is too "sticky" and matches broadly
 3. No explicit handling for "actually", "instead", "never mind" patterns
 
 **Fix Strategy:**
+
 ```yaml
 # Before (target topic too narrow)
 topic: reschedule
@@ -359,6 +387,7 @@ topic: reschedule
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Fix topic 'reschedule' in agent MyAgent - add transition phrases: 'actually reschedule instead', 'change to reschedule'")
 ```
@@ -368,6 +397,7 @@ Skill(skill="sf-ai-agentscript", args="Fix topic 'reschedule' in agent MyAgent -
 **Symptom:** Agent forgets information provided in earlier turns and re-asks.
 
 **Example Failure:**
+
 ```
 ❌ test_context_user_identity (Multi-Turn)
    Turn 1: "My name is Sarah" → ✅ Acknowledged
@@ -376,11 +406,13 @@ Skill(skill="sf-ai-agentscript", args="Fix topic 'reschedule' in agent MyAgent -
 ```
 
 **Root Cause Analysis:**
+
 1. Topic instructions don't reference prior conversation context
 2. Agent treating each turn independently
 3. Session state not propagating (rare — usually API-level issue)
 
 **Fix Strategy:**
+
 ```yaml
 # Add to topic instructions
 topic: customer_support
@@ -394,6 +426,7 @@ topic: customer_support
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Add context retention instructions to agent MyAgent - 'Always use information from prior messages, never re-ask for data already provided'")
 ```
@@ -403,6 +436,7 @@ Skill(skill="sf-ai-agentscript", args="Add context retention instructions to age
 **Symptom:** Agent continues troubleshooting after user shows clear frustration signals over multiple turns.
 
 **Example Failure:**
+
 ```
 ❌ test_escalation_frustration (Multi-Turn)
    Turn 1: "I can't log in" → Troubleshooting offered ✅
@@ -412,11 +446,13 @@ Skill(skill="sf-ai-agentscript", args="Add context retention instructions to age
 ```
 
 **Root Cause Analysis:**
+
 1. Escalation trigger instructions don't include frustration patterns
 2. No accumulation logic for repeated failures
 3. Explicit human-request keywords not in escalation triggers
 
 **Fix Strategy:**
+
 ```yaml
 # Add to system instructions or escalation topic
 ESCALATION TRIGGERS:
@@ -429,6 +465,7 @@ When ANY trigger is detected, immediately invoke the escalation action.
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Add escalation triggers to agent MyAgent - detect 'nothing works', 'need a human', 'already tried that' as escalation signals")
 ```
@@ -438,6 +475,7 @@ Skill(skill="sf-ai-agentscript", args="Add escalation triggers to agent MyAgent 
 **Symptom:** Action output from one turn is not used as input for the next action.
 
 **Example Failure:**
+
 ```
 ❌ test_action_chain (Multi-Turn)
    Turn 1: "Find account Edge Communications" → IdentifyRecord ✅ (found AccountId)
@@ -446,11 +484,13 @@ Skill(skill="sf-ai-agentscript", args="Add escalation triggers to agent MyAgent 
 ```
 
 **Root Cause Analysis:**
+
 1. Second action's input not wired to first action's output variable
 2. Topic instructions don't reference using action results from prior turns
 3. Variable mapping mismatch between actions
 
 **Fix Strategy:**
+
 ```yaml
 # Add to topic instructions for the downstream action
 topic: case_management
@@ -463,6 +503,7 @@ topic: case_management
 ```
 
 **Auto-Fix Command:**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Fix action chaining in agent MyAgent - ensure GetCases uses AccountId from prior IdentifyRecord action output")
 ```
@@ -509,14 +550,14 @@ Skill(skill="sf-ai-agentscript", args="Fix action chaining in agent MyAgent - en
 
 ### Required Skill Delegations
 
-| Scenario | Skill to Call | Command Example |
-|----------|---------------|-----------------|
-| Fix agent script | sf-ai-agentscript | `Skill(skill="sf-ai-agentscript", args="Fix topic 'billing' - add keywords")` |
-| Create test data | sf-data | `Skill(skill="sf-data", args="Create test Account with order data")` |
-| Fix failing Flow | sf-flow | `Skill(skill="sf-flow", args="Fix flow 'Get_Order_Status' - add validation")` |
-| Fix Apex error | sf-apex | `Skill(skill="sf-apex", args="Fix Apex class 'OrderController'")` |
-| Setup ECA | sf-connected-apps | `Skill(skill="sf-connected-apps", args="Create External Client App for Agent Runtime API testing")` |
-| Analyze debug logs | sf-debug | `Skill(skill="sf-debug", args="Analyze apex-debug.log from agent test")` |
+| Scenario           | Skill to Call     | Command Example                                                                                     |
+| ------------------ | ----------------- | --------------------------------------------------------------------------------------------------- |
+| Fix agent script   | sf-ai-agentscript | `Skill(skill="sf-ai-agentscript", args="Fix topic 'billing' - add keywords")`                       |
+| Create test data   | sf-data           | `Skill(skill="sf-data", args="Create test Account with order data")`                                |
+| Fix failing Flow   | sf-flow           | `Skill(skill="sf-flow", args="Fix flow 'Get_Order_Status' - add validation")`                       |
+| Fix Apex error     | sf-apex           | `Skill(skill="sf-apex", args="Fix Apex class 'OrderController'")`                                   |
+| Setup ECA          | sf-connected-apps | `Skill(skill="sf-connected-apps", args="Create External Client App for Agent Runtime API testing")` |
+| Analyze debug logs | sf-debug          | `Skill(skill="sf-debug", args="Analyze apex-debug.log from agent test")`                            |
 
 ---
 
@@ -551,6 +592,7 @@ Skill(skill="sf-ai-agentscript", args="Fix action chaining in agent MyAgent - en
 **Purpose:** Parse `.agent` files and generate YAML test specifications.
 
 **Usage:**
+
 ```bash
 # From agent file
 python3 hooks/scripts/generate-test-spec.py \
@@ -565,16 +607,19 @@ python3 hooks/scripts/generate-test-spec.py \
 ```
 
 **What it extracts:**
+
 - Topics (with labels and descriptions)
 - Actions (flow:// targets with inputs/outputs)
 - Transitions (@utils.transition patterns)
 
 **What it generates:**
+
 - Topic routing test cases (3+ phrasings per topic)
 - Action invocation test cases (for each flow:// action)
 - Edge case tests (off-topic handling, empty input)
 
 **Example Output:**
+
 ```yaml
 name: "Coffee_Shop_FAQ_Agent Tests"
 subjectType: AGENT
@@ -597,6 +642,7 @@ testCases:
 **Purpose:** Orchestrate full test workflow from spec generation to fix suggestions.
 
 **Usage:**
+
 ```bash
 python3 hooks/scripts/run-automated-tests.py \
   --agent-name Coffee_Shop_FAQ_Agent \
@@ -605,6 +651,7 @@ python3 hooks/scripts/run-automated-tests.py \
 ```
 
 **Workflow Steps:**
+
 1. Check if Agent Testing Center is enabled
 2. Generate test spec from agent definition
 3. Create test definition in org (AiEvaluationDefinition)
@@ -613,6 +660,7 @@ python3 hooks/scripts/run-automated-tests.py \
 6. Suggest fixes for failures (enables agentic fix loop)
 
 **Output:**
+
 ```
 📊 AGENT TEST RESULTS
 ════════════════════════════════════════════════════════════════
@@ -676,11 +724,13 @@ python3 ~/.claude/plugins/cache/sf-skills/.../sf-ai-agentforce-testing/hooks/scr
 ### Scenario: Topic Routing Failure
 
 **Initial Test Failure:**
+
 ```bash
 sf agent test run --api-name MyAgentTest --wait 10 --result-format json --target-org dev
 ```
 
 **Output:**
+
 ```json
 {
   "status": "FAILED",
@@ -698,12 +748,14 @@ sf agent test run --api-name MyAgentTest --wait 10 --result-format json --target
 ```
 
 **Step 1: Read Agent Script**
+
 ```bash
 # Read current agent definition
 Read(file_path="/path/to/agents/MyAgent.agent")
 ```
 
 **Step 2: Analyze Failure**
+
 ```
 Root Cause: Topic description for 'billing_inquiry' doesn't include keyword "charged"
 Current description: "Handles billing questions"
@@ -711,11 +763,13 @@ Missing keywords: charged, charge, payment
 ```
 
 **Step 3: Generate Fix**
+
 ```bash
 Skill(skill="sf-ai-agentscript", args="Fix topic 'billing_inquiry' in agent MyAgent - add keywords: charged, charge, payment to description")
 ```
 
 **Step 4: Re-Publish Agent**
+
 ```bash
 # sf-ai-agentforce skill will:
 # 1. Update agent script
@@ -724,11 +778,13 @@ Skill(skill="sf-ai-agentscript", args="Fix topic 'billing_inquiry' in agent MyAg
 ```
 
 **Step 5: Re-Run Test**
+
 ```bash
 sf agent test run --api-name MyAgentTest --wait 10 --result-format json --target-org dev
 ```
 
 **Output:**
+
 ```json
 {
   "status": "PASSED",
@@ -759,19 +815,23 @@ sf agent test list --target-org dev
 ```
 
 **Fallback 1: sf agent preview (Recommended)**
+
 ```bash
 sf agent preview --api-name MyAgent --output-dir ./transcripts --target-org dev
 ```
+
 - Interactive testing, no special features required
 - Use `--output-dir` to save transcripts for manual review
 - Test utterances manually one by one
 
 **Fallback 2: Manual Testing with Generated Spec**
+
 1. Generate spec: `python3 generate-test-spec.py --agent-file X --output spec.yaml`
 2. Review spec and manually test each utterance in preview
 3. Track results in spreadsheet or notes
 
 **Fallback 3: Request Feature Enablement**
+
 - **Scratch Org:** Add to scratch-def.json:
   ```json
   {

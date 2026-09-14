@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Agent Script Testing Patterns
 
 Testing guide for agents built with Agent Script (`.agent` files / AiAuthoringBundle). Covers the unique challenges of testing multi-topic Agent Script agents via CLI (`sf agent test`) and Agent Runtime API.
@@ -9,10 +10,10 @@ Testing guide for agents built with Agent Script (`.agent` files / AiAuthoringBu
 
 Agent Script agents use a **two-level action system**:
 
-| Level | Where | What It Does | Example |
-|-------|-------|-------------|---------|
-| **Level 1: Definition** | `topic.actions:` block | Defines action with `target:` | `get_order_status: target: "apex://OrderStatusService"` |
-| **Level 2: Invocation** | `reasoning.actions:` block | Invokes Level 1 via `@actions.<name>` | `check_status: @actions.get_order_status` |
+| Level                   | Where                      | What It Does                          | Example                                                 |
+| ----------------------- | -------------------------- | ------------------------------------- | ------------------------------------------------------- |
+| **Level 1: Definition** | `topic.actions:` block     | Defines action with `target:`         | `get_order_status: target: "apex://OrderStatusService"` |
+| **Level 2: Invocation** | `reasoning.actions:` block | Invokes Level 1 via `@actions.<name>` | `check_status: @actions.get_order_status`               |
 
 Multi-topic agents also have a `start_agent` entry point that routes to topics via `@utils.transition to @topic.<name>`. This creates **transition actions** (e.g., `go_order_status`).
 
@@ -33,7 +34,7 @@ testCases:
   - utterance: "I want to check my order status"
     expectedTopic: order_status
     expectedActions:
-      - go_order_status    # Transition action from start_agent
+      - go_order_status # Transition action from start_agent
     expectedOutcome: "Agent should acknowledge and begin the order status flow"
 
   - utterance: "Check the status of my order"
@@ -45,6 +46,7 @@ testCases:
 ```
 
 **What to verify in results:**
+
 - `generatedData.topic` matches `expectedTopic`
 - `actionsSequence` contains `go_<topic_name>`
 
@@ -69,17 +71,17 @@ testCases:
         message: "I'd be happy to help! Could you please provide the Order ID?"
     expectedTopic: order_status
     expectedActions:
-      - get_order_status    # Level 1 DEFINITION name (NOT invocation name)
+      - get_order_status # Level 1 DEFINITION name (NOT invocation name)
     expectedOutcome: "Agent retrieves order details including number, status, and amount"
 ```
 
 **Conversation history format:**
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `role` | Yes | `"user"` or `"agent"` |
-| `message` | Yes | The message content |
-| `topic` | Agent only | Topic name — **required for agent messages** to establish topic context |
+| Field     | Required   | Description                                                             |
+| --------- | ---------- | ----------------------------------------------------------------------- |
+| `role`    | Yes        | `"user"` or `"agent"`                                                   |
+| `message` | Yes        | The message content                                                     |
+| `topic`   | Agent only | Topic name — **required for agent messages** to establish topic context |
 
 **Common mistake:** Using the Level 2 invocation name (e.g., `check_status`) instead of the Level 1 definition name (e.g., `get_order_status`) in `expectedActions`. CLI results always report the **definition name**.
 
@@ -293,15 +295,15 @@ EOF
 
 ## Agent Script vs GenAiPlannerBundle: Testing Differences
 
-| Aspect | Agent Script (AiAuthoringBundle) | GenAiPlannerBundle |
-|--------|----------------------------------|-------------------|
-| **Metadata format** | `.agent` DSL file | XML files |
-| **Action references** | `apex://Class` directly | GenAiFunction XML |
-| **Topic routing** | `start_agent` → `@utils.transition` | LLM planner routing |
-| **Action in CLI test** | Transition action only (1st cycle) | May get business action |
-| **Test approach** | Use conversationHistory for actions | Standard single-utterance |
-| **Discovery** | Parse `.agent` DSL | Parse XML files |
-| **Permission model** | `default_agent_user` in config | Org-level profile |
+| Aspect                 | Agent Script (AiAuthoringBundle)    | GenAiPlannerBundle        |
+| ---------------------- | ----------------------------------- | ------------------------- |
+| **Metadata format**    | `.agent` DSL file                   | XML files                 |
+| **Action references**  | `apex://Class` directly             | GenAiFunction XML         |
+| **Topic routing**      | `start_agent` → `@utils.transition` | LLM planner routing       |
+| **Action in CLI test** | Transition action only (1st cycle)  | May get business action   |
+| **Test approach**      | Use conversationHistory for actions | Standard single-utterance |
+| **Discovery**          | Parse `.agent` DSL                  | Parse XML files           |
+| **Permission model**   | `default_agent_user` in config      | Org-level profile         |
 
 ---
 
@@ -309,21 +311,21 @@ EOF
 
 ```yaml
 # REQUIRED top-level fields
-name: "My Agent Tests"              # MasterLabel — deploy fails without
-subjectType: AGENT                   # Must be AGENT
-subjectName: My_Agent_Name           # config.developer_name from .agent file
+name: "My Agent Tests" # MasterLabel — deploy fails without
+subjectType: AGENT # Must be AGENT
+subjectName: My_Agent_Name # config.developer_name from .agent file
 
 testCases:
-  - utterance: "user message"        # Required
-    expectedTopic: topic_name        # From .agent topic block name
-    expectedActions:                  # Flat list of strings
-      - action_name                  # Level 1 definition name
-    expectedOutcome: "description"   # LLM-as-judge evaluation
-    conversationHistory:             # Pre-position in topic
+  - utterance: "user message" # Required
+    expectedTopic: topic_name # From .agent topic block name
+    expectedActions: # Flat list of strings
+      - action_name # Level 1 definition name
+    expectedOutcome: "description" # LLM-as-judge evaluation
+    conversationHistory: # Pre-position in topic
       - role: "user"
         message: "prior user message"
       - role: "agent"
-        topic: "topic_name"          # REQUIRED for agent messages
+        topic: "topic_name" # REQUIRED for agent messages
         message: "prior agent response"
 ```
 

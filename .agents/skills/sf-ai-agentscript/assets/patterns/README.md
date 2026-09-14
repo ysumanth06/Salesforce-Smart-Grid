@@ -42,11 +42,13 @@ What do you need?
 **Purpose**: Chain actions with guaranteed execution using `run` keyword.
 
 **Use when**:
+
 - Follow-up actions MUST happen after parent action
 - Audit logging required for compliance
 - Order matters (send email AFTER order created)
 
 **Key syntax**:
+
 ```agentscript
 process_order: @actions.create_order
    with customer_id=...
@@ -64,12 +66,14 @@ process_order: @actions.create_order
 **Purpose**: Run code before/after every reasoning step automatically.
 
 **Use when**:
+
 - Track conversation metrics (turn count, duration)
 - Refresh context before each response
 - Log analytics after each turn
 - Initialize state on first turn
 
 **Key syntax**:
+
 ```agentscript
 topic conversation:
    before_reasoning:
@@ -91,12 +95,14 @@ topic conversation:
 **Purpose**: Navigate to specialist topic and return with results.
 
 **Use when**:
+
 - Complex workflows spanning multiple topics
 - "Consult an expert" pattern
 - Need to bring results back to coordinator
 - Want separation of concerns
 
 **Key syntax**:
+
 ```agentscript
 # In main topic
 consult_pricing: @utils.transition to @topic.pricing_specialist
@@ -117,12 +123,14 @@ return_with_results: @utils.transition to @topic.main_hub
 **Purpose**: Master all parameter binding techniques for actions.
 
 **Use when**:
+
 - Learning different ways to pass values to actions
 - Complex multi-input action scenarios
 - Chaining outputs between multiple actions
 - Mixing LLM slot filling with stored state
 
 **Key syntax**:
+
 ```agentscript
 reasoning:
    actions:
@@ -157,12 +165,14 @@ reasoning:
 **Purpose**: Dynamic agent behavior based on context (user tier, time, features).
 
 **Use when**:
+
 - Different behavior for different user segments (VIP vs standard)
 - Time-based changes (business hours vs after hours)
 - Feature flags controlling agent personality
 - A/B testing different conversation styles
 
 **Key syntax**:
+
 ```agentscript
 # System block: Static base instructions
 system:
@@ -195,12 +205,14 @@ reasoning:
 **Purpose**: Auth-gated topic routing with LLM bypass using a 3-variable state machine.
 
 **Use when**:
+
 - Multiple protected topics require authentication before access
 - You want zero-credit LLM bypass while a gate topic holds focus
 - Users should be redirected to auth, then automatically returned to their intended topic
 - You need an EXIT_PROTOCOL to release gate state when users change intent
 
 **Key syntax**:
+
 ```agentscript
 # topic_selector bypasses LLM when open_gate is set
 before_reasoning:
@@ -233,22 +245,22 @@ open-gate-routing + lifecycle-events
 
 ## Validation Scoring Impact
 
-| Pattern | Scoring Boost | Key Requirements |
-|---------|--------------|------------------|
-| Action Callbacks | +5 pts | No nested run |
-| Lifecycle Events | +5 pts | Proper block placement |
-| Bidirectional | +5 pts | Return transitions |
-| Input Bindings | +5 pts | Proper binding patterns |
-| System Overrides | +5 pts | Static system, dynamic topics |
-| Open Gate | +5 pts | 3-variable coordination |
+| Pattern          | Scoring Boost | Key Requirements              |
+| ---------------- | ------------- | ----------------------------- |
+| Action Callbacks | +5 pts        | No nested run                 |
+| Lifecycle Events | +5 pts        | Proper block placement        |
+| Bidirectional    | +5 pts        | Return transitions            |
+| Input Bindings   | +5 pts        | Proper binding patterns       |
+| System Overrides | +5 pts        | Static system, dynamic topics |
+| Open Gate        | +5 pts        | 3-variable coordination       |
 
 ## Anti-Patterns to Avoid
 
-| ❌ Don't | ✅ Do Instead |
-|----------|---------------|
-| Nested `run` inside `run` | Sequential `run` at same level |
-| Lifecycle in wrong order | before_reasoning, reasoning, after_reasoning |
-| Forget return transition | Always include return action in specialists |
-| Use lifecycle for one-time setup | Use if @variables.turn_count == 1 |
-| Missing EXIT_PROTOCOL in gate pattern | Always include gate reset topic |
-| Hardcoding gate topic name in open_gate | Use variable-driven routing |
+| ❌ Don't                                | ✅ Do Instead                                |
+| --------------------------------------- | -------------------------------------------- |
+| Nested `run` inside `run`               | Sequential `run` at same level               |
+| Lifecycle in wrong order                | before_reasoning, reasoning, after_reasoning |
+| Forget return transition                | Always include return action in specialists  |
+| Use lifecycle for one-time setup        | Use if @variables.turn_count == 1            |
+| Missing EXIT_PROTOCOL in gate pattern   | Always include gate reset topic              |
+| Hardcoding gate topic name in open_gate | Use variable-driven routing                  |

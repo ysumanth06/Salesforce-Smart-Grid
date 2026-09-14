@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Advanced Action Patterns
 
 > Context-aware descriptions, instruction references, and binding strategies
@@ -51,12 +52,12 @@ topic after_hours:
 
 ### When to use description overrides
 
-| Scenario | Use Override? |
-|----------|--------------|
-| Same action serves different user expertise levels | ✅ Yes |
-| Same action has different context in different topics | ✅ Yes |
-| Action is always used the same way | ❌ No — single description suffices |
-| Action name alone is already clear | ❌ No — don't over-engineer |
+| Scenario                                              | Use Override?                       |
+| ----------------------------------------------------- | ----------------------------------- |
+| Same action serves different user expertise levels    | ✅ Yes                              |
+| Same action has different context in different topics | ✅ Yes                              |
+| Action is always used the same way                    | ❌ No — single description suffices |
+| Action name alone is already clear                    | ❌ No — don't over-engineer         |
 
 ---
 
@@ -133,11 +134,11 @@ topic secure_operations:
 
 ### Descriptions vs. References: When to Use Which
 
-| Approach | When to Use |
-|----------|-------------|
-| **Description overrides** | Action needs different descriptions per topic/context |
-| **Instruction references** | Need to explicitly guide LLM toward an action in instructions |
-| **Both** | Maximum control — override description AND reference in instructions |
+| Approach                   | When to Use                                                          |
+| -------------------------- | -------------------------------------------------------------------- |
+| **Description overrides**  | Action needs different descriptions per topic/context                |
+| **Instruction references** | Need to explicitly guide LLM toward an action in instructions        |
+| **Both**                   | Maximum control — override description AND reference in instructions |
 
 ---
 
@@ -145,12 +146,12 @@ topic secure_operations:
 
 Agent Script supports four input binding approaches. Use this matrix to choose:
 
-| Binding | Syntax | Use When | Example |
-|---------|--------|----------|---------|
-| **LLM slot-filling** | `...` | User provides the value in conversation | `with query=...` |
-| **Variable binding** | `@variables.X` | Data exists from prior turns or actions | `with id=@variables.customer_id` |
-| **Fixed value** | literal | System constant or business rule | `with format="pdf"` |
-| **Mixed** | combination | Complex actions needing multiple sources | See below |
+| Binding              | Syntax         | Use When                                 | Example                          |
+| -------------------- | -------------- | ---------------------------------------- | -------------------------------- |
+| **LLM slot-filling** | `...`          | User provides the value in conversation  | `with query=...`                 |
+| **Variable binding** | `@variables.X` | Data exists from prior turns or actions  | `with id=@variables.customer_id` |
+| **Fixed value**      | literal        | System constant or business rule         | `with format="pdf"`              |
+| **Mixed**            | combination    | Complex actions needing multiple sources | See below                        |
 
 ### Mixed Binding Example
 
@@ -231,14 +232,14 @@ create_case: @actions.create_support_case
 
 These supplement the "Common Issues" table in SKILL.md.
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| Missing colon after action name | `my_action` instead of `my_action:` | Add colon: `my_action:` |
-| Missing type annotation on input | `email:` with no type | Add type: `email: string` |
-| Wrong target protocol | `flows://MyFlow` | Use `flow://MyFlow` (no trailing `s`) |
-| `Input:` without quotes | `with Input:email=...` | Quote it: `with "Input:email"=...` |
-| `...` as variable default | `my_var: mutable string = ...` | Use `""` for defaults; `...` is slot-filling only |
-| Vague action description | `description: "Does a search"` | Be specific: `description: "Searches KB for articles matching the query"` |
+| Error                            | Cause                               | Fix                                                                       |
+| -------------------------------- | ----------------------------------- | ------------------------------------------------------------------------- |
+| Missing colon after action name  | `my_action` instead of `my_action:` | Add colon: `my_action:`                                                   |
+| Missing type annotation on input | `email:` with no type               | Add type: `email: string`                                                 |
+| Wrong target protocol            | `flows://MyFlow`                    | Use `flow://MyFlow` (no trailing `s`)                                     |
+| `Input:` without quotes          | `with Input:email=...`              | Quote it: `with "Input:email"=...`                                        |
+| `...` as variable default        | `my_var: mutable string = ...`      | Use `""` for defaults; `...` is slot-filling only                         |
+| Vague action description         | `description: "Does a search"`      | Be specific: `description: "Searches KB for articles matching the query"` |
 
 ---
 
@@ -276,30 +277,35 @@ parse: @actions.parse_json_response
 
 ```apex
 public class JsonParserAction {
-    public class ParseRequest {
-        @InvocableVariable(required=true)
-        public String jsonString;
-    }
+  public class ParseRequest {
+    @InvocableVariable(required=true)
+    public String jsonString;
+  }
 
-    public class ParseResult {
-        @InvocableVariable public String name;
-        @InvocableVariable public String email;
-        @InvocableVariable public String tier;
-    }
+  public class ParseResult {
+    @InvocableVariable
+    public String name;
+    @InvocableVariable
+    public String email;
+    @InvocableVariable
+    public String tier;
+  }
 
-    @InvocableMethod(label='Parse Customer JSON')
-    public static List<ParseResult> parse(List<ParseRequest> requests) {
-        List<ParseResult> results = new List<ParseResult>();
-        for (ParseRequest req : requests) {
-            Map<String, Object> parsed = (Map<String, Object>) JSON.deserializeUntyped(req.jsonString);
-            ParseResult result = new ParseResult();
-            result.name = (String) parsed.get('name');
-            result.email = (String) parsed.get('email');
-            result.tier = (String) parsed.get('tier');
-            results.add(result);
-        }
-        return results;
+  @InvocableMethod(label='Parse Customer JSON')
+  public static List<ParseResult> parse(List<ParseRequest> requests) {
+    List<ParseResult> results = new List<ParseResult>();
+    for (ParseRequest req : requests) {
+      Map<String, Object> parsed = (Map<String, Object>) JSON.deserializeUntyped(
+        req.jsonString
+      );
+      ParseResult result = new ParseResult();
+      result.name = (String) parsed.get('name');
+      result.email = (String) parsed.get('email');
+      result.tier = (String) parsed.get('tier');
+      results.add(result);
     }
+    return results;
+  }
 }
 ```
 
@@ -307,4 +313,4 @@ public class JsonParserAction {
 
 ---
 
-*Consolidated from @kunello's [PR #20](https://github.com/Jaganpro/sf-skills/pull/20) research on Agent Script Recipes action configuration patterns.*
+_Consolidated from @kunello's [PR #20](https://github.com/Jaganpro/sf-skills/pull/20) research on Agent Script Recipes action configuration patterns._

@@ -61,7 +61,7 @@ testCases:
             isReference: false
           - name: actual
             value: "$.generatedData.invokedActions[0][0].function.input.[fieldName]"
-            isReference: true       # JSONPath resolved against generatedData
+            isReference: true # JSONPath resolved against generatedData
           - name: expected
             value: "[expected_value]"
             isReference: false
@@ -112,7 +112,7 @@ testCases:
             value: "$.generatedData.invokedActions[0][0].executionLatency"
             isReference: true
           - name: expected
-            value: "5000"           # 5000ms = 5 seconds
+            value: "5000" # 5000ms = 5 seconds
             isReference: false
 
   # ═══════════════════════════════════════════════════════════════
@@ -127,7 +127,7 @@ testCases:
       - [action_name]
     contextVariables:
       - name: RoutableId
-        value: "[MessagingSession_Id]"  # e.g., 0Mwbb000007MGoTCAW
+        value: "[MessagingSession_Id]" # e.g., 0Mwbb000007MGoTCAW
     customEvaluations:
       - label: "recordId is the injected MessagingSession ID"
         name: string_comparison
@@ -139,7 +139,7 @@ testCases:
             value: "$.generatedData.invokedActions[0][0].function.input.recordId"
             isReference: true
           - name: expected
-            value: "[MessagingSession_Id]"  # Must match contextVariables.RoutableId value
+            value: "[MessagingSession_Id]" # Must match contextVariables.RoutableId value
             isReference: false
 
   # ═══════════════════════════════════════════════════════════════
