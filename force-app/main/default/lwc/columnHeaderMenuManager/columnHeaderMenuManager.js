@@ -37,6 +37,13 @@ export function generateColumnActions(
     iconName: isPinned ? "utility:pinned" : "utility:pin"
   });
 
+  // 2. Auto-Fit Column Width Action (TS-05)
+  actions.push({
+    label: "Auto-Fit Column Width",
+    name: "autofit_width",
+    iconName: "utility:expand_alt"
+  });
+
   // Extract distinct values and frequency
   const counts = new Map();
   for (const row of data) {

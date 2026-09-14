@@ -1,7 +1,7 @@
 # Task Story 02: Visual "Modified View" Badge & Explicit "Save vs Save As" [US-P2.5-02]
 
 **Feature**: 003.5-smartgrid-phase2.5 | **Story Type**: FULL | **Priority**: P1 — High  
-**Status**: SPECIFIED | **Branch**: `feature/003.5-smartgrid-phase2.5`
+**Status**: COMPLETE | **Branch**: `feature/003.5-smartgrid-phase2.5`
 
 ---
 
@@ -19,11 +19,11 @@ Enhance `smartGridViewSelector` to provide clear view lifecycle management:
 
 ## SF Implementation Layers
 
-| Layer                  | Skill      | File Path                                                                                  | Status       |
-| :--------------------- | :--------- | :----------------------------------------------------------------------------------------- | :----------- |
-| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartGridViewSelector/`                                        | 📝 SPECIFIED |
-| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/smartGridViewSelector/__tests__/smartGridViewSelector.test.js` | 📝 SPECIFIED |
-| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                                | 📝 SPECIFIED |
+| Layer                  | Skill      | File Path                                                                                  | Status      |
+| :--------------------- | :--------- | :----------------------------------------------------------------------------------------- | :---------- |
+| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartGridViewSelector/`                                        | ✅ COMPLETE |
+| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/smartGridViewSelector/__tests__/smartGridViewSelector.test.js` | ✅ COMPLETE |
+| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                                | ✅ COMPLETE |
 
 ---
 

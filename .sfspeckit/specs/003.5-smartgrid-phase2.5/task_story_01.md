@@ -1,7 +1,7 @@
 # Task Story 01: Active Filter Pill Bar (Breadcrumbs & In-Place Removal) [US-P2.5-01]
 
 **Feature**: 003.5-smartgrid-phase2.5 | **Story Type**: FULL | **Priority**: P1 — Critical  
-**Status**: SPECIFIED | **Branch**: `feature/003.5-smartgrid-phase2.5`
+**Status**: COMPLETE | **Branch**: `feature/003.5-smartgrid-phase2.5`
 
 ---
 
@@ -20,11 +20,11 @@ Each filter criterion displays as an individual removable SLDS pill (e.g., `[ St
 
 ## SF Implementation Layers
 
-| Layer                  | Skill      | File Path                                                                            | Status       |
-| :--------------------- | :--------- | :----------------------------------------------------------------------------------- | :----------- |
-| LWC Component          | sf-lwc     | `force-app/main/default/lwc/smartGridFilterBar/`                                     | 📝 SPECIFIED |
-| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/smartGridFilterBar/__tests__/smartGridFilterBar.test.js` | 📝 SPECIFIED |
-| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                          | 📝 SPECIFIED |
+| Layer                  | Skill      | File Path                                                                            | Status      |
+| :--------------------- | :--------- | :----------------------------------------------------------------------------------- | :---------- |
+| LWC Component          | sf-lwc     | `force-app/main/default/lwc/smartGridFilterBar/`                                     | ✅ COMPLETE |
+| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/smartGridFilterBar/__tests__/smartGridFilterBar.test.js` | ✅ COMPLETE |
+| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                          | ✅ COMPLETE |
 
 ---
 

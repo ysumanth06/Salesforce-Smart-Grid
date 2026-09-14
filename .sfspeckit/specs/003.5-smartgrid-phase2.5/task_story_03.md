@@ -1,7 +1,7 @@
 # Task Story 03: Unsaved Changes Counter & Review Popover [US-P2.5-03]
 
 **Feature**: 003.5-smartgrid-phase2.5 | **Story Type**: FULL | **Priority**: P2 — High  
-**Status**: SPECIFIED | **Branch**: `feature/003.5-smartgrid-phase2.5`
+**Status**: COMPLETE | **Branch**: `feature/003.5-smartgrid-phase2.5`
 
 ---
 
@@ -21,11 +21,11 @@ Provide immediate visual clarity around uncommitted draft edits:
 
 ## SF Implementation Layers
 
-| Layer                  | Skill      | File Path                                                                                | Status       |
-| :--------------------- | :--------- | :--------------------------------------------------------------------------------------- | :----------- |
-| LWC Component          | sf-lwc     | `force-app/main/default/lwc/smartGridReviewModal/`                                       | 📝 SPECIFIED |
-| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/smartGridReviewModal/__tests__/smartGridReviewModal.test.js` | 📝 SPECIFIED |
-| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                              | 📝 SPECIFIED |
+| Layer                  | Skill      | File Path                                                                                | Status      |
+| :--------------------- | :--------- | :--------------------------------------------------------------------------------------- | :---------- |
+| LWC Component          | sf-lwc     | `force-app/main/default/lwc/smartGridReviewModal/`                                       | ✅ COMPLETE |
+| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/smartGridReviewModal/__tests__/smartGridReviewModal.test.js` | ✅ COMPLETE |
+| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                              | ✅ COMPLETE |
 
 ---
 

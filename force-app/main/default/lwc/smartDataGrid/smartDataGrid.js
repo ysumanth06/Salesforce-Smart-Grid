@@ -13,10 +13,16 @@ import getFormatRules from "@salesforce/apex/SmartGridController.getFormatRules"
 import getAggregates from "@salesforce/apex/SmartGridController.getAggregates";
 import logQueryHistory from "@salesforce/apex/SmartGridController.logQueryHistory";
 import { exportToCSV } from "c/csvHelper";
+import { exportToExcel } from "c/spreadsheetExporter";
 import { reduceErrors } from "c/errorUtils";
 import { applyFormatRules } from "c/formatRuleEngine";
 import { DirtyStateManager } from "c/dirtyStateManager";
 import { computeFormulaColumns } from "c/formulaEvaluator";
+import { GridPageCache } from "c/gridPageCache";
+import {
+  calculateColumnWidth,
+  calculateAllColumnWidths
+} from "c/columnWidthCalculator";
 import {
   generateColumnActions,
   filterRecordsByHeaderActions,
@@ -55,6 +61,7 @@ export default class SmartDataGrid extends LightningElement {
 
   // Sprint 4 features state
   @track showAdvancedFilterModal = false;
+  @track showReviewModal = false;
   @track activeFilterExpression;
   @track activeFilterJson;
   @track selectedRecordForReadingPane;
@@ -69,6 +76,7 @@ export default class SmartDataGrid extends LightningElement {
   _unfilteredGridData = [];
 
   dirtyStateManager = new DirtyStateManager(50);
+  pageCache = new GridPageCache(10, 300000);
 
   // Filter state
   @track filterFields = [];
@@ -299,17 +307,28 @@ export default class SmartDataGrid extends LightningElement {
     this.isFilterPanelOpen = false;
     this.updateActivePills();
     this.publishLmsEvent("filtered", []);
+    this.pageCache.clear();
     await this.fetchData();
   }
 
   async handleClearAllFilters() {
-    this.filterFields = this.filterFields.map((f) => ({
-      ...f,
-      selectedValue: ""
-    }));
+    if (this.filterFields) {
+      this.filterFields = this.filterFields.map((f) => ({
+        ...f,
+        selectedValue: ""
+      }));
+    }
+    this.activeHeaderFilters = {};
+    this.activeFilterExpression = null;
+    this.activeFilterJson = null;
     this.isFilterPanelOpen = false;
+    this.applyHeaderFilters();
+    this.refreshHeaderActions();
     this.updateActivePills();
+    this.currentPage = 1;
+    this.pageCache.clear();
     await this.fetchData();
+    this.fetchTotals();
   }
 
   async handleSort(event) {
@@ -324,11 +343,17 @@ export default class SmartDataGrid extends LightningElement {
     this._sortDisplayField = fieldName;
     this.sortField = actualFieldName;
     this.sortDirection = sortDirection;
+    this.pageCache.clear();
 
     await this.fetchData();
   }
 
-  async fetchData() {
+  async handleRefresh() {
+    this.pageCache.clear();
+    await this.fetchData(true);
+  }
+
+  async fetchData(bypassCache = false) {
     if (
       !this.objectApiName ||
       !this.gridColumns ||
@@ -340,42 +365,49 @@ export default class SmartDataGrid extends LightningElement {
       this.isLoading = true;
       this.errorMessage = null;
 
-      let fieldsToQuery = this.gridColumns.map((c) => c.fieldName);
+      let response;
+      if (!bypassCache && this.pageCache.has(this.currentPage)) {
+        response = this.pageCache.get(this.currentPage);
+      } else {
+        let fieldsToQuery = this.gridColumns.map((c) => c.fieldName);
 
-      // Build filter map
-      let filterMap = {};
-      if (this.parentRelationshipField && this.parentRecordId) {
-        filterMap[this.parentRelationshipField] = this.parentRecordId;
-      }
-      if (this.filterFields) {
-        this.filterFields.forEach((f) => {
-          if (f.selectedValue && !f.isDate) {
-            filterMap[f.fieldName] = f.selectedValue;
-          }
+        // Build filter map
+        let filterMap = {};
+        if (this.parentRelationshipField && this.parentRecordId) {
+          filterMap[this.parentRelationshipField] = this.parentRecordId;
+        }
+        if (this.filterFields) {
+          this.filterFields.forEach((f) => {
+            if (f.selectedValue && !f.isDate) {
+              filterMap[f.fieldName] = f.selectedValue;
+            }
+          });
+        }
+
+        // Find first date filter for the paged results call (it currently only supports one date range)
+        const dateFilter = this.filterFields.find(
+          (f) => f.isDate && f.selectedValue
+        );
+
+        response = await getRecordsPaged({
+          objectApiName: this.objectApiName,
+          fields: fieldsToQuery,
+          filters: filterMap,
+          dateField: dateFilter ? dateFilter.fieldName : null,
+          startDate: dateFilter ? dateFilter.selectedValue : null,
+          endDate: null, // Note: Simplified date logic to work with the universal array
+          sortField: this.sortField || this.config?.defaultSortField,
+          sortDirection: this.sortDirection,
+          pageSize: this.pageSize,
+          pageNumber: this.currentPage,
+          filterJson: this.activeFilterJson || null
         });
+
+        this.pageCache.set(this.currentPage, response);
       }
-
-      // Find first date filter for the paged results call (it currently only supports one date range)
-      const dateFilter = this.filterFields.find(
-        (f) => f.isDate && f.selectedValue
-      );
-
-      let response = await getRecordsPaged({
-        objectApiName: this.objectApiName,
-        fields: fieldsToQuery,
-        filters: filterMap,
-        dateField: dateFilter ? dateFilter.fieldName : null,
-        startDate: dateFilter ? dateFilter.selectedValue : null,
-        endDate: null, // Note: Simplified date logic to work with the universal array
-        sortField: this.sortField || this.config?.defaultSortField,
-        sortDirection: this.sortDirection,
-        pageSize: this.pageSize,
-        pageNumber: this.currentPage,
-        filterJson: this.activeFilterJson || null
-      });
 
       // Auto-generate URL properties for lightning-datatable 'url' columns
-      let rawMapped = response.records.map((row) => {
+      let rawMapped = (response.records || []).map((row) => {
         let mappedRow = { ...row };
         Object.keys(mappedRow).forEach((key) => {
           if (key === "Id" || key.endsWith("Id")) {
@@ -506,6 +538,7 @@ export default class SmartDataGrid extends LightningElement {
         if (deleteResult && deleteResult.isSuccess) {
           const deletedIds = recordsToDelete.map((r) => r.Id);
           this.publishLmsEvent("deleted", deletedIds);
+          this.pageCache.clear();
           this.dispatchEvent(
             new ShowToastEvent({
               title: "Success",
@@ -575,6 +608,7 @@ export default class SmartDataGrid extends LightningElement {
           })
         );
         this.draftValues = [];
+        this.pageCache.clear();
         await this.fetchData();
       } else {
         let rowErrorMap = {};
@@ -653,6 +687,114 @@ export default class SmartDataGrid extends LightningElement {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // ─── Task Story 03: Live Changes Counter & Review Modal ───
+
+  get hasDrafts() {
+    return this.draftValues && this.draftValues.length > 0;
+  }
+
+  get draftStats() {
+    if (!this.hasDrafts) {
+      return { totalChanges: 0, totalRecords: 0 };
+    }
+    let totalChanges = 0;
+    this.draftValues.forEach((d) => {
+      const keys = Object.keys(d).filter(
+        (k) => k !== "Id" && !k.startsWith("_")
+      );
+      totalChanges += keys.length;
+    });
+    return { totalChanges, totalRecords: this.draftValues.length };
+  }
+
+  get saveButtonLabel() {
+    const stats = this.draftStats;
+    if (stats.totalChanges === 0) {
+      return "Save";
+    }
+    const changeWord = stats.totalChanges === 1 ? "change" : "changes";
+    const rowWord = stats.totalRecords === 1 ? "row" : "rows";
+    return `Save (${stats.totalChanges} ${changeWord} across ${stats.totalRecords} ${rowWord})`;
+  }
+
+  handleOpenReviewModal() {
+    this.showReviewModal = true;
+  }
+
+  handleCloseReviewModal() {
+    this.showReviewModal = false;
+  }
+
+  async handleToolbarSave() {
+    if (!this.hasDrafts) return;
+    await this.handleSave({ detail: { draftValues: this.draftValues } });
+  }
+
+  async handleReviewSave() {
+    this.showReviewModal = false;
+    await this.handleToolbarSave();
+  }
+
+  handleDiscardAll() {
+    this.draftValues = [];
+    if (this.dirtyStateManager) {
+      this.dirtyStateManager.clear();
+      this.updateUndoRedoState();
+    }
+    if (this.gridData) {
+      this.gridData = this.gridData.filter(
+        (r) => !r.Id || !r.Id.startsWith("new-")
+      );
+    }
+    if (this._unfilteredGridData) {
+      this.applyHeaderFilters();
+    }
+    this.showReviewModal = false;
+    this.fetchTotals();
+  }
+
+  handleRevertField(event) {
+    const { recordId, fieldName } = event.detail;
+    if (!recordId || !fieldName) return;
+
+    let updated = [];
+    this.draftValues.forEach((draft) => {
+      if (draft.Id === recordId) {
+        const copy = { ...draft };
+        delete copy[fieldName];
+        const remainingKeys = Object.keys(copy).filter(
+          (k) => k !== "Id" && !k.startsWith("_")
+        );
+        if (remainingKeys.length > 0) {
+          updated.push(copy);
+        }
+      } else {
+        updated.push(draft);
+      }
+    });
+
+    this.draftValues = updated;
+
+    // Restore original cell value in gridData if available
+    if (this._unfilteredGridData && this.gridData) {
+      const originalRow = this._unfilteredGridData.find(
+        (r) => r.Id === recordId
+      );
+      if (originalRow) {
+        const gridRow = this.gridData.find((r) => r.Id === recordId);
+        if (gridRow) {
+          gridRow[fieldName] = originalRow[fieldName];
+          this.gridData = [...this.gridData];
+        }
+      }
+    }
+
+    if (this.draftValues.length === 0) {
+      this.showReviewModal = false;
+    }
+    this.fetchTotals();
   }
 
   handleRecordSolved(event) {
@@ -802,6 +944,49 @@ export default class SmartDataGrid extends LightningElement {
         dataCopy,
         colsCopy,
         `${this.objectApiName || "export"}_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+    } catch (e) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Export Error",
+          message: this.reduceErrors(e),
+          variant: "error"
+        })
+      );
+    }
+  }
+
+  handleExportExcel() {
+    if (!this.gridData || this.gridData.length === 0) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Nothing to Export",
+          message: "No records to export.",
+          variant: "warning"
+        })
+      );
+      return;
+    }
+
+    try {
+      const dataCopy = JSON.parse(JSON.stringify(this.gridData));
+      const colsCopy = JSON.parse(JSON.stringify(this.gridColumns));
+      const totalsCopy = this.totalsData
+        ? JSON.parse(JSON.stringify(this.totalsData))
+        : [];
+
+      const fileName = `${this.objectApiName || "export"}_${new Date()
+        .toISOString()
+        .slice(0, 10)}.xls`;
+
+      exportToExcel(dataCopy, colsCopy, totalsCopy, fileName);
+
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Export Successful",
+          message: "Spreadsheet exported successfully!",
+          variant: "success"
+        })
       );
     } catch (e) {
       this.dispatchEvent(
@@ -1435,31 +1620,106 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   updateActivePills() {
-    let pills = [];
-    this.filterFields.forEach((f) => {
-      if (f.selectedValue && f.selectedValue !== "") {
-        let displayVal = f.selectedValue;
-        if (f.isPicklist) {
-          let opt = f.options.find((o) => o.value === f.selectedValue);
-          displayVal = opt ? opt.label : f.selectedValue;
+    const pills = [];
+
+    // 1. Quick Filters & Date Filters from filterFields
+    if (this.filterFields && Array.isArray(this.filterFields)) {
+      this.filterFields.forEach((f) => {
+        if (f.selectedValue && f.selectedValue !== "") {
+          let displayVal = f.selectedValue;
+          if (f.isPicklist && Array.isArray(f.options)) {
+            const opt = f.options.find((o) => o.value === f.selectedValue);
+            if (opt) displayVal = opt.label;
+          }
+          pills.push({
+            id: `quick_${f.fieldName}`,
+            fieldName: f.fieldName,
+            fieldLabel: f.label || f.fieldName,
+            value: f.selectedValue,
+            displayLabel: `${f.label || f.fieldName}: ${displayVal}`,
+            source: f.isDate ? "daterange" : "combobox"
+          });
         }
-        pills.push({
-          label: `${f.label}: ${displayVal}`,
-          name: f.fieldName
-        });
-      }
-    });
+      });
+    }
+
+    // 2. In-place Column Header Filters (activeHeaderFilters)
+    if (
+      this.activeHeaderFilters &&
+      typeof this.activeHeaderFilters === "object"
+    ) {
+      Object.keys(this.activeHeaderFilters).forEach((fieldName) => {
+        const valSet = this.activeHeaderFilters[fieldName];
+        if (valSet && valSet.size > 0) {
+          const col = this.gridColumns?.find((c) => c.fieldName === fieldName);
+          const colLabel = col ? col.label : fieldName;
+          valSet.forEach((val) => {
+            pills.push({
+              id: `header_${fieldName}_${encodeURIComponent(val)}`,
+              fieldName: fieldName,
+              fieldLabel: colLabel,
+              value: val,
+              displayLabel: `${colLabel}: ${val}`,
+              source: "header"
+            });
+          });
+        }
+      });
+    }
+
+    // 3. Advanced Filter Builder (activeFilterJson / activeFilterExpression)
+    if (this.activeFilterExpression || this.activeFilterJson) {
+      pills.push({
+        id: "advanced_filter",
+        fieldName: "advanced",
+        fieldLabel: "Advanced Filter",
+        value: this.activeFilterExpression || "Custom Criteria",
+        displayLabel: `Advanced: ${this.activeFilterExpression || "Custom Criteria"}`,
+        source: "filterbuilder"
+      });
+    }
+
     this.activeFilterPills = pills;
   }
 
-  handleRemoveFilterPill(event) {
-    const name = event.target.name;
-    let filter = this.filterFields.find((f) => f.fieldName === name);
-    if (filter) {
-      filter.selectedValue = "";
+  async handleRemoveFilterPill(event) {
+    const detail = event.detail || {};
+    const source = detail.source;
+    const fieldName = detail.fieldName || event.target?.name;
+    const value = detail.value;
+
+    if (source === "header") {
+      if (this.activeHeaderFilters && this.activeHeaderFilters[fieldName]) {
+        this.activeHeaderFilters[fieldName].delete(value);
+        if (this.activeHeaderFilters[fieldName].size === 0) {
+          delete this.activeHeaderFilters[fieldName];
+        }
+      }
+      this.applyHeaderFilters();
+      this.refreshHeaderActions();
+      this.fetchTotals();
+      this.updateActivePills();
+      return;
+    }
+
+    if (source === "filterbuilder") {
+      this.activeFilterExpression = null;
+      this.activeFilterJson = null;
+      this.currentPage = 1;
+      this.updateActivePills();
+      await this.fetchData();
+      return;
+    }
+
+    // Default: Quick Combobox / Date range
+    if (this.filterFields) {
+      const filter = this.filterFields.find((f) => f.fieldName === fieldName);
+      if (filter) {
+        filter.selectedValue = "";
+      }
     }
     this.updateActivePills();
-    this.fetchData();
+    await this.fetchData();
   }
 
   // ─── Utilities ───
@@ -1592,6 +1852,8 @@ export default class SmartDataGrid extends LightningElement {
     this.activeFilterExpression = event.detail.expression;
     this.activeFilterJson = event.detail.json;
     this.currentPage = 1;
+    this.pageCache.clear();
+    this.updateActivePills();
     await this.fetchData();
     this.logHistory();
   }
@@ -1617,6 +1879,8 @@ export default class SmartDataGrid extends LightningElement {
       }
     }
     this.currentPage = 1;
+    this.pageCache.clear();
+    this.updateActivePills();
     await this.fetchData();
   }
 
@@ -1628,6 +1892,8 @@ export default class SmartDataGrid extends LightningElement {
     this.sortField = null;
     this.sortDirection = "asc";
     this.currentPage = 1;
+    this.pageCache.clear();
+    this.updateActivePills();
     await this.fetchData();
   }
 
@@ -1724,6 +1990,11 @@ export default class SmartDataGrid extends LightningElement {
       return;
     }
 
+    if (actionName === "autofit_width") {
+      this.handleAutoFitColumn(fieldName);
+      return;
+    }
+
     if (actionName === "more_filters") {
       this.handleOpenAdvancedFilter();
       return;
@@ -1736,6 +2007,7 @@ export default class SmartDataGrid extends LightningElement {
       this.applyHeaderFilters();
       this.refreshHeaderActions();
       this.fetchTotals();
+      this.updateActivePills();
       return;
     }
 
@@ -1757,6 +2029,47 @@ export default class SmartDataGrid extends LightningElement {
       this.applyHeaderFilters();
       this.refreshHeaderActions();
       this.fetchTotals();
+      this.updateActivePills();
+    }
+  }
+
+  handleAutoFitColumn(fieldName) {
+    if (!this.gridColumns || !this.gridData) return;
+    const colIndex = this.gridColumns.findIndex(
+      (c) => c.fieldName === fieldName
+    );
+    if (colIndex === -1) return;
+
+    const col = this.gridColumns[colIndex];
+    const newWidth = calculateColumnWidth(col, this.gridData);
+
+    const updatedCols = [...this.gridColumns];
+    updatedCols[colIndex] = { ...col, initialWidth: newWidth };
+    this.gridColumns = updatedCols;
+
+    this.saveCurrentPrefs();
+  }
+
+  handleAutoFitAllColumns() {
+    if (!this.gridColumns || !this.gridData) return;
+    this.gridColumns = calculateAllColumnWidths(
+      this.gridColumns,
+      this.gridData
+    );
+    this.saveCurrentPrefs();
+  }
+
+  handleHeaderDoubleClick(event) {
+    const th = event.target?.closest ? event.target.closest("th") : null;
+    if (th) {
+      const col = this.gridColumns?.find(
+        (c) =>
+          c.label === th.textContent?.trim() ||
+          c.fieldName === th.dataset?.fieldName
+      );
+      if (col) {
+        this.handleAutoFitColumn(col.fieldName);
+      }
     }
   }
 

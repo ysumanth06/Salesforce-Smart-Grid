@@ -24,6 +24,36 @@
           class="slds-m-left_x-small"
         ></lightning-button>
       </template>
+      <!-- Save, Review & Discard Buttons with Live Counter (TS-03) -->
+      <template lwc:if={hasDrafts}>
+        <lightning-button
+          label={saveButtonLabel}
+          icon-name="utility:save"
+          variant="brand"
+          onclick={handleToolbarSave}
+          disabled={isLoading}
+          class="slds-m-left_x-small"
+          data-testid="toolbar-save-btn"
+        ></lightning-button>
+        <lightning-button-icon
+          icon-name="utility:preview"
+          alternative-text="Review Pending Changes"
+          title="Review Pending Changes"
+          onclick={handleOpenReviewModal}
+          class="slds-m-left_xx-small"
+          variant="border-filled"
+          data-testid="toolbar-review-btn"
+        ></lightning-button-icon>
+        <lightning-button
+          label="Discard All"
+          icon-name="utility:clear"
+          variant="neutral"
+          onclick={handleDiscardAll}
+          disabled={isLoading}
+          class="slds-m-left_xx-small"
+          data-testid="toolbar-discard-btn"
+        ></lightning-button>
+      </template>
       <template lwc:if={canDelete}>
         <lightning-button
           label="Delete Selected"
@@ -59,15 +89,44 @@
         disabled={disableFillDown}
         class="slds-m-left_x-small"
       ></lightning-button>
+      <!-- Export Options Menu (TS-06) -->
       <template lwc:if={canExport}>
-        <lightning-button
-          label="Export CSV"
+        <lightning-button-menu
+          alternative-text="Export Options"
+          title="Export Data"
           icon-name="utility:download"
-          onclick={handleExportCSV}
           disabled={isLoading}
           class="slds-m-left_x-small"
-        ></lightning-button>
+          menu-alignment="right"
+          data-testid="export-menu"
+        >
+          <lightning-menu-item
+            value="csv"
+            label="Export as CSV (.csv)"
+            prefix-icon-name="utility:download"
+            onclick={handleExportCSV}
+            data-testid="export-csv-item"
+          ></lightning-menu-item>
+          <lightning-menu-item
+            value="excel"
+            label="Export as Formatted Excel (.xls)"
+            prefix-icon-name="utility:table"
+            onclick={handleExportExcel}
+            data-testid="export-excel-item"
+          ></lightning-menu-item>
+        </lightning-button-menu>
       </template>
+      <!-- Refresh Grid (bypasses cache) (TS-04) -->
+      <lightning-button-icon
+        icon-name="utility:refresh"
+        alternative-text="Refresh Data"
+        title="Refresh Data (bypass cache)"
+        onclick={handleRefresh}
+        disabled={isLoading}
+        class="slds-m-left_x-small"
+        variant="border-filled"
+        data-testid="toolbar-refresh-btn"
+      ></lightning-button-icon>
       <template lwc:if={canFilter}>
         <lightning-button-icon
           icon-name="utility:filterList"
@@ -86,20 +145,12 @@
         ></lightning-button>
       </template>
     </div>
-    <!-- Active Filter Pills -->
-    <template lwc:if={hasActiveFilters}>
-      <div class="slds-p-horizontal_medium slds-m-bottom_small">
-        <template for:each={activeFilterPills} for:item="pill">
-          <lightning-pill
-            key={pill.name}
-            label={pill.label}
-            name={pill.name}
-            onremove={handleRemoveFilterPill}
-            class="slds-m-right_xx-small"
-          ></lightning-pill>
-        </template>
-      </div>
-    </template>
+    <!-- Active Filter Pills Bar (TS-01) -->
+    <c-smart-grid-filter-bar
+      filters={activeFilterPills}
+      onremovefilter={handleRemoveFilterPill}
+      onclearall={handleClearAllFilters}
+    ></c-smart-grid-filter-bar>
 
     <!-- Filter Bar (Collapsible Panel) -->
     <template lwc:if={showFilterPanel}>
@@ -214,6 +265,7 @@
               onrowselection={handleRowSelection}
               oncellchange={handleCellChange}
               onheaderaction={handleHeaderAction}
+              ondblclick={handleHeaderDoubleClick}
             >
             </lightning-datatable>
             <!-- Sticky Column Totals Footer (TS-02) -->
@@ -374,4 +426,16 @@
       onclose={handleCloseAdvancedFilter}
     ></c-smart-grid-filter-builder>
   </template>
+
+  <!-- Review Unsaved Changes Modal (TS-03) -->
+  <c-smart-grid-review-modal
+    is-open={showReviewModal}
+    draft-values={draftValues}
+    grid-data={gridData}
+    grid-columns={gridColumns}
+    onclose={handleCloseReviewModal}
+    onrevertfield={handleRevertField}
+    ondiscardall={handleDiscardAll}
+    onsave={handleReviewSave}
+  ></c-smart-grid-review-modal>
 </template>

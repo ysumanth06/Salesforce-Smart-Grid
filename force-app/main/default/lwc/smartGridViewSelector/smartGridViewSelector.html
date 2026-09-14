@@ -2,6 +2,17 @@
   <div
     class="view-selector-container slds-grid slds-grid_vertical-align-center"
   >
+    <!-- Modified Badge (TS-02) -->
+    <template lwc:if={isModified}>
+      <span
+        class="slds-badge slds-theme_warning slds-m-right_xx-small modified-badge"
+        title="View has unsaved modifications"
+        data-testid="modified-badge"
+      >
+        * Modified
+      </span>
+    </template>
+
     <div class="slds-m-right_x-small">
       <lightning-combobox
         name="viewSelector"
@@ -16,13 +27,60 @@
       </lightning-combobox>
     </div>
 
-    <lightning-button-icon
-      icon-name="utility:save"
-      alternative-text="Save Current View"
-      title="Save Current View"
-      onclick={handleOpenSaveModal}
+    <!-- View Action Menu (TS-02) -->
+    <lightning-button-menu
+      alternative-text="View Management Actions"
+      title="View Options"
+      menu-alignment="right"
       variant="border-filled"
       class="slds-m-right_xx-small"
+      data-testid="view-menu"
+    >
+      <lightning-menu-item
+        value="update"
+        label="Update Current View"
+        prefix-icon-name="utility:save"
+        disabled={isUpdateDisabled}
+        onclick={handleUpdateCurrentView}
+        data-testid="menu-update"
+      ></lightning-menu-item>
+      <lightning-menu-item
+        value="saveas"
+        label="Save as New View..."
+        prefix-icon-name="utility:new"
+        onclick={handleOpenSaveModal}
+        data-testid="menu-saveas"
+      ></lightning-menu-item>
+      <lightning-menu-item
+        value="revert"
+        label="Revert Changes"
+        prefix-icon-name="utility:undo"
+        disabled={isRevertDisabled}
+        onclick={handleRevertChanges}
+        data-testid="menu-revert"
+      ></lightning-menu-item>
+      <template lwc:if={canDelete}>
+        <lightning-menu-divider></lightning-menu-divider>
+        <lightning-menu-item
+          value="delete"
+          label="Delete View"
+          prefix-icon-name="utility:delete"
+          onclick={handleDeleteSelectedView}
+          data-testid="menu-delete"
+        ></lightning-menu-item>
+      </template>
+    </lightning-button-menu>
+
+    <!-- Quick Save / Update Button -->
+    <lightning-button-icon
+      icon-name="utility:save"
+      alternative-text={saveButtonTitle}
+      title={saveButtonTitle}
+      onclick={handleQuickSave}
+      variant={saveButtonVariant}
+      disabled={isQuickSaveDisabled}
+      class="slds-m-right_xx-small"
+      data-testid="quick-save-btn"
     >
     </lightning-button-icon>
 
@@ -62,7 +120,7 @@
             <span class="slds-assistive-text">Close</span>
           </button>
           <h2 class="slds-modal__title slds-hyphenate slds-text-heading_medium">
-            Save Current Grid View
+            Save as New View
           </h2>
         </header>
 

@@ -1,7 +1,7 @@
 # Task Story 05: Double-Click Auto-Fit Column Width [US-P2.5-05]
 
 **Feature**: 003.5-smartgrid-phase2.5 | **Story Type**: FULL | **Priority**: P2 — Medium  
-**Status**: SPECIFIED | **Branch**: `feature/003.5-smartgrid-phase2.5`
+**Status**: COMPLETE | **Branch**: `feature/003.5-smartgrid-phase2.5`
 
 ---
 
@@ -21,11 +21,11 @@ When a user double-clicks the border/divider between columns or selects "Auto-Fi
 
 ## SF Implementation Layers
 
-| Layer                  | Skill      | File Path                                                                                  | Status       |
-| :--------------------- | :--------- | :----------------------------------------------------------------------------------------- | :----------- |
-| LWC Utility            | sf-lwc     | `force-app/main/default/lwc/columnWidthCalculator/columnWidthCalculator.js`                | 📝 SPECIFIED |
-| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/columnWidthCalculator/__tests__/columnWidthCalculator.test.js` | 📝 SPECIFIED |
-| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                                | 📝 SPECIFIED |
+| Layer                  | Skill      | File Path                                                                                  | Status      |
+| :--------------------- | :--------- | :----------------------------------------------------------------------------------------- | :---------- |
+| LWC Utility            | sf-lwc     | `force-app/main/default/lwc/columnWidthCalculator/columnWidthCalculator.js`                | ✅ COMPLETE |
+| LWC Unit Tests         | sf-testing | `force-app/main/default/lwc/columnWidthCalculator/__tests__/columnWidthCalculator.test.js` | ✅ COMPLETE |
+| LWC Component (modify) | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/`                                                | ✅ COMPLETE |
 
 ---
 
