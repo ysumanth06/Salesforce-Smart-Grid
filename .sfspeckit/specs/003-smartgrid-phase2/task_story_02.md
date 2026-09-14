@@ -1,7 +1,7 @@
 # Task Story 02: Column Totals Footer [US-P2-02]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P1 — Critical
-**Status**: READY | **Branch**: `feature/003-ts02-column-totals`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,11 +15,11 @@ Add an aggregate footer row showing Sum, Avg, Min, Max, and Count for configured
 
 | Layer                       | Skill      | File Path                                                                           | Status |
 | --------------------------- | ---------- | ----------------------------------------------------------------------------------- | ------ |
-| Query Builder (modify)      | sf-apex    | `force-app/main/default/classes/GridQueryBuilder.cls` — add `buildAggregateQuery()` | ⬜     |
-| Query Builder Test (modify) | sf-testing | `force-app/main/default/classes/GridQueryBuilderTest.cls`                           | ⬜     |
-| Controller (modify)         | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — add `getAggregates()`    | ⬜     |
-| Controller Test (modify)    | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                        | ⬜     |
-| LWC (modify)                | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — sticky footer row                     | ⬜     |
+| Query Builder (modify)      | sf-apex    | `force-app/main/default/classes/GridQueryBuilder.cls` — add `buildAggregateQuery()` | ✅     |
+| Query Builder Test (modify) | sf-testing | `force-app/main/default/classes/GridQueryBuilderTest.cls`                           | ✅     |
+| Controller (modify)         | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — add `getAggregates()`    | ✅     |
+| Controller Test (modify)    | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                        | ✅     |
+| LWC (modify)                | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — sticky footer row                     | ✅     |
 
 ---
 

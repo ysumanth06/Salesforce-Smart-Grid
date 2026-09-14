@@ -1,7 +1,7 @@
 # Task Story 01: Conditional Formatting Engine [US-P2-01]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P1 — Critical
-**Status**: READY | **Branch**: `feature/003-ts01-conditional-formatting`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,12 +15,12 @@ Build the conditional formatting engine that evaluates `Smart_Grid_Format_Rule__
 
 | Layer                    | Skill      | File Path                                                                         | Status |
 | ------------------------ | ---------- | --------------------------------------------------------------------------------- | ------ |
-| Apex Service             | sf-apex    | `force-app/main/default/classes/SmartGridFormatEngine.cls`                        | ⬜     |
-| Apex Test                | sf-testing | `force-app/main/default/classes/SmartGridFormatEngineTest.cls`                    | ⬜     |
-| Controller (modify)      | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — add `getFormatRules()` | ⬜     |
-| Controller Test (modify) | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                      | ⬜     |
-| LWC Module               | sf-lwc     | `force-app/main/default/lwc/formatRuleEngine/`                                    | ⬜     |
-| LWC (modify)             | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — integrate format engine             | ⬜     |
+| Apex Service             | sf-apex    | `force-app/main/default/classes/SmartGridFormatEngine.cls`                        | ✅     |
+| Apex Test                | sf-testing | `force-app/main/default/classes/SmartGridFormatEngineTest.cls`                    | ✅     |
+| Controller (modify)      | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — add `getFormatRules()` | ✅     |
+| Controller Test (modify) | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                      | ✅     |
+| LWC Module               | sf-lwc     | `force-app/main/default/lwc/formatRuleEngine/`                                    | ✅     |
+| LWC (modify)             | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — integrate format engine             | ✅     |
 
 ---
 

@@ -507,6 +507,146 @@ public with sharing class SmartGridController {
     return result;
   }
 
+  /**
+   * @description Fetches format rules for a given Smart Grid configuration.
+   * @param configDevName DeveloperName of the Smart_Grid_Config__mdt record
+   * @param objectApiName Optional SObject API Name for validating field existence
+   * @return List of FormatRuleDTO
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<SmartGridFormatEngine.FormatRuleDTO> getFormatRules(
+    String configDevName,
+    String objectApiName
+  ) {
+    return SmartGridFormatEngine.getFormatRules(configDevName, objectApiName);
+  }
+
+  /**
+   * @description Computes server-side column totals (SUM, AVG, MIN, MAX, COUNT)
+   * across the entire filtered dataset respecting user permissions.
+   * @param objectApiName Target SObject API name
+   * @param fieldsToAggregate List of numeric field API names to aggregate
+   * @param filters Map of field name to filter value
+   * @param dateField Optional date field name for date range
+   * @param startDate Optional start date string
+   * @param endDate Optional end date string
+   * @return List of AggregateResultDTO
+   */
+  @AuraEnabled(cacheable=false)
+  public static List<AggregateResultDTO> getAggregates(
+    String objectApiName,
+    List<String> fieldsToAggregate,
+    Map<String, String> filters,
+    String dateField,
+    String startDate,
+    String endDate
+  ) {
+    List<AggregateResultDTO> dtos = new List<AggregateResultDTO>();
+    if (
+      String.isBlank(objectApiName) ||
+      fieldsToAggregate == null ||
+      fieldsToAggregate.isEmpty()
+    ) {
+      return dtos;
+    }
+
+    SObjectType sType = Schema.getGlobalDescribe().get(objectApiName);
+    if (sType == null || !sType.getDescribe().isAccessible()) {
+      return dtos;
+    }
+
+    Map<String, SObjectField> fieldMap = sType.getDescribe().fields.getMap();
+    List<String> validNumericFields = new List<String>();
+
+    for (String f : fieldsToAggregate) {
+      String lowerField = f.toLowerCase();
+      if (fieldMap.containsKey(lowerField)) {
+        DescribeFieldResult dfr = fieldMap.get(lowerField).getDescribe();
+        if (dfr.isAccessible()) {
+          Schema.DisplayType dt = dfr.getType();
+          if (
+            dt == Schema.DisplayType.CURRENCY ||
+            dt == Schema.DisplayType.DOUBLE ||
+            dt == Schema.DisplayType.INTEGER ||
+            dt == Schema.DisplayType.LONG ||
+            dt == Schema.DisplayType.PERCENT
+          ) {
+            validNumericFields.add(f);
+          }
+        }
+      }
+    }
+
+    if (validNumericFields.isEmpty()) {
+      return dtos;
+    }
+
+    Map<String, Object> filterMapObj = null;
+    if (filters != null) {
+      filterMapObj = new Map<String, Object>();
+      for (String k : filters.keySet()) {
+        filterMapObj.put(k, filters.get(k));
+      }
+    }
+
+    GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
+    req.objectApiName = objectApiName;
+    req.fields = validNumericFields;
+    req.filters = filterMapObj;
+    req.dateField = dateField;
+    if (String.isNotBlank(startDate)) {
+      try {
+        req.startDate = Date.valueOf(startDate);
+      } catch (Exception e) {
+        // Ignore parse errors
+      }
+    }
+    if (String.isNotBlank(endDate)) {
+      try {
+        req.endDate = Date.valueOf(endDate);
+      } catch (Exception e) {
+        // Ignore parse errors
+      }
+    }
+
+    String query = GridQueryBuilder.buildAggregateQuery(req);
+    List<AggregateResult> results = Database.query(
+      query,
+      AccessLevel.USER_MODE
+    );
+
+    if (!results.isEmpty()) {
+      AggregateResult ar = results[0];
+      for (Integer i = 0; i < validNumericFields.size(); i++) {
+        AggregateResultDTO dto = new AggregateResultDTO();
+        dto.fieldName = validNumericFields[i];
+        dto.sumValue = (Decimal) ar.get('sum_' + i);
+        dto.avgValue = (Decimal) ar.get('avg_' + i);
+        dto.minValue = (Decimal) ar.get('min_' + i);
+        dto.maxValue = (Decimal) ar.get('max_' + i);
+        dto.countValue = (Integer) ar.get('count_' + i);
+        dtos.add(dto);
+      }
+    }
+
+    return dtos;
+  }
+
+  public class AggregateResultDTO {
+    @AuraEnabled
+    public String fieldName;
+    @AuraEnabled
+    public Decimal sumValue;
+    @AuraEnabled
+    public Decimal avgValue;
+    @AuraEnabled
+    public Decimal minValue;
+    @AuraEnabled
+    public Decimal maxValue;
+    @AuraEnabled
+    public Integer countValue;
+  }
+
   public class PagedResult {
     @AuraEnabled
     public List<SObject> records;

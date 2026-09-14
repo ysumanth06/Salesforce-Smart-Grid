@@ -290,6 +290,124 @@ public with sharing class GridQueryBuilder {
     return validateField(sObjType, filterField);
   }
 
+  /**
+   * @description Constructs a SOQL aggregate query string calculating SUM, AVG, MIN, MAX, COUNT
+   * for specified numeric fields, applying filters and date ranges.
+   * @param req The AggregateRequest containing objectApiName, numeric fields, filters, and dates
+   * @return A safe SOQL aggregate query string
+   */
+  public static String buildAggregateQuery(AggregateRequest req) {
+    if (String.isBlank(req.objectApiName)) {
+      throw new QueryBuilderException(
+        'Object API Name cannot be null or blank.'
+      );
+    }
+
+    SObjectType sObjType = Schema.getGlobalDescribe().get(req.objectApiName);
+    if (sObjType == null) {
+      throw new QueryBuilderException(
+        'Invalid Object API Name: ' + req.objectApiName
+      );
+    }
+
+    if (!sObjType.getDescribe().isAccessible()) {
+      throw new QueryBuilderException(
+        'User does not have access to object: ' + req.objectApiName
+      );
+    }
+
+    Map<String, SObjectField> fieldMap = sObjType.getDescribe().fields.getMap();
+    List<String> selectClauses = new List<String>();
+
+    if (req.fields != null && !req.fields.isEmpty()) {
+      for (Integer i = 0; i < req.fields.size(); i++) {
+        String fieldName = req.fields[i];
+        String lowerField = fieldName.toLowerCase();
+        if (fieldMap.containsKey(lowerField)) {
+          DescribeFieldResult dfr = fieldMap.get(lowerField).getDescribe();
+          if (dfr.isAccessible()) {
+            Schema.DisplayType dt = dfr.getType();
+            if (
+              dt == Schema.DisplayType.CURRENCY ||
+              dt == Schema.DisplayType.DOUBLE ||
+              dt == Schema.DisplayType.INTEGER ||
+              dt == Schema.DisplayType.LONG ||
+              dt == Schema.DisplayType.PERCENT
+            ) {
+              String safeField = String.escapeSingleQuotes(fieldName);
+              selectClauses.add('SUM(' + safeField + ') sum_' + i);
+              selectClauses.add('AVG(' + safeField + ') avg_' + i);
+              selectClauses.add('MIN(' + safeField + ') min_' + i);
+              selectClauses.add('MAX(' + safeField + ') max_' + i);
+              selectClauses.add('COUNT(' + safeField + ') count_' + i);
+            }
+          }
+        }
+      }
+    }
+
+    if (selectClauses.isEmpty()) {
+      selectClauses.add('COUNT(Id) count_all');
+    }
+
+    String query =
+      'SELECT ' +
+      String.join(selectClauses, ', ') +
+      ' FROM ' +
+      String.escapeSingleQuotes(req.objectApiName);
+
+    List<String> whereClauses = new List<String>();
+
+    if (req.filters != null && !req.filters.isEmpty()) {
+      for (String field : req.filters.keySet()) {
+        if (isValidFilterField(sObjType, field)) {
+          Object val = req.filters.get(field);
+          if (val != null && String.isNotBlank(String.valueOf(val))) {
+            String escapedField = String.escapeSingleQuotes(field);
+            String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
+            Schema.DisplayType fType = fieldMap.get(field.toLowerCase())
+              .getDescribe()
+              .getType();
+
+            if (
+              fType == Schema.DisplayType.STRING ||
+              fType == Schema.DisplayType.TEXTAREA ||
+              fType == Schema.DisplayType.EMAIL ||
+              fType == Schema.DisplayType.PHONE
+            ) {
+              whereClauses.add(escapedField + ' LIKE \'%' + escapedVal + '%\'');
+            } else {
+              whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
+            }
+          }
+        }
+      }
+    }
+
+    if (
+      String.isNotBlank(req.dateField) &&
+      isValidFilterField(sObjType, req.dateField)
+    ) {
+      String escapedDateField = String.escapeSingleQuotes(req.dateField);
+      if (req.startDate != null) {
+        whereClauses.add(
+          escapedDateField + ' >= ' + String.valueOf(req.startDate)
+        );
+      }
+      if (req.endDate != null) {
+        whereClauses.add(
+          escapedDateField + ' <= ' + String.valueOf(req.endDate)
+        );
+      }
+    }
+
+    if (!whereClauses.isEmpty()) {
+      query += ' WHERE ' + String.join(whereClauses, ' AND ');
+    }
+
+    return query;
+  }
+
   public class QueryRequest {
     @InvocableVariable(label='Object API Name' required=true)
     public String objectApiName;
@@ -319,6 +437,15 @@ public with sharing class GridQueryBuilder {
 
     @InvocableVariable(label='Offset Value')
     public Integer offsetValue;
+  }
+
+  public class AggregateRequest {
+    public String objectApiName;
+    public List<String> fields;
+    public Map<String, Object> filters;
+    public String dateField;
+    public Date startDate;
+    public Date endDate;
   }
 
   public class QueryBuilderException extends Exception {

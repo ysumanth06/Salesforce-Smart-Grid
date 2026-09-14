@@ -169,6 +169,57 @@
           onrowselection={handleRowSelection}
         >
         </lightning-datatable>
+        <!-- Sticky Column Totals Footer (TS-02) -->
+        <template lwc:if={hasTotals}>
+          <div class="smart-grid-totals-container slds-p-around_x-small">
+            <div
+              class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
+            >
+              <div class="slds-col slds-size_12-of-12 slds-m-bottom_xx-small">
+                <span class="slds-badge slds-theme_shade">
+                  <lightning-icon
+                    icon-name="utility:table"
+                    size="xx-small"
+                    class="slds-m-right_xx-small"
+                  ></lightning-icon>
+                  <strong>Aggregates & Column Totals</strong>
+                </span>
+              </div>
+              <template for:each={totalsDisplayList} for:item="total">
+                <div
+                  key={total.fieldName}
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-m-vertical_xx-small"
+                >
+                  <div
+                    class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
+                  >
+                    <div class="smart-grid-totals-label">{total.label}</div>
+                    <div
+                      class="slds-grid slds-gutters_xx-small slds-m-top_xx-small slds-text-body_small"
+                    >
+                      <div class="slds-col">
+                        <span>Sum:</span> <strong>{total.sumFormatted}</strong>
+                      </div>
+                      <div class="slds-col">
+                        <span>Avg:</span> <strong>{total.avgFormatted}</strong>
+                      </div>
+                    </div>
+                    <div
+                      class="slds-grid slds-gutters_xx-small slds-text-body_small"
+                    >
+                      <div class="slds-col">
+                        <span>Min:</span> <strong>{total.minFormatted}</strong>
+                      </div>
+                      <div class="slds-col">
+                        <span>Max:</span> <strong>{total.maxFormatted}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
       </template>
       <template lwc:if={showNoConfigMessage}>
         <div

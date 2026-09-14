@@ -437,4 +437,80 @@ public class SmartGridControllerTest {
     }
     Test.stopTest();
   }
+
+  @isTest
+  static void testGetFormatRules_Controller() {
+    Test.startTest();
+    List<SmartGridFormatEngine.FormatRuleDTO> rules = SmartGridController.getFormatRules(
+      'Account_Demo_Grid',
+      'Account'
+    );
+    Test.stopTest();
+    Assert.isNotNull(rules, 'Format rules should not be null');
+  }
+
+  @isTest
+  static void testGetAggregates_Opportunity() {
+    Opportunity opp1 = new Opportunity(
+      Name = 'Opp 1',
+      StageName = 'Closed Won',
+      CloseDate = Date.today(),
+      Amount = 1000
+    );
+    Opportunity opp2 = new Opportunity(
+      Name = 'Opp 2',
+      StageName = 'Closed Won',
+      CloseDate = Date.today(),
+      Amount = 2000
+    );
+    insert new List<Opportunity>{ opp1, opp2 };
+
+    Test.startTest();
+    List<SmartGridController.AggregateResultDTO> aggs = SmartGridController.getAggregates(
+      'Opportunity',
+      new List<String>{ 'Amount' },
+      new Map<String, String>{ 'StageName' => 'Closed Won' },
+      'CloseDate',
+      String.valueOf(Date.today().addDays(-1)),
+      String.valueOf(Date.today().addDays(1))
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, aggs.size(), 'Should return 1 aggregate DTO for Amount');
+    Assert.areEqual('Amount', aggs[0].fieldName, 'Field name should be Amount');
+    Assert.areEqual(3000, aggs[0].sumValue, 'Sum should be 3000');
+    Assert.areEqual(1500, aggs[0].avgValue, 'Avg should be 1500');
+    Assert.areEqual(1000, aggs[0].minValue, 'Min should be 1000');
+    Assert.areEqual(2000, aggs[0].maxValue, 'Max should be 2000');
+    Assert.areEqual(2, aggs[0].countValue, 'Count should be 2');
+  }
+
+  @isTest
+  static void testGetAggregates_InvalidInputs() {
+    Test.startTest();
+    List<SmartGridController.AggregateResultDTO> empty1 = SmartGridController.getAggregates(
+      null,
+      new List<String>{ 'Amount' },
+      null,
+      null,
+      null,
+      null
+    );
+    List<SmartGridController.AggregateResultDTO> empty2 = SmartGridController.getAggregates(
+      'Account',
+      new List<String>{ 'Name' },
+      null,
+      null,
+      null,
+      null
+    );
+    Test.stopTest();
+
+    Assert.areEqual(0, empty1.size(), 'Null object should return empty list');
+    Assert.areEqual(
+      0,
+      empty2.size(),
+      'Non-numeric field should return empty list'
+    );
+  }
 }

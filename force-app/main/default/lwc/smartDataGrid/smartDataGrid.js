@@ -9,8 +9,11 @@ import LightningConfirm from "lightning/confirm";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getPrefs from "@salesforce/apex/SmartGridUserPrefService.getPrefs";
 import savePrefs from "@salesforce/apex/SmartGridUserPrefService.savePrefs";
+import getFormatRules from "@salesforce/apex/SmartGridController.getFormatRules";
+import getAggregates from "@salesforce/apex/SmartGridController.getAggregates";
 import { exportToCSV } from "c/csvHelper";
 import { reduceErrors } from "c/errorUtils";
+import { applyFormatRules } from "c/formatRuleEngine";
 import {
   publish,
   subscribe,
@@ -33,6 +36,8 @@ export default class SmartDataGrid extends LightningElement {
   @track isSetupRequired = false;
   @track isFilterPanelOpen = false;
   @track activeFilterPills = [];
+  @track formatRules = [];
+  @track totalsData = [];
 
   // Filter state
   @track filterFields = [];
@@ -116,6 +121,16 @@ export default class SmartDataGrid extends LightningElement {
 
         // First check user prefs
         const hasPrefs = await this.loadCachedColumns();
+
+        // AC-01-5: Cache format rules on first load
+        try {
+          this.formatRules = await getFormatRules({
+            configDevName: this.gridConfigName,
+            objectApiName: this.objectApiName
+          });
+        } catch (ruleErr) {
+          console.warn("Failed to load format rules:", ruleErr);
+        }
 
         if (!hasPrefs) {
           // Parse columns
@@ -312,7 +327,7 @@ export default class SmartDataGrid extends LightningElement {
       });
 
       // Auto-generate URL properties for lightning-datatable 'url' columns
-      this.gridData = response.records.map((row) => {
+      let rawMapped = response.records.map((row) => {
         let mappedRow = { ...row };
         Object.keys(mappedRow).forEach((key) => {
           if (key === "Id" || key.endsWith("Id")) {
@@ -321,7 +336,17 @@ export default class SmartDataGrid extends LightningElement {
         });
         return mappedRow;
       });
+
+      // Apply conditional formatting rules (TS-01)
+      this.gridData = applyFormatRules(
+        rawMapped,
+        this.formatRules,
+        this.gridColumns
+      );
       this.totalRecords = response.totalSize;
+
+      // Recalculate column totals across full filtered dataset (TS-02)
+      await this.fetchTotals();
     } catch (e) {
       this.errorMessage = "Error loading records: " + this.reduceErrors(e);
     } finally {
@@ -844,6 +869,80 @@ export default class SmartDataGrid extends LightningElement {
     return this.config ? this.config.enableReadingPane === true : false;
   }
 
+  // ─── Column Totals (TS-02) ───
+
+  async fetchTotals() {
+    if (!this.objectApiName || !this.config || !this.config.totalsFieldsJson) {
+      this.totalsData = [];
+      return;
+    }
+
+    try {
+      const fieldsToAggregate = JSON.parse(this.config.totalsFieldsJson);
+      if (!Array.isArray(fieldsToAggregate) || fieldsToAggregate.length === 0) {
+        this.totalsData = [];
+        return;
+      }
+
+      let filterMap = {};
+      if (this.filterFields) {
+        this.filterFields.forEach((f) => {
+          if (f.selectedValue && !f.isDate) {
+            filterMap[f.fieldName] = f.selectedValue;
+          }
+        });
+      }
+
+      const dateFilter = this.filterFields
+        ? this.filterFields.find((f) => f.isDate && f.selectedValue)
+        : null;
+
+      this.totalsData = await getAggregates({
+        objectApiName: this.objectApiName,
+        fieldsToAggregate: fieldsToAggregate,
+        filters: filterMap,
+        dateField: dateFilter ? dateFilter.fieldName : null,
+        startDate: dateFilter ? dateFilter.selectedValue : null,
+        endDate: null
+      });
+    } catch (e) {
+      console.warn("Failed to fetch column totals:", e);
+      this.totalsData = [];
+    }
+  }
+
+  get hasTotals() {
+    return this.totalsData && this.totalsData.length > 0;
+  }
+
+  get totalsDisplayList() {
+    if (!this.hasTotals) return [];
+    const colMap = {};
+    if (this.gridColumns) {
+      this.gridColumns.forEach((c) => {
+        colMap[c.fieldName] = c.label;
+      });
+    }
+
+    return this.totalsData.map((t) => ({
+      fieldName: t.fieldName,
+      label: colMap[t.fieldName] || t.fieldName,
+      sumFormatted:
+        t.sumValue != null ? Number(t.sumValue).toLocaleString() : "—",
+      avgFormatted:
+        t.avgValue != null
+          ? Number(t.avgValue).toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            })
+          : "—",
+      minFormatted:
+        t.minValue != null ? Number(t.minValue).toLocaleString() : "—",
+      maxFormatted:
+        t.maxValue != null ? Number(t.maxValue).toLocaleString() : "—",
+      count: t.countValue
+    }));
+  }
+
   get hasFilters() {
     return this.filterFields && this.filterFields.length > 0;
   }
@@ -970,6 +1069,11 @@ export default class SmartDataGrid extends LightningElement {
           label: { fieldName: fieldApi },
           target: "_blank"
         },
+        cellAttributes: {
+          class: { fieldName: fieldApi + "_cellClass" },
+          iconName: { fieldName: fieldApi + "_iconName" },
+          iconPosition: "left"
+        },
         editable: false,
         sortable: isSortable,
         initialWidth: colWidth
@@ -987,6 +1091,11 @@ export default class SmartDataGrid extends LightningElement {
       fieldName: fieldApi,
       type: mapped.type,
       typeAttributes: mapped.typeAttributes || undefined,
+      cellAttributes: {
+        class: { fieldName: fieldApi + "_cellClass" },
+        iconName: { fieldName: fieldApi + "_iconName" },
+        iconPosition: "left"
+      },
       editable: isBooleanType ? false : isEditable,
       sortable: isSortable,
       initialWidth: colWidth

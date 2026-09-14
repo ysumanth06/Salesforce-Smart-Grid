@@ -186,4 +186,89 @@ public class GridQueryBuilderTest {
     Assert.isTrue(query.contains('LIMIT 10'), 'Query should contain limit');
     Assert.isTrue(query.contains('OFFSET 20'), 'Query should contain offset');
   }
+
+  @isTest
+  static void testBuildAggregateQuery_Positive() {
+    GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
+    req.objectApiName = 'Opportunity';
+    req.fields = new List<String>{ 'Amount' };
+    req.filters = new Map<String, Object>{ 'StageName' => 'Closed Won' };
+    req.dateField = 'CloseDate';
+    req.startDate = Date.newInstance(2026, 1, 1);
+    req.endDate = Date.newInstance(2026, 12, 31);
+
+    Test.startTest();
+    String query = GridQueryBuilder.buildAggregateQuery(req);
+    Test.stopTest();
+
+    Assert.isTrue(
+      query.contains('SUM(Amount) sum_0'),
+      'Should contain SUM alias'
+    );
+    Assert.isTrue(
+      query.contains('AVG(Amount) avg_0'),
+      'Should contain AVG alias'
+    );
+    Assert.isTrue(
+      query.contains('MIN(Amount) min_0'),
+      'Should contain MIN alias'
+    );
+    Assert.isTrue(
+      query.contains('MAX(Amount) max_0'),
+      'Should contain MAX alias'
+    );
+    Assert.isTrue(
+      query.contains('COUNT(Amount) count_0'),
+      'Should contain COUNT alias'
+    );
+    Assert.isTrue(
+      query.contains('FROM Opportunity'),
+      'Should query from Opportunity'
+    );
+    Assert.isTrue(
+      query.contains('StageName = \'Closed Won\''),
+      'Should filter by StageName'
+    );
+    Assert.isTrue(
+      query.contains('CloseDate >='),
+      'Should filter by start date'
+    );
+    Assert.isTrue(query.contains('CloseDate <='), 'Should filter by end date');
+  }
+
+  @isTest
+  static void testBuildAggregateQuery_NonNumericField_Fallback() {
+    GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
+    req.objectApiName = 'Account';
+    req.fields = new List<String>{ 'Name' }; // Non-numeric
+
+    Test.startTest();
+    String query = GridQueryBuilder.buildAggregateQuery(req);
+    Test.stopTest();
+
+    Assert.isTrue(
+      query.contains('COUNT(Id) count_all'),
+      'Should fallback to count_all for non-numeric fields'
+    );
+    Assert.isTrue(query.contains('FROM Account'), 'Should query from Account');
+  }
+
+  @isTest
+  static void testBuildAggregateQuery_Negative_InvalidObject() {
+    GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
+    req.objectApiName = 'InvalidObj_XYZ__c';
+    req.fields = new List<String>{ 'Amount' };
+
+    Test.startTest();
+    try {
+      GridQueryBuilder.buildAggregateQuery(req);
+      Assert.fail('Should throw exception for invalid object');
+    } catch (GridQueryBuilder.QueryBuilderException e) {
+      Assert.isTrue(
+        e.getMessage().contains('Invalid Object API Name'),
+        'Exception message should match'
+      );
+    }
+    Test.stopTest();
+  }
 }

@@ -80,4 +80,8 @@
         <enabled>true</enabled>
         <apexClass>SmartGridIdValidator</apexClass>
     </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridFormatEngine</apexClass>
+    </classAccesses>
 </PermissionSet>
