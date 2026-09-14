@@ -235,4 +235,18 @@ public class SmartGridIdValidatorTest {
     }
     Test.stopTest();
   }
+
+  @IsTest
+  static void testIsValidSalesforceId_16And17Characters_ShouldBeInvalid() {
+    String invalid16 = '001000000000001A';
+    String invalid17 = '001000000000001AA';
+    Assert.isFalse(
+      SmartGridIdValidator.isValidSalesforceId(invalid16),
+      '16-character string should NOT be considered a valid Salesforce ID'
+    );
+    Assert.isFalse(
+      SmartGridIdValidator.isValidSalesforceId(invalid17),
+      '17-character string should NOT be considered a valid Salesforce ID'
+    );
+  }
 }

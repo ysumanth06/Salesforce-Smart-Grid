@@ -45,24 +45,30 @@ export function evaluateRule(rule, fieldValue) {
 
     case "GREATER_THAN":
     case ">":
+      if (actualRaw === "" || targetRaw === "") return false;
       return isNumeric ? numActual > numTarget : actualLower > targetLower;
 
     case "LESS_THAN":
     case "<":
+      if (actualRaw === "" || targetRaw === "") return false;
       return isNumeric ? numActual < numTarget : actualLower < targetLower;
 
     case "GREATER_OR_EQUAL":
     case ">=":
+      if (actualRaw === "" || targetRaw === "") return false;
       return isNumeric ? numActual >= numTarget : actualLower >= targetLower;
 
     case "LESS_OR_EQUAL":
     case "<=":
+      if (actualRaw === "" || targetRaw === "") return false;
       return isNumeric ? numActual <= numTarget : actualLower <= targetLower;
 
     case "CONTAINS":
+      if (targetRaw === "") return false;
       return actualLower.includes(targetLower);
 
     case "STARTS_WITH":
+      if (targetRaw === "") return false;
       return actualLower.startsWith(targetLower);
 
     default:

@@ -632,4 +632,86 @@ public class GridQueryBuilderTest {
     );
     Assert.isTrue(aggQuery.contains('CloseDate >='), 'Contains date filter');
   }
+
+  @IsTest
+  static void testBuildSingleQuery_DateTimeRangeAndLiterals() {
+    GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
+    req.objectApiName = 'Account';
+    req.fields = new List<String>{ 'Name', 'CreatedDate' };
+    req.dateField = 'CreatedDate';
+    req.startDate = Date.newInstance(2026, 9, 1);
+    req.endDate = Date.newInstance(2026, 9, 30);
+
+    Test.startTest();
+    String query = GridQueryBuilder.buildSingleQuery(req);
+    Test.stopTest();
+
+    Assert.isTrue(
+      query.contains('CreatedDate >= 2026-09-01T00:00:00Z'),
+      'DateTime start date should have T00:00:00Z without quotes: ' + query
+    );
+    Assert.isTrue(
+      query.contains('CreatedDate <= 2026-09-30T23:59:59Z'),
+      'DateTime end date should have T23:59:59Z without quotes: ' + query
+    );
+  }
+
+  @IsTest
+  static void testBuildWhereClause_DateTimeAndDateLiterals() {
+    SObjectType sObjType = Schema.getGlobalDescribe().get('Account');
+
+    GridQueryBuilder.FilterExpression expr = new GridQueryBuilder.FilterExpression();
+    expr.conditions.add(
+      new GridQueryBuilder.FilterCondition('CreatedDate', '>=', 'TODAY')
+    );
+    expr.conditions.add(
+      new GridQueryBuilder.FilterCondition(
+        'CreatedDate',
+        '<=',
+        'LAST_N_DAYS:30'
+      )
+    );
+    expr.conditions.add(
+      new GridQueryBuilder.FilterCondition(
+        'CreatedDate',
+        '=',
+        '2026-09-14T01:54:00Z'
+      )
+    );
+
+    Test.startTest();
+    String clause = GridQueryBuilder.buildWhereClause(expr, sObjType);
+    Test.stopTest();
+
+    Assert.isTrue(
+      clause.contains('CreatedDate >= TODAY'),
+      'Date literal TODAY supported: ' + clause
+    );
+    Assert.isTrue(
+      clause.contains('CreatedDate <= LAST_N_DAYS:30'),
+      'Parameterized literal LAST_N_DAYS supported: ' + clause
+    );
+    Assert.isTrue(
+      clause.contains('CreatedDate = 2026-09-14T01:54:00Z'),
+      'ISO datetime literal formatted without quotes: ' + clause
+    );
+  }
+
+  @IsTest
+  static void testBuildSingleQuery_NumericFilterWithoutQuotes() {
+    GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
+    req.objectApiName = 'Account';
+    req.fields = new List<String>{ 'Name', 'NumberOfEmployees' };
+    req.filters = new Map<String, Object>{ 'NumberOfEmployees' => 100 };
+
+    Test.startTest();
+    String query = GridQueryBuilder.buildSingleQuery(req);
+    Test.stopTest();
+
+    Assert.isTrue(
+      query.contains('NumberOfEmployees = 100') ||
+      query.contains('NumberOfEmployees = 100.0'),
+      'Numeric filter should NOT be enclosed in single quotes: ' + query
+    );
+  }
 }

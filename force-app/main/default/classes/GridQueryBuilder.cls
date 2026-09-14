@@ -1,4 +1,15 @@
 public with sharing class GridQueryBuilder {
+  private static final Pattern DATE_LITERAL_PATTERN = Pattern.compile(
+    '(?i)^(YESTERDAY|TODAY|TOMORROW|LAST_WEEK|THIS_WEEK|NEXT_WEEK|LAST_MONTH|THIS_MONTH|NEXT_MONTH|LAST_90_DAYS|NEXT_90_DAYS|THIS_QUARTER|LAST_QUARTER|NEXT_QUARTER|THIS_YEAR|LAST_YEAR|NEXT_YEAR|THIS_FISCAL_QUARTER|LAST_FISCAL_QUARTER|NEXT_FISCAL_QUARTER|THIS_FISCAL_YEAR|LAST_FISCAL_YEAR|NEXT_FISCAL_YEAR|(LAST_N_DAYS|NEXT_N_DAYS|LAST_N_WEEKS|NEXT_N_WEEKS|LAST_N_MONTHS|NEXT_N_MONTHS|LAST_N_QUARTERS|NEXT_N_QUARTERS|LAST_N_YEARS|NEXT_N_YEARS|LAST_N_FISCAL_QUARTERS|NEXT_N_FISCAL_QUARTERS|LAST_N_FISCAL_YEARS|NEXT_N_FISCAL_YEARS):\\d+)$'
+  );
+
+  private static Boolean isDateLiteral(String val) {
+    if (String.isBlank(val)) {
+      return false;
+    }
+    return DATE_LITERAL_PATTERN.matcher(val.trim()).matches();
+  }
+
   /**
    * @description Validates the fields against FLS and builds a safe SOQL query string.
    * Annotated with InvocableMethod to support future AI or Flow interactions.
@@ -61,74 +72,15 @@ public with sharing class GridQueryBuilder {
       String.escapeSingleQuotes(req.objectApiName);
 
     // Filter Handling
-    List<String> whereClauses = new List<String>();
-
-    // Complex FilterExpression Handling (TS-06)
-    FilterExpression expr = req.filterExpression;
-    if (expr == null && String.isNotBlank(req.filterJson)) {
-      try {
-        expr = (FilterExpression) JSON.deserialize(
-          req.filterJson,
-          FilterExpression.class
-        );
-      } catch (Exception e) {
-        System.debug(
-          LoggingLevel.FINE,
-          'Invalid filter JSON: ' + e.getMessage()
-        );
-      }
-    }
-    if (expr != null) {
-      String complexWhere = buildWhereClause(expr, sObjType);
-      if (String.isNotBlank(complexWhere)) {
-        whereClauses.add('(' + complexWhere + ')');
-      }
-    }
-
-    if (req.filters != null && !req.filters.isEmpty()) {
-      for (String field : req.filters.keySet()) {
-        if (isValidFilterField(sObjType, field)) {
-          String escapedField = String.escapeSingleQuotes(field);
-          Object val = req.filters.get(field);
-          if (val != null && String.isNotBlank(String.valueOf(val))) {
-            String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
-            Schema.DisplayType fType = sObjType.getDescribe()
-              .fields.getMap()
-              .get(field.toLowerCase())
-              .getDescribe()
-              .getType();
-
-            if (
-              fType == Schema.DisplayType.STRING ||
-              fType == Schema.DisplayType.TEXTAREA ||
-              fType == Schema.DisplayType.EMAIL ||
-              fType == Schema.DisplayType.PHONE
-            ) {
-              whereClauses.add(escapedField + ' LIKE \'%' + escapedVal + '%\'');
-            } else {
-              whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
-            }
-          }
-        }
-      }
-    }
-
-    // Date Range logic
-    if (
-      String.isNotBlank(req.dateField) &&
-      isValidFilterField(sObjType, req.dateField)
-    ) {
-      String escapedDateField = String.escapeSingleQuotes(req.dateField);
-      if (req.startDate != null) {
-        // Formatting date to SOQL format (YYYY-MM-DD)
-        String sd = String.valueOf(req.startDate);
-        whereClauses.add(escapedDateField + ' >= ' + sd);
-      }
-      if (req.endDate != null) {
-        String ed = String.valueOf(req.endDate);
-        whereClauses.add(escapedDateField + ' <= ' + ed);
-      }
-    }
+    List<String> whereClauses = buildStandardWhereClauses(
+      sObjType,
+      req.filterExpression,
+      req.filterJson,
+      req.filters,
+      req.dateField,
+      req.startDate,
+      req.endDate
+    );
 
     if (!whereClauses.isEmpty()) {
       query += ' WHERE ' + String.join(whereClauses, ' AND ');
@@ -198,74 +150,15 @@ public with sharing class GridQueryBuilder {
     String query =
       'SELECT COUNT() FROM ' + String.escapeSingleQuotes(req.objectApiName);
 
-    List<String> whereClauses = new List<String>();
-
-    // Complex FilterExpression Handling (TS-06)
-    FilterExpression expr = req.filterExpression;
-    if (expr == null && String.isNotBlank(req.filterJson)) {
-      try {
-        expr = (FilterExpression) JSON.deserialize(
-          req.filterJson,
-          FilterExpression.class
-        );
-      } catch (Exception e) {
-        System.debug(
-          LoggingLevel.FINE,
-          'Invalid filter JSON: ' + e.getMessage()
-        );
-      }
-    }
-    if (expr != null) {
-      String complexWhere = buildWhereClause(expr, sObjType);
-      if (String.isNotBlank(complexWhere)) {
-        whereClauses.add('(' + complexWhere + ')');
-      }
-    }
-
-    if (req.filters != null && !req.filters.isEmpty()) {
-      for (String field : req.filters.keySet()) {
-        if (isValidFilterField(sObjType, field)) {
-          Object val = req.filters.get(field);
-          if (val != null && String.isNotBlank(String.valueOf(val))) {
-            String escapedField = String.escapeSingleQuotes(field);
-            String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
-            Schema.DisplayType fType = sObjType.getDescribe()
-              .fields.getMap()
-              .get(field.toLowerCase())
-              .getDescribe()
-              .getType();
-
-            if (
-              fType == Schema.DisplayType.STRING ||
-              fType == Schema.DisplayType.TEXTAREA ||
-              fType == Schema.DisplayType.EMAIL ||
-              fType == Schema.DisplayType.PHONE
-            ) {
-              whereClauses.add(escapedField + ' LIKE \'%' + escapedVal + '%\'');
-            } else {
-              whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
-            }
-          }
-        }
-      }
-    }
-
-    if (
-      String.isNotBlank(req.dateField) &&
-      isValidFilterField(sObjType, req.dateField)
-    ) {
-      String escapedDateField = String.escapeSingleQuotes(req.dateField);
-      if (req.startDate != null) {
-        whereClauses.add(
-          escapedDateField + ' >= ' + String.valueOf(req.startDate)
-        );
-      }
-      if (req.endDate != null) {
-        whereClauses.add(
-          escapedDateField + ' <= ' + String.valueOf(req.endDate)
-        );
-      }
-    }
+    List<String> whereClauses = buildStandardWhereClauses(
+      sObjType,
+      req.filterExpression,
+      req.filterJson,
+      req.filters,
+      req.dateField,
+      req.startDate,
+      req.endDate
+    );
 
     if (!whereClauses.isEmpty()) {
       query += ' WHERE ' + String.join(whereClauses, ' AND ');
@@ -400,72 +293,15 @@ public with sharing class GridQueryBuilder {
       ' FROM ' +
       String.escapeSingleQuotes(req.objectApiName);
 
-    List<String> whereClauses = new List<String>();
-
-    // Complex FilterExpression Handling (TS-06)
-    FilterExpression expr = req.filterExpression;
-    if (expr == null && String.isNotBlank(req.filterJson)) {
-      try {
-        expr = (FilterExpression) JSON.deserialize(
-          req.filterJson,
-          FilterExpression.class
-        );
-      } catch (Exception e) {
-        System.debug(
-          LoggingLevel.FINE,
-          'Invalid filter JSON: ' + e.getMessage()
-        );
-      }
-    }
-    if (expr != null) {
-      String complexWhere = buildWhereClause(expr, sObjType);
-      if (String.isNotBlank(complexWhere)) {
-        whereClauses.add('(' + complexWhere + ')');
-      }
-    }
-
-    if (req.filters != null && !req.filters.isEmpty()) {
-      for (String field : req.filters.keySet()) {
-        if (isValidFilterField(sObjType, field)) {
-          Object val = req.filters.get(field);
-          if (val != null && String.isNotBlank(String.valueOf(val))) {
-            String escapedField = String.escapeSingleQuotes(field);
-            String escapedVal = String.escapeSingleQuotes(String.valueOf(val));
-            Schema.DisplayType fType = fieldMap.get(field.toLowerCase())
-              .getDescribe()
-              .getType();
-
-            if (
-              fType == Schema.DisplayType.STRING ||
-              fType == Schema.DisplayType.TEXTAREA ||
-              fType == Schema.DisplayType.EMAIL ||
-              fType == Schema.DisplayType.PHONE
-            ) {
-              whereClauses.add(escapedField + ' LIKE \'%' + escapedVal + '%\'');
-            } else {
-              whereClauses.add(escapedField + ' = \'' + escapedVal + '\'');
-            }
-          }
-        }
-      }
-    }
-
-    if (
-      String.isNotBlank(req.dateField) &&
-      isValidFilterField(sObjType, req.dateField)
-    ) {
-      String escapedDateField = String.escapeSingleQuotes(req.dateField);
-      if (req.startDate != null) {
-        whereClauses.add(
-          escapedDateField + ' >= ' + String.valueOf(req.startDate)
-        );
-      }
-      if (req.endDate != null) {
-        whereClauses.add(
-          escapedDateField + ' <= ' + String.valueOf(req.endDate)
-        );
-      }
-    }
+    List<String> whereClauses = buildStandardWhereClauses(
+      sObjType,
+      req.filterExpression,
+      req.filterJson,
+      req.filters,
+      req.dateField,
+      req.startDate,
+      req.endDate
+    );
 
     if (!whereClauses.isEmpty()) {
       query += ' WHERE ' + String.join(whereClauses, ' AND ');
@@ -631,6 +467,10 @@ public with sharing class GridQueryBuilder {
 
     // Date
     if (dt == Schema.DisplayType.DATE) {
+      if (isDateLiteral(strVal)) {
+        String sym = mapOperatorSymbol(op);
+        return fieldName + ' ' + sym + ' ' + strVal.trim().toUpperCase();
+      }
       Date dateVal;
       try {
         dateVal = Date.valueOf(strVal);
@@ -639,6 +479,50 @@ public with sharing class GridQueryBuilder {
       }
       String sym = mapOperatorSymbol(op);
       return fieldName + ' ' + sym + ' ' + String.valueOf(dateVal);
+    }
+
+    // DateTime
+    if (dt == Schema.DisplayType.DATETIME) {
+      if (isDateLiteral(strVal)) {
+        String sym = mapOperatorSymbol(op);
+        return fieldName + ' ' + sym + ' ' + strVal.trim().toUpperCase();
+      }
+      Datetime dtVal;
+      try {
+        if (strVal.contains('T')) {
+          dtVal = (Datetime) JSON.deserialize(
+            '"' + strVal + '"',
+            Datetime.class
+          );
+        } else if (strVal.contains(' ')) {
+          dtVal = Datetime.valueOfGmt(strVal);
+        } else {
+          Date d = Date.valueOf(strVal);
+          dtVal = Datetime.newInstanceGmt(
+            d.year(),
+            d.month(),
+            d.day(),
+            0,
+            0,
+            0
+          );
+        }
+      } catch (Exception ex) {
+        try {
+          dtVal = Datetime.valueOf(strVal);
+        } catch (Exception ex2) {
+          return null;
+        }
+      }
+      if (dtVal != null) {
+        String sym = mapOperatorSymbol(op);
+        return fieldName +
+          ' ' +
+          sym +
+          ' ' +
+          dtVal.formatGmt('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'');
+      }
+      return null;
     }
 
     // Default: Strings, Picklists, Textarea, Email, Phone, Id, Url
@@ -670,6 +554,103 @@ public with sharing class GridQueryBuilder {
     if (op == '!=' || op == '<>' || op == 'not_equals' || op == 'ne')
       return '!=';
     return '=';
+  }
+
+  /**
+   * @description Shared helper that constructs where clauses across single, count, and aggregate queries.
+   */
+  private static List<String> buildStandardWhereClauses(
+    SObjectType sObjType,
+    FilterExpression expr,
+    String filterJson,
+    Map<String, Object> filters,
+    String dateField,
+    Date startDate,
+    Date endDate
+  ) {
+    List<String> whereClauses = new List<String>();
+
+    // 1. Complex FilterExpression Handling (TS-06)
+    if (expr == null && String.isNotBlank(filterJson)) {
+      try {
+        expr = (FilterExpression) JSON.deserialize(
+          filterJson,
+          FilterExpression.class
+        );
+      } catch (Exception e) {
+        System.debug(
+          LoggingLevel.FINE,
+          'Invalid filter JSON: ' + e.getMessage()
+        );
+      }
+    }
+    if (expr != null) {
+      String complexWhere = buildWhereClause(expr, sObjType);
+      if (String.isNotBlank(complexWhere)) {
+        whereClauses.add('(' + complexWhere + ')');
+      }
+    }
+
+    // 2. Simple Filters Map (TS-02)
+    if (filters != null && !filters.isEmpty()) {
+      Map<String, SObjectField> fieldMap = sObjType.getDescribe()
+        .fields.getMap();
+      for (String field : filters.keySet()) {
+        if (isValidFilterField(sObjType, field)) {
+          Object val = filters.get(field);
+          if (val != null && String.isNotBlank(String.valueOf(val))) {
+            DescribeFieldResult dfr = fieldMap.get(field.toLowerCase())
+              .getDescribe();
+            Schema.DisplayType fType = dfr.getType();
+            String op = (fType == Schema.DisplayType.STRING ||
+              fType == Schema.DisplayType.TEXTAREA ||
+              fType == Schema.DisplayType.EMAIL ||
+              fType == Schema.DisplayType.PHONE)
+              ? 'contains'
+              : '=';
+            String cond = buildConditionClause(dfr, op, val);
+            if (String.isNotBlank(cond)) {
+              whereClauses.add(cond);
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Date / DateTime Range Handling
+    if (
+      String.isNotBlank(dateField) && isValidFilterField(sObjType, dateField)
+    ) {
+      DescribeFieldResult dateDfr = sObjType.getDescribe()
+        .fields.getMap()
+        .get(dateField.toLowerCase())
+        .getDescribe();
+      Schema.DisplayType dt = dateDfr.getType();
+      String escapedDateField = String.escapeSingleQuotes(dateDfr.getName());
+
+      if (startDate != null) {
+        if (dt == Schema.DisplayType.DATETIME) {
+          whereClauses.add(
+            escapedDateField + ' >= ' + String.valueOf(startDate) + 'T00:00:00Z'
+          );
+        } else {
+          whereClauses.add(
+            escapedDateField + ' >= ' + String.valueOf(startDate)
+          );
+        }
+      }
+      if (endDate != null) {
+        if (dt == Schema.DisplayType.DATETIME) {
+          whereClauses.add(
+            escapedDateField + ' <= ' + String.valueOf(endDate) + 'T23:59:59Z'
+          );
+        } else {
+          whereClauses.add(escapedDateField + ' <= ' + String.valueOf(endDate));
+        }
+      }
+    }
+
+    return whereClauses;
   }
 
   public class FilterCondition {

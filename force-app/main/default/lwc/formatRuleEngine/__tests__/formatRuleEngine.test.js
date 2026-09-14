@@ -62,6 +62,42 @@ describe("formatRuleEngine", () => {
         )
       ).toBe(false);
     });
+
+    test("inequality operators return false for null, undefined, or empty values", () => {
+      const lessThanRule = { operator: "LESS_THAN", value: 50 };
+      const greaterThanRule = { operator: "GREATER_THAN", value: 50 };
+      const lessOrEqualRule = { operator: "LESS_OR_EQUAL", value: 50 };
+      const greaterOrEqualRule = { operator: "GREATER_OR_EQUAL", value: 50 };
+
+      // Null, undefined, and empty string must NOT match inequality rules
+      expect(evaluateRule(lessThanRule, null)).toBe(false);
+      expect(evaluateRule(lessThanRule, undefined)).toBe(false);
+      expect(evaluateRule(lessThanRule, "")).toBe(false);
+
+      expect(evaluateRule(lessOrEqualRule, null)).toBe(false);
+      expect(evaluateRule(lessOrEqualRule, "")).toBe(false);
+
+      expect(evaluateRule(greaterThanRule, null)).toBe(false);
+      expect(evaluateRule(greaterThanRule, "")).toBe(false);
+
+      expect(evaluateRule(greaterOrEqualRule, null)).toBe(false);
+      expect(evaluateRule(greaterOrEqualRule, "")).toBe(false);
+    });
+
+    test("handles empty target values safely without accidental matching", () => {
+      expect(evaluateRule({ operator: "LESS_THAN", value: "" }, 25)).toBe(
+        false
+      );
+      expect(evaluateRule({ operator: "GREATER_THAN", value: null }, 25)).toBe(
+        false
+      );
+      expect(evaluateRule({ operator: "CONTAINS", value: "" }, "Acme")).toBe(
+        false
+      );
+      expect(evaluateRule({ operator: "STARTS_WITH", value: "" }, "Acme")).toBe(
+        false
+      );
+    });
   });
 
   describe("applyFormatRules", () => {

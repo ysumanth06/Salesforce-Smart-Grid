@@ -21,8 +21,13 @@ export function exportToCSV(data, columns, filename = "export.csv") {
             row[col.fieldName] === null || row[col.fieldName] === undefined
               ? ""
               : row[col.fieldName];
+          cellValue = String(cellValue);
+          // Prevent CSV formula injection (CWE-1236)
+          if (/^[=+\-@\t\r]/.test(cellValue)) {
+            cellValue = `'${cellValue}`;
+          }
           // Escape quotes by doubling them
-          cellValue = String(cellValue).replace(/"/g, '""');
+          cellValue = cellValue.replace(/"/g, '""');
           return `"${cellValue}"`;
         })
         .join(",");

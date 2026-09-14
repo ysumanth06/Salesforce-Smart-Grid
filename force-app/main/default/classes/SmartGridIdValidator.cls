@@ -4,7 +4,7 @@
  */
 public with sharing class SmartGridIdValidator {
   private static final Pattern ID_PATTERN = Pattern.compile(
-    '^[a-zA-Z0-9]{15,18}$'
+    '^[a-zA-Z0-9]{15}([a-zA-Z0-9]{3})?$'
   );
 
   @TestVisible
