@@ -513,4 +513,62 @@ public class SmartGridControllerTest {
       'Non-numeric field should return empty list'
     );
   }
+
+  @isTest
+  static void testGetRecordsPaged_WithFilterJson() {
+    Account acc = new Account(
+      Name = 'FilterJson Test Acc',
+      Industry = 'Apparel'
+    );
+    insert acc;
+
+    String jsonFilter = '{"logic":"AND","conditions":[{"field":"Industry","operator":"=","value":"Apparel"}]}';
+
+    Test.startTest();
+    SmartGridController.PagedResult result = SmartGridController.getRecordsPaged(
+      'Account',
+      new List<String>{ 'Name', 'Industry' },
+      null,
+      null,
+      null,
+      null,
+      'Name',
+      'ASC',
+      10,
+      1,
+      jsonFilter
+    );
+    Test.stopTest();
+
+    Assert.isNotNull(result, 'Result should not be null');
+    Assert.isTrue(result.records.size() >= 1, 'Should find matching record');
+  }
+
+  @isTest
+  static void testSavedViewsDelegation() {
+    Test.startTest();
+    Smart_Grid_View__c saved = SmartGridController.saveView(
+      null,
+      'Controller View Test',
+      'Account',
+      '{"cols":["Name"]}',
+      true
+    );
+    Assert.isNotNull(saved.Id, 'Saved view should have an ID');
+
+    List<Smart_Grid_View__c> views = SmartGridController.getViews('Account');
+    Assert.isTrue(views.size() >= 1, 'Should return saved views');
+
+    SmartGridController.logQueryHistory('Account', '{"filter":1}');
+
+    SmartGridController.deleteView(saved.Id);
+    Test.stopTest();
+
+    List<Smart_Grid_View__c> remaining = SmartGridController.getViews(
+      'Account'
+    );
+    for (Smart_Grid_View__c v : remaining) {
+      Assert.areNotEqual(saved.Id, v.Id, 'Deleted view should not exist');
+    }
+  }
 }

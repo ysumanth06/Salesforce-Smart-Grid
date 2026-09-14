@@ -1,7 +1,7 @@
 # Task Story 07: Related Object Navigation [US-P2-07]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P2 — High
-**Status**: READY | **Branch**: `feature/003-ts07-related-grid`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,8 +15,8 @@ When a record is selected and `Related_Object__c` is configured, render a child 
 
 | Layer         | Skill  | File Path                                                                         | Status |
 | ------------- | ------ | --------------------------------------------------------------------------------- | ------ |
-| LWC Component | sf-lwc | `force-app/main/default/lwc/smartGridRelatedGrid/`                                | ⬜     |
-| LWC (modify)  | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — child grid rendering, depth counter | ⬜     |
+| LWC Component | sf-lwc | `force-app/main/default/lwc/smartGridRelatedGrid/`                                | ✅     |
+| LWC (modify)  | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — child grid rendering, depth counter | ✅     |
 
 ---
 

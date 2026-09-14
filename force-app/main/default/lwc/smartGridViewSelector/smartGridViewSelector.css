@@ -1,0 +1,9 @@
+.view-selector-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+.view-combobox {
+  min-width: 180px;
+  max-width: 240px;
+}

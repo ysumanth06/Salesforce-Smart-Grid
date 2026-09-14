@@ -1,7 +1,7 @@
 # Task Story 09: Query History & Saved Views [US-P2-09]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P3 — Nice-to-Have
-**Status**: READY | **Branch**: `feature/003-ts09-saved-views`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,12 +15,12 @@ Implement a saved views system allowing users to name and save filter/sort/colum
 
 | Layer                    | Skill      | File Path                                                                                                 | Status |
 | ------------------------ | ---------- | --------------------------------------------------------------------------------------------------------- | ------ |
-| Apex Service             | sf-apex    | `force-app/main/default/classes/SmartGridViewService.cls`                                                 | ⬜     |
-| Apex Test                | sf-testing | `force-app/main/default/classes/SmartGridViewServiceTest.cls`                                             | ⬜     |
-| Controller (modify)      | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — add `getViews()`, `saveView()`, `deleteView()` | ⬜     |
-| Controller Test (modify) | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                                              | ⬜     |
-| LWC Component            | sf-lwc     | `force-app/main/default/lwc/smartGridViewSelector/`                                                       | ⬜     |
-| LWC (modify)             | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — view selector toolbar integration                           | ⬜     |
+| Apex Service             | sf-apex    | `force-app/main/default/classes/SmartGridViewService.cls`                                                 | ✅     |
+| Apex Test                | sf-testing | `force-app/main/default/classes/SmartGridViewServiceTest.cls`                                             | ✅     |
+| Controller (modify)      | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — add `getViews()`, `saveView()`, `deleteView()` | ✅     |
+| Controller Test (modify) | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                                              | ✅     |
+| LWC Component            | sf-lwc     | `force-app/main/default/lwc/smartGridViewSelector/`                                                       | ✅     |
+| LWC (modify)             | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — view selector toolbar integration                           | ✅     |
 
 ---
 

@@ -1,7 +1,7 @@
 # Task Story 05: Reading Pane — Record Detail Sidebar [US-P2-05]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P2 — High
-**Status**: READY | **Branch**: `feature/003-ts05-reading-pane`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,8 +15,8 @@ Add a collapsible detail sidebar (70/30 split) that shows all accessible fields 
 
 | Layer         | Skill  | File Path                                                                     | Status |
 | ------------- | ------ | ----------------------------------------------------------------------------- | ------ |
-| LWC Component | sf-lwc | `force-app/main/default/lwc/smartGridReadingPane/`                            | ⬜     |
-| LWC (modify)  | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — 70/30 layout, row click handler | ⬜     |
+| LWC Component | sf-lwc | `force-app/main/default/lwc/smartGridReadingPane/`                            | ✅     |
+| LWC (modify)  | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — 70/30 layout, row click handler | ✅     |
 
 ---
 

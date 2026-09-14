@@ -63,6 +63,24 @@ public with sharing class GridQueryBuilder {
     // Filter Handling
     List<String> whereClauses = new List<String>();
 
+    // Complex FilterExpression Handling (TS-06)
+    FilterExpression expr = req.filterExpression;
+    if (expr == null && String.isNotBlank(req.filterJson)) {
+      try {
+        expr = (FilterExpression) JSON.deserialize(
+          req.filterJson,
+          FilterExpression.class
+        );
+      } catch (Exception e) {
+      }
+    }
+    if (expr != null) {
+      String complexWhere = buildWhereClause(expr, sObjType);
+      if (String.isNotBlank(complexWhere)) {
+        whereClauses.add('(' + complexWhere + ')');
+      }
+    }
+
     if (req.filters != null && !req.filters.isEmpty()) {
       for (String field : req.filters.keySet()) {
         if (isValidFilterField(sObjType, field)) {
@@ -177,6 +195,24 @@ public with sharing class GridQueryBuilder {
       'SELECT COUNT() FROM ' + String.escapeSingleQuotes(req.objectApiName);
 
     List<String> whereClauses = new List<String>();
+
+    // Complex FilterExpression Handling (TS-06)
+    FilterExpression expr = req.filterExpression;
+    if (expr == null && String.isNotBlank(req.filterJson)) {
+      try {
+        expr = (FilterExpression) JSON.deserialize(
+          req.filterJson,
+          FilterExpression.class
+        );
+      } catch (Exception e) {
+      }
+    }
+    if (expr != null) {
+      String complexWhere = buildWhereClause(expr, sObjType);
+      if (String.isNotBlank(complexWhere)) {
+        whereClauses.add('(' + complexWhere + ')');
+      }
+    }
 
     if (req.filters != null && !req.filters.isEmpty()) {
       for (String field : req.filters.keySet()) {
@@ -358,6 +394,24 @@ public with sharing class GridQueryBuilder {
 
     List<String> whereClauses = new List<String>();
 
+    // Complex FilterExpression Handling (TS-06)
+    FilterExpression expr = req.filterExpression;
+    if (expr == null && String.isNotBlank(req.filterJson)) {
+      try {
+        expr = (FilterExpression) JSON.deserialize(
+          req.filterJson,
+          FilterExpression.class
+        );
+      } catch (Exception e) {
+      }
+    }
+    if (expr != null) {
+      String complexWhere = buildWhereClause(expr, sObjType);
+      if (String.isNotBlank(complexWhere)) {
+        whereClauses.add('(' + complexWhere + ')');
+      }
+    }
+
     if (req.filters != null && !req.filters.isEmpty()) {
       for (String field : req.filters.keySet()) {
         if (isValidFilterField(sObjType, field)) {
@@ -408,6 +462,236 @@ public with sharing class GridQueryBuilder {
     return query;
   }
 
+  /**
+   * @description Recursively builds a secure SOQL WHERE clause from a FilterExpression.
+   * Supports nested AND/OR groups, parameterized escaping, and all standard field types.
+   * Excludes FLS-blocked fields to enforce field-level security.
+   * @param expr The FilterExpression containing logic, conditions, and child groups
+   * @param sObjType Target SObjectType to validate fields and data types against
+   * @return Safe SOQL WHERE clause string, or empty string if no valid conditions
+   */
+  public static String buildWhereClause(
+    FilterExpression expr,
+    SObjectType sObjType
+  ) {
+    if (expr == null || sObjType == null) {
+      return '';
+    }
+
+    Map<String, SObjectField> fieldMap = sObjType.getDescribe().fields.getMap();
+    List<String> parts = new List<String>();
+
+    // 1. Evaluate direct conditions in this group
+    if (expr.conditions != null && !expr.conditions.isEmpty()) {
+      for (FilterCondition cond : expr.conditions) {
+        if (
+          cond == null ||
+          String.isBlank(cond.field) ||
+          String.isBlank(cond.operator)
+        ) {
+          continue;
+        }
+        String lowerField = cond.field.toLowerCase();
+        if (!fieldMap.containsKey(lowerField)) {
+          continue;
+        }
+        DescribeFieldResult dfr = fieldMap.get(lowerField).getDescribe();
+        if (!dfr.isAccessible()) {
+          // Field excluded from query if blocked by FLS (TC-06-N2)
+          continue;
+        }
+
+        String clause = buildConditionClause(dfr, cond.operator, cond.value);
+        if (String.isNotBlank(clause)) {
+          parts.add(clause);
+        }
+      }
+    }
+
+    // 2. Evaluate nested child groups recursively
+    if (expr.groups != null && !expr.groups.isEmpty()) {
+      for (FilterExpression childGroup : expr.groups) {
+        String childClause = buildWhereClause(childGroup, sObjType);
+        if (String.isNotBlank(childClause)) {
+          parts.add('(' + childClause + ')');
+        }
+      }
+    }
+
+    if (parts.isEmpty()) {
+      return '';
+    }
+    if (parts.size() == 1) {
+      return parts[0];
+    }
+
+    String delimiter = (expr.logic != null &&
+      expr.logic.trim().equalsIgnoreCase('OR'))
+      ? ' OR '
+      : ' AND ';
+    return String.join(parts, delimiter);
+  }
+
+  /**
+   * @description Overload to build WHERE clause directly from a serialized JSON string.
+   */
+  public static String buildWhereClause(
+    String filterJson,
+    SObjectType sObjType
+  ) {
+    if (String.isBlank(filterJson) || sObjType == null) {
+      return '';
+    }
+    try {
+      FilterExpression expr = (FilterExpression) JSON.deserialize(
+        filterJson,
+        FilterExpression.class
+      );
+      return buildWhereClause(expr, sObjType);
+    } catch (Exception e) {
+      return '';
+    }
+  }
+
+  /**
+   * @description Formats a single condition clause safely based on field describe, operator, and value.
+   */
+  private static String buildConditionClause(
+    DescribeFieldResult dfr,
+    String operator,
+    Object value
+  ) {
+    String fieldName = String.escapeSingleQuotes(dfr.getName());
+    String op = operator.trim().toLowerCase();
+
+    // Check for null / empty value
+    if (
+      value == null ||
+      (value instanceof String && String.isBlank((String) value))
+    ) {
+      if (op == '!=' || op == '<>' || op == 'not_equals' || op == 'ne') {
+        return fieldName + ' != null';
+      }
+      if (op == '=' || op == 'equals' || op == 'eq') {
+        return fieldName + ' = null';
+      }
+      return null;
+    }
+
+    String strVal = String.valueOf(value).trim();
+    if (strVal.equalsIgnoreCase('null')) {
+      if (op == '!=' || op == '<>' || op == 'not_equals' || op == 'ne') {
+        return fieldName + ' != null';
+      }
+      return fieldName + ' = null';
+    }
+
+    Schema.DisplayType dt = dfr.getType();
+
+    // Numbers: Integer, Double, Currency, Percent, Long
+    if (
+      dt == Schema.DisplayType.INTEGER ||
+      dt == Schema.DisplayType.DOUBLE ||
+      dt == Schema.DisplayType.CURRENCY ||
+      dt == Schema.DisplayType.PERCENT ||
+      dt == Schema.DisplayType.LONG
+    ) {
+      Decimal numVal;
+      try {
+        numVal = Decimal.valueOf(strVal);
+      } catch (Exception ex) {
+        return null;
+      }
+      String sym = mapOperatorSymbol(op);
+      return fieldName + ' ' + sym + ' ' + numVal;
+    }
+
+    // Boolean
+    if (dt == Schema.DisplayType.BOOLEAN) {
+      Boolean boolVal = Boolean.valueOf(strVal);
+      String sym = (op == '!=' ||
+        op == '<>' ||
+        op == 'not_equals')
+        ? '!='
+        : '=';
+      return fieldName + ' ' + sym + ' ' + boolVal;
+    }
+
+    // Date
+    if (dt == Schema.DisplayType.DATE) {
+      Date dateVal;
+      try {
+        dateVal = Date.valueOf(strVal);
+      } catch (Exception ex) {
+        return null;
+      }
+      String sym = mapOperatorSymbol(op);
+      return fieldName + ' ' + sym + ' ' + String.valueOf(dateVal);
+    }
+
+    // Default: Strings, Picklists, Textarea, Email, Phone, Id, Url
+    String escapedVal = String.escapeSingleQuotes(strVal);
+    if (op == 'contains' || op == 'like') {
+      return fieldName + ' LIKE \'%' + escapedVal + '%\'';
+    } else if (op == 'starts_with') {
+      return fieldName + ' LIKE \'' + escapedVal + '%\'';
+    } else if (op == 'ends_with') {
+      return fieldName + ' LIKE \'%' + escapedVal + '\'';
+    } else if (op == 'not_contains') {
+      return '(NOT ' + fieldName + ' LIKE \'%' + escapedVal + '%\')';
+    } else if (op == '!=' || op == '<>' || op == 'not_equals' || op == 'ne') {
+      return fieldName + ' != \'' + escapedVal + '\'';
+    } else {
+      return fieldName + ' = \'' + escapedVal + '\'';
+    }
+  }
+
+  private static String mapOperatorSymbol(String op) {
+    if (op == '>' || op == 'gt' || op == 'greater_than')
+      return '>';
+    if (op == '>=' || op == 'gte' || op == 'greater_or_equal')
+      return '>=';
+    if (op == '<' || op == 'lt' || op == 'less_than')
+      return '<';
+    if (op == '<=' || op == 'lte' || op == 'less_or_equal')
+      return '<=';
+    if (op == '!=' || op == '<>' || op == 'not_equals' || op == 'ne')
+      return '!=';
+    return '=';
+  }
+
+  public class FilterCondition {
+    @AuraEnabled
+    public String field { get; set; }
+    @AuraEnabled
+    public String operator { get; set; }
+    @AuraEnabled
+    public String value { get; set; }
+
+    public FilterCondition() {
+    }
+    public FilterCondition(String field, String operator, Object value) {
+      this.field = field;
+      this.operator = operator;
+      this.value = (value != null) ? String.valueOf(value) : null;
+    }
+  }
+
+  public class FilterExpression {
+    @AuraEnabled
+    public String logic { get; set; }
+    @AuraEnabled
+    public List<FilterCondition> conditions { get; set; }
+    @AuraEnabled
+    public List<FilterExpression> groups { get; set; }
+
+    public FilterExpression() {
+      this.conditions = new List<FilterCondition>();
+      this.groups = new List<FilterExpression>();
+      this.logic = 'AND';
+    }
+  }
+
   public class QueryRequest {
     @InvocableVariable(label='Object API Name' required=true)
     public String objectApiName;
@@ -416,6 +700,8 @@ public with sharing class GridQueryBuilder {
     public List<String> fields;
 
     public Map<String, Object> filters;
+    public FilterExpression filterExpression;
+    public String filterJson;
 
     @InvocableVariable(label='Date Field')
     public String dateField;
@@ -443,6 +729,8 @@ public with sharing class GridQueryBuilder {
     public String objectApiName;
     public List<String> fields;
     public Map<String, Object> filters;
+    public FilterExpression filterExpression;
+    public String filterJson;
     public String dateField;
     public Date startDate;
     public Date endDate;

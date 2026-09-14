@@ -1,6 +1,13 @@
 <template>
   <lightning-card title={gridTitle}>
-    <div slot="actions">
+    <div slot="actions" class="slds-grid slds-grid_vertical-align-center">
+      <c-smart-grid-view-selector
+        object-api-name={objectApiName}
+        current-config={currentGridConfig}
+        onviewselect={handleViewSelect}
+        onresetview={handleResetView}
+        class="slds-m-right_x-small"
+      ></c-smart-grid-view-selector>
       <template lwc:if={isDynamicGrid}>
         <lightning-button
           label="Select Fields"
@@ -64,12 +71,19 @@
       <template lwc:if={canFilter}>
         <lightning-button-icon
           icon-name="utility:filterList"
-          alternative-text="Toggle Filters"
-          title="Toggle Filters"
+          alternative-text="Toggle Quick Filters"
+          title="Toggle Quick Filters"
           onclick={toggleFilterPanel}
           class="slds-m-left_x-small"
           variant="border-filled"
         ></lightning-button-icon>
+        <lightning-button
+          label="Advanced Filter"
+          icon-name="utility:filter"
+          onclick={handleOpenAdvancedFilter}
+          disabled={isLoading}
+          class="slds-m-left_x-small"
+        ></lightning-button>
       </template>
     </div>
     <!-- Active Filter Pills -->
@@ -185,71 +199,94 @@
         </div>
       </template>
       <template lwc:elseif={gridColumns}>
-        <lightning-datatable
-          key-field="Id"
-          data={gridData}
-          columns={gridColumns}
-          onsave={handleSave}
-          draft-values={draftValues}
-          sorted-by={sortedByDisplay}
-          sorted-direction={sortDirection}
-          onsort={handleSort}
-          onresize={handleResize}
-          onrowselection={handleRowSelection}
-          oncellchange={handleCellChange}
-        >
-        </lightning-datatable>
-        <!-- Sticky Column Totals Footer (TS-02) -->
-        <template lwc:if={hasTotals}>
-          <div class="smart-grid-totals-container slds-p-around_x-small">
-            <div
-              class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
+        <div class="slds-grid slds-wrap">
+          <div class={gridContainerClass}>
+            <lightning-datatable
+              key-field="Id"
+              data={gridData}
+              columns={gridColumns}
+              onsave={handleSave}
+              draft-values={draftValues}
+              sorted-by={sortedByDisplay}
+              sorted-direction={sortDirection}
+              onsort={handleSort}
+              onresize={handleResize}
+              onrowselection={handleRowSelection}
+              oncellchange={handleCellChange}
             >
-              <div class="slds-col slds-size_12-of-12 slds-m-bottom_xx-small">
-                <span class="slds-badge slds-theme_shade">
-                  <lightning-icon
-                    icon-name="utility:table"
-                    size="xx-small"
-                    class="slds-m-right_xx-small"
-                  ></lightning-icon>
-                  <strong>Aggregates & Column Totals</strong>
-                </span>
-              </div>
-              <template for:each={totalsDisplayList} for:item="total">
+            </lightning-datatable>
+            <!-- Sticky Column Totals Footer (TS-02) -->
+            <template lwc:if={hasTotals}>
+              <div class="smart-grid-totals-container slds-p-around_x-small">
                 <div
-                  key={total.fieldName}
-                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-m-vertical_xx-small"
+                  class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
                 >
                   <div
-                    class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
+                    class="slds-col slds-size_12-of-12 slds-m-bottom_xx-small"
                   >
-                    <div class="smart-grid-totals-label">{total.label}</div>
-                    <div
-                      class="slds-grid slds-gutters_xx-small slds-m-top_xx-small slds-text-body_small"
-                    >
-                      <div class="slds-col">
-                        <span>Sum:</span> <strong>{total.sumFormatted}</strong>
-                      </div>
-                      <div class="slds-col">
-                        <span>Avg:</span> <strong>{total.avgFormatted}</strong>
-                      </div>
-                    </div>
-                    <div
-                      class="slds-grid slds-gutters_xx-small slds-text-body_small"
-                    >
-                      <div class="slds-col">
-                        <span>Min:</span> <strong>{total.minFormatted}</strong>
-                      </div>
-                      <div class="slds-col">
-                        <span>Max:</span> <strong>{total.maxFormatted}</strong>
-                      </div>
-                    </div>
+                    <span class="slds-badge slds-theme_shade">
+                      <lightning-icon
+                        icon-name="utility:table"
+                        size="xx-small"
+                        class="slds-m-right_xx-small"
+                      ></lightning-icon>
+                      <strong>Aggregates & Column Totals</strong>
+                    </span>
                   </div>
+                  <template for:each={totalsDisplayList} for:item="total">
+                    <div
+                      key={total.fieldName}
+                      class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-m-vertical_xx-small"
+                    >
+                      <div
+                        class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
+                      >
+                        <div class="smart-grid-totals-label">{total.label}</div>
+                        <div
+                          class="slds-grid slds-gutters_xx-small slds-m-top_xx-small slds-text-body_small"
+                        >
+                          <div class="slds-col">
+                            <span>Sum:</span>
+                            <strong>{total.sumFormatted}</strong>
+                          </div>
+                          <div class="slds-col">
+                            <span>Avg:</span>
+                            <strong>{total.avgFormatted}</strong>
+                          </div>
+                        </div>
+                        <div
+                          class="slds-grid slds-gutters_xx-small slds-text-body_small"
+                        >
+                          <div class="slds-col">
+                            <span>Min:</span>
+                            <strong>{total.minFormatted}</strong>
+                          </div>
+                          <div class="slds-col">
+                            <span>Max:</span>
+                            <strong>{total.maxFormatted}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
                 </div>
-              </template>
-            </div>
+              </div>
+            </template>
           </div>
-        </template>
+          <template lwc:if={showReadingPane}>
+            <div
+              class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 reading-pane-container"
+            >
+              <c-smart-grid-reading-pane
+                record-id={selectedRecordForReadingPane}
+                object-api-name={objectApiName}
+                fields={gridColumns}
+                record-title={selectedRecordTitle}
+                onclose={handleCloseReadingPane}
+              ></c-smart-grid-reading-pane>
+            </div>
+          </template>
+        </div>
       </template>
       <template lwc:if={showNoConfigMessage}>
         <div
@@ -298,6 +335,16 @@
         ></lightning-combobox>
       </div>
     </template>
+    <!-- Related Object Sub-Grid (TS-07) -->
+    <template lwc:if={showRelatedGrid}>
+      <c-smart-grid-related-grid
+        parent-record-id={selectedRowId}
+        parent-object-name={objectApiName}
+        related-objects-string={relatedObjectConfig}
+        depth={depth}
+        onclose={handleCloseRelatedGrid}
+      ></c-smart-grid-related-grid>
+    </template>
   </lightning-card>
 
   <!-- Field Picker Modal (child) -->
@@ -316,4 +363,14 @@
     oncomplete={handleResolutionComplete}
     onclose={handleResolutionClose}
   ></c-smart-grid-resolution-modal>
+
+  <!-- Advanced Filter Builder Modal (TS-06) -->
+  <template lwc:if={showAdvancedFilterModal}>
+    <c-smart-grid-filter-builder
+      columns={gridColumns}
+      filter-expression={activeFilterExpression}
+      onapplyfilter={handleApplyAdvancedFilter}
+      onclose={handleCloseAdvancedFilter}
+    ></c-smart-grid-filter-builder>
+  </template>
 </template>

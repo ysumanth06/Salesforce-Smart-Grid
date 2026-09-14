@@ -84,4 +84,8 @@
         <enabled>true</enabled>
         <apexClass>SmartGridFormatEngine</apexClass>
     </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridViewService</apexClass>
+    </classAccesses>
 </PermissionSet>

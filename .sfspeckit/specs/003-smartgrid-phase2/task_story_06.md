@@ -1,7 +1,7 @@
 # Task Story 06: Advanced Filter Builder (AND/OR) [US-P2-06]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P2 — High
-**Status**: READY | **Branch**: `feature/003-ts06-filter-builder`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,10 +15,10 @@ Replace the basic filter panel with a visual query builder supporting nested AND
 
 | Layer                       | Skill      | File Path                                                                                        | Status |
 | --------------------------- | ---------- | ------------------------------------------------------------------------------------------------ | ------ |
-| Query Builder (modify)      | sf-apex    | `force-app/main/default/classes/GridQueryBuilder.cls` — add `buildWhereClause(FilterExpression)` | ⬜     |
-| Query Builder Test (modify) | sf-testing | `force-app/main/default/classes/GridQueryBuilderTest.cls`                                        | ⬜     |
-| LWC Component               | sf-lwc     | `force-app/main/default/lwc/smartGridFilterBuilder/`                                             | ⬜     |
-| LWC (modify)                | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — replace basic filter with builder                  | ⬜     |
+| Query Builder (modify)      | sf-apex    | `force-app/main/default/classes/GridQueryBuilder.cls` — add `buildWhereClause(FilterExpression)` | ✅     |
+| Query Builder Test (modify) | sf-testing | `force-app/main/default/classes/GridQueryBuilderTest.cls`                                        | ✅     |
+| LWC Component               | sf-lwc     | `force-app/main/default/lwc/smartGridFilterBuilder/`                                             | ✅     |
+| LWC (modify)                | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — replace basic filter with builder                  | ✅     |
 
 ---
 

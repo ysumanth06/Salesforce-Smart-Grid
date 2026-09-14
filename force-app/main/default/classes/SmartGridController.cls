@@ -222,7 +222,6 @@ public with sharing class SmartGridController {
    * @param pageNumber 1-based page index
    * @return PagedResult containing records, totalSize, pageNumber, and pageSize
    */
-  @AuraEnabled
   public static PagedResult getRecordsPaged(
     String objectApiName,
     List<String> fields,
@@ -234,6 +233,35 @@ public with sharing class SmartGridController {
     String sortDirection,
     Integer pageSize,
     Integer pageNumber
+  ) {
+    return getRecordsPaged(
+      objectApiName,
+      fields,
+      filters,
+      dateField,
+      startDate,
+      endDate,
+      sortField,
+      sortDirection,
+      pageSize,
+      pageNumber,
+      null
+    );
+  }
+
+  @AuraEnabled
+  public static PagedResult getRecordsPaged(
+    String objectApiName,
+    List<String> fields,
+    Map<String, Object> filters,
+    String dateField,
+    Date startDate,
+    Date endDate,
+    String sortField,
+    String sortDirection,
+    Integer pageSize,
+    Integer pageNumber,
+    String filterJson
   ) {
     if (String.isBlank(objectApiName) || fields == null || fields.isEmpty()) {
       throw new AuraHandledException(
@@ -253,6 +281,7 @@ public with sharing class SmartGridController {
       req.objectApiName = objectApiName;
       req.fields = fields;
       req.filters = filters;
+      req.filterJson = filterJson;
       req.dateField = dateField;
       req.startDate = startDate;
       req.endDate = endDate;
@@ -532,7 +561,6 @@ public with sharing class SmartGridController {
    * @param endDate Optional end date string
    * @return List of AggregateResultDTO
    */
-  @AuraEnabled(cacheable=false)
   public static List<AggregateResultDTO> getAggregates(
     String objectApiName,
     List<String> fieldsToAggregate,
@@ -540,6 +568,27 @@ public with sharing class SmartGridController {
     String dateField,
     String startDate,
     String endDate
+  ) {
+    return getAggregates(
+      objectApiName,
+      fieldsToAggregate,
+      filters,
+      dateField,
+      startDate,
+      endDate,
+      null
+    );
+  }
+
+  @AuraEnabled(cacheable=false)
+  public static List<AggregateResultDTO> getAggregates(
+    String objectApiName,
+    List<String> fieldsToAggregate,
+    Map<String, String> filters,
+    String dateField,
+    String startDate,
+    String endDate,
+    String filterJson
   ) {
     List<AggregateResultDTO> dtos = new List<AggregateResultDTO>();
     if (
@@ -593,6 +642,7 @@ public with sharing class SmartGridController {
     req.objectApiName = objectApiName;
     req.fields = validNumericFields;
     req.filters = filterMapObj;
+    req.filterJson = filterJson;
     req.dateField = dateField;
     if (String.isNotBlank(startDate)) {
       try {
@@ -630,6 +680,66 @@ public with sharing class SmartGridController {
     }
 
     return dtos;
+  }
+
+  /**
+   * @description Fetches saved views and query history for the current user and target object (TS-09).
+   */
+  @AuraEnabled
+  public static List<Smart_Grid_View__c> getViews(String objectApiName) {
+    try {
+      return SmartGridViewService.getViews(objectApiName);
+    } catch (Exception e) {
+      throw new AuraHandledException('Error loading views: ' + e.getMessage());
+    }
+  }
+
+  /**
+   * @description Saves or updates a saved view for the current user (TS-09).
+   */
+  @AuraEnabled
+  public static Smart_Grid_View__c saveView(
+    Id viewId,
+    String viewName,
+    String objectApiName,
+    String configJson,
+    Boolean isDefault
+  ) {
+    try {
+      return SmartGridViewService.saveView(
+        viewId,
+        viewName,
+        objectApiName,
+        configJson,
+        isDefault
+      );
+    } catch (Exception e) {
+      throw new AuraHandledException('Error saving view: ' + e.getMessage());
+    }
+  }
+
+  /**
+   * @description Deletes a saved view owned by the current user (TS-09).
+   */
+  @AuraEnabled
+  public static void deleteView(Id viewId) {
+    try {
+      SmartGridViewService.deleteView(viewId);
+    } catch (Exception e) {
+      throw new AuraHandledException('Error deleting view: ' + e.getMessage());
+    }
+  }
+
+  /**
+   * @description Logs grid interaction into auto-maintained query history (TS-09).
+   */
+  @AuraEnabled
+  public static void logQueryHistory(String objectApiName, String configJson) {
+    try {
+      SmartGridViewService.saveQueryHistory(objectApiName, configJson);
+    } catch (Exception e) {
+      // History logging is non-blocking
+    }
   }
 
   public class AggregateResultDTO {

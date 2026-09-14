@@ -11,6 +11,7 @@ import getPrefs from "@salesforce/apex/SmartGridUserPrefService.getPrefs";
 import savePrefs from "@salesforce/apex/SmartGridUserPrefService.savePrefs";
 import getFormatRules from "@salesforce/apex/SmartGridController.getFormatRules";
 import getAggregates from "@salesforce/apex/SmartGridController.getAggregates";
+import logQueryHistory from "@salesforce/apex/SmartGridController.logQueryHistory";
 import { exportToCSV } from "c/csvHelper";
 import { reduceErrors } from "c/errorUtils";
 import { applyFormatRules } from "c/formatRuleEngine";
@@ -28,6 +29,9 @@ export default class SmartDataGrid extends LightningElement {
   @api gridConfigName;
   @api objectApiName;
   @api gridTitle = "Smart Data Grid";
+  @api depth = 0;
+  @api parentRecordId;
+  @api parentRelationshipField;
 
   @track gridColumns;
   @track gridData = [];
@@ -43,6 +47,16 @@ export default class SmartDataGrid extends LightningElement {
   @track selectedRowsList = [];
   @track canUndoState = false;
   @track canRedoState = false;
+
+  // Sprint 4 features state
+  @track showAdvancedFilterModal = false;
+  @track activeFilterExpression;
+  @track activeFilterJson;
+  @track selectedRecordForReadingPane;
+  @track selectedRecordTitle;
+  @track showReadingPane = false;
+  @track showRelatedGrid = false;
+  @track selectedRowId;
 
   dirtyStateManager = new DirtyStateManager(50);
 
@@ -320,6 +334,9 @@ export default class SmartDataGrid extends LightningElement {
 
       // Build filter map
       let filterMap = {};
+      if (this.parentRelationshipField && this.parentRecordId) {
+        filterMap[this.parentRelationshipField] = this.parentRecordId;
+      }
       if (this.filterFields) {
         this.filterFields.forEach((f) => {
           if (f.selectedValue && !f.isDate) {
@@ -343,7 +360,8 @@ export default class SmartDataGrid extends LightningElement {
         sortField: this.sortField || this.config?.defaultSortField,
         sortDirection: this.sortDirection,
         pageSize: this.pageSize,
-        pageNumber: this.currentPage
+        pageNumber: this.currentPage,
+        filterJson: this.activeFilterJson || null
       });
 
       // Auto-generate URL properties for lightning-datatable 'url' columns
@@ -875,6 +893,26 @@ export default class SmartDataGrid extends LightningElement {
       .map((r) => r.Id)
       .filter((id) => id && !id.startsWith("new-"));
     this.publishLmsEvent("selected", ids);
+
+    // Reading pane & Related grid selection handling (TS-05 & TS-07)
+    if (selectedRows.length > 0) {
+      const selected = selectedRows[selectedRows.length - 1];
+      this.selectedRowId = selected.Id;
+      this.selectedRecordForReadingPane = selected.Id;
+      this.selectedRecordTitle = selected.Name || selected.Id;
+      if (this.canReadingPane) {
+        this.showReadingPane = true;
+      }
+      if (this.hasRelatedObjects) {
+        this.showRelatedGrid = true;
+      }
+    } else {
+      this.selectedRowId = null;
+      this.selectedRecordForReadingPane = null;
+      this.selectedRecordTitle = null;
+      this.showReadingPane = false;
+      this.showRelatedGrid = false;
+    }
   }
 
   // ─── Cell Changes & Undo / Redo (TS-03) ───
@@ -1250,6 +1288,29 @@ export default class SmartDataGrid extends LightningElement {
     return this.config ? this.config.enableReadingPane === true : false;
   }
 
+  get hasRelatedObjects() {
+    return Boolean(this.config && this.config.relatedObject && this.depth < 2);
+  }
+
+  get relatedObjectConfig() {
+    return this.config ? this.config.relatedObject : "";
+  }
+
+  get gridContainerClass() {
+    return this.showReadingPane
+      ? "slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-p-right_small"
+      : "slds-col slds-size_1-of-1";
+  }
+
+  get currentGridConfig() {
+    return {
+      columns: this.pickerSelectedFields,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection,
+      filterExpression: this.activeFilterExpression
+    };
+  }
+
   // ─── Column Totals (TS-02) ───
 
   async fetchTotals() {
@@ -1266,6 +1327,9 @@ export default class SmartDataGrid extends LightningElement {
       }
 
       let filterMap = {};
+      if (this.parentRelationshipField && this.parentRecordId) {
+        filterMap[this.parentRelationshipField] = this.parentRecordId;
+      }
       if (this.filterFields) {
         this.filterFields.forEach((f) => {
           if (f.selectedValue && !f.isDate) {
@@ -1284,7 +1348,8 @@ export default class SmartDataGrid extends LightningElement {
         filters: filterMap,
         dateField: dateFilter ? dateFilter.fieldName : null,
         startDate: dateFilter ? dateFilter.selectedValue : null,
-        endDate: null
+        endDate: null,
+        filterJson: this.activeFilterJson || null
       });
     } catch (e) {
       console.warn("Failed to fetch column totals:", e);
@@ -1481,6 +1546,76 @@ export default class SmartDataGrid extends LightningElement {
       sortable: isSortable,
       initialWidth: colWidth
     };
+  }
+
+  // ─── Sprint 4 Actions (TS-05, TS-06, TS-07, TS-09) ───
+
+  handleOpenAdvancedFilter() {
+    this.showAdvancedFilterModal = true;
+  }
+
+  handleCloseAdvancedFilter() {
+    this.showAdvancedFilterModal = false;
+  }
+
+  async handleApplyAdvancedFilter(event) {
+    this.showAdvancedFilterModal = false;
+    this.activeFilterExpression = event.detail.expression;
+    this.activeFilterJson = event.detail.json;
+    this.currentPage = 1;
+    await this.fetchData();
+    this.logHistory();
+  }
+
+  async handleViewSelect(event) {
+    const { config } = event.detail;
+    if (config) {
+      if (config.sortField) this.sortField = config.sortField;
+      if (config.sortDirection) this.sortDirection = config.sortDirection;
+      if (config.filterExpression) {
+        this.activeFilterExpression = config.filterExpression;
+        this.activeFilterJson = JSON.stringify(config.filterExpression);
+      } else {
+        this.activeFilterExpression = null;
+        this.activeFilterJson = null;
+      }
+      if (Array.isArray(config.columns) && config.columns.length > 0) {
+        this.pickerSelectedFields = config.columns;
+        this.refreshColumns();
+      }
+    }
+    this.currentPage = 1;
+    await this.fetchData();
+  }
+
+  async handleResetView() {
+    this.activeFilterExpression = null;
+    this.activeFilterJson = null;
+    this.sortField = null;
+    this.sortDirection = "asc";
+    this.currentPage = 1;
+    await this.fetchData();
+  }
+
+  handleCloseReadingPane() {
+    this.showReadingPane = false;
+  }
+
+  handleCloseRelatedGrid() {
+    this.showRelatedGrid = false;
+  }
+
+  async logHistory() {
+    try {
+      if (this.objectApiName && this.activeFilterJson) {
+        await logQueryHistory({
+          objectApiName: this.objectApiName,
+          configJson: JSON.stringify(this.currentGridConfig)
+        });
+      }
+    } catch {
+      // Non-blocking history logging
+    }
   }
 
   // L-1: Delegate to shared utility
