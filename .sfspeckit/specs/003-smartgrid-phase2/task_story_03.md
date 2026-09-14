@@ -1,7 +1,7 @@
 # Task Story 03: Undo/Redo — Dirty State Manager [US-P2-03]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P1 — Critical
-**Status**: READY | **Branch**: `feature/003-ts03-undo-redo`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,8 +15,8 @@ Implement a client-side undo/redo stack for inline edits using a circular buffer
 
 | Layer        | Skill  | File Path                                                                         | Status |
 | ------------ | ------ | --------------------------------------------------------------------------------- | ------ |
-| LWC Module   | sf-lwc | `force-app/main/default/lwc/dirtyStateManager/dirtyStateManager.js`               | ⬜     |
-| LWC (modify) | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — keyboard handlers + toolbar buttons | ⬜     |
+| LWC Module   | sf-lwc | `force-app/main/default/lwc/dirtyStateManager/dirtyStateManager.js`               | ✅     |
+| LWC (modify) | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — keyboard handlers + toolbar buttons | ✅     |
 
 ---
 

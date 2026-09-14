@@ -27,6 +27,31 @@
           class="slds-m-left_x-small"
         ></lightning-button>
       </template>
+      <lightning-button-icon
+        icon-name="utility:undo"
+        alternative-text="Undo (Ctrl+Z)"
+        title="Undo (Ctrl+Z)"
+        onclick={handleUndo}
+        disabled={disableUndo}
+        class="slds-m-left_x-small"
+        variant="border-filled"
+      ></lightning-button-icon>
+      <lightning-button-icon
+        icon-name="utility:redo"
+        alternative-text="Redo (Ctrl+Y)"
+        title="Redo (Ctrl+Y)"
+        onclick={handleRedo}
+        disabled={disableRedo}
+        class="slds-m-left_x-small"
+        variant="border-filled"
+      ></lightning-button-icon>
+      <lightning-button
+        label="Fill Down"
+        icon-name="utility:down"
+        onclick={handleFillDown}
+        disabled={disableFillDown}
+        class="slds-m-left_x-small"
+      ></lightning-button>
       <template lwc:if={canExport}>
         <lightning-button
           label="Export CSV"
@@ -124,7 +149,11 @@
       </div>
     </template>
 
-    <div class="slds-m-around_medium" style="height: 400px; position: relative">
+    <div
+      class="slds-m-around_medium"
+      style="height: 400px; position: relative"
+      onpaste={handlePaste}
+    >
       <template lwc:if={isLoading}>
         <lightning-spinner
           alternative-text="Loading"
@@ -167,6 +196,7 @@
           onsort={handleSort}
           onresize={handleResize}
           onrowselection={handleRowSelection}
+          oncellchange={handleCellChange}
         >
         </lightning-datatable>
         <!-- Sticky Column Totals Footer (TS-02) -->

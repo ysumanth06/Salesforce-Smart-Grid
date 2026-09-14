@@ -14,6 +14,8 @@ import getAggregates from "@salesforce/apex/SmartGridController.getAggregates";
 import { exportToCSV } from "c/csvHelper";
 import { reduceErrors } from "c/errorUtils";
 import { applyFormatRules } from "c/formatRuleEngine";
+import { DirtyStateManager } from "c/dirtyStateManager";
+import { computeFormulaColumns } from "c/formulaEvaluator";
 import {
   publish,
   subscribe,
@@ -38,6 +40,11 @@ export default class SmartDataGrid extends LightningElement {
   @track activeFilterPills = [];
   @track formatRules = [];
   @track totalsData = [];
+  @track selectedRowsList = [];
+  @track canUndoState = false;
+  @track canRedoState = false;
+
+  dirtyStateManager = new DirtyStateManager(50);
 
   // Filter state
   @track filterFields = [];
@@ -90,9 +97,22 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   handleKeyDown(event) {
-    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+    const isCmdOrCtrl = event.ctrlKey || event.metaKey;
+    if (!isCmdOrCtrl) return;
+
+    const key = event.key.toLowerCase();
+    if (key === "s") {
       event.preventDefault();
       this.handleShortcutSave();
+    } else if (key === "z" && !event.shiftKey) {
+      event.preventDefault();
+      this.handleUndo();
+    } else if (key === "y" || (key === "z" && event.shiftKey)) {
+      event.preventDefault();
+      this.handleRedo();
+    } else if (key === "d") {
+      event.preventDefault();
+      this.handleFillDown();
     }
   }
 
@@ -338,10 +358,17 @@ export default class SmartDataGrid extends LightningElement {
       });
 
       // Apply conditional formatting rules (TS-01)
-      this.gridData = applyFormatRules(
+      let formattedRecords = applyFormatRules(
         rawMapped,
         this.formatRules,
         this.gridColumns
+      );
+
+      // Compute formula columns (TS-11)
+      this.gridData = computeFormulaColumns(
+        formattedRecords,
+        this.gridColumns,
+        this.draftValues
       );
       this.totalRecords = response.totalSize;
 
@@ -508,6 +535,8 @@ export default class SmartDataGrid extends LightningElement {
           .map((r) => r.Id)
           .filter((id) => id && !id.startsWith("new-"));
         this.publishLmsEvent("saved", savedIds);
+        this.dirtyStateManager.clear();
+        this.updateUndoRedoState();
         this.dispatchEvent(
           new ShowToastEvent({
             title: "Success",
@@ -841,10 +870,362 @@ export default class SmartDataGrid extends LightningElement {
 
   handleRowSelection(event) {
     const selectedRows = event.detail.selectedRows || [];
+    this.selectedRowsList = selectedRows;
     const ids = selectedRows
       .map((r) => r.Id)
       .filter((id) => id && !id.startsWith("new-"));
     this.publishLmsEvent("selected", ids);
+  }
+
+  // ─── Cell Changes & Undo / Redo (TS-03) ───
+
+  handleCellChange(event) {
+    const newDrafts = event.detail.draftValues || [];
+    const changes = [];
+
+    newDrafts.forEach((draft) => {
+      const existingDraft = this.draftValues.find((d) => d.Id === draft.Id);
+      const originalRow = this.gridData.find((r) => r.Id === draft.Id);
+
+      Object.keys(draft).forEach((field) => {
+        if (field === "Id") return;
+        const oldVal =
+          existingDraft && existingDraft[field] !== undefined
+            ? existingDraft[field]
+            : originalRow
+              ? originalRow[field]
+              : undefined;
+        const newVal = draft[field];
+
+        if (oldVal !== newVal) {
+          changes.push({
+            recordId: draft.Id,
+            fieldName: field,
+            oldValue: oldVal,
+            newValue: newVal
+          });
+        }
+      });
+    });
+
+    if (changes.length > 0) {
+      this.dirtyStateManager.push({ type: "cell", changes });
+      this.updateUndoRedoState();
+    }
+
+    // Merge newDrafts into this.draftValues
+    let updatedDrafts = [...this.draftValues];
+    newDrafts.forEach((draft) => {
+      const idx = updatedDrafts.findIndex((d) => d.Id === draft.Id);
+      if (idx >= 0) {
+        updatedDrafts[idx] = { ...updatedDrafts[idx], ...draft };
+      } else {
+        updatedDrafts.push(draft);
+      }
+    });
+    this.draftValues = updatedDrafts;
+
+    // Recalculate formula columns on cell change (AC-11-4)
+    this.gridData = computeFormulaColumns(
+      this.gridData,
+      this.gridColumns,
+      this.draftValues
+    );
+  }
+
+  handleUndo() {
+    if (!this.dirtyStateManager.canUndo) return;
+    const op = this.dirtyStateManager.undo();
+    if (!op || !op.changes) return;
+
+    let updatedDrafts = [...this.draftValues];
+    let updatedGridData = [...this.gridData];
+
+    op.changes.forEach((ch) => {
+      const draftIdx = updatedDrafts.findIndex((d) => d.Id === ch.recordId);
+      if (draftIdx >= 0) {
+        if (ch.oldValue === undefined) {
+          delete updatedDrafts[draftIdx][ch.fieldName];
+          if (Object.keys(updatedDrafts[draftIdx]).length <= 1) {
+            updatedDrafts.splice(draftIdx, 1);
+          }
+        } else {
+          updatedDrafts[draftIdx] = {
+            ...updatedDrafts[draftIdx],
+            [ch.fieldName]: ch.oldValue
+          };
+        }
+      }
+
+      const rowIdx = updatedGridData.findIndex((r) => r.Id === ch.recordId);
+      if (rowIdx >= 0) {
+        updatedGridData[rowIdx] = {
+          ...updatedGridData[rowIdx],
+          [ch.fieldName]: ch.oldValue
+        };
+      }
+    });
+
+    this.draftValues = updatedDrafts;
+    this.gridData = computeFormulaColumns(
+      updatedGridData,
+      this.gridColumns,
+      this.draftValues
+    );
+    this.updateUndoRedoState();
+  }
+
+  handleRedo() {
+    if (!this.dirtyStateManager.canRedo) return;
+    const op = this.dirtyStateManager.redo();
+    if (!op || !op.changes) return;
+
+    let updatedDrafts = [...this.draftValues];
+    let updatedGridData = [...this.gridData];
+
+    op.changes.forEach((ch) => {
+      const draftIdx = updatedDrafts.findIndex((d) => d.Id === ch.recordId);
+      if (draftIdx >= 0) {
+        updatedDrafts[draftIdx] = {
+          ...updatedDrafts[draftIdx],
+          [ch.fieldName]: ch.newValue
+        };
+      } else {
+        updatedDrafts.push({
+          Id: ch.recordId,
+          [ch.fieldName]: ch.newValue
+        });
+      }
+
+      const rowIdx = updatedGridData.findIndex((r) => r.Id === ch.recordId);
+      if (rowIdx >= 0) {
+        updatedGridData[rowIdx] = {
+          ...updatedGridData[rowIdx],
+          [ch.fieldName]: ch.newValue
+        };
+      }
+    });
+
+    this.draftValues = updatedDrafts;
+    this.gridData = computeFormulaColumns(
+      updatedGridData,
+      this.gridColumns,
+      this.draftValues
+    );
+    this.updateUndoRedoState();
+  }
+
+  updateUndoRedoState() {
+    this.canUndoState = this.dirtyStateManager.canUndo;
+    this.canRedoState = this.dirtyStateManager.canRedo;
+  }
+
+  get disableUndo() {
+    return !this.canUndoState || this.isLoading;
+  }
+
+  get disableRedo() {
+    return !this.canRedoState || this.isLoading;
+  }
+
+  get disableFillDown() {
+    return (
+      !this.selectedRowsList ||
+      this.selectedRowsList.length < 2 ||
+      this.isLoading
+    );
+  }
+
+  // ─── Fill Down & Clipboard Paste (TS-10) ───
+
+  handleFillDown() {
+    if (!this.selectedRowsList || this.selectedRowsList.length < 2) {
+      return;
+    }
+
+    // Find the first editable column
+    const editableCol = this.gridColumns.find(
+      (c) =>
+        c.editable &&
+        !c.formula &&
+        !c.expression &&
+        !c.fieldName.endsWith("_Url")
+    );
+    if (!editableCol) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Fill Down Unavailable",
+          message: "No editable columns available for fill-down.",
+          variant: "warning"
+        })
+      );
+      return;
+    }
+
+    const fieldName = editableCol.fieldName;
+    const selectedIds = new Set(this.selectedRowsList.map((r) => r.Id));
+    const visibleSelectedRows = this.gridData.filter((r) =>
+      selectedIds.has(r.Id)
+    );
+    if (visibleSelectedRows.length < 2) return;
+
+    const sourceRow = visibleSelectedRows[0];
+    const sourceVal = sourceRow[fieldName];
+    const targetRows = visibleSelectedRows.slice(1);
+    const changes = [];
+
+    let updatedDrafts = [...this.draftValues];
+    let updatedGridData = [...this.gridData];
+
+    targetRows.forEach((row) => {
+      const oldVal = row[fieldName];
+      changes.push({
+        recordId: row.Id,
+        fieldName: fieldName,
+        oldValue: oldVal,
+        newValue: sourceVal
+      });
+
+      const draftIdx = updatedDrafts.findIndex((d) => d.Id === row.Id);
+      if (draftIdx >= 0) {
+        updatedDrafts[draftIdx] = {
+          ...updatedDrafts[draftIdx],
+          [fieldName]: sourceVal
+        };
+      } else {
+        updatedDrafts.push({
+          Id: row.Id,
+          [fieldName]: sourceVal
+        });
+      }
+
+      const rowIdx = updatedGridData.findIndex((r) => r.Id === row.Id);
+      if (rowIdx >= 0) {
+        updatedGridData[rowIdx] = {
+          ...updatedGridData[rowIdx],
+          [fieldName]: sourceVal
+        };
+      }
+    });
+
+    if (changes.length > 0) {
+      this.dirtyStateManager.push({ type: "fill-down", changes });
+      this.draftValues = updatedDrafts;
+      this.gridData = computeFormulaColumns(
+        updatedGridData,
+        this.gridColumns,
+        this.draftValues
+      );
+      this.updateUndoRedoState();
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Fill Down Complete",
+          message: `Filled "${fieldName}" down to ${targetRows.length} rows.`,
+          variant: "info"
+        })
+      );
+    }
+  }
+
+  handlePaste(event) {
+    const clipboardText = event.clipboardData
+      ? event.clipboardData.getData("text/plain")
+      : "";
+    if (
+      !clipboardText ||
+      !this.selectedRowsList ||
+      this.selectedRowsList.length === 0
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const rows = clipboardText
+      .split(/\r\n|\n|\r/)
+      .filter((line) => line.length > 0);
+    if (rows.length === 0) return;
+
+    const editableCols = this.gridColumns.filter(
+      (c) =>
+        c.editable &&
+        !c.formula &&
+        !c.expression &&
+        !c.fieldName.endsWith("_Url")
+    );
+    if (editableCols.length === 0) return;
+
+    const selectedIds = new Set(this.selectedRowsList.map((r) => r.Id));
+    const visibleSelected = this.gridData.filter((r) => selectedIds.has(r.Id));
+    const changes = [];
+
+    let updatedDrafts = [...this.draftValues];
+    let updatedGridData = [...this.gridData];
+
+    for (
+      let rIdx = 0;
+      rIdx < Math.min(rows.length, visibleSelected.length);
+      rIdx++
+    ) {
+      const row = visibleSelected[rIdx];
+      const cellValues = rows[rIdx].split("\t");
+
+      for (
+        let cIdx = 0;
+        cIdx < Math.min(cellValues.length, editableCols.length);
+        cIdx++
+      ) {
+        const fieldName = editableCols[cIdx].fieldName;
+        const pastedVal = cellValues[cIdx].trim();
+        const oldVal = row[fieldName];
+
+        changes.push({
+          recordId: row.Id,
+          fieldName: fieldName,
+          oldValue: oldVal,
+          newValue: pastedVal
+        });
+
+        const draftIdx = updatedDrafts.findIndex((d) => d.Id === row.Id);
+        if (draftIdx >= 0) {
+          updatedDrafts[draftIdx] = {
+            ...updatedDrafts[draftIdx],
+            [fieldName]: pastedVal
+          };
+        } else {
+          updatedDrafts.push({
+            Id: row.Id,
+            [fieldName]: pastedVal
+          });
+        }
+
+        const rowDataIdx = updatedGridData.findIndex((r) => r.Id === row.Id);
+        if (rowDataIdx >= 0) {
+          updatedGridData[rowDataIdx] = {
+            ...updatedGridData[rowDataIdx],
+            [fieldName]: pastedVal
+          };
+        }
+      }
+    }
+
+    if (changes.length > 0) {
+      this.dirtyStateManager.push({ type: "paste", changes });
+      this.draftValues = updatedDrafts;
+      this.gridData = computeFormulaColumns(
+        updatedGridData,
+        this.gridColumns,
+        this.draftValues
+      );
+      this.updateUndoRedoState();
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Paste Complete",
+          message: `Pasted values into ${changes.length} cell(s).`,
+          variant: "info"
+        })
+      );
+    }
   }
 
   // ─── Feature Security Toggles (TS-12) ───
@@ -1046,9 +1427,9 @@ export default class SmartDataGrid extends LightningElement {
   formatColumn(col) {
     const fieldApi = col.fieldApiName || col.field || col.fieldName;
     const label = col.displayLabel || col.label || fieldApi;
-    // Default ALL fields to editable unless explicitly non-updateable from schema
-    // Config-level editable flag is intentionally ignored — if a field is on the grid, it should be editable
-    const isEditable = col.isUpdateable !== false;
+    // Formula / computed columns are strictly read-only (AC-11-3)
+    const isFormula = Boolean(col.formula || col.expression);
+    const isEditable = !isFormula && col.isUpdateable !== false;
     const isSortable = col.isSortable === true || col.sortable === true;
     const colWidth = col.columnWidth || col.width;
     // Always resolve to the real Salesforce type from metadata

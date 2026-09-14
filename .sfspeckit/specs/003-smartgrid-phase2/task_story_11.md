@@ -1,7 +1,7 @@
 # Task Story 11: Formula/Computed Columns [US-P2-11]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P3 — Nice-to-Have
-**Status**: READY | **Branch**: `feature/003-ts11-computed-columns`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -13,9 +13,9 @@ Allow admins to define computed columns in CMDT (e.g., `Amount * Probability / 1
 
 ## SF Implementation Layers
 
-| Layer      | Skill  | File Path                                                                                     | Status |
-| ---------- | ------ | --------------------------------------------------------------------------------------------- | ------ |
-| LWC Module | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — expression evaluator, computed column rendering | ⬜     |
+| Layer      | Skill  | File Path                                                                                                   | Status |
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------- | ------ |
+| LWC Module | sf-lwc | `force-app/main/default/lwc/formulaEvaluator/` & `smartDataGrid/` — expression evaluator & column rendering | ✅     |
 
 ---
 

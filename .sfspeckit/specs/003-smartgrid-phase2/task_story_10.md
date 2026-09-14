@@ -1,7 +1,7 @@
 # Task Story 10: Fill-Down & Copy/Paste [US-P2-10]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P3 — Nice-to-Have
-**Status**: READY | **Branch**: `feature/003-ts10-fill-down`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,7 +15,7 @@ Allow users to select a cell value and fill it down to multiple selected rows, o
 
 | Layer        | Skill  | File Path                                                                        | Status |
 | ------------ | ------ | -------------------------------------------------------------------------------- | ------ |
-| LWC (modify) | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — fill-down logic, clipboard handler | ⬜     |
+| LWC (modify) | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — fill-down logic, clipboard handler | ✅     |
 
 ---
 
