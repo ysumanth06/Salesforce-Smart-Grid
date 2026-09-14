@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class GridQueryBuilderTest {
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_Positive() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -32,7 +32,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildQuery_Invocable_Positive() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -52,7 +52,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_Negative_InvalidObject() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'InvalidObjectXYZ__c';
@@ -71,7 +71,7 @@ public class GridQueryBuilderTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_Negative_InvalidField() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -91,7 +91,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_BulkLimits() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -108,7 +108,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_FilterValue_Positive() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -127,7 +127,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_FilterValue_SqlInjection_Negative() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -152,7 +152,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_FilterFieldOnly_NoValue() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -171,7 +171,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_Offset() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -187,7 +187,7 @@ public class GridQueryBuilderTest {
     Assert.isTrue(query.contains('OFFSET 20'), 'Query should contain offset');
   }
 
-  @isTest
+  @IsTest
   static void testBuildAggregateQuery_Positive() {
     GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
     req.objectApiName = 'Opportunity';
@@ -236,7 +236,7 @@ public class GridQueryBuilderTest {
     Assert.isTrue(query.contains('CloseDate <='), 'Should filter by end date');
   }
 
-  @isTest
+  @IsTest
   static void testBuildAggregateQuery_NonNumericField_Fallback() {
     GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
     req.objectApiName = 'Account';
@@ -253,7 +253,7 @@ public class GridQueryBuilderTest {
     Assert.isTrue(query.contains('FROM Account'), 'Should query from Account');
   }
 
-  @isTest
+  @IsTest
   static void testBuildAggregateQuery_Negative_InvalidObject() {
     GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
     req.objectApiName = 'InvalidObj_XYZ__c';
@@ -272,7 +272,7 @@ public class GridQueryBuilderTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_TC_06_P1_SimpleAnd() {
     GridQueryBuilder.FilterExpression expr = new GridQueryBuilder.FilterExpression();
     expr.logic = 'AND';
@@ -303,7 +303,7 @@ public class GridQueryBuilderTest {
     Assert.isTrue(query.contains(' AND '), 'Should join conditions with AND');
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_TC_06_P2_NestedOr() {
     GridQueryBuilder.FilterExpression root = new GridQueryBuilder.FilterExpression();
     root.logic = 'AND';
@@ -352,7 +352,7 @@ public class GridQueryBuilderTest {
     Assert.isTrue(query.contains(' OR '), 'Nested group should join with OR');
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_TC_06_P3_JsonParsing() {
     String jsonFilter = '{"logic":"AND","conditions":[{"field":"Industry","operator":"like","value":"Tech"}]}';
 
@@ -371,7 +371,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_TC_06_N1_SqlInjectionPrevention() {
     GridQueryBuilder.FilterExpression expr = new GridQueryBuilder.FilterExpression();
     expr.conditions.add(
@@ -393,7 +393,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_TC_06_N2_BlockedOrInvalidField() {
     GridQueryBuilder.FilterExpression expr = new GridQueryBuilder.FilterExpression();
     expr.conditions.add(
@@ -418,7 +418,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_TC_06_B1_BulkGroups() {
     GridQueryBuilder.FilterExpression root = new GridQueryBuilder.FilterExpression();
     root.logic = 'AND';
@@ -453,7 +453,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testFilterExpression_VariousOperatorsAndTypes() {
     GridQueryBuilder.FilterExpression expr = new GridQueryBuilder.FilterExpression();
     expr.logic = 'AND';
@@ -502,7 +502,7 @@ public class GridQueryBuilderTest {
     Assert.isTrue(clause.contains('NumberOfEmployees >= 10'), '>= handled');
   }
 
-  @isTest
+  @IsTest
   static void testBuildCountQuery_WithFilterExpression() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     req.objectApiName = 'Account';
@@ -540,7 +540,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildCountQuery_NegativeScenarios() {
     GridQueryBuilder.QueryRequest blankReq = new GridQueryBuilder.QueryRequest();
     try {
@@ -560,7 +560,7 @@ public class GridQueryBuilderTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testBuildSingleQuery_BlankObject_Negative() {
     GridQueryBuilder.QueryRequest req = new GridQueryBuilder.QueryRequest();
     try {
@@ -571,7 +571,7 @@ public class GridQueryBuilderTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testBuildWhereClause_DirectJsonAndNulls() {
     SObjectType sObjType = Schema.getGlobalDescribe().get('Account');
 
@@ -604,7 +604,7 @@ public class GridQueryBuilderTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testBuildAggregateQuery_WithFilterExpression() {
     GridQueryBuilder.AggregateRequest req = new GridQueryBuilder.AggregateRequest();
     req.objectApiName = 'Opportunity';

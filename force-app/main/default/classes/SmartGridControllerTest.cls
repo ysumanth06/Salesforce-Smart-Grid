@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class SmartGridControllerTest {
-  @isTest
+  @IsTest
   static void testGetGridConfig_Null() {
     Test.startTest();
     SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(
@@ -10,7 +10,7 @@ public class SmartGridControllerTest {
     Assert.isNull(config, 'Config should be null for null dev name');
   }
 
-  @isTest
+  @IsTest
   static void testGetGridConfig_JSON() {
     String jsonStr = '[{"Id":"m00000000000001", "DeveloperName":"Test_JSON", "Is_Active__c":true, "Use_Advanced_Config__c":false, "Columns_JSON__c":"[{\\"field\\":\\"Name\\",\\"order\\":1}]"}]';
     SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
@@ -42,7 +42,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetGridConfig_Relational() {
     String jsonStr = '[{"Id":"m00000000000002", "DeveloperName":"Test_Relational", "Is_Active__c":true, "Use_Advanced_Config__c":true, "Smart_Grid_Columns__r":{"totalSize":1, "done":true, "records":[{"Id":"m01000000000001", "Field_API_Name__c":"Industry", "Order__c":1, "Is_Editable__c":true}]}}]';
     SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
@@ -74,7 +74,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetGridConfig_DefaultToggles() {
     String jsonStr = '[{"Id":"m00000000000003", "DeveloperName":"Test_Defaults", "Is_Active__c":true, "Columns_JSON__c":"[{\\"field\\":\\"Name\\"}]"}]';
     SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
@@ -99,7 +99,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetGridConfig_FeatureToggles() {
     String jsonStr = '[{"Id":"m00000000000004", "DeveloperName":"Test_Toggles", "Is_Active__c":true, "Enable_Add_Row__c":false, "Enable_Delete__c":false, "Enable_Export__c":false, "Enable_Filters__c":false, "Enable_Reading_Pane__c":true, "Totals_Fields_JSON__c":"[\\"AnnualRevenue\\"]", "Related_Object__c":"Contact", "Columns_JSON__c":"[{\\"field\\":\\"Name\\"}]"}]';
     SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
@@ -131,7 +131,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetObjectFields_Valid() {
     Test.startTest();
     List<SmartGridController.ColumnInfo> fields = SmartGridController.getObjectFields(
@@ -141,7 +141,7 @@ public class SmartGridControllerTest {
     Assert.isTrue(fields.size() > 0, 'Should return fields for Account');
   }
 
-  @isTest
+  @IsTest
   static void testGetObjectFields_Invalid() {
     Test.startTest();
     List<SmartGridController.ColumnInfo> fields = SmartGridController.getObjectFields(
@@ -155,7 +155,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetRecords_Valid() {
     Account target = new Account(Name = 'Test Smart Grid Acc');
     insert target;
@@ -180,7 +180,7 @@ public class SmartGridControllerTest {
     Assert.areEqual(1, result.pageNumber, 'Page number should be 1');
   }
 
-  @isTest
+  @IsTest
   static void testSaveRecords_Valid() {
     Account target = new Account(Name = 'Save Test Acc');
     insert target;
@@ -198,7 +198,7 @@ public class SmartGridControllerTest {
     Assert.areEqual('Updated Acc', updatedAcc.Name, 'Name should be updated');
   }
 
-  @isTest
+  @IsTest
   static void testSaveRecords_PartialSuccess() {
     Account goodAcc = new Account(Name = 'Good Acc');
     insert goodAcc;
@@ -234,7 +234,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testSaveRecords_Bulk() {
     List<Account> accounts = new List<Account>();
     for (Integer i = 0; i < 251; i++) {
@@ -262,7 +262,7 @@ public class SmartGridControllerTest {
     Assert.areEqual(251, updatedCount, 'All 251 records should be updated');
   }
 
-  @isTest
+  @IsTest
   static void testGetPicklistValues_Valid() {
     Test.startTest();
     List<SmartGridController.PicklistOption> options = SmartGridController.getPicklistValues(
@@ -281,7 +281,7 @@ public class SmartGridControllerTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testGetPicklistValues_NonPicklistField() {
     Test.startTest();
     try {
@@ -297,7 +297,7 @@ public class SmartGridControllerTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testGetPicklistValues_NullParams() {
     Test.startTest();
     List<SmartGridController.PicklistOption> options = SmartGridController.getPicklistValues(
@@ -313,7 +313,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetRecords_WithFilterValue() {
     Account acc = new Account(Name = 'Filter Test', Industry = 'Technology');
     insert acc;
@@ -346,7 +346,7 @@ public class SmartGridControllerTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testDeleteRecords_Valid() {
     Account acc = new Account(Name = 'Delete Test');
     insert acc;
@@ -363,7 +363,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testDeleteRecords_Bulk() {
     List<Account> accounts = new List<Account>();
     for (Integer i = 0; i < 251; i++) {
@@ -378,7 +378,7 @@ public class SmartGridControllerTest {
     Assert.isTrue(sr.isSuccess, 'Bulk delete should be successful');
   }
 
-  @isTest
+  @IsTest
   static void testDeleteRecords_Null() {
     Test.startTest();
     SmartGridController.SaveResult sr = SmartGridController.deleteRecords(null);
@@ -386,7 +386,7 @@ public class SmartGridControllerTest {
     Assert.isTrue(sr.isSuccess, 'Should return success for null');
   }
 
-  @isTest
+  @IsTest
   static void testSaveRecords_InsertNew() {
     Account acc = new Account(Name = 'New Insert Test');
     Test.startTest();
@@ -402,7 +402,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testSaveRecords_InsertPartialSuccess() {
     Account acc1 = new Account(Name = 'Valid Insert');
     Account acc2 = new Account(); // Missing Name
@@ -420,7 +420,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testDeleteRecords_InvalidId_ThrowsException() {
     Account uninsertedAcc = new Account(Name = 'No Id');
     Test.startTest();
@@ -438,7 +438,7 @@ public class SmartGridControllerTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testGetFormatRules_Controller() {
     Test.startTest();
     List<SmartGridFormatEngine.FormatRuleDTO> rules = SmartGridController.getFormatRules(
@@ -449,7 +449,7 @@ public class SmartGridControllerTest {
     Assert.isNotNull(rules, 'Format rules should not be null');
   }
 
-  @isTest
+  @IsTest
   static void testGetAggregates_Opportunity() {
     Opportunity opp1 = new Opportunity(
       Name = 'Opp 1',
@@ -485,7 +485,7 @@ public class SmartGridControllerTest {
     Assert.areEqual(2, aggs[0].countValue, 'Count should be 2');
   }
 
-  @isTest
+  @IsTest
   static void testGetAggregates_InvalidInputs() {
     Test.startTest();
     List<SmartGridController.AggregateResultDTO> empty1 = SmartGridController.getAggregates(
@@ -514,7 +514,7 @@ public class SmartGridControllerTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetRecordsPaged_WithFilterJson() {
     Account acc = new Account(
       Name = 'FilterJson Test Acc',
@@ -544,7 +544,7 @@ public class SmartGridControllerTest {
     Assert.isTrue(result.records.size() >= 1, 'Should find matching record');
   }
 
-  @isTest
+  @IsTest
   static void testSavedViewsDelegation() {
     Test.startTest();
     Smart_Grid_View__c saved = SmartGridController.saveView(

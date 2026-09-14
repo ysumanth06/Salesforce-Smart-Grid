@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class SmartGridViewServiceTest {
-  @isTest
+  @IsTest
   static void testSaveView_And_GetViews_Positive() {
     Test.startTest();
     Smart_Grid_View__c saved = SmartGridViewService.saveView(
@@ -24,7 +24,7 @@ public class SmartGridViewServiceTest {
     Assert.isFalse(views[0].Is_Default__c, 'Is_Default should be false');
   }
 
-  @isTest
+  @IsTest
   static void testSaveView_DefaultSwitching_TC_09_P4() {
     // 1. Create first default view
     Smart_Grid_View__c view1 = SmartGridViewService.saveView(
@@ -59,7 +59,7 @@ public class SmartGridViewServiceTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testUpdateExistingView() {
     Smart_Grid_View__c view = SmartGridViewService.saveView(
       null,
@@ -88,7 +88,7 @@ public class SmartGridViewServiceTest {
     Assert.isTrue(updated.Is_Default__c, 'Should now be default');
   }
 
-  @isTest
+  @IsTest
   static void testDeleteView_TC_09_N1() {
     Smart_Grid_View__c view = SmartGridViewService.saveView(
       null,
@@ -106,7 +106,7 @@ public class SmartGridViewServiceTest {
     Assert.areEqual(0, views.size(), 'View should be deleted');
   }
 
-  @isTest
+  @IsTest
   static void testQueryHistory_Last10Maintained_TC_09_P3() {
     Test.startTest();
     // Simulate 12 query executions
@@ -131,7 +131,7 @@ public class SmartGridViewServiceTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testUserPrivacy_TC_09_N2() {
     // Run as standard user A
     Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
@@ -187,7 +187,7 @@ public class SmartGridViewServiceTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testSaveView_Validation_Negative() {
     try {
       SmartGridViewService.saveView(null, '', 'Account', '{}', false);
@@ -204,7 +204,7 @@ public class SmartGridViewServiceTest {
     }
   }
 
-  @isTest
+  @IsTest
   static void testBulkViews_TC_09_B1() {
     List<Smart_Grid_View__c> bulkViews = new List<Smart_Grid_View__c>();
     Id currUserId = UserInfo.getUserId();

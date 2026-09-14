@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class SmartGridIdValidatorTest {
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_Valid18Char() {
     String valid18 = '001000000000001AAA';
     Assert.isTrue(
@@ -9,7 +9,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_Valid15Char() {
     String valid15 = '001000000000001';
     Assert.isTrue(
@@ -18,7 +18,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_NullOrBlank() {
     Assert.isFalse(
       SmartGridIdValidator.isValidSalesforceId(null),
@@ -34,7 +34,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_TooShort() {
     Assert.isFalse(
       SmartGridIdValidator.isValidSalesforceId('12345'),
@@ -42,7 +42,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_TooLong() {
     Assert.isFalse(
       SmartGridIdValidator.isValidSalesforceId('001000000000001AAAAAAAA'),
@@ -50,7 +50,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_SqlInjectionAttempt() {
     String injectionPayload = '\'; DROP TABLE--';
     Assert.isFalse(
@@ -59,7 +59,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testIsValidSalesforceId_SpecialCharacters() {
     String specialChars = '001!@#$%^&*()';
     Assert.isFalse(
@@ -68,7 +68,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testValidateIds_NewRecordsNullId_Passes() {
     List<Account> newAccounts = new List<Account>{
       new Account(Name = 'New Acc 1'),
@@ -85,7 +85,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testValidateIds_NullOrEmptyList_Passes() {
     Test.startTest();
     SmartGridIdValidator.validateIds(null);
@@ -99,7 +99,7 @@ public class SmartGridIdValidatorTest {
     Assert.isTrue(true, 'Null and empty lists should pass safely');
   }
 
-  @isTest
+  @IsTest
   static void testValidateIds_Bulk251Records_Passes() {
     List<Account> accounts = new List<Account>();
     for (Integer i = 0; i < 251; i++) {
@@ -118,7 +118,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testValidateIdsForDelete_MissingId_ThrowsException() {
     Account uninserted = new Account(Name = 'No Id Acc');
 
@@ -139,7 +139,7 @@ public class SmartGridIdValidatorTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testValidateIdsForDelete_ValidIds_Passes() {
     Account acc = new Account(Name = 'Delete Target');
     insert acc;
@@ -154,7 +154,7 @@ public class SmartGridIdValidatorTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testValidateIdStrings_Invalid_ThrowsException() {
     List<String> invalidIds = new List<String>{
       '001000000000001',
@@ -174,7 +174,7 @@ public class SmartGridIdValidatorTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testValidateIdStrings_Valid_Passes() {
     List<String> validIds = new List<String>{
       '001000000000001',
@@ -188,7 +188,7 @@ public class SmartGridIdValidatorTest {
     Assert.isTrue(true, 'Valid ID strings should pass validation');
   }
 
-  @isTest
+  @IsTest
   static void testValidateIds_InvalidRecordId_ThrowsException() {
     Account acc = new Account(Name = 'Invalid Acc');
     insert acc;
@@ -212,7 +212,7 @@ public class SmartGridIdValidatorTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testValidateIdsForDelete_InvalidRecordId_ThrowsException() {
     Account acc = new Account(Name = 'Delete Invalid Acc');
     insert acc;

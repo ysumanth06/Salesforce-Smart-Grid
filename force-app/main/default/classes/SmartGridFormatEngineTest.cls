@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class SmartGridFormatEngineTest {
-  @isTest
+  @IsTest
   static void testGetFormatRules_BlankConfig() {
     Test.startTest();
     List<SmartGridFormatEngine.FormatRuleDTO> rules = SmartGridFormatEngine.getFormatRules(
@@ -16,7 +16,7 @@ public class SmartGridFormatEngineTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetFormatRules_WithMockRules_PriorityAndFiltering() {
     String jsonStr =
       '[' +
@@ -61,7 +61,7 @@ public class SmartGridFormatEngineTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetFormatRules_WithoutObjectValidation() {
     String jsonStr =
       '[' +
@@ -93,7 +93,7 @@ public class SmartGridFormatEngineTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetFormatRules_RealQuery() {
     // Test the live SOQL query path with nonexistent config
     Test.startTest();

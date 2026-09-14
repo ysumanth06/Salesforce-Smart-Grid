@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class SmartGridUserPrefServiceTest {
-  @testSetup
+  @TestSetup
   static void setupTestData() {
     // Create user prefs
     Smart_Grid_User_Pref__c pref = new Smart_Grid_User_Pref__c(
@@ -11,7 +11,7 @@ public class SmartGridUserPrefServiceTest {
     insert pref;
   }
 
-  @isTest
+  @IsTest
   static void testGetPrefs_Success() {
     Test.startTest();
     String result = SmartGridUserPrefService.getPrefs('Account');
@@ -24,7 +24,7 @@ public class SmartGridUserPrefServiceTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testGetPrefs_NotFound() {
     Test.startTest();
     String result = SmartGridUserPrefService.getPrefs('Contact');
@@ -36,7 +36,7 @@ public class SmartGridUserPrefServiceTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testSavePrefs_InsertNew() {
     Test.startTest();
     SmartGridUserPrefService.savePrefs(
@@ -57,7 +57,7 @@ public class SmartGridUserPrefServiceTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testSavePrefs_UpdateExisting() {
     Test.startTest();
     SmartGridUserPrefService.savePrefs(
@@ -82,7 +82,7 @@ public class SmartGridUserPrefServiceTest {
     );
   }
 
-  @isTest
+  @IsTest
   static void testSavePrefs_ExceedsLengthLimit() {
     String longJson = 'x'.repeat(32001);
     Test.startTest();
@@ -98,7 +98,7 @@ public class SmartGridUserPrefServiceTest {
     Test.stopTest();
   }
 
-  @isTest
+  @IsTest
   static void testResetPrefs() {
     Test.startTest();
     SmartGridUserPrefService.resetPrefs('Account');
