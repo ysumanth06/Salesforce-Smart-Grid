@@ -1,251 +1,237 @@
-# Salesforce Smart Grid — Phase 0 MVP
+# Salesforce Smart Grid — Enterprise AI Data Workspace
 
-A **metadata-driven, dynamic inline-edit data grid** for Salesforce Lightning. Drop it onto any App, Home, or Record page to instantly render a fully functional, editable datatable for any object — no code changes required.
+[![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v65.0-blue.svg)](https://developer.salesforce.com)
+[![Apex Tests](<https://img.shields.io/badge/Apex%20Tests-126%2F126%20Passing%20(100%25)-success.svg>)]()
+[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-124%2F124%20Passing%20(100%25)-success.svg>)]()
+[![Security](https://img.shields.io/badge/Security-USER__MODE%20%7C%20stripInaccessible-green.svg)]()
+[![License](https://img.shields.io/badge/License-MIT-purple.svg)]()
 
----
-
-## ✨ What's Included in Phase 0
-
-### Core Features
-
-| Feature | Description |
-|---------|-------------|
-| **Dynamic Grid Rendering** | Configure once in Custom Metadata, render everywhere. Supports any standard or custom object. |
-| **Inline Editing** | Users can edit records directly in the datatable and save in bulk. |
-| **Bulk Save with Partial Success** | Uses `Database.update(records, false)` — successful rows save, failed rows show inline errors. |
-| **Row-Level Error Handling** | DML errors are mapped back to individual rows in the datatable with field-level highlights. |
-| **Column Personalization** | When no CMDT config exists, a modal with a dual-listbox lets users pick which fields to display. |
-| **Dynamic Filtering** | Configurable picklist-based filter combobox. Set a `Default_Filter_Field__c` and the grid auto-populates a filter dropdown. |
-| **FLS Security** | All queries enforce `isAccessible()` checks. All DML uses `stripInaccessible()`. No data leaks. |
-
-### Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        LWC Layer                                │
-│  ┌─────────────────────┐    ┌──────────────────────────────┐   │
-│  │   smartDataGrid     │───▶│   smartGridFieldPicker       │   │
-│  │  (Parent: datatable,│◀───│  (Child: dual-listbox modal) │   │
-│  │   filter combobox)  │    │   fires <fieldselection>     │   │
-│  └─────────┬───────────┘    └──────────────────────────────┘   │
-│            │                                                    │
-├────────────┼────────────────────────────────────────────────────┤
-│            │              Apex Layer                            │
-│  ┌─────────▼───────────┐    ┌──────────────────────────────┐   │
-│  │ SmartGridController │───▶│     GridQueryBuilder         │   │
-│  │ (Thin Controller)   │    │  (Selector / Domain Layer)   │   │
-│  │ getGridConfig()     │    │  buildSingleQuery()          │   │
-│  │ getRecords()        │    │  validateFields() + FLS      │   │
-│  │ saveRecords()       │    │  SQL injection prevention    │   │
-│  │ getObjectFields()   │    └──────────────────────────────┘   │
-│  │ getPicklistValues() │                                       │
-│  └─────────────────────┘                                       │
-│                                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│                      Metadata Layer                             │
-│  Smart_Grid_Config__mdt (8 fields) + SmartGrid_User PermSet    │
-└─────────────────────────────────────────────────────────────────┘
-```
+A **metadata-driven, enterprise-grade data workspace and spreadsheet experience** for Salesforce Lightning. Drop it onto any App, Home, or Record page to instantly render a fully functional, editable, and AI-augmented datatable for any standard or custom object — no code required.
 
 ---
 
-## 📁 Project Structure
+## 📚 Complete Documentation Suite
+
+| Guide                                                       | Description                                                                                                                                   | Target Audience                                |
+| :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------- |
+| 📖 **[User Guide](docs/USER_GUIDE.md)**                     | End-user instructions, inline editing, draft review, column customization, with vs without AI usage, and detailed AI examples.                | End Users, Sales Reps, Analysts, Data Stewards |
+| 🛠️ **[Administrator Guide](docs/ADMIN_GUIDE.md)**           | Full metadata setup (`__mdt`), App Builder deployment, permission sets, external LLM Named Credentials, telemetry, and governor limit tuning. | Salesforce Admins, Developers, Architects      |
+| 🧪 **[QA Audit & Remediation Walkthrough](walkthrough.md)** | 100-point E2E quality audit, defect log (P0-P2 fixes), non-admin persona verification under `System.runAs`, and seed data validation.         | QA Leads, Security Reviewers, Release Managers |
+
+---
+
+## ✨ Feature Pillars
+
+### 1. High-Performance Spreadsheet Experience
+
+- **Mass Inline Editing**: Edit text, numbers, dates, currencies, and custom picklists inline with instant visual cues.
+- **Review Pending Changes Modal**: Compare baseline database values against draft edits in a side-by-side diff before saving.
+- **Bulk Save with Partial Success**: Uses `Database.insert`/`Database.update(..., false)`. Successful records save cleanly; failed records display inline error tooltips.
+- **Add & Delete Rows**: Add new client-side draft rows instantly. Delete selected records safely with confirmation modals.
+- **Fill Down**: Copy a value across selected rows targeting the active edited column.
+- **Multi-Level Undo/Redo**: Full history stack (`Ctrl+Z`, `Ctrl+Y`).
+- **Responsive Paging & Sticky Scrolling**: Page sizes of 10, 25, 50, or 100 with sticky table headers and anchored footer pagination.
+- **Sticky Column Totals & Aggregates**: Live Sum, Average, Minimum, and Maximum for numeric and currency fields.
+- **Reading Pane**: Side-by-side inspection drawer for viewing record details without leaving the grid.
+- **Hierarchical Related Sub-Grids**: Expand parent records to display nested child record grids (e.g. Account → Contacts).
+- **RFC 4180 CSV Exporter**: One-click spreadsheet export respecting visible columns and active filter criteria.
+
+### 2. Dynamic Personalization & Customization
+
+- **Field Picker**: Dual-listbox modal enabling users to add, remove, and reorder fields on demand.
+- **Column Pinning & Resizing**: Pin vital columns (e.g. `Name`) to the left; drag borders or double-click to auto-fit widths.
+- **User-Saved Views (`Smart_Grid_View__c`)**: Create, name, save, and switch between personalized view presets.
+- **Ergonomic Preferences (`Smart_Grid_User_Pref__c`)**: Persists user density preferences, page sizes, and column widths across sessions.
+- **Conditional Formatting (`Smart_Grid_Format_Rule__mdt`)**: Highlight cells based on business rules (e.g. green for "Closed Won", red for "Closed Lost").
+
+### 3. AI-Powered Intelligence Suite (AI Premium)
+
+- **NLP Command Palette (`Cmd+K` / `Ctrl+K`)**: Query and filter records using natural language (e.g. _"Show California technology accounts with revenue over $2M"_).
+- **Data Quality & Health Inspection Drawer**: Automated health score (0-100) scanning records for missing data, duplicate candidates, outliers, and anomalies.
+- **Conversational Assistant Copilot**: Side drawer assistant aware of active grid filters, answering questions and computing aggregate analytics in natural language.
+- **Pluggable AI Providers**: Compatible with Salesforce **Einstein Models API**, external LLMs (**OpenAI GPT-4o**, **Claude 3.5**, **Azure OpenAI**) via Named Credentials, or local **Mock AI Provider**.
+
+---
+
+## 🏛️ Architecture
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        LIGHTNING WEB COMPONENTS                        │
+│  smartDataGrid (Parent)                                               │
+│  ├── c-smart-grid-datatable (Custom picklist cell types)               │
+│  ├── c-smart-grid-filter-bar & c-smart-grid-filter-builder             │
+│  ├── c-smart-grid-field-picker & c-smart-grid-view-selector            │
+│  ├── c-smart-grid-review-modal (Diff inspection modal)                │
+│  ├── c-smart-grid-reading-pane & c-smart-grid-related-grid             │
+│  ├── c-smart-grid-command-palette (NLP prompt interface)               │
+│  ├── c-smart-grid-assistant (Conversational AI copilot)               │
+│  ├── c-smart-grid-data-quality (Health score & issue inspector)        │
+│  └── c-smart-grid-onboarding (Interactive product walkthrough)        │
+├────────────────────────────────────────────────────────────────────────┤
+│                           APEX DOMAIN LAYER                            │
+│  SmartGridController (Thin API boundary)                               │
+│  ├── GridQueryBuilder (FLS-safe dynamic SOQL, SQLi prevention)         │
+│  ├── SmartGridIdValidator (ID validation, delete integrity check)      │
+│  ├── SmartGridLicenseService (Entitlement checks & tier gating)        │
+│  ├── SmartGridNLPEngine (Natural language query translation)           │
+│  ├── SmartGridDataQualityService (Outlier & anomaly evaluation)        │
+│  ├── SmartGridAgentService & SmartGridNLPDMLHandler (AI DML execution) │
+│  ├── SmartGridViewService & SmartGridUserPrefService                   │
+│  └── SmartGridTelemetryService (Platform event publisher)              │
+├────────────────────────────────────────────────────────────────────────┤
+│                         METADATA & DATA LAYER                          │
+│  Custom Metadata Types:                                                │
+│    - Smart_Grid_Config__mdt, Smart_Grid_Column__mdt                    │
+│    - Smart_Grid_Format_Rule__mdt, Smart_Grid_AI_Config__mdt            │
+│    - Smart_Grid_License__mdt                                           │
+│  Custom Objects: Smart_Grid_View__c, Smart_Grid_User_Pref__c           │
+│  Platform Event: Smart_Grid_Telemetry__e                               │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📁 Repository Structure
 
 ```
 force-app/main/default/
 ├── classes/
-│   ├── GridQueryBuilder.cls          # Dynamic SOQL builder with FLS validation
-│   ├── GridQueryBuilderTest.cls      # 8 test methods (PNB + SQL injection)
-│   ├── SmartGridController.cls       # @AuraEnabled controller (thin wrapper)
-│   └── SmartGridControllerTest.cls   # 11 test methods (PNB + bulk + filter)
-├── customMetadata/
-│   └── Smart_Grid_Config.Account_Demo_Grid.md-meta.xml  # Demo config record
+│   ├── GridQueryBuilder.cls                # Dynamic SOQL generator with FLS
+│   ├── GridQueryBuilderTest.cls            # 100% pass
+│   ├── ISmartGridAIProvider.cls            # Pluggable AI provider interface
+│   ├── SmartGridAgentService.cls           # Agent runtime orchestration
+│   ├── SmartGridAgentServiceTest.cls       # 100% pass
+│   ├── SmartGridController.cls             # Main @AuraEnabled controller
+│   ├── SmartGridControllerTest.cls         # 100% pass
+│   ├── SmartGridDataQualityService.cls     # Data health analysis engine
+│   ├── SmartGridDataQualityServiceTest.cls # 100% pass
+│   ├── SmartGridEinsteinAIProvider.cls     # Einstein Models API adapter
+│   ├── SmartGridExternalAIProvider.cls     # Named Credential HTTP adapter
+│   ├── SmartGridFormatEngine.cls           # Cell format rule parser
+│   ├── SmartGridFormatEngineTest.cls       # 100% pass
+│   ├── SmartGridIdValidator.cls            # ID security & validation
+│   ├── SmartGridIdValidatorTest.cls        # 100% pass
+│   ├── SmartGridLicenseService.cls         # Feature gating & licenses
+│   ├── SmartGridLicenseServiceTest.cls     # 100% pass
+│   ├── SmartGridMockAIProvider.cls         # Simulation AI engine
+│   ├── SmartGridNLPDMLHandler.cls          # Natural language DML engine
+│   ├── SmartGridNLPDMLHandlerTest.cls      # 100% pass
+│   ├── SmartGridNLPEngine.cls              # NLP SOQL translation engine
+│   ├── SmartGridNLPEngineTest.cls          # 100% pass
+│   ├── SmartGridNonAdminPersonaTest.cls    # System.runAs non-admin test suite
+│   ├── SmartGridSchemaService.cls          # Schema describe caching
+│   ├── SmartGridTelemetryService.cls       # Telemetry publisher
+│   ├── SmartGridTelemetryServiceTest.cls   # 100% pass
+│   ├── SmartGridUserPrefService.cls        # User preferences service
+│   ├── SmartGridUserPrefServiceTest.cls    # 100% pass
+│   ├── SmartGridViewService.cls            # Custom views manager
+│   └── SmartGridViewServiceTest.cls        # 100% pass
+├── flexipages/
+│   └── Smart_Grid_Demo.flexipage-meta.xml  # Lightning App Page
+├── tabs/
+│   └── Smart_Grid_Explorer.tab-meta.xml    # Lightning Custom Tab
 ├── lwc/
-│   ├── smartDataGrid/                # Parent grid component
-│   │   ├── smartDataGrid.html
-│   │   ├── smartDataGrid.js
-│   │   ├── smartDataGrid.css
-│   │   └── smartDataGrid.js-meta.xml
-│   └── smartGridFieldPicker/         # Column picker modal (child)
-│       ├── smartGridFieldPicker.html
-│       ├── smartGridFieldPicker.js
-│       ├── smartGridFieldPicker.css
-│       ├── smartGridFieldPicker.js-meta.xml
-│       └── __tests__/
-│           └── smartGridFieldPicker.test.js  # 9 Jest tests
+│   ├── smartDataGrid/                      # Parent grid orchestrator
+│   ├── smartGridDatatable/                 # Extended datatable with custom types
+│   ├── smartGridPicklist/                  # Custom picklist template
+│   ├── smartGridCommandPalette/            # Cmd+K NLP prompt modal
+│   ├── smartGridAssistant/                 # AI assistant side drawer
+│   ├── smartGridDataQuality/               # Health score & outlier inspector
+│   ├── smartGridFilterBar/                 # Quick filter combobox
+│   ├── smartGridFilterBuilder/             # Advanced condition builder
+│   ├── smartGridFieldPicker/               # Column personalization dual-listbox
+│   ├── smartGridReviewModal/               # Unsaved changes diff viewer
+│   ├── smartGridReadingPane/               # Side-by-side record drawer
+│   ├── smartGridRelatedGrid/               # Nested hierarchical child grid
+│   ├── smartGridOnboarding/                # Product tour modal
+│   └── [helper services]/                  # Cache, CSV, DirtyState, Formats, etc.
 ├── objects/
-│   └── Smart_Grid_Config__mdt/       # Custom Metadata Type + 8 fields
+│   ├── Smart_Grid_Config__mdt/             # Configuration CMDT
+│   ├── Smart_Grid_Column__mdt/             # Relational column CMDT
+│   ├── Smart_Grid_Format_Rule__mdt/        # Formatting rule CMDT
+│   ├── Smart_Grid_AI_Config__mdt/          # AI provider CMDT
+│   ├── Smart_Grid_License__mdt/            # Licensing & entitlement CMDT
+│   ├── Smart_Grid_Telemetry__e/            # Platform Event
+│   ├── Smart_Grid_User_Pref__c/            # User preferences custom object
+│   └── Smart_Grid_View__c/                 # Saved views custom object
 └── permissionsets/
-    └── SmartGrid_User.permissionset-meta.xml
+    ├── SmartGrid_User.permissionset-meta.xml
+    └── Smart_Grid_AI_Premium.permissionset-meta.xml
 ```
 
 ---
 
-## 🚀 Deployment
+## 🚀 Quick Start Deployment
 
-### Prerequisites
-
-- Salesforce CLI (`sf`) installed and authenticated
-- Target org API version 65.0+
-- Node.js 18+ (for Jest tests)
-
-### Deploy to a Sandbox or Scratch Org
+### 1. Authenticate to your Target Org
 
 ```bash
-# Authenticate to your org
-sf org login web --alias dev
+sf org login web --alias my-org
+```
 
-# Deploy everything
+### 2. Deploy Metadata
+
+```bash
 sf project deploy start \
   --source-dir force-app \
-  --target-org dev \
+  --target-org my-org \
   --test-level RunLocalTests \
   --wait 15
-
-# Assign the permission set to your user
-sf org assign permset --name SmartGrid_User --target-org dev
 ```
 
-### Run Tests
+### 3. Assign Permission Sets
 
 ```bash
-# Apex tests
+# Assign Core Grid to user
+sf org assign permset --name SmartGrid_User --target-org my-org
+
+# Assign AI Suite (Optional)
+sf org assign permset --name Smart_Grid_AI_Premium --target-org my-org
+```
+
+### 4. Open the App in Lightning Experience
+
+```bash
+sf org open --path /lightning/n/Smart_Grid_Explorer --target-org my-org
+```
+
+---
+
+## 🧪 Test Execution & Verification
+
+### Apex Automated Tests (13 Suites, 126 Tests)
+
+```bash
 sf apex run test \
-  --class-names GridQueryBuilderTest,SmartGridControllerTest \
+  --class-names GridQueryBuilderTest,SmartGridControllerTest,SmartGridDataQualityServiceTest,SmartGridFormatEngineTest,SmartGridIdValidatorTest,SmartGridLicenseServiceTest,SmartGridNLPDMLHandlerTest,SmartGridNLPEngineTest,SmartGridNonAdminPersonaTest,SmartGridTelemetryServiceTest,SmartGridUserPrefServiceTest,SmartGridViewServiceTest,SmartGridAgentServiceTest \
   --code-coverage \
   --result-format human \
-  --target-org dev
-
-# Jest tests (LWC)
-npm install                          # Install dev dependencies first
-npx lwc-jest -- --testPathPattern smartGridFieldPicker
+  --target-org my-org
 ```
 
----
+> **Result**: `126 / 126 Passed (100% Pass Rate)`
 
-## 🧪 How to Test in Salesforce
-
-### Step 1: Verify the Custom Metadata
-
-1. Navigate to **Setup → Custom Metadata Types → Smart Grid Config → Manage Records**
-2. You should see a record named **Account_Demo_Grid** with:
-   - `Object_API_Name__c` = `Account`
-   - `Columns_JSON__c` = `[{"field":"Name","order":1,"editable":true,"width":200},{"field":"Industry","order":2,"editable":true},{"field":"Phone","order":3,"editable":false}]`
-   - `Default_Filter_Field__c` = `Industry`
-   - `Is_Active__c` = `true`
-
-### Step 2: Add the Component to a Lightning Page
-
-1. Navigate to any **Lightning App Page** (e.g., the Home page)
-2. Click **Edit Page** (gear icon → Edit Page)
-3. Search for **"Smart Data Grid"** in the component palette
-4. Drag it onto the page
-5. In the right-hand property panel, set:
-   - **Grid Config Developer Name** = `Account_Demo_Grid`
-6. Click **Save** → **Activate** → **Assign as Org Default** (or app-specific)
-
-### Step 3: Test Inline Editing
-
-1. Navigate to the page where you placed the component.
-2. You should see an Account datatable with **Name**, **Industry**, and **Phone** columns.
-3. Click on any **Name** or **Industry** cell to edit it inline.
-4. Modify values on one or more rows.
-5. Click the **Save** button that appears at the bottom of the datatable.
-6. ✅ Verify: Edited rows save, and the grid refreshes with updated values.
-
-### Step 4: Test Error Handling
-
-1. Edit a row and clear the **Name** field (set it to blank).
-2. Edit another row normally.
-3. Click **Save**.
-4. ✅ Verify: The good row saves successfully. The bad row shows an inline error with a red indicator. A "Partial Success" toast notification appears.
-
-### Step 5: Test Dynamic Filtering
-
-1. If `Default_Filter_Field__c` is set to `Industry`, you should see a **"Filter by Industry"** combobox above the datatable.
-2. Select a value like "Technology" from the dropdown.
-3. ✅ Verify: The grid reloads showing only Account records where `Industry = 'Technology'`.
-4. Select "-- All --" to clear the filter.
-
-### Step 6: Test the Field Picker (Column Personalization)
-
-1. Add a **new** Smart Data Grid component to a page.
-2. Instead of setting a Grid Config, only set:
-   - **Default Object API Name** = `Account`
-3. Save and navigate to the page.
-4. ✅ Verify: A **modal** appears with a dual-listbox showing all accessible Account fields.
-5. Move fields (e.g., AnnualRevenue, Website) to the "Selected" side.
-6. Click **Apply**.
-7. ✅ Verify: The datatable renders with your chosen fields and loads Account data.
-
----
-
-## ⚙️ Configuration Reference
-
-### Smart_Grid_Config__mdt Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `Object_API_Name__c` | Text (80) | API name of the target SObject (e.g., `Account`, `Contact`, `My_Custom__c`) |
-| `Columns_JSON__c` | Long Text (10000) | JSON array defining columns: `[{"field":"Name","order":1,"editable":true,"width":200}]` |
-| `Default_Filter_Field__c` | Text (80) | Picklist field API name for the dynamic filter combobox |
-| `Default_Sort_Field__c` | Text (80) | Field to sort by on initial load |
-| `Record_Limit__c` | Number | Max rows returned (default: 200, max: 2000) |
-| `Is_Active__c` | Checkbox | Deactivate without removing the component |
-| `Allow_Personalization__c` | Checkbox | Allow users to open the field picker modal |
-| `Use_Advanced_Config__c` | Checkbox | Phase 1 migration flag (not yet implemented) |
-
-### Creating a New Grid Configuration
+### LWC Jest Unit Tests (20 Suites, 124 Tests)
 
 ```bash
-# Use sf CLI to create a new config record
-sf data create record \
-  --sobject Smart_Grid_Config__mdt \
-  --values "DeveloperName='Contact_Grid' \
-            MasterLabel='Contact Grid' \
-            Object_API_Name__c='Contact' \
-            Columns_JSON__c='[{\"field\":\"FirstName\",\"order\":1,\"editable\":true},{\"field\":\"LastName\",\"order\":2,\"editable\":true},{\"field\":\"Email\",\"order\":3,\"editable\":false}]' \
-            Is_Active__c=true \
-            Record_Limit__c=100" \
-  --target-org dev
+npm test
 ```
 
-Or create a new metadata file in `force-app/main/default/customMetadata/` and deploy.
+> **Result**: `20 / 20 Suites Passed, 124 / 124 Tests Passed (100% Pass Rate)`
 
 ---
 
-## 🔒 Security Model
+## 🔒 Security & Quality Gates
 
-| Layer | Enforcement |
-|-------|------------|
-| **Object Access** | `Schema.getGlobalDescribe().isAccessible()` — objects the user can't see are rejected |
-| **Field Access (Read)** | `Schema.DescribeFieldResult.isAccessible()` — inaccessible fields silently dropped from queries |
-| **Field Access (Write)** | `Security.stripInaccessible(AccessType.UPDATABLE)` — unauthorized fields stripped before DML |
-| **Sharing** | `with sharing` on all Apex classes |
-| **Injection** | `String.escapeSingleQuotes()` on all dynamic SOQL inputs |
+- **User Mode Enforcement**: Queries run `WITH USER_MODE`. Inaccessible fields are automatically excluded from SOQL.
+- **Strip Inaccessible**: DML operations execute through `Security.stripInaccessible(AccessType.UPSERTABLE, records)` to prevent unauthorized field writes.
+- **SQL Injection Prevention**: Object names and fields are validated against `Schema.getGlobalDescribe()` token maps; string inputs are safely escaped.
+- **License-Agnostic Permission Sets**: No rigid user license locks. Fully compatible with Salesforce Platform, Salesforce Standard, and Community internal licenses.
+- **Non-Admin Persona Verified**: Tested and verified under `System.runAs(standardUser)` across all DML, NLP, and Data Quality services.
 
 ---
 
-## 🗺️ Roadmap (Phase 1+)
+## 📄 License
 
-- [ ] Relational metadata config (replace JSON with child CMDT records)
-- [ ] Multi-field filtering with AND/OR logic
-- [ ] Server-side pagination (offset/cursor)
-- [ ] Column sorting by click
-- [ ] Export to CSV
-- [ ] Record creation (inline "new row")
-- [ ] LMS integration for cross-component communication
-
----
-
-## 📐 Built With
-
-- **Salesforce Platform** — API 65.0
-- **Apex** — `with sharing`, `WITH USER_MODE`, `Database.update(records, false)`
-- **Lightning Web Components** — SLDS 2, `lwc:if`, PICKLES architecture
-- **Custom Metadata Types** — Deployable, packageable config
-- **SFSpeckit** — Spec-driven development methodology
-
-## License
-
-MIT
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
