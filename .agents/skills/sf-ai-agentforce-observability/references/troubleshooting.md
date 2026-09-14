@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Troubleshooting Guide
 
 Common issues and solutions for Agentforce session tracing extraction.
@@ -8,20 +9,22 @@ Common issues and solutions for Agentforce session tracing extraction.
 ### 401 Unauthorized
 
 **Symptom:**
+
 ```
 RuntimeError: Token exchange failed: invalid_grant
 ```
 
 **Causes & Solutions:**
 
-| Cause | Solution |
-|-------|----------|
-| Expired JWT | Check certificate expiration with `openssl x509 -enddate -noout -in cert.crt` |
-| Wrong consumer key | Verify consumer key matches External Client App |
-| Certificate mismatch | Re-upload certificate to Salesforce |
-| User not authorized | Assign user to Connected App / Permission Set |
+| Cause                | Solution                                                                      |
+| -------------------- | ----------------------------------------------------------------------------- |
+| Expired JWT          | Check certificate expiration with `openssl x509 -enddate -noout -in cert.crt` |
+| Wrong consumer key   | Verify consumer key matches External Client App                               |
+| Certificate mismatch | Re-upload certificate to Salesforce                                           |
+| User not authorized  | Assign user to Connected App / Permission Set                                 |
 
 **Debug Steps:**
+
 ```bash
 # Test JWT generation
 python3 -c "
@@ -37,6 +40,7 @@ sf org display --target-org myorg --json
 ### 403 Forbidden
 
 **Symptom:**
+
 ```
 RuntimeError: Access denied: Ensure ECA has cdp_query_api scope
 ```
@@ -60,20 +64,22 @@ RuntimeError: Access denied: Ensure ECA has cdp_query_api scope
 ### No Session Data Found
 
 **Symptom:**
+
 ```
 Extracted 0 sessions
 ```
 
 **Causes & Solutions:**
 
-| Cause | Solution |
-|-------|----------|
-| Session tracing not enabled | Setup → Agentforce → Enable Session Tracing |
-| Wrong date range | Data typically lags 5-15 minutes |
-| Wrong agent name | Check exact API name with `sf agent list` |
-| Sandbox without data | Session tracing may not be enabled in sandbox |
+| Cause                       | Solution                                      |
+| --------------------------- | --------------------------------------------- |
+| Session tracing not enabled | Setup → Agentforce → Enable Session Tracing   |
+| Wrong date range            | Data typically lags 5-15 minutes              |
+| Wrong agent name            | Check exact API name with `sf agent list`     |
+| Sandbox without data        | Session tracing may not be enabled in sandbox |
 
 **Debug:**
+
 ```python
 # Check if DMO exists and has data
 from scripts.datacloud_client import Data360Client
@@ -86,6 +92,7 @@ print(f"Total sessions in Data 360: {count}")
 ### Query Timeout
 
 **Symptom:**
+
 ```
 RuntimeError: Request timed out after 3 retries
 ```
@@ -93,6 +100,7 @@ RuntimeError: Request timed out after 3 retries
 **Solutions:**
 
 1. **Add date filters** to reduce data volume:
+
    ```python
    extractor.extract_sessions(
        since=datetime.now() - timedelta(days=1),  # Shorter range
@@ -100,6 +108,7 @@ RuntimeError: Request timed out after 3 retries
    ```
 
 2. **Use incremental extraction**:
+
    ```bash
    python3 scripts/cli.py extract-incremental --org prod
    ```
@@ -112,6 +121,7 @@ RuntimeError: Request timed out after 3 retries
 ### Memory Error
 
 **Symptom:**
+
 ```
 MemoryError: Unable to allocate array
 ```
@@ -119,6 +129,7 @@ MemoryError: Unable to allocate array
 **Solutions:**
 
 1. **Use lazy evaluation**:
+
    ```python
    # Good
    sessions = pl.scan_parquet(path)
@@ -129,6 +140,7 @@ MemoryError: Unable to allocate array
    ```
 
 2. **Stream to Parquet** instead of loading:
+
    ```python
    client.query_to_parquet(sql, output_path)  # Streams, doesn't load all
    ```
@@ -147,6 +159,7 @@ MemoryError: Unable to allocate array
 ### Missing Child Records
 
 **Symptom:**
+
 ```
 Sessions: 1000
 Interactions: 0
@@ -156,6 +169,7 @@ Steps: 0
 **Cause:** Session IDs not matching in child queries.
 
 **Solution:**
+
 ```python
 # Verify session IDs are valid
 sessions_df = pl.read_parquet(data_dir / "sessions" / "data.parquet")
@@ -171,6 +185,7 @@ WHERE ssot__AiAgentSessionId__c IN ('{session_ids[0]}')
 ### Parquet Write Failure
 
 **Symptom:**
+
 ```
 ArrowInvalid: Could not convert X with type Y
 ```
@@ -178,6 +193,7 @@ ArrowInvalid: Could not convert X with type Y
 **Solutions:**
 
 1. **Check for nested/complex types**:
+
    ```python
    # Complex types are serialized to JSON strings
    if isinstance(value, (dict, list)):
@@ -197,11 +213,13 @@ ArrowInvalid: Could not convert X with type Y
 ### Polars Import Error
 
 **Symptom:**
+
 ```
 ImportError: No module named 'polars'
 ```
 
 **Solution:**
+
 ```bash
 pip install polars pyarrow
 ```
@@ -209,11 +227,13 @@ pip install polars pyarrow
 ### Empty DataFrame
 
 **Symptom:**
+
 ```python
 analyzer.session_summary()  # Returns empty DataFrame
 ```
 
 **Debug:**
+
 ```python
 # Check if files exist
 from pathlib import Path
@@ -229,6 +249,7 @@ print(f"Rows: {pf.metadata.num_rows}")
 ### Column Not Found
 
 **Symptom:**
+
 ```
 SchemaError: column 'ssot__Id__c' not found
 ```
@@ -236,6 +257,7 @@ SchemaError: column 'ssot__Id__c' not found
 **Cause:** Parquet file has different column names.
 
 **Debug:**
+
 ```python
 # Check actual column names
 import pyarrow.parquet as pq
@@ -250,11 +272,13 @@ print(pf.schema_arrow)
 ### Command Not Found
 
 **Symptom:**
+
 ```
 bash: stdm-extract: command not found
 ```
 
 **Solution:**
+
 ```bash
 # Run directly
 python3 scripts/cli.py extract --help
@@ -266,6 +290,7 @@ pip install -e .
 ### Environment Variable Not Set
 
 **Symptom:**
+
 ```
 ValueError: Consumer key not found. Set SF_CONSUMER_KEY
 ```
@@ -273,11 +298,13 @@ ValueError: Consumer key not found. Set SF_CONSUMER_KEY
 **Solutions:**
 
 1. **Set environment variable**:
+
    ```bash
    export SF_CONSUMER_KEY="3MVG9..."
    ```
 
 2. **Pass via command line**:
+
    ```bash
    python3 scripts/cli.py extract --org prod --consumer-key "3MVG9..."
    ```
@@ -294,6 +321,7 @@ ValueError: Consumer key not found. Set SF_CONSUMER_KEY
 ### DMO Not Found
 
 **Symptom:**
+
 ```
 Error: Object ssot__AIAgentSession__dlm not found
 ```
@@ -307,17 +335,18 @@ Error: Object ssot__AIAgentSession__dlm not found
 ### Query Syntax Error
 
 **Symptom:**
+
 ```
 Error: Unexpected token at position X
 ```
 
 **Common fixes:**
 
-| Issue | Fix |
-|-------|-----|
-| Single quotes in values | Escape: `'O''Brien'` |
-| Reserved words | Use backticks: `` `Order` `` |
-| Date format | Use ISO: `'2026-01-28T00:00:00.000Z'` |
+| Issue                   | Fix                                   |
+| ----------------------- | ------------------------------------- |
+| Single quotes in values | Escape: `'O''Brien'`                  |
+| Reserved words          | Use backticks: `` `Order` ``          |
+| Date format             | Use ISO: `'2026-01-28T00:00:00.000Z'` |
 
 ---
 
@@ -330,6 +359,7 @@ Critical discoveries from live testing against Vivint-DevInt org.
 **Problem:** Documentation referenced v60.0, but Data 360 Query SQL API requires v64.0+. We recommend v65.0 (Winter '26).
 
 **Fix:**
+
 ```python
 # Wrong (v60.0)
 url = f"{instance_url}/services/data/v60.0/ssot/querybuilder/execute"
@@ -343,11 +373,13 @@ url = f"{instance_url}/services/data/v65.0/ssot/query-sql"
 **Problem:** Documentation shows `AIAgent` but actual schema uses `AiAgent`.
 
 **Wrong:**
+
 ```sql
 SELECT ssot__AIAgentSessionId__c FROM ssot__AIAgentInteraction__dlm
 ```
 
 **Correct:**
+
 ```sql
 SELECT ssot__AiAgentSessionId__c FROM ssot__AIAgentInteraction__dlm
 ```
@@ -361,6 +393,7 @@ SELECT ssot__AiAgentSessionId__c FROM ssot__AIAgentInteraction__dlm
 **Reality:** AIAgentMoment links directly to Sessions via `ssot__AiAgentSessionId__c`.
 
 **Correct Schema:**
+
 ```
 AIAgentSession → AIAgentInteraction → AIAgentInteractionStep
        ↓
@@ -372,9 +405,10 @@ AIAgentMoment (links to session, not interaction)
 **Problem:** Expected array of objects, but v64.0+ returns array of arrays.
 
 **v65.0 Response:**
+
 ```json
 {
-  "metadata": [{"name": "ssot__Id__c"}, {"name": "ssot__Name__c"}],
+  "metadata": [{ "name": "ssot__Id__c" }, { "name": "ssot__Name__c" }],
   "data": [
     ["019abc...", "Session 1"],
     ["019def...", "Session 2"]
@@ -383,6 +417,7 @@ AIAgentMoment (links to session, not interaction)
 ```
 
 **Fix:** Convert using metadata column names:
+
 ```python
 column_names = [col["name"] for col in metadata]
 records = [dict(zip(column_names, row)) for row in data]
@@ -400,10 +435,12 @@ records = [dict(zip(column_names, row)) for row in data]
 **Problem:** `extract-incremental` was overwriting Parquet files instead of appending.
 
 **Symptoms:**
+
 - Running incremental after full extract → lost all historical data
 - Session count dropped from 447 to 17
 
 **Fix:** Added `append` + `dedupe_key` parameters to `query_to_parquet()`:
+
 ```python
 # Now correctly reads existing, appends new, dedupes by ID
 result = client.query_to_parquet(
@@ -418,6 +455,7 @@ result = client.query_to_parquet(
 **Observation:** 100% of sessions had `ssot__AiAgentSessionEndType__c = 'NOT_SET'`.
 
 **Possible causes:**
+
 - Sessions not explicitly closed
 - Agent Builder sessions don't track end types
 - Potential data quality issue in source org

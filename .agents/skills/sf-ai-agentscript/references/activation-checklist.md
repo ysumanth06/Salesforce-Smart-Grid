@@ -5,11 +5,13 @@ Use this file when `sf-ai-agentscript` is already active and you need the shorte
 ## 1. Route correctly
 
 Use `sf-ai-agentscript` for:
+
 - `.agent` files
 - deterministic topic/state/action design
 - Agent Script CLI workflows (`sf agent generate/publish`)
 
 Do **not** use it for:
+
 - Setup UI / Agent Builder maintenance → use `sf-ai-agentforce`
 - agent testing strategy → use `sf-ai-agentforce-testing`
 - persona design → use `sf-ai-agentforce-persona`
@@ -30,6 +32,7 @@ Do **not** use it for:
 ## 3. Service Agent publish safety
 
 For `AgentforceServiceAgent`:
+
 - `default_agent_user` must exist
 - user must be active
 - user must not be `AutomatedProcess`
@@ -37,9 +40,11 @@ For `AgentforceServiceAgent`:
 - target-backed actions usually require a custom `{AgentName}_Access` permission set
 
 For `AgentforceEmployeeAgent`:
+
 - omit `default_agent_user`
 
 Full details:
+
 - [agent-user-setup.md](agent-user-setup.md)
 - [production-gotchas.md](production-gotchas.md)
 

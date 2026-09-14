@@ -13,13 +13,15 @@
 **Root Cause**: The YAML spec must include a `name:` field at the top level, which maps to `MasterLabel` in the `AiEvaluationDefinition` XML. Our templates previously omitted this field.
 
 **Fix**: Add `name:` to the top of your YAML spec:
+
 ```yaml
-name: "My Agent Tests"    # ← This was the missing field
+name: "My Agent Tests" # ← This was the missing field
 subjectType: AGENT
 subjectName: My_Agent
 ```
 
 **If you still encounter issues**:
+
 1. ✅ Use interactive `sf agent generate test-spec` wizard (interactive-only, no CLI flags)
 2. ✅ Create tests via Salesforce Testing Center UI
 3. ✅ Deploy XML metadata directly
@@ -70,6 +72,7 @@ subjectName: My_Agent
 **Error**: `INTERNAL_SERVER_ERROR: The specified enum type has no constant with the specified name: RETRY`
 
 **Scope**:
+
 - Server returns "RETRY" status for test cases with custom evaluations using `isReference: true`
 - Results API endpoint crashes with HTTP 500 when fetching results
 - Both filter expressions `[?(@.field == 'value')]` AND direct indexing `[0][0]` trigger the bug
@@ -78,6 +81,7 @@ subjectName: My_Agent
 **Confirmed**: Direct `curl` to REST endpoint returns same 500 — NOT a CLI parsing issue
 
 **Workaround**:
+
 1. Use Testing Center UI (Setup → Agent Testing) — may display results
 2. Skip custom evaluations until platform patch
 3. Use `expectedOutcome` (LLM-as-judge) for response validation instead
@@ -121,6 +125,7 @@ subjectName: My_Agent
 **Issue**: The runtime `developerName` hash suffix (e.g., `Escalation_16j9d687a53f890`) changes each time an agent is republished. Tests with hardcoded full runtime names break silently — `topic_assertion` reports `FAILURE` because the expected hash no longer matches.
 
 **Mitigation**:
+
 1. Use `localDeveloperName` for standard topics (framework resolves automatically)
 2. For promoted topics, re-run the [discovery workflow](../references/topic-name-resolution.md#discovery-workflow) after each agent publish
 3. Keep a topic name mapping file that gets updated as part of the publish-and-test cycle

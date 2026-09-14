@@ -29,13 +29,13 @@ export SF_CONSUMER_SECRET=ABC123...
 
 ## Security Rules
 
-| Rule | Implementation |
-|------|---------------|
-| Directory permissions | `0700` (owner only) |
-| File permissions | `0600` (owner only) |
-| Git protection | `.gitignore` with `*` auto-created in `~/.sfagent/` |
-| Secret display | NEVER show full secrets — mask as `ABC...XYZ` (first 3 + last 3) |
-| Credential passing | Export as env vars for subprocesses, never write to temp files |
+| Rule                  | Implementation                                                   |
+| --------------------- | ---------------------------------------------------------------- |
+| Directory permissions | `0700` (owner only)                                              |
+| File permissions      | `0600` (owner only)                                              |
+| Git protection        | `.gitignore` with `*` auto-created in `~/.sfagent/`              |
+| Secret display        | NEVER show full secrets — mask as `ABC...XYZ` (first 3 + last 3) |
+| Credential passing    | Export as env vars for subprocesses, never write to temp files   |
 
 ## CLI Reference
 

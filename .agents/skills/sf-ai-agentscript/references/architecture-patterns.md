@@ -3,7 +3,9 @@
 # Architecture Patterns
 
 ## Pattern 1: Hub and Spoke
+
 Central router (hub) to specialized topics (spokes). Use for multi-purpose agents.
+
 ```
        ┌─────────────┐
        │ topic_sel   │
@@ -17,7 +19,9 @@ Central router (hub) to specialized topics (spokes). Use for multi-purpose agent
 ```
 
 ## Pattern 2: Verification Gate
+
 Security gate before protected topics. Mandatory for sensitive data.
+
 ```
 ┌─────────┐     ┌──────────┐     ┌───────────┐
 │  entry  │ ──▶ │ VERIFY   │ ──▶ │ protected │
@@ -31,7 +35,9 @@ Security gate before protected topics. Mandatory for sensitive data.
 ```
 
 ## Pattern 3: Post-Action Loop
+
 Topic re-resolves after action completes - put checks at TOP.
+
 ```yaml
 topic refund:
   reasoning:

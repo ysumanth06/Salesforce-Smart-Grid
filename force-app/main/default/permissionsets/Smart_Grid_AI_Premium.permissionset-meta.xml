@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >Grants premium AI capabilities including NLP Command Palette, Data Quality Insights, and Conversational Assistant.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>SmartGrid AI Premium</label>
+    <license>Salesforce</license>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_AI_Config__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_License__mdt</name>
+    </customMetadataTypeAccesses>
+</PermissionSet>

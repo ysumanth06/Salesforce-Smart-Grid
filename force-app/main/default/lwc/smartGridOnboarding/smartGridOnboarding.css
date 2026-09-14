@@ -1,0 +1,77 @@
+.onboarding-modal {
+  z-index: 10000;
+}
+
+.onboarding-backdrop {
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.onboarding-container {
+  max-width: 42rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+.onboarding-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  padding: 1.25rem 1.5rem;
+}
+
+.step-indicator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.step-icon {
+  --slds-c-icon-color-foreground-default: #38bdf8;
+}
+
+.step-title {
+  color: #ffffff;
+  margin: 0;
+}
+
+.onboarding-body {
+  background: #f8fafc;
+}
+
+.step-description {
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.feature-highlights {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+}
+
+.highlights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.highlight-item {
+  padding: 0.35rem 0;
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+.onboarding-footer {
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+}
+
+.dont-show-again {
+  color: #64748b;
+}

@@ -1,0 +1,139 @@
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="onboarding-modal-title"
+      class="slds-modal slds-fade-in-open onboarding-modal"
+      data-testid="onboarding-modal"
+    >
+      <div class="slds-modal__container onboarding-container">
+        <!-- Header -->
+        <header class="slds-modal__header onboarding-header">
+          <div
+            class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread"
+          >
+            <span class="step-indicator"
+              >Step {currentStepNumber} of {totalSteps}</span
+            >
+            <button
+              class="slds-button slds-button_icon slds-button_icon-inverse"
+              title="Skip Tour"
+              onclick={handleSkip}
+              data-testid="skip-tour-btn"
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="x-small"
+                variant="inverse"
+              ></lightning-icon>
+              <span class="slds-assistive-text">Skip</span>
+            </button>
+          </div>
+          <div
+            class="slds-var-m-top_small slds-grid slds-grid_vertical-align-center"
+          >
+            <lightning-icon
+              icon-name={currentStep.icon}
+              size="medium"
+              class="step-icon slds-var-m-right_small"
+            ></lightning-icon>
+            <div>
+              <h2
+                id="onboarding-modal-title"
+                class="slds-text-heading_medium step-title"
+              >
+                {currentStep.title}
+              </h2>
+              <p class="slds-text-color_inverse-weak">{currentStep.subtitle}</p>
+            </div>
+          </div>
+        </header>
+
+        <!-- Body -->
+        <div
+          class="slds-modal__content slds-var-p-around_large onboarding-body"
+        >
+          <p class="step-description slds-var-m-bottom_medium">
+            {currentStep.description}
+          </p>
+
+          <div
+            class="feature-highlights slds-var-p-around_medium slds-var-m-bottom_medium"
+          >
+            <ul class="highlights-list">
+              <template for:each={currentStep.highlights} for:item="hl">
+                <li
+                  key={hl}
+                  class="highlight-item slds-grid slds-grid_vertical-align-center"
+                >
+                  <lightning-icon
+                    icon-name="utility:check"
+                    size="xx-small"
+                    variant="success"
+                    class="slds-var-m-right_x-small"
+                  ></lightning-icon>
+                  <span>{hl}</span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer
+          class="slds-modal__footer slds-grid slds-grid_vertical-align-center slds-grid_align-spread onboarding-footer"
+        >
+          <div
+            class="dont-show-again slds-grid slds-grid_vertical-align-center"
+          >
+            <input
+              type="checkbox"
+              id="dont-show-checkbox"
+              checked={dontShowAgain}
+              onchange={handleDontShowChange}
+            />
+            <label
+              for="dont-show-checkbox"
+              class="slds-var-m-left_xx-small slds-text-body_small"
+            >
+              Don't show this tour again
+            </label>
+          </div>
+
+          <div>
+            <template lwc:if={hasPrevious}>
+              <button
+                class="slds-button slds-button_neutral slds-var-m-right_x-small"
+                onclick={handlePrevious}
+                data-testid="prev-step-btn"
+              >
+                Back
+              </button>
+            </template>
+            <template lwc:if={hasNext}>
+              <button
+                class="slds-button slds-button_brand"
+                onclick={handleNext}
+                data-testid="next-step-btn"
+              >
+                Next
+              </button>
+            </template>
+            <template lwc:else>
+              <button
+                class="slds-button slds-button_brand"
+                onclick={handleFinish}
+                data-testid="finish-tour-btn"
+              >
+                Get Started
+              </button>
+            </template>
+          </div>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open onboarding-backdrop"></div>
+  </template>
+</template>

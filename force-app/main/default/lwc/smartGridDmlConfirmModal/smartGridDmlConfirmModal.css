@@ -1,0 +1,107 @@
+.dml-modal {
+  z-index: 10000;
+}
+
+.dml-backdrop {
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.dml-container {
+  max-width: 52rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+.dml-header {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #334155;
+}
+
+.dml-body {
+  background: #f8fafc;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.metric-bar {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.metric-badge {
+  background: #ffffff;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-right: 0.35rem;
+}
+
+.metric-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.diff-table-container {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+}
+
+.field-badge {
+  font-family: monospace;
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+}
+
+.old-val-badge {
+  color: #dc2626;
+  text-decoration: line-through;
+  background: #fee2e2;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.new-val-badge-update {
+  color: #16a34a;
+  font-weight: 600;
+  background: #dcfce7;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.new-val-badge-delete {
+  color: #b91c1c;
+  font-weight: 700;
+  background: #fecaca;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.spinner-holder {
+  min-height: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -14,13 +14,14 @@ Agent Script agents (`.agent` files in `aiAuthoringBundles/`) deploy as `BotDefi
 Multi-topic Agent Script agents with `start_agent` routing have a "1 action per reasoning cycle" budget in CLI tests. The first cycle is consumed by the **transition action** (`go_<topic>`). The actual business action (e.g., `get_order_status`) fires in a second cycle that single-utterance tests don't reach.
 
 **Solution — Use `conversationHistory`:**
+
 ```yaml
 testCases:
   # ROUTING TEST — captures transition action only
   - utterance: "I want to check my order status"
     expectedTopic: order_status
     expectedActions:
-      - go_order_status          # Transition action from start_agent
+      - go_order_status # Transition action from start_agent
 
   # ACTION TEST — use conversationHistory to skip routing
   - utterance: "The order ID is 801ak00001g59JlAAI"
@@ -28,11 +29,11 @@ testCases:
       - role: "user"
         message: "I want to check my order status"
       - role: "agent"
-        topic: "order_status"    # Pre-positions agent in target topic
+        topic: "order_status" # Pre-positions agent in target topic
         message: "I'd be happy to help! Could you provide the Order ID?"
     expectedTopic: order_status
     expectedActions:
-      - get_order_status         # Level 1 DEFINITION name (NOT invocation name)
+      - get_order_status # Level 1 DEFINITION name (NOT invocation name)
     expectedOutcome: "Agent retrieves and displays order details"
 ```
 
@@ -46,10 +47,12 @@ testCases:
 ## Agent Script API Testing Caveat
 
 Agent Script agents embed action results differently via the Agent Runtime API:
+
 - **Agent Builder agents**: Return separate `ActionResult` message types with structured data
 - **Agent Script agents**: Embed action outputs within `Inform` text messages — no separate `ActionResult` type
 
 This means:
+
 - `action_invoked: true` (boolean) may fail even when the action runs — use `response_contains` to verify action output instead
 - `action_invoked: "action_name"` uses `plannerSurfaces` fallback parsing but is less reliable
 - For robust testing, prefer `response_contains` / `response_contains_any` checks over `action_invoked`

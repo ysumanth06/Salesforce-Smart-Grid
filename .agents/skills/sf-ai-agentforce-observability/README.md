@@ -11,13 +11,13 @@ Extract and analyze Agentforce session tracing data from Salesforce Data Cloud.
 
 This skill has been validated against live Salesforce orgs and is production-ready.
 
-| Metric | Value |
-|--------|-------|
-| **Test Coverage** | 260+ tests across 6 tiers |
-| **DMO Discovery** | 24 DMOs verified, 3 not found (RAG Quality) |
-| **Live API Validation** | All SQL patterns tested against Data Cloud |
-| **Schema Accuracy** | Verified column names match actual API |
-| **Last Validated** | January 30, 2026 (Vivint-DevInt) |
+| Metric                  | Value                                       |
+| ----------------------- | ------------------------------------------- |
+| **Test Coverage**       | 260+ tests across 6 tiers                   |
+| **DMO Discovery**       | 24 DMOs verified, 3 not found (RAG Quality) |
+| **Live API Validation** | All SQL patterns tested against Data Cloud  |
+| **Schema Accuracy**     | Verified column names match actual API      |
+| **Last Validated**      | January 30, 2026 (Vivint-DevInt)            |
 
 ## Features
 
@@ -109,6 +109,7 @@ print(analyzer.message_timeline("a0x..."))
 **24 DMOs verified** via T6 live API testing (January 2026):
 
 ### Session Tracing DMOs (5)
+
 ```
 AIAgentSession (18 fields)
 ├── AIAgentSessionParticipant (12 fields) - Roles: USER, AGENT
@@ -119,6 +120,7 @@ AIAgentSession (18 fields)
 ```
 
 ### GenAI Audit & Feedback DMOs (13) ✅ T6 Verified
+
 ```
 GenAIGatewayRequest (30 fields) - LLM call details, token usage
 ├── GenAIGatewayResponse (8 fields)
@@ -131,15 +133,17 @@ GenAIGatewayRequest (30 fields) - LLM call details, token usage
 ```
 
 ### Key Enum Values (Live API Verified)
-| Entity | Field | Values |
-|--------|-------|--------|
-| Session | ChannelType | `E & O`, `Builder`, `SCRT2 - EmbeddedMessaging`, `Voice`, `NGC` |
-| Participant | AgentType | `EinsteinServiceAgent`, `AgentforceEmployeeAgent`, `AgentforceServiceAgent` |
-| Participant | Role | `USER`, `AGENT` |
-| Step | StepType | `LLM_STEP`, `ACTION_STEP`, `TOPIC_STEP`, `SESSION_END` |
-| ContentCategory | DetectorType | `TOXICITY`, `PII`, `PROMPT_DEFENSE`, `InstructionAdherence` |
+
+| Entity          | Field        | Values                                                                      |
+| --------------- | ------------ | --------------------------------------------------------------------------- |
+| Session         | ChannelType  | `E & O`, `Builder`, `SCRT2 - EmbeddedMessaging`, `Voice`, `NGC`             |
+| Participant     | AgentType    | `EinsteinServiceAgent`, `AgentforceEmployeeAgent`, `AgentforceServiceAgent` |
+| Participant     | Role         | `USER`, `AGENT`                                                             |
+| Step            | StepType     | `LLM_STEP`, `ACTION_STEP`, `TOPIC_STEP`, `SESSION_END`                      |
+| ContentCategory | DetectorType | `TOXICITY`, `PII`, `PROMPT_DEFENSE`, `InstructionAdherence`                 |
 
 ### DMOs NOT Found (3)
+
 - `GenAIRetrieverResponse__dlm` ❌
 - `GenAIRetrieverRequest__dlm` ❌
 - `GenAIRetrieverQualityMetric__dlm` ❌
@@ -168,16 +172,16 @@ stdm_data/
 
 ## CLI Reference
 
-| Command | Description |
-|---------|-------------|
-| `extract` | Extract session data for time range |
-| `extract-tree` | Extract full tree for specific session |
-| `extract-incremental` | Continue from last extraction |
-| `extract-quality` | Extract GenAI Trust Layer metrics |
-| `analyze` | Generate summary statistics |
-| `debug-session` | Show session timeline |
-| `topics` | Topic routing analysis |
-| `count` | Count records per DMO |
+| Command               | Description                            |
+| --------------------- | -------------------------------------- |
+| `extract`             | Extract session data for time range    |
+| `extract-tree`        | Extract full tree for specific session |
+| `extract-incremental` | Continue from last extraction          |
+| `extract-quality`     | Extract GenAI Trust Layer metrics      |
+| `analyze`             | Generate summary statistics            |
+| `debug-session`       | Show session timeline                  |
+| `topics`              | Topic routing analysis                 |
+| `count`               | Count records per DMO                  |
 
 See [references/cli-reference.md](references/cli-reference.md) for all options.
 
@@ -185,20 +189,21 @@ See [references/cli-reference.md](references/cli-reference.md) for all options.
 
 This skill includes comprehensive validation testing:
 
-| Tier | Category | Tests | Description |
-|------|----------|-------|-------------|
-| T1 | Auth & Connectivity | 5 | JWT auth, API access, DMO existence |
-| T2 | Extraction Commands | 35 | CLI extract, tree, incremental |
-| T3 | Analysis Commands | 46 | Analyze, debug-session, topics |
-| T4 | Schema/Documentation | 96 | Field validation, query patterns |
-| T5 | Negative Cases | 12 | Error handling, invalid args |
-| T6 | **Live SQL Execution** | 39 | All SQL patterns against live API |
-| T6 | **DMO Discovery** | 27 | Probe all 27 DMOs for existence |
-| T6 | **Field Discovery** | 47 | Discover all fields per DMO |
+| Tier | Category               | Tests | Description                         |
+| ---- | ---------------------- | ----- | ----------------------------------- |
+| T1   | Auth & Connectivity    | 5     | JWT auth, API access, DMO existence |
+| T2   | Extraction Commands    | 35    | CLI extract, tree, incremental      |
+| T3   | Analysis Commands      | 46    | Analyze, debug-session, topics      |
+| T4   | Schema/Documentation   | 96    | Field validation, query patterns    |
+| T5   | Negative Cases         | 12    | Error handling, invalid args        |
+| T6   | **Live SQL Execution** | 39    | All SQL patterns against live API   |
+| T6   | **DMO Discovery**      | 27    | Probe all 27 DMOs for existence     |
+| T6   | **Field Discovery**    | 47    | Discover all fields per DMO         |
 
 **Total: 260+ tests | 100% pass rate** (34 discovery tests skip as expected for non-existent DMOs)
 
 Run validation:
+
 ```bash
 cd validation
 source .venv/bin/activate
@@ -207,12 +212,12 @@ pytest scenarios/ -v --org YourOrgAlias
 
 ## Integration with Other Skills
 
-| Skill | Use Case |
-|-------|----------|
-| `sf-connected-apps` | Set up JWT Bearer auth |
-| `sf-ai-agentscript` | Fix agents based on trace analysis |
+| Skill                      | Use Case                            |
+| -------------------------- | ----------------------------------- |
+| `sf-connected-apps`        | Set up JWT Bearer auth              |
+| `sf-ai-agentscript`        | Fix agents based on trace analysis  |
 | `sf-ai-agentforce-testing` | Create tests from observed patterns |
-| `sf-debug` | Deep-dive into action failures |
+| `sf-debug`                 | Deep-dive into action failures      |
 
 ## Requirements
 
@@ -239,4 +244,4 @@ Jag Valaiyapathy
 
 ---
 
-*Last updated: January 2026 | Validated against: Vivint-DevInt*
+_Last updated: January 2026 | Validated against: Vivint-DevInt_

@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # FSM Architecture Guide
 
 > Design agent behavior as a finite state machine with deterministic nodes and explicit transitions.
@@ -9,31 +10,31 @@
 
 ### The Problem with Prompt-Only Agents
 
-| Anti-Pattern | Description |
-|--------------|-------------|
-| **ReAct Pattern** | Agents get stuck in reasoning loops without guardrails |
-| **Doom-Prompting** | Prompts grow exponentially to handle edge cases |
-| **Goal Drift** | Agents forget original intent after several turns |
+| Anti-Pattern       | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| **ReAct Pattern**  | Agents get stuck in reasoning loops without guardrails |
+| **Doom-Prompting** | Prompts grow exponentially to handle edge cases        |
+| **Goal Drift**     | Agents forget original intent after several turns      |
 
 > **KEY INSIGHT**: "LLMs are non-deterministic by design. Without structured control flow, enterprise agents become unpredictable, expensive, and impossible to debug."
 
 ### The FSM Solution
 
-| FSM Concept | Traffic Light Example | Agent Benefit |
-|-------------|----------------------|---------------|
-| **States** | Red, Green, Yellow | Agent always knows exactly what it's doing |
-| **Transitions** | Timer expires | No ambiguity about what happens next |
-| **Determinism** | Red → Green (guaranteed) | Auditable, testable, trustworthy |
+| FSM Concept     | Traffic Light Example    | Agent Benefit                              |
+| --------------- | ------------------------ | ------------------------------------------ |
+| **States**      | Red, Green, Yellow       | Agent always knows exactly what it's doing |
+| **Transitions** | Timer expires            | No ambiguity about what happens next       |
+| **Determinism** | Red → Green (guaranteed) | Auditable, testable, trustworthy           |
 
 ---
 
 ## The Three FSM Pillars
 
-| Pillar | Definition | Agent Benefit |
-|--------|------------|---------------|
-| **States** | Distinct "modes" the system can be in | Clear context at any moment |
+| Pillar          | Definition                               | Agent Benefit               |
+| --------------- | ---------------------------------------- | --------------------------- |
+| **States**      | Distinct "modes" the system can be in    | Clear context at any moment |
 | **Transitions** | Explicit rules for moving between states | Defined paths, no surprises |
-| **Determinism** | Same input → same output | Auditable and testable |
+| **Determinism** | Same input → same output                 | Auditable and testable      |
 
 ---
 
@@ -41,13 +42,13 @@
 
 ### Pattern Overview
 
-| Pattern | Color | Purpose |
-|---------|-------|---------|
-| 🔵 **ROUTING** | Blue | Routes based on intent |
-| 🔵 **VERIFICATION** | Light Blue | Security checks |
-| 🟡 **DATA-LOOKUP** | Yellow | External data fetch |
-| 🟢 **PROCESSING** | Green | Business logic |
-| 🔴 **HANDOFF** | Red | Human escalation |
+| Pattern             | Color      | Purpose                |
+| ------------------- | ---------- | ---------------------- |
+| 🔵 **ROUTING**      | Blue       | Routes based on intent |
+| 🔵 **VERIFICATION** | Light Blue | Security checks        |
+| 🟡 **DATA-LOOKUP**  | Yellow     | External data fetch    |
+| 🟢 **PROCESSING**   | Green      | Business logic         |
+| 🔴 **HANDOFF**      | Red        | Human escalation       |
 
 ---
 
@@ -298,11 +299,11 @@ Security gate before protected topics.
 
 **The 3 Variables:**
 
-| Variable | Type | Purpose |
-|----------|------|---------|
-| `open_gate` | string | Which topic holds focus (`"null"` = LLM decides) |
-| `next_topic` | string | Deferred destination after auth completes |
-| `authenticated` | boolean | Whether user has passed authentication |
+| Variable        | Type    | Purpose                                          |
+| --------------- | ------- | ------------------------------------------------ |
+| `open_gate`     | string  | Which topic holds focus (`"null"` = LLM decides) |
+| `next_topic`    | string  | Deferred destination after auth completes        |
+| `authenticated` | boolean | Whether user has passed authentication           |
 
 **When to Use**: Multiple protected topics behind a shared auth gate, especially when you want zero-credit LLM bypass while the gate holds focus.
 
@@ -317,23 +318,23 @@ Security gate before protected topics.
 ### Classification Framework
 
 | Put in Deterministic Nodes if... | Put in Subjective Reasoning if... |
-|----------------------------------|-----------------------------------|
-| Security/safety requirement | Conversational/greeting |
-| Financial threshold | Context understanding needed |
-| Data fetch required | Natural language generation |
-| Counter/state management | Flexible interpretation needed |
-| Hard cutoff rule | Response explanation |
+| -------------------------------- | --------------------------------- |
+| Security/safety requirement      | Conversational/greeting           |
+| Financial threshold              | Context understanding needed      |
+| Data fetch required              | Natural language generation       |
+| Counter/state management         | Flexible interpretation needed    |
+| Hard cutoff rule                 | Response explanation              |
 
 ### Examples
 
-| Requirement | Classification | Reasoning |
-|-------------|----------------|-----------|
-| "ALWAYS verify identity before refund" | **Deterministic** | Security - must be code-enforced |
-| "Start with a friendly greeting" | **Subjective** | Conversational - LLM flexibility |
-| "IF churn > 80, full refund" | **Deterministic** | Financial threshold - no exceptions |
-| "Explain the refund status" | **Subjective** | Natural language generation |
-| "Count failed verification attempts" | **Deterministic** | Counter logic - must be accurate |
-| "Redirect off-topic questions" | **Subjective** | Context understanding required |
+| Requirement                            | Classification    | Reasoning                           |
+| -------------------------------------- | ----------------- | ----------------------------------- |
+| "ALWAYS verify identity before refund" | **Deterministic** | Security - must be code-enforced    |
+| "Start with a friendly greeting"       | **Subjective**    | Conversational - LLM flexibility    |
+| "IF churn > 80, full refund"           | **Deterministic** | Financial threshold - no exceptions |
+| "Explain the refund status"            | **Subjective**    | Natural language generation         |
+| "Count failed verification attempts"   | **Deterministic** | Counter logic - must be accurate    |
+| "Redirect off-topic questions"         | **Subjective**    | Context understanding required      |
 
 ---
 
@@ -359,25 +360,28 @@ Security gate before protected topics.
 
 ### State Definitions
 
-| State | Type | Entry Condition | Exit Conditions |
-|-------|------|-----------------|-----------------|
-| Topic Selector | ROUTING | Conversation start | Intent detected |
-| Identity Verification | VERIFICATION | Refund intent | Verified OR 3 failures |
-| Risk Assessment | DATA-LOOKUP | Identity verified | Score loaded |
-| Refund Processor | PROCESSING | Score loaded | Refund complete |
-| Escalation | HANDOFF | 3 failures | Human takeover |
+| State                 | Type         | Entry Condition    | Exit Conditions        |
+| --------------------- | ------------ | ------------------ | ---------------------- |
+| Topic Selector        | ROUTING      | Conversation start | Intent detected        |
+| Identity Verification | VERIFICATION | Refund intent      | Verified OR 3 failures |
+| Risk Assessment       | DATA-LOOKUP  | Identity verified  | Score loaded           |
+| Refund Processor      | PROCESSING   | Score loaded       | Refund complete        |
+| Escalation            | HANDOFF      | 3 failures         | Human takeover         |
 
 ---
 
 ## Best Practices
 
 ### 1. Single Responsibility per Topic
+
 Each topic should handle ONE concern. If a topic does verification AND processing, split it.
 
 ### 2. Explicit Transitions
+
 Always define how to enter AND exit each state. No dead ends.
 
 ### 3. Guard Sensitive Transitions
+
 Use `available when` to make actions invisible when conditions aren't met.
 
 ```yaml
@@ -388,9 +392,11 @@ actions:
 ```
 
 ### 4. Design for the Happy Path First
+
 Map the success flow, then add failure states.
 
 ### 5. Use Escalation as a Safety Net
+
 When in doubt, escalate to human. It's better than a bad automated decision.
 
 ---
@@ -403,18 +409,19 @@ When in doubt, escalate to human. It's better than a bad automated decision.
 
 **Topics** are conversation modes that group related actions and reasoning logic. Think of them as "skill areas" or "conversation contexts" for your agent.
 
-| Benefit | Description |
-|---------|-------------|
+| Benefit                    | Description                                                       |
+| -------------------------- | ----------------------------------------------------------------- |
 | **Separation of Concerns** | Group related functionality (e.g., "Order Management", "Support") |
-| **Focused Instructions** | Each topic has its own reasoning instructions |
-| **Action Scoping** | Actions defined in a topic are available only in that topic |
-| **Persona Switching** | Topics can override system instructions for different modes |
+| **Focused Instructions**   | Each topic has its own reasoning instructions                     |
+| **Action Scoping**         | Actions defined in a topic are available only in that topic       |
+| **Persona Switching**      | Topics can override system instructions for different modes       |
 
 ### Topic Structure
 
 #### Required Fields
 
 Every topic MUST have:
+
 - `description:` - What the topic does (used by LLM for routing decisions)
 
 > **`label:` is valid on topics** (TDD v2.2.0). Use `label:` for display names and `description:` to convey the topic's purpose to the LLM.
@@ -430,11 +437,11 @@ topic order_lookup:
 
 #### Optional Blocks
 
-| Block | Purpose | Example |
-|-------|---------|---------|
-| `system:` | Override global system instructions | Persona switching |
-| `actions:` | Define topic-specific actions | Flow/Apex actions |
-| `reasoning:` | Topic reasoning logic | Instructions + action invocations |
+| Block        | Purpose                             | Example                           |
+| ------------ | ----------------------------------- | --------------------------------- |
+| `system:`    | Override global system instructions | Persona switching                 |
+| `actions:`   | Define topic-specific actions       | Flow/Apex actions                 |
+| `reasoning:` | Topic reasoning logic               | Instructions + action invocations |
 
 ---
 
@@ -459,6 +466,7 @@ start_agent topic_selector:
 ```
 
 **When to Use:**
+
 - **Permanent mode switches** (e.g., "I want to check my order" → order_lookup)
 - **One-way transitions** where user won't return to previous topic
 - **Entry point routing** (start_agent → specific topics)
@@ -472,12 +480,14 @@ There are TWO ways to reference other topics:
 #### 1. `@utils.transition to @topic.[name]` — Permanent Transition
 
 **Behavior:**
+
 - Permanently moves to the target topic
 - User CANNOT automatically return
 - Current topic is abandoned
 - Target topic becomes the active context
 
 **Use Cases:**
+
 - Main menu routing (start_agent → feature topics)
 - Mode switches (FAQ → Support)
 - One-way workflows
@@ -491,12 +501,14 @@ actions:
 #### 2. `@topic.[name]` — Topic Delegation (Sub-Agent Pattern)
 
 **Behavior:**
+
 - Temporarily delegates to target topic
 - Target topic can "return" control to caller
 - Original topic resumes after delegation completes
 - Like calling a subroutine
 
 **Use Cases:**
+
 - Specialist consultation (Main Agent → Tax Expert → Main Agent)
 - Reusable sub-workflows (Address Collection)
 - Modular agent design
@@ -509,10 +521,10 @@ actions:
 
 **Key Difference:**
 
-| Pattern | Control Flow | Returns? |
-|---------|--------------|----------|
-| `@utils.transition to @topic.x` | Permanent move | No |
-| `@topic.x` | Temporary delegation | Yes (if target topic transitions back) |
+| Pattern                         | Control Flow         | Returns?                               |
+| ------------------------------- | -------------------- | -------------------------------------- |
+| `@utils.transition to @topic.x` | Permanent move       | No                                     |
+| `@topic.x`                      | Temporary delegation | Yes (if target topic transitions back) |
 
 ---
 
@@ -611,12 +623,12 @@ topic order_lookup:
 
 #### When to Use Multiple Topics
 
-| Scenario | Topics Needed |
-|----------|---------------|
-| **Multi-feature agent** | 1 topic per feature + 1 router topic |
-| **Workflow with steps** | 1 topic per step + 1 entry topic |
-| **Persona switching** | 1 topic per persona + 1 selector |
-| **Specialist delegation** | 1 main topic + N specialist topics |
+| Scenario                  | Topics Needed                        |
+| ------------------------- | ------------------------------------ |
+| **Multi-feature agent**   | 1 topic per feature + 1 router topic |
+| **Workflow with steps**   | 1 topic per step + 1 entry topic     |
+| **Persona switching**     | 1 topic per persona + 1 selector     |
+| **Specialist delegation** | 1 main topic + N specialist topics   |
 
 ---
 
@@ -663,20 +675,20 @@ topic legal_specialist:
 
 ### Topic Naming Conventions
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Topic name | snake_case | `order_management` |
+| Element     | Convention | Example            |
+| ----------- | ---------- | ------------------ |
+| Topic name  | snake_case | `order_management` |
 | Action name | snake_case | `get_order_status` |
 
 ### Common Topic Design Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| Missing `description` | Add `description:` to every topic (required for LLM routing) |
-| Orphaned topics (unreachable) | Ensure all topics have incoming transitions |
-| No way to go back | Add transition to topic_selector or escalation |
-| Too many topics | Combine related functionality |
-| Too few topics | Split complex topics into focused ones |
+| Mistake                       | Fix                                                          |
+| ----------------------------- | ------------------------------------------------------------ |
+| Missing `description`         | Add `description:` to every topic (required for LLM routing) |
+| Orphaned topics (unreachable) | Ensure all topics have incoming transitions                  |
+| No way to go back             | Add transition to topic_selector or escalation               |
+| Too many topics               | Combine related functionality                                |
+| Too few topics                | Split complex topics into focused ones                       |
 
 ### Topic Transitions Checklist
 

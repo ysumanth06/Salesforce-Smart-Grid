@@ -3,8 +3,8 @@
 # and are NOT part of the Agent Skills open specification.
 
 PostToolUse:
-- matcher: "Write|Edit"
-  hooks:
-  - type: command
-    command: "python3 ${SKILL_HOOKS}/instruction-quality-validator.py"
-    timeout: 10000
+  - matcher: "Write|Edit"
+    hooks:
+      - type: command
+        command: "python3 ${SKILL_HOOKS}/instruction-quality-validator.py"
+        timeout: 10000

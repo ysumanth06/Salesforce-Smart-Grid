@@ -4,22 +4,22 @@
 
 ## Script Reference
 
-| Script | Purpose | Dependencies |
-|--------|---------|-------------|
-| `agent_api_client.py` | Reusable Agent Runtime API v1 client (auth, sessions, messaging, variables) | stdlib only |
+| Script                      | Purpose                                                                              | Dependencies                    |
+| --------------------------- | ------------------------------------------------------------------------------------ | ------------------------------- |
+| `agent_api_client.py`       | Reusable Agent Runtime API v1 client (auth, sessions, messaging, variables)          | stdlib only                     |
 | `multi_turn_test_runner.py` | Multi-turn test orchestrator (reads YAML, executes, evaluates, Rich colored reports) | pyyaml, rich + agent_api_client |
-| `rich_test_report.py` | Aggregate N worker result JSONs into one unified Rich terminal report | rich |
-| `generate-test-spec.py` | Parse .agent files, generate CLI test YAML specs | stdlib only |
-| `run-automated-tests.py` | Orchestrate full CLI test workflow with fix suggestions | stdlib only |
+| `rich_test_report.py`       | Aggregate N worker result JSONs into one unified Rich terminal report                | rich                            |
+| `generate-test-spec.py`     | Parse .agent files, generate CLI test YAML specs                                     | stdlib only                     |
+| `run-automated-tests.py`    | Orchestrate full CLI test workflow with fix suggestions                              | stdlib only                     |
 
 ## CLI Flags (multi_turn_test_runner.py)
 
-| Flag | Default | Purpose |
-|------|---------|---------|
-| `--report-file PATH` | none | Write Rich terminal report to file (ANSI codes included) — viewable with `cat` or `bat` |
-| `--no-rich` | off | Disable Rich colored output; use plain-text format |
-| `--width N` | auto | Override terminal width (auto-detects from $COLUMNS; fallback 80) |
-| `--rich-output` | _(deprecated)_ | No-op — Rich is now default when installed |
+| Flag                 | Default        | Purpose                                                                                 |
+| -------------------- | -------------- | --------------------------------------------------------------------------------------- |
+| `--report-file PATH` | none           | Write Rich terminal report to file (ANSI codes included) — viewable with `cat` or `bat` |
+| `--no-rich`          | off            | Disable Rich colored output; use plain-text format                                      |
+| `--width N`          | auto           | Override terminal width (auto-detects from $COLUMNS; fallback 80)                       |
+| `--rich-output`      | _(deprecated)_ | No-op — Rich is now default when installed                                              |
 
 ## Multi-Turn Testing (Agent Runtime API)
 
@@ -104,9 +104,9 @@ CLAUDE CODE:
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `CURRENT_ATTEMPT` | Current attempt number | 1 |
-| `MAX_WAIT_MINUTES` | Timeout for test execution | 10 |
-| `SKIP_TESTS` | Comma-separated test names to skip | (none) |
-| `VERBOSE` | Enable detailed output | false |
+| Variable           | Description                        | Default |
+| ------------------ | ---------------------------------- | ------- |
+| `CURRENT_ATTEMPT`  | Current attempt number             | 1       |
+| `MAX_WAIT_MINUTES` | Timeout for test execution         | 10      |
+| `SKIP_TESTS`       | Comma-separated test names to skip | (none)  |
+| `VERBOSE`          | Enable detailed output             | false   |

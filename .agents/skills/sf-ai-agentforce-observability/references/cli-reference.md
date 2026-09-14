@@ -1,14 +1,15 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # CLI Reference
 
 Complete command reference for the `stdm-extract` CLI tool.
 
 ## Global Options
 
-| Option | Description |
-|--------|-------------|
-| `--help` | Show help message and exit |
-| `--version` | Show version number |
+| Option      | Description                |
+| ----------- | -------------------------- |
+| `--help`    | Show help message and exit |
+| `--version` | Show version number        |
 
 ---
 
@@ -24,16 +25,16 @@ stdm-extract extract --org <alias> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--org` | String | Required | Salesforce org alias (from `sf org list`) |
-| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key |
-| `--days` | Integer | 7 | Extract last N days |
-| `--since` | DateTime | None | Start date (ISO format) |
-| `--until` | DateTime | Now | End date (ISO format) |
-| `--agent` | String | None | Filter by agent API name (repeatable) |
-| `--output` | Path | `./stdm_data` | Output directory |
-| `--verbose` | Flag | False | Enable verbose logging |
+| Option           | Type     | Default            | Description                               |
+| ---------------- | -------- | ------------------ | ----------------------------------------- |
+| `--org`          | String   | Required           | Salesforce org alias (from `sf org list`) |
+| `--consumer-key` | String   | `$SF_CONSUMER_KEY` | ECA consumer key                          |
+| `--days`         | Integer  | 7                  | Extract last N days                       |
+| `--since`        | DateTime | None               | Start date (ISO format)                   |
+| `--until`        | DateTime | Now                | End date (ISO format)                     |
+| `--agent`        | String   | None               | Filter by agent API name (repeatable)     |
+| `--output`       | Path     | `./stdm_data`      | Output directory                          |
+| `--verbose`      | Flag     | False              | Enable verbose logging                    |
 
 **Examples:**
 
@@ -63,13 +64,13 @@ stdm-extract extract-tree --org <alias> --session-ids <ids> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--org` | String | Required | Salesforce org alias |
-| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key |
-| `--session-ids` | String | Required | Comma-separated session IDs |
-| `--output` | Path | `./stdm_data` | Output directory |
-| `--verbose` | Flag | False | Enable verbose logging |
+| Option           | Type   | Default            | Description                 |
+| ---------------- | ------ | ------------------ | --------------------------- |
+| `--org`          | String | Required           | Salesforce org alias        |
+| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key            |
+| `--session-ids`  | String | Required           | Comma-separated session IDs |
+| `--output`       | Path   | `./stdm_data`      | Output directory            |
+| `--verbose`      | Flag   | False              | Enable verbose logging      |
 
 **Example:**
 
@@ -89,14 +90,15 @@ stdm-extract extract-incremental --org <alias> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--org` | String | Required | Salesforce org alias |
-| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key |
-| `--output` | Path | `./stdm_data` | Output directory |
-| `--verbose` | Flag | False | Enable verbose logging |
+| Option           | Type   | Default            | Description            |
+| ---------------- | ------ | ------------------ | ---------------------- |
+| `--org`          | String | Required           | Salesforce org alias   |
+| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key       |
+| `--output`       | Path   | `./stdm_data`      | Output directory       |
+| `--verbose`      | Flag   | False              | Enable verbose logging |
 
 **Notes:**
+
 - Watermark stored at `~/.sf/observability/{org}/watermark.json`
 - First run extracts last 24 hours
 - Subsequent runs extract since last watermark
@@ -123,10 +125,10 @@ stdm-extract analyze --data-dir <path> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--data-dir` | Path | Required | Directory containing Parquet files |
-| `--format` | Choice | `table` | Output format: `table`, `json`, `csv` |
+| Option       | Type   | Default  | Description                           |
+| ------------ | ------ | -------- | ------------------------------------- |
+| `--data-dir` | Path   | Required | Directory containing Parquet files    |
+| `--format`   | Choice | `table`  | Output format: `table`, `json`, `csv` |
 
 **Example:**
 
@@ -146,12 +148,12 @@ stdm-extract debug-session --data-dir <path> --session-id <id> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--data-dir` | Path | Required | Directory containing Parquet files |
-| `--session-id` | String | Required | Session ID to debug |
-| `--verbose` | Flag | False | Show step details (LLM, actions) |
-| `--output` | Path | None | Export timeline to JSON |
+| Option         | Type   | Default  | Description                        |
+| -------------- | ------ | -------- | ---------------------------------- |
+| `--data-dir`   | Path   | Required | Directory containing Parquet files |
+| `--session-id` | String | Required | Session ID to debug                |
+| `--verbose`    | Flag   | False    | Show step details (LLM, actions)   |
+| `--output`     | Path   | None     | Export timeline to JSON            |
 
 **Example:**
 
@@ -176,10 +178,10 @@ stdm-extract topics --data-dir <path> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--data-dir` | Path | Required | Directory containing Parquet files |
-| `--format` | Choice | `table` | Output format: `table`, `json` |
+| Option       | Type   | Default  | Description                        |
+| ------------ | ------ | -------- | ---------------------------------- |
+| `--data-dir` | Path   | Required | Directory containing Parquet files |
+| `--format`   | Choice | `table`  | Output format: `table`, `json`     |
 
 **Example:**
 
@@ -199,11 +201,11 @@ stdm-extract actions --data-dir <path> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--data-dir` | Path | Required | Directory containing Parquet files |
-| `--agent` | String | None | Filter by agent API name |
-| `--format` | Choice | `table` | Output format: `table`, `json` |
+| Option       | Type   | Default  | Description                        |
+| ------------ | ------ | -------- | ---------------------------------- |
+| `--data-dir` | Path   | Required | Directory containing Parquet files |
+| `--agent`    | String | None     | Filter by agent API name           |
+| `--format`   | Choice | `table`  | Output format: `table`, `json`     |
 
 **Example:**
 
@@ -223,11 +225,11 @@ stdm-extract count --org <alias> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--org` | String | Required | Salesforce org alias |
-| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key |
-| `--dmo` | Choice | `sessions` | DMO to count |
+| Option           | Type   | Default            | Description          |
+| ---------------- | ------ | ------------------ | -------------------- |
+| `--org`          | String | Required           | Salesforce org alias |
+| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key     |
+| `--dmo`          | Choice | `sessions`         | DMO to count         |
 
 **Example:**
 
@@ -247,10 +249,10 @@ stdm-extract test-auth --org <alias> [options]
 
 **Options:**
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `--org` | String | Required | Salesforce org alias |
-| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key |
+| Option           | Type   | Default            | Description          |
+| ---------------- | ------ | ------------------ | -------------------- |
+| `--org`          | String | Required           | Salesforce org alias |
+| `--consumer-key` | String | `$SF_CONSUMER_KEY` | ECA consumer key     |
 
 **Example:**
 
@@ -262,22 +264,22 @@ stdm-extract test-auth --org prod
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `SF_CONSUMER_KEY` | Default consumer key for ECA |
+| Variable          | Description                                                        |
+| ----------------- | ------------------------------------------------------------------ |
+| `SF_CONSUMER_KEY` | Default consumer key for ECA                                       |
 | `SF_JWT_KEY_PATH` | Override JWT private key location (default: `~/.sf/jwt/{org}.key`) |
 
 ---
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | General error |
-| 2 | Authentication failed |
-| 3 | Data not found |
-| 4 | Invalid arguments |
+| Code | Meaning               |
+| ---- | --------------------- |
+| 0    | Success               |
+| 1    | General error         |
+| 2    | Authentication failed |
+| 3    | Data not found        |
+| 4    | Invalid arguments     |
 
 ---
 

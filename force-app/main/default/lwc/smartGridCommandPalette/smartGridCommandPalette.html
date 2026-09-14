@@ -1,0 +1,210 @@
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="command-palette-title"
+      class="slds-modal slds-fade-in-open command-palette-modal"
+      data-testid="command-palette-modal"
+      onkeydown={handleKeyDown}
+    >
+      <div class="slds-modal__container palette-container">
+        <!-- Palette Header & Input -->
+        <div class="palette-header slds-grid slds-grid_vertical-align-center">
+          <lightning-icon
+            icon-name="utility:einstein"
+            size="small"
+            class="ai-icon slds-var-m-right_small"
+          ></lightning-icon>
+          <div class="slds-grow">
+            <input
+              type="text"
+              class="palette-input"
+              placeholder={computedPlaceholder}
+              value={promptText}
+              oninput={handleInputChange}
+              onkeydown={handleInputKeyDown}
+              data-testid="palette-input"
+              autofocus
+            />
+          </div>
+          <div class="palette-badges slds-grid slds-grid_vertical-align-center">
+            <template lwc:if={isLoading}>
+              <lightning-spinner
+                alternative-text="Processing with AI"
+                size="small"
+                variant="brand"
+              ></lightning-spinner>
+            </template>
+            <template lwc:else>
+              <span class="shortcut-pill">ESC to close</span>
+              <span class="shortcut-pill">↵ to run</span>
+            </template>
+            <button
+              class="slds-button slds-button_icon slds-button_icon-inverse slds-var-m-left_xx-small"
+              title="Close"
+              onclick={closeModal}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="x-small"
+                variant="inverse"
+              ></lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Palette Body -->
+        <div class="palette-body slds-var-p-around_medium">
+          <!-- Translation Success / Preview Banner -->
+          <template lwc:if={hasResult}>
+            <div
+              class="result-card slds-var-p-around_small slds-var-m-bottom_small"
+            >
+              <div
+                class="slds-grid slds-grid_vertical-align-center slds-var-m-bottom_x-small"
+              >
+                <lightning-icon
+                  icon-name="utility:success"
+                  size="x-small"
+                  variant="success"
+                  class="slds-var-m-right_xx-small"
+                ></lightning-icon>
+                <span class="result-title slds-text-title_bold"
+                  >{resultExplanation}</span
+                >
+              </div>
+
+              <!-- Filter Chips Preview -->
+              <template lwc:if={hasResultFilters}>
+                <div class="slds-grid slds-wrap slds-var-m-bottom_x-small">
+                  <template for:each={resultFilters} for:item="rf">
+                    <span key={rf.key} class="ai-filter-chip">
+                      <lightning-icon
+                        icon-name="utility:filter"
+                        size="xx-small"
+                        class="slds-var-m-right_xxx-small"
+                      ></lightning-icon>
+                      {rf.field} {rf.operator} '{rf.value}'
+                    </span>
+                  </template>
+                </div>
+              </template>
+
+              <!-- Collapsible Debug SOQL -->
+              <details class="soql-debug">
+                <summary class="slds-text-body_small slds-text-color_weak">
+                  View Generated SOQL Query
+                </summary>
+                <pre class="soql-code">{resultSoql}</pre>
+              </details>
+
+              <div class="slds-grid slds-grid_align-end slds-var-m-top_small">
+                <button
+                  class="slds-button slds-button_neutral slds-var-m-right_x-small"
+                  onclick={handleClearResult}
+                >
+                  Clear
+                </button>
+                <button
+                  class="slds-button slds-button_brand"
+                  onclick={handleApplyResult}
+                  data-testid="apply-ai-filters-btn"
+                >
+                  Apply to Grid
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <!-- Error Alert -->
+          <template lwc:if={errorMessage}>
+            <div
+              class="slds-notify slds-notify_alert slds-alert_error slds-var-m-bottom_small slds-theme_alert-texture"
+              role="alert"
+            >
+              <span class="slds-assistive-text">Error</span>
+              <h2>{errorMessage}</h2>
+            </div>
+          </template>
+
+          <!-- Suggested Quick Prompts -->
+          <div class="palette-section slds-var-m-bottom_small">
+            <span class="section-heading">Suggested Prompts</span>
+            <div
+              class="prompt-chips slds-grid slds-wrap slds-var-m-top_xx-small"
+            >
+              <template for:each={suggestedPrompts} for:item="sp">
+                <button
+                  key={sp}
+                  class="prompt-chip"
+                  data-prompt={sp}
+                  onclick={handleSelectSuggestedPrompt}
+                >
+                  <lightning-icon
+                    icon-name="utility:sparkles"
+                    size="xx-small"
+                    class="chip-icon slds-var-m-right_xxx-small"
+                  ></lightning-icon>
+                  {sp}
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Recent Prompts History (if any) -->
+          <template lwc:if={hasRecentPrompts}>
+            <div class="palette-section slds-var-m-bottom_small">
+              <span class="section-heading">Recent Queries</span>
+              <ul class="recent-list slds-var-m-top_xx-small">
+                <template for:each={recentPrompts} for:item="rp">
+                  <li key={rp} class="recent-item">
+                    <button
+                      class="recent-btn slds-grid slds-grid_vertical-align-center"
+                      data-prompt={rp}
+                      onclick={handleSelectSuggestedPrompt}
+                    >
+                      <lightning-icon
+                        icon-name="utility:clock"
+                        size="xx-small"
+                        class="slds-var-m-right_x-small slds-text-color_weak"
+                      ></lightning-icon>
+                      <span class="slds-truncate">{rp}</span>
+                    </button>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+
+          <!-- Schema Fields Helper -->
+          <template lwc:if={hasAvailableFields}>
+            <div class="palette-section">
+              <span class="section-heading">Available Columns in View</span>
+              <div
+                class="fields-cloud slds-grid slds-wrap slds-var-m-top_xx-small"
+              >
+                <template for:each={availableFields} for:item="field">
+                  <span
+                    key={field}
+                    class="field-tag"
+                    data-field={field}
+                    onclick={handleFieldTagClick}
+                  >
+                    {field}
+                  </span>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+    <div
+      class="slds-backdrop slds-backdrop_open palette-backdrop"
+      onclick={closeModal}
+    ></div>
+  </template>
+</template>

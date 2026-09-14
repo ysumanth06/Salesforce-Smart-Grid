@@ -15,17 +15,17 @@
 
 ### Quality Scorecard Summary
 
-| Category | Current Score | Max Score | Percentage | Target Score |
-|----------|---------------|-----------|------------|--------------|
-| Persona & Tone | {{PERSONA_CURRENT}} | 15 | {{PERSONA_PCT}}% | {{PERSONA_TARGET}} |
-| Topic Architecture | {{TOPIC_CURRENT}} | 20 | {{TOPIC_PCT}}% | {{TOPIC_TARGET}} |
-| Instruction Quality | {{INSTRUCTION_CURRENT}} | 20 | {{INSTRUCTION_PCT}}% | {{INSTRUCTION_TARGET}} |
-| Dialog Flow Design | {{DIALOG_CURRENT}} | 15 | {{DIALOG_PCT}}% | {{DIALOG_TARGET}} |
-| Utterance Coverage | {{UTTERANCE_CURRENT}} | 15 | {{UTTERANCE_PCT}}% | {{UTTERANCE_TARGET}} |
-| Escalation Design | {{ESCALATION_CURRENT}} | 15 | {{ESCALATION_PCT}}% | {{ESCALATION_TARGET}} |
-| Guardrails & Safety | {{GUARDRAILS_CURRENT}} | 10 | {{GUARDRAILS_PCT}}% | {{GUARDRAILS_TARGET}} |
-| Continuous Improvement | {{IMPROVEMENT_CURRENT}} | 10 | {{IMPROVEMENT_PCT}}% | {{IMPROVEMENT_TARGET}} |
-| **TOTAL** | **{{TOTAL_CURRENT}}** | **120** | **{{TOTAL_PCT}}%** | **{{TOTAL_TARGET}}** |
+| Category               | Current Score           | Max Score | Percentage           | Target Score           |
+| ---------------------- | ----------------------- | --------- | -------------------- | ---------------------- |
+| Persona & Tone         | {{PERSONA_CURRENT}}     | 15        | {{PERSONA_PCT}}%     | {{PERSONA_TARGET}}     |
+| Topic Architecture     | {{TOPIC_CURRENT}}       | 20        | {{TOPIC_PCT}}%       | {{TOPIC_TARGET}}       |
+| Instruction Quality    | {{INSTRUCTION_CURRENT}} | 20        | {{INSTRUCTION_PCT}}% | {{INSTRUCTION_TARGET}} |
+| Dialog Flow Design     | {{DIALOG_CURRENT}}      | 15        | {{DIALOG_PCT}}%      | {{DIALOG_TARGET}}      |
+| Utterance Coverage     | {{UTTERANCE_CURRENT}}   | 15        | {{UTTERANCE_PCT}}%   | {{UTTERANCE_TARGET}}   |
+| Escalation Design      | {{ESCALATION_CURRENT}}  | 15        | {{ESCALATION_PCT}}%  | {{ESCALATION_TARGET}}  |
+| Guardrails & Safety    | {{GUARDRAILS_CURRENT}}  | 10        | {{GUARDRAILS_PCT}}%  | {{GUARDRAILS_TARGET}}  |
+| Continuous Improvement | {{IMPROVEMENT_CURRENT}} | 10        | {{IMPROVEMENT_PCT}}% | {{IMPROVEMENT_TARGET}} |
+| **TOTAL**              | **{{TOTAL_CURRENT}}**   | **120**   | **{{TOTAL_PCT}}%**   | **{{TOTAL_TARGET}}**   |
 
 **Current Grade:** {{CURRENT_GRADE}}
 **Target Grade:** {{TARGET_GRADE}}
@@ -41,6 +41,7 @@
 **Gap:** {{PERSONA_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_1_1}}
 - {{WEAKNESS_1_2}}
 
@@ -58,6 +59,7 @@
 **Gap:** {{TOPIC_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_2_1}}
 - {{WEAKNESS_2_2}}
 
@@ -75,6 +77,7 @@
 **Gap:** {{INSTRUCTION_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_3_1}}
 - {{WEAKNESS_3_2}}
 
@@ -92,6 +95,7 @@
 **Gap:** {{DIALOG_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_4_1}}
 - {{WEAKNESS_4_2}}
 
@@ -109,6 +113,7 @@
 **Gap:** {{UTTERANCE_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_5_1}}
 - {{WEAKNESS_5_2}}
 
@@ -126,6 +131,7 @@
 **Gap:** {{ESCALATION_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_6_1}}
 - {{WEAKNESS_6_2}}
 
@@ -143,6 +149,7 @@
 **Gap:** {{GUARDRAILS_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_7_1}}
 - {{WEAKNESS_7_2}}
 
@@ -160,6 +167,7 @@
 **Gap:** {{IMPROVEMENT_GAP}} points
 
 **Key Weaknesses:**
+
 - {{WEAKNESS_8_1}}
 - {{WEAKNESS_8_2}}
 
@@ -183,11 +191,13 @@
 {{ACTION_1_DESCRIPTION}}
 
 **Specific Changes:**
+
 - {{CHANGE_1_1}}
 - {{CHANGE_1_2}}
 - {{CHANGE_1_3}}
 
 **Success Criteria:**
+
 - {{SUCCESS_1_1}}
 - {{SUCCESS_1_2}}
 
@@ -208,10 +218,12 @@
 {{ACTION_2_DESCRIPTION}}
 
 **Specific Changes:**
+
 - {{CHANGE_2_1}}
 - {{CHANGE_2_2}}
 
 **Success Criteria:**
+
 - {{SUCCESS_2_1}}
 - {{SUCCESS_2_2}}
 
@@ -232,10 +244,12 @@
 {{ACTION_3_DESCRIPTION}}
 
 **Specific Changes:**
+
 - {{CHANGE_3_1}}
 - {{CHANGE_3_2}}
 
 **Success Criteria:**
+
 - {{SUCCESS_3_1}}
 - {{SUCCESS_3_2}}
 
@@ -260,6 +274,7 @@ Add more actions as needed. Prioritize actions by:
 
 **Category:** {{TEST_CATEGORY_1}}
 **New Test Cases:**
+
 1. {{TEST_CASE_1_1}} - {{TEST_DESCRIPTION_1_1}}
 2. {{TEST_CASE_1_2}} - {{TEST_DESCRIPTION_1_2}}
 
@@ -267,6 +282,7 @@ Add more actions as needed. Prioritize actions by:
 
 **Category:** {{TEST_CATEGORY_2}}
 **New Test Cases:**
+
 1. {{TEST_CASE_2_1}} - {{TEST_DESCRIPTION_2_1}}
 2. {{TEST_CASE_2_2}} - {{TEST_DESCRIPTION_2_2}}
 
@@ -275,6 +291,7 @@ Add more actions as needed. Prioritize actions by:
 ### Monitoring and Alerts
 
 **Metric 1:** {{METRIC_1_NAME}}
+
 - **Baseline:** {{METRIC_1_BASELINE}}
 - **Target:** {{METRIC_1_TARGET}}
 - **Alert Threshold:** {{METRIC_1_THRESHOLD}}
@@ -283,6 +300,7 @@ Add more actions as needed. Prioritize actions by:
 ---
 
 **Metric 2:** {{METRIC_2_NAME}}
+
 - **Baseline:** {{METRIC_2_BASELINE}}
 - **Target:** {{METRIC_2_TARGET}}
 - **Alert Threshold:** {{METRIC_2_THRESHOLD}}
@@ -305,6 +323,7 @@ Examples:
 **Focus Areas:** {{ITERATION_1_FOCUS}}
 
 **Actions to Complete:**
+
 - [ ] {{ITERATION_1_ACTION_1}}
 - [ ] {{ITERATION_1_ACTION_2}}
 - [ ] {{ITERATION_1_ACTION_3}}
@@ -319,6 +338,7 @@ Examples:
 **Focus Areas:** {{ITERATION_2_FOCUS}}
 
 **Actions to Complete:**
+
 - [ ] {{ITERATION_2_ACTION_1}}
 - [ ] {{ITERATION_2_ACTION_2}}
 - [ ] {{ITERATION_2_ACTION_3}}
@@ -333,6 +353,7 @@ Examples:
 **Focus Areas:** {{ITERATION_3_FOCUS}}
 
 **Actions to Complete:**
+
 - [ ] {{ITERATION_3_ACTION_1}}
 - [ ] {{ITERATION_3_ACTION_2}}
 
@@ -379,17 +400,18 @@ Examples:
 ## Success Metrics
 
 ### Primary KPI: {{PRIMARY_KPI}}
+
 - **Current:** {{PRIMARY_KPI_CURRENT}}
 - **Target:** {{PRIMARY_KPI_TARGET}}
 - **Measurement Method:** {{PRIMARY_KPI_METHOD}}
 
 ### Secondary KPIs
 
-| KPI | Current | Target | Measurement Method |
-|-----|---------|--------|--------------------|
-| {{KPI_2}} | {{KPI_2_CURRENT}} | {{KPI_2_TARGET}} | {{KPI_2_METHOD}} |
-| {{KPI_3}} | {{KPI_3_CURRENT}} | {{KPI_3_TARGET}} | {{KPI_3_METHOD}} |
-| {{KPI_4}} | {{KPI_4_CURRENT}} | {{KPI_4_TARGET}} | {{KPI_4_METHOD}} |
+| KPI       | Current           | Target           | Measurement Method |
+| --------- | ----------------- | ---------------- | ------------------ |
+| {{KPI_2}} | {{KPI_2_CURRENT}} | {{KPI_2_TARGET}} | {{KPI_2_METHOD}}   |
+| {{KPI_3}} | {{KPI_3_CURRENT}} | {{KPI_3_TARGET}} | {{KPI_3_METHOD}}   |
+| {{KPI_4}} | {{KPI_4_CURRENT}} | {{KPI_4_TARGET}} | {{KPI_4_METHOD}}   |
 
 <!--
 Example KPIs:
@@ -405,10 +427,12 @@ Example KPIs:
 ## Review and Approval
 
 **Plan Reviewed By:**
+
 - {{REVIEWER_1_NAME}} - {{REVIEWER_1_ROLE}} - {{REVIEWER_1_DATE}}
 - {{REVIEWER_2_NAME}} - {{REVIEWER_2_ROLE}} - {{REVIEWER_2_DATE}}
 
 **Plan Approved By:**
+
 - {{APPROVER_NAME}} - {{APPROVER_ROLE}} - {{APPROVER_DATE}}
 
 **Next Review Date:** {{NEXT_REVIEW_DATE}}
@@ -417,7 +441,7 @@ Example KPIs:
 
 ## Change Log
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
+| Version       | Date       | Author       | Changes       |
+| ------------- | ---------- | ------------ | ------------- |
 | {{VERSION_1}} | {{DATE_1}} | {{AUTHOR_1}} | {{CHANGES_1}} |
 | {{VERSION_2}} | {{DATE_2}} | {{AUTHOR_2}} | {{CHANGES_2}} |

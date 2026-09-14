@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Authentication Guide for Agent Testing
 
 Guide to authentication methods for agent preview and API-based testing.
@@ -11,10 +12,10 @@ Guide to authentication methods for agent preview and API-based testing.
 
 Agent testing uses **two different auth methods** depending on the testing approach:
 
-| Testing Approach | Auth Method | Setup Required |
-|------------------|-------------|----------------|
-| **Preview (Simulated)** | Standard org auth | `sf org login web` |
-| **Preview (Live)** | Standard org auth | `sf org login web` |
+| Testing Approach                   | Auth Method               | Setup Required          |
+| ---------------------------------- | ------------------------- | ----------------------- |
+| **Preview (Simulated)**            | Standard org auth         | `sf org login web`      |
+| **Preview (Live)**                 | Standard org auth         | `sf org login web`      |
 | **Agent Runtime API** (multi-turn) | External Client App (ECA) | Client Credentials flow |
 
 ---
@@ -72,8 +73,8 @@ Conversation record:
 {
   "conversationId": "0Af7X000000001",
   "messages": [
-    {"role": "user", "content": "Where is my order?", "timestamp": "..."},
-    {"role": "assistant", "content": "Let me check...", "timestamp": "..."}
+    { "role": "user", "content": "Where is my order?", "timestamp": "..." },
+    { "role": "assistant", "content": "Let me check...", "timestamp": "..." }
   ],
   "status": "completed"
 }
@@ -124,6 +125,7 @@ When using `--apex-debug`:
 **Cause:** Org authentication expired or invalid.
 
 **Solution:**
+
 1. Re-authenticate: `sf org login web --alias [alias]`
 2. Verify auth is valid: `sf org display --target-org [alias]`
 3. Ensure user has Agentforce permissions
@@ -133,6 +135,7 @@ When using `--apex-debug`:
 **Cause:** Actions require deployed Flows/Apex.
 
 **Solution:**
+
 1. Verify Flow is active via SOQL: `sf data query --query "SELECT Id, ActiveVersionId, Status FROM FlowDefinitionView WHERE ApiName = '[FlowName]'" --target-org [OrgAlias]`
 2. Deploy/activate Flow via metadata: `sf project deploy start --metadata Flow:[FlowName] --target-org [OrgAlias]`
 3. Verify Apex is deployed: `sf project deploy start --metadata ApexClass:[ClassName]`
@@ -143,6 +146,7 @@ When using `--apex-debug`:
 **Cause:** Flow or Apex taking too long.
 
 **Solution:**
+
 1. Add debug logs: `--apex-debug`
 2. Check Flow for long-running operations
 3. Verify external callouts are responsive
@@ -155,14 +159,14 @@ For **multi-turn API testing** (not CLI preview), you need an External Client Ap
 
 ### Standard Auth vs ECA Comparison
 
-| Aspect | Standard Auth (Preview) | Client Credentials (ECA) |
-|--------|------------------------|--------------------------|
-| **Used by** | `sf agent preview` (simulated + live) | Agent Runtime API (multi-turn testing) |
-| **App type** | None required | External Client App (ECA) |
-| **Auth flow** | Standard CLI auth (browser login) | Client Credentials (machine-to-machine) |
-| **User interaction** | Browser redirect | None — fully automated |
-| **Best for** | Manual interactive testing | Automated multi-turn API testing |
-| **Setup guide** | This section | [ECA Setup Guide](eca-setup-guide.md) |
+| Aspect               | Standard Auth (Preview)               | Client Credentials (ECA)                |
+| -------------------- | ------------------------------------- | --------------------------------------- |
+| **Used by**          | `sf agent preview` (simulated + live) | Agent Runtime API (multi-turn testing)  |
+| **App type**         | None required                         | External Client App (ECA)               |
+| **Auth flow**        | Standard CLI auth (browser login)     | Client Credentials (machine-to-machine) |
+| **User interaction** | Browser redirect                      | None — fully automated                  |
+| **Best for**         | Manual interactive testing            | Automated multi-turn API testing        |
+| **Setup guide**      | This section                          | [ECA Setup Guide](eca-setup-guide.md)   |
 
 ### Decision Flow
 
@@ -179,6 +183,7 @@ What are you testing?
 ### When You Need an ECA
 
 If you're doing **multi-turn API testing** via Agent Runtime API, you'll need:
+
 - An **External Client App** with Client Credentials flow ([ECA Setup Guide](eca-setup-guide.md))
 - Scopes: `api`, `chatbot_api`, `sfap_api`
 
@@ -188,9 +193,9 @@ Preview testing (simulated or live) only requires standard `sf org login web`.
 
 ## Related Skills
 
-| Skill | Use For |
-|-------|---------|
+| Skill             | Use For                                   |
+| ----------------- | ----------------------------------------- |
 | sf-connected-apps | Create and manage Connected Apps and ECAs |
-| sf-flow | Debug failing Flow actions |
-| sf-apex | Debug failing Apex actions |
-| sf-debug | Analyze debug logs |
+| sf-flow           | Debug failing Flow actions                |
+| sf-apex           | Debug failing Apex actions                |
+| sf-debug          | Analyze debug logs                        |

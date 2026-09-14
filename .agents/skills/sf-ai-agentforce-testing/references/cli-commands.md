@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # CLI Commands Reference
 
 Complete reference for SF CLI commands related to Agentforce testing.
@@ -57,12 +58,12 @@ sf agent generate test-spec [--output-file <path>]
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `--output-file` | Path for generated YAML (default: `specs/agentTestSpec.yaml`) |
-| `--api-version` | Override API version |
+| Flag                | Description                                                                            |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| `--output-file`     | Path for generated YAML (default: `specs/agentTestSpec.yaml`)                          |
+| `--api-version`     | Override API version                                                                   |
 | `--from-definition` | Path to existing XML `AiEvaluationDefinition` file — converts to YAML test spec format |
-| `--force-overwrite` | Overwrite output file without confirmation prompt |
+| `--force-overwrite` | Overwrite output file without confirmation prompt                                      |
 
 **Converting XML to YAML:**
 
@@ -74,6 +75,7 @@ sf agent generate test-spec --from-definition force-app/main/default/aiEvaluatio
 > **Note:** `--from-definition` converts an existing XML-based test definition to the newer YAML test spec format. Useful when migrating from manually-created XML metadata to the YAML-based workflow.
 
 **⛔ Non-existent flags (DO NOT USE):**
+
 - `--api-name` - Does NOT exist (common misconception)
 - `--agent-name` - Does NOT exist
 - `--from-agent` - Does NOT exist
@@ -81,6 +83,7 @@ sf agent generate test-spec --from-definition force-app/main/default/aiEvaluatio
 **Interactive Prompts:**
 
 The command interactively prompts for:
+
 1. **Utterance** - Test input (user message)
 2. **Expected topic** - Which topic should be selected
 3. **Expected actions** - Which actions should be invoked
@@ -115,18 +118,18 @@ sf agent test create --spec <file> --target-org <alias> [--api-name <name>] [--f
 
 **Required Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-s, --spec` | Path to test spec YAML file |
+| Flag               | Description                  |
+| ------------------ | ---------------------------- |
+| `-s, --spec`       | Path to test spec YAML file  |
 | `-o, --target-org` | Target org alias or username |
 
 **Optional Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-n, --api-name` | API name for the test (auto-generated if omitted) |
-| `--force-overwrite` | Skip confirmation if test exists |
-| `--preview` | Dry-run - view metadata without deploying |
+| Flag                | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `-n, --api-name`    | API name for the test (auto-generated if omitted) |
+| `--force-overwrite` | Skip confirmation if test exists                  |
+| `--preview`         | Dry-run - view metadata without deploying         |
 
 **Example:**
 
@@ -144,6 +147,7 @@ sf agent test create --spec ./tests/spec.yaml --preview --target-org dev
 **Output:**
 
 Creates `AiEvaluationDefinition` metadata in the org at:
+
 ```
 force-app/main/default/aiEvaluationDefinitions/[TestName].aiEvaluationDefinition-meta.xml
 ```
@@ -162,19 +166,19 @@ sf agent test run --api-name <name> --target-org <alias> [--wait <minutes>]
 
 **Required Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-n, --api-name` | Test API name (created via `test create`) |
-| `-o, --target-org` | Target org alias or username |
+| Flag               | Description                               |
+| ------------------ | ----------------------------------------- |
+| `-n, --api-name`   | Test API name (created via `test create`) |
+| `-o, --target-org` | Target org alias or username              |
 
 **Optional Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-w, --wait` | Minutes to wait for completion (default: async) |
+| Flag                  | Description                                              |
+| --------------------- | -------------------------------------------------------- |
+| `-w, --wait`          | Minutes to wait for completion (default: async)          |
 | `-r, --result-format` | Output format: `human` (default), `json`, `junit`, `tap` |
-| `-d, --output-dir` | Directory to save results |
-| `--verbose` | Include detailed action data |
+| `-d, --output-dir`    | Directory to save results                                |
+| `--verbose`           | Include detailed action data                             |
 
 **Example:**
 
@@ -198,11 +202,11 @@ The `--verbose` flag adds detailed `generatedData` to test results, including ac
 
 **Additional fields in `generatedData` with `--verbose`:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `invokedActions` | stringified JSON | All action invocations per turn — inputs, outputs, latency |
-| `generatedResponse` | string | Raw agent response text (pre-formatting) |
-| `sessionId` | string | Test session UUID |
+| Field               | Type             | Description                                                |
+| ------------------- | ---------------- | ---------------------------------------------------------- |
+| `invokedActions`    | stringified JSON | All action invocations per turn — inputs, outputs, latency |
+| `generatedResponse` | string           | Raw agent response text (pre-formatting)                   |
+| `sessionId`         | string           | Test session UUID                                          |
 
 **Example `generatedData` with `--verbose`:**
 
@@ -228,6 +232,7 @@ The `--verbose` flag adds detailed `generatedData` to test results, including ac
 **Async Behavior:**
 
 Without `--wait`, the command:
+
 1. Starts the test
 2. Returns a job ID
 3. Exits immediately
@@ -250,15 +255,16 @@ sf agent test results --job-id <id> --target-org <alias> [--result-format <forma
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-i, --job-id` | **(REQUIRED)** Job ID from `test run` command |
-| `-o, --target-org` | Target org alias or username |
-| `-r, --result-format` | Output format: `human`, `json`, `junit`, `tap` |
-| `-d, --output-dir` | Directory to save results |
-| `--verbose` | Show generated data including `invokedActions` with action inputs, outputs, and latency |
+| Flag                  | Description                                                                             |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| `-i, --job-id`        | **(REQUIRED)** Job ID from `test run` command                                           |
+| `-o, --target-org`    | Target org alias or username                                                            |
+| `-r, --result-format` | Output format: `human`, `json`, `junit`, `tap`                                          |
+| `-d, --output-dir`    | Directory to save results                                                               |
+| `--verbose`           | Show generated data including `invokedActions` with action inputs, outputs, and latency |
 
 **⛔ Non-working flags (DO NOT USE):**
+
 - `--use-most-recent` - Documented in help text but NOT implemented as of v2.123.1 (confirmed still broken since v2.108.6). Use `test resume --use-most-recent` or `--job-id` instead.
 
 **Example:**
@@ -276,9 +282,11 @@ sf agent test results --job-id 4KBak0000001btZGAQ --verbose --target-org dev
 
 **Getting the Job ID:**
 The `sf agent test run` command outputs the job ID when it starts:
+
 ```
 Job ID: 4KBak0000001btZGAQ
 ```
+
 Save this ID to retrieve results later.
 
 ---
@@ -295,15 +303,15 @@ sf agent test resume --job-id <id> --target-org <alias> [--wait <minutes>]
 
 **Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-i, --job-id` | Job ID to resume |
-| `-r, --use-most-recent` | Use the job ID of the most recent agent test run (alternative to `--job-id`) |
-| `-o, --target-org` | Target org alias or username |
-| `-w, --wait` | Minutes to wait for completion |
-| `-r, --result-format` | Output format: `human`, `json`, `junit`, `tap` |
-| `-d, --output-dir` | Directory to save results |
-| `--verbose` | Show generated data including `invokedActions` with action inputs, outputs, and latency |
+| Flag                    | Description                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `-i, --job-id`          | Job ID to resume                                                                        |
+| `-r, --use-most-recent` | Use the job ID of the most recent agent test run (alternative to `--job-id`)            |
+| `-o, --target-org`      | Target org alias or username                                                            |
+| `-w, --wait`            | Minutes to wait for completion                                                          |
+| `-r, --result-format`   | Output format: `human`, `json`, `junit`, `tap`                                          |
+| `-d, --output-dir`      | Directory to save results                                                               |
+| `--verbose`             | Show generated data including `invokedActions` with action inputs, outputs, and latency |
 
 > **Note:** `--use-most-recent` works on `test resume` (verified on v2.123.1) but is broken on `test results`. Use `test resume --use-most-recent` as a workaround when you don't have the job ID handy.
 
@@ -335,27 +343,29 @@ testCases:
     expectedActions:
       - Field_Support_Updating_Messaging_Session_179c7c824b693d7
     contextVariables:
-      - name: RoutableId            # NOT $Context.RoutableId — bare name only
+      - name: RoutableId # NOT $Context.RoutableId — bare name only
         value: "0Mwbb000007MGoTCAW"
       - name: CaseId
         value: "500XX0000000001"
 ```
 
 **Key Rules:**
+
 - `name` uses the **bare variable name** (e.g., `RoutableId`), NOT `$Context.RoutableId`
 - The CLI framework adds the `$Context.` prefix automatically during XML generation
 - Maps to `<contextVariable><variableName>` / `<variableValue>` in metadata XML
 
 **Common Variables:**
 
-| Variable | Purpose | Discovery Query |
-|----------|---------|-----------------|
+| Variable     | Purpose                              | Discovery Query                                                 |
+| ------------ | ------------------------------------ | --------------------------------------------------------------- |
 | `RoutableId` | MessagingSession ID for action flows | `SELECT Id FROM MessagingSession WHERE Status='Active' LIMIT 1` |
-| `CaseId` | Case record ID | `SELECT Id FROM Case ORDER BY CreatedDate DESC LIMIT 1` |
-| `EndUserId` | End user contact/person ID | `SELECT Id FROM Contact LIMIT 1` |
-| `ContactId` | Contact record ID | `SELECT Id FROM Contact LIMIT 1` |
+| `CaseId`     | Case record ID                       | `SELECT Id FROM Case ORDER BY CreatedDate DESC LIMIT 1`         |
+| `EndUserId`  | End user contact/person ID           | `SELECT Id FROM Contact LIMIT 1`                                |
+| `ContactId`  | Contact record ID                    | `SELECT Id FROM Contact LIMIT 1`                                |
 
 **Effect of `RoutableId`:**
+
 - **Without RoutableId:** Action flows receive the topic's internal name (e.g., `p_16jPl000000GwEX_Field_Support_Routing_16j8eeef13560aa`) as `recordId`
 - **With RoutableId:** Action flows receive a real MessagingSession ID (e.g., `0Mwbb000007MGoTCAW`) as `recordId`
 
@@ -389,7 +399,7 @@ testCases:
             isReference: false
           - name: actual
             value: "$.generatedData.invokedActions[0][0].function.input.supportPath"
-            isReference: true       # JSONPath resolved against generatedData
+            isReference: true # JSONPath resolved against generatedData
           - name: expected
             value: "Field Support"
             isReference: false
@@ -405,12 +415,12 @@ testCases:
 
 Common JSONPath expressions for `invokedActions` (use `--verbose` to discover structure):
 
-| Path | What It Returns |
-|------|-----------------|
-| `$.generatedData.invokedActions[0][0].function.name` | Action name |
-| `$.generatedData.invokedActions[0][0].function.input.[field]` | Action input field value |
-| `$.generatedData.invokedActions[0][0].function.output.[field]` | Action output field value |
-| `$.generatedData.invokedActions[0][0].executionLatency` | Action execution latency (ms) |
+| Path                                                           | What It Returns               |
+| -------------------------------------------------------------- | ----------------------------- |
+| `$.generatedData.invokedActions[0][0].function.name`           | Action name                   |
+| `$.generatedData.invokedActions[0][0].function.input.[field]`  | Action input field value      |
+| `$.generatedData.invokedActions[0][0].function.output.[field]` | Action output field value     |
+| `$.generatedData.invokedActions[0][0].executionLatency`        | Action execution latency (ms) |
 
 ### Workflow
 
@@ -442,13 +452,13 @@ testCases:
 
 ### Available Metrics
 
-| Metric | Score Range | Status | Description |
-|--------|-------------|--------|-------------|
-| `coherence` | 1-5 | ✅ Works (caveat) | Response clarity, grammar, and logical flow. Typically scores 4-5 for clear responses. **⚠️ Scores deflection agents poorly** (2-3) because it evaluates whether the response "answers" the user's literal question, not whether the agent behaved correctly. For deflection/guardrail tests, use `expectedOutcome` instead. |
-| `completeness` | 1-5 | ⚠️ Misleading | How fully the response addresses the query. **Penalizes triage/routing agents** for transferring instead of "solving." |
-| `conciseness` | 1-5 | 🔴 Broken | **Returns score=0** with empty `metricExplainability` on most tests. Platform bug. |
-| `instruction_following` | 0-1 | ⚠️ Two bugs | Whether agent follows instructions. **Bug 1:** Labels "FAILURE" even at score=1 — check score value, ignore label. **Bug 2:** Crashes Testing Center UI — `No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION`. Remove from metrics if users need UI. |
-| `output_latency_milliseconds` | Raw ms | ✅ Works | Raw response latency. No pass/fail grading — useful for performance baselining. |
+| Metric                        | Score Range | Status            | Description                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------- | ----------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coherence`                   | 1-5         | ✅ Works (caveat) | Response clarity, grammar, and logical flow. Typically scores 4-5 for clear responses. **⚠️ Scores deflection agents poorly** (2-3) because it evaluates whether the response "answers" the user's literal question, not whether the agent behaved correctly. For deflection/guardrail tests, use `expectedOutcome` instead. |
+| `completeness`                | 1-5         | ⚠️ Misleading     | How fully the response addresses the query. **Penalizes triage/routing agents** for transferring instead of "solving."                                                                                                                                                                                                       |
+| `conciseness`                 | 1-5         | 🔴 Broken         | **Returns score=0** with empty `metricExplainability` on most tests. Platform bug.                                                                                                                                                                                                                                           |
+| `instruction_following`       | 0-1         | ⚠️ Two bugs       | Whether agent follows instructions. **Bug 1:** Labels "FAILURE" even at score=1 — check score value, ignore label. **Bug 2:** Crashes Testing Center UI — `No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION`. Remove from metrics if users need UI.                                                  |
+| `output_latency_milliseconds` | Raw ms      | ✅ Works          | Raw response latency. No pass/fail grading — useful for performance baselining.                                                                                                                                                                                                                                              |
 
 ### Recommendations
 
@@ -498,26 +508,26 @@ sf agent preview --api-name <name> --target-org <alias> [options]
 
 **Required Flags:**
 
-| Flag | Description |
-|------|-------------|
-| `-n, --api-name` | Agent API name |
+| Flag               | Description                  |
+| ------------------ | ---------------------------- |
+| `-n, --api-name`   | Agent API name               |
 | `-o, --target-org` | Target org alias or username |
 
 **Optional Flags:**
 
-| Flag | Description |
-|------|-------------|
+| Flag                 | Description                            |
+| -------------------- | -------------------------------------- |
 | `--use-live-actions` | Execute real Flows/Apex (vs simulated) |
-| `--authoring-bundle` | Specific authoring bundle to preview |
-| `-d, --output-dir` | Directory to save transcripts |
-| `-x, --apex-debug` | Capture Apex debug logs |
+| `--authoring-bundle` | Specific authoring bundle to preview   |
+| `-d, --output-dir`   | Directory to save transcripts          |
+| `-x, --apex-debug`   | Capture Apex debug logs                |
 
 **Modes:**
 
-| Mode | Command | Description |
-|------|---------|-------------|
-| **Simulated** | `sf agent preview --api-name Agent` | LLM simulates action results |
-| **Live** | `sf agent preview --api-name Agent --use-live-actions` | Real Flows/Apex execute |
+| Mode          | Command                                                | Description                  |
+| ------------- | ------------------------------------------------------ | ---------------------------- |
+| **Simulated** | `sf agent preview --api-name Agent`                    | LLM simulates action results |
+| **Live**      | `sf agent preview --api-name Agent --use-live-actions` | Real Flows/Apex execute      |
 
 > **v2.121.7+**: When `--api-name` is omitted, the interactive agent selection now shows **(Published)** and **(Agent Script)** labels next to agent names to help distinguish agent types.
 
@@ -557,6 +567,7 @@ Saved to: ./logs/transcript.json
 **Output Files:**
 
 When using `--output-dir`:
+
 - `transcript.json` - Conversation record
 - `responses.json` - Full API messages with internal details
 - `apex-debug.log` - Debug logs (if `--apex-debug`)
@@ -629,7 +640,8 @@ sf agent test run --api-name Test --result-format json --target-org dev
 ```
 
 > **Note:** `output_validation` shows `FAILURE` when `expectedOutcome` is omitted — this is **harmless**. The `topic_assertion` and `actions_assertion` results are the primary pass/fail indicators.
-```
+
+````
 
 ### JUnit
 
@@ -637,16 +649,22 @@ XML format for test reporting tools.
 
 ```bash
 sf agent test run --api-name Test --result-format junit --output-dir ./results --target-org dev
-```
+````
 
 **JUnit Structure:**
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <testsuite name="CustomerSupportTests" tests="20" failures="2" time="45.2">
-  <testcase name="route_to_order_lookup" classname="topic_routing" time="2.1"/>
-  <testcase name="action_invocation_test" classname="action_invocation" time="3.2">
-    <failure type="ACTION_NOT_INVOKED">Expected action get_order_status was not invoked</failure>
+  <testcase name="route_to_order_lookup" classname="topic_routing" time="2.1" />
+  <testcase
+    name="action_invocation_test"
+    classname="action_invocation"
+    time="3.2"
+  >
+    <failure
+      type="ACTION_NOT_INVOKED"
+    >Expected action get_order_status was not invoked</failure>
   </testcase>
 </testsuite>
 ```
@@ -722,20 +740,20 @@ cat ./debug/apex-debug.log | grep ERROR
 
 ## Error Troubleshooting
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| "Agent not found" | Agent not published | Run `sf agent publish authoring-bundle` |
-| "Test not found" | Test not created | Run `sf agent test create` first |
-| "401 Unauthorized" | Org auth expired | Re-authenticate: `sf org login web` |
-| "Job ID not found" | Test timed out | Use `sf agent test resume` |
-| "No results" | Test still running | Wait longer or use `--wait` |
-| **"Nonexistent flag: --use-most-recent"** | `test results` CLI bug (confirmed v2.123.1) | Use `--job-id` explicitly, or use `test resume --use-most-recent` instead |
-| **Topic assertion fails** | Expected topic doesn't match actual | Standard copilots use `MigrationDefaultTopic` - update test expectations |
-| **"No matching records"** | Test data doesn't exist | Verify utterances reference actual org data |
-| **Test exists confirmation hangs** | Interactive prompt in script | Use `echo "y" \| sf agent test create...` |
-| **"RETRY" / "INTERNAL_SERVER_ERROR"** | Custom eval platform bug (Spring '26) | Skip custom evaluations or use Testing Center UI. See [Known Issues](#critical-custom-evaluations-retry-bug-spring-26) |
-| **Metric score=0 on conciseness** | `conciseness` metric broken | Skip `conciseness` metric until platform patch |
-| **"No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION"** | Testing Center UI crashes when test suite includes `instruction_following` metric | Remove `- instruction_following` from YAML metrics and redeploy. CLI execution is unaffected. |
+| Error                                                                          | Cause                                                                             | Solution                                                                                                               |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| "Agent not found"                                                              | Agent not published                                                               | Run `sf agent publish authoring-bundle`                                                                                |
+| "Test not found"                                                               | Test not created                                                                  | Run `sf agent test create` first                                                                                       |
+| "401 Unauthorized"                                                             | Org auth expired                                                                  | Re-authenticate: `sf org login web`                                                                                    |
+| "Job ID not found"                                                             | Test timed out                                                                    | Use `sf agent test resume`                                                                                             |
+| "No results"                                                                   | Test still running                                                                | Wait longer or use `--wait`                                                                                            |
+| **"Nonexistent flag: --use-most-recent"**                                      | `test results` CLI bug (confirmed v2.123.1)                                       | Use `--job-id` explicitly, or use `test resume --use-most-recent` instead                                              |
+| **Topic assertion fails**                                                      | Expected topic doesn't match actual                                               | Standard copilots use `MigrationDefaultTopic` - update test expectations                                               |
+| **"No matching records"**                                                      | Test data doesn't exist                                                           | Verify utterances reference actual org data                                                                            |
+| **Test exists confirmation hangs**                                             | Interactive prompt in script                                                      | Use `echo "y" \| sf agent test create...`                                                                              |
+| **"RETRY" / "INTERNAL_SERVER_ERROR"**                                          | Custom eval platform bug (Spring '26)                                             | Skip custom evaluations or use Testing Center UI. See [Known Issues](#critical-custom-evaluations-retry-bug-spring-26) |
+| **Metric score=0 on conciseness**                                              | `conciseness` metric broken                                                       | Skip `conciseness` metric until platform patch                                                                         |
+| **"No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION"** | Testing Center UI crashes when test suite includes `instruction_following` metric | Remove `- instruction_following` from YAML metrics and redeploy. CLI execution is unaffected.                          |
 
 ---
 
@@ -744,39 +762,42 @@ cat ./debug/apex-debug.log | grep ERROR
 ### 1. Action Matching Uses Superset Logic
 
 Action assertions use **flexible superset matching**:
+
 - Expected: `[IdentifyRecordByName]`
 - Actual: `[IdentifyRecordByName, SummarizeRecord]`
 - Result: ✅ **PASS** (actual contains expected)
 
-This means tests pass if the agent invokes *at least* the expected actions, even if it invokes additional ones.
+This means tests pass if the agent invokes _at least_ the expected actions, even if it invokes additional ones.
 
 ### 2. Topic Names Vary by Agent Type
 
-| Agent Type | Typical Topic Names |
-|------------|---------------------|
-| Standard Salesforce Copilot | `MigrationDefaultTopic` |
-| Custom Agent | Custom names you define |
-| Agentforce for Service | `GeneralCRM`, `OOTBSingleRecordSummary` |
+| Agent Type                  | Typical Topic Names                     |
+| --------------------------- | --------------------------------------- |
+| Standard Salesforce Copilot | `MigrationDefaultTopic`                 |
+| Custom Agent                | Custom names you define                 |
+| Agentforce for Service      | `GeneralCRM`, `OOTBSingleRecordSummary` |
 
 **Best Practice:** Run one test first, check actual topic names in results, then update expectations.
 
 ### 3. Test Data Must Exist
 
 Tests referencing specific records will fail if:
+
 - The record doesn't exist (e.g., "Acme" account)
 - The record name doesn't match exactly (case-sensitive)
 
 **Best Practice:** Query org for actual data before writing tests:
+
 ```bash
 sf data query --query "SELECT Name FROM Account LIMIT 5" --target-org dev
 ```
 
 ### 4. Two Fix Strategies Exist
 
-| Agent Type | Fix Strategy |
-|------------|--------------|
+| Agent Type                 | Fix Strategy                   |
+| -------------------------- | ------------------------------ |
 | Custom Agent (you control) | Fix agent via sf-ai-agentforce |
-| Managed/Standard Agent | Fix test expectations in YAML |
+| Managed/Standard Agent     | Fix test expectations in YAML  |
 
 ---
 
@@ -784,10 +805,10 @@ sf data query --query "SELECT Name FROM Account LIMIT 5" --target-org dev
 
 When writing `expectedTopic` in YAML specs, the format depends on the topic type:
 
-| Topic Type | YAML Value | Example |
-|------------|-----------|---------|
-| **Standard** (Escalation, Off_Topic, etc.) | `localDeveloperName` | `Escalation` |
-| **Promoted** (p_16j... prefix) | Full runtime `developerName` with hash | `p_16jPl000000GwEX_Topic_16j8eeef13560aa` |
+| Topic Type                                 | YAML Value                             | Example                                   |
+| ------------------------------------------ | -------------------------------------- | ----------------------------------------- |
+| **Standard** (Escalation, Off_Topic, etc.) | `localDeveloperName`                   | `Escalation`                              |
+| **Promoted** (p_16j... prefix)             | Full runtime `developerName` with hash | `p_16jPl000000GwEX_Topic_16j8eeef13560aa` |
 
 ### Standard Topics
 
@@ -874,6 +895,7 @@ An empty list or omitted `expectedActions` means "I'm not testing action invocat
 ### Missing `expectedOutcome` Causes Harmless ERROR
 
 Omitting `expectedOutcome` causes `output_validation` to report `ERROR` status with:
+
 > "Skip metric result due to missing expected input"
 
 This is **harmless** — `topic_assertion` and `actions_assertion` still run and report correctly.
@@ -885,6 +907,7 @@ The CLI test framework runs without a MessagingSession. Flows that need `recordI
 ### Do NOT Add Fabricated Fields
 
 These fields are NOT part of the CLI YAML schema and will be silently ignored or cause errors:
+
 - `apiVersion`, `kind` — not recognized
 - `metadata.name`, `metadata.agent` — use top-level `name:` and `subjectName:` instead
 - `settings.timeout`, `settings.retryCount` — not recognized
@@ -901,6 +924,7 @@ These fields are NOT part of the CLI YAML schema and will be silently ignored or
 **Error**: `INTERNAL_SERVER_ERROR: The specified enum type has no constant with the specified name: RETRY`
 
 **Scope**:
+
 - Server returns "RETRY" status for test cases with custom evaluations using `isReference: true`
 - Results API endpoint crashes with HTTP 500 when fetching results
 - Both filter expressions `[?(@.field == 'value')]` AND direct indexing `[0][0]` trigger the bug
@@ -909,6 +933,7 @@ These fields are NOT part of the CLI YAML schema and will be silently ignored or
 **Confirmed**: Direct `curl` to REST endpoint returns same 500 — NOT a CLI parsing issue
 
 **Workaround**:
+
 1. Use Testing Center UI (Setup → Agent Testing) — may display results
 2. Skip custom evaluations until platform patch
 3. Use `expectedOutcome` (LLM-as-judge) for response validation instead
@@ -943,9 +968,9 @@ These fields are NOT part of the CLI YAML schema and will be silently ignored or
 
 ## Related Commands
 
-| Command | Skill | Purpose |
-|---------|-------|---------|
-| `sf agent publish authoring-bundle` | sf-ai-agentscript | Publish agent before testing |
-| `sf agent validate authoring-bundle` | sf-ai-agentscript | Validate agent syntax |
-| `sf agent activate` | sf-ai-agentscript | Activate for preview |
-| `sf org login web` | - | OAuth for live preview |
+| Command                              | Skill             | Purpose                      |
+| ------------------------------------ | ----------------- | ---------------------------- |
+| `sf agent publish authoring-bundle`  | sf-ai-agentscript | Publish agent before testing |
+| `sf agent validate authoring-bundle` | sf-ai-agentscript | Validate agent syntax        |
+| `sf agent activate`                  | sf-ai-agentscript | Activate for preview         |
+| `sf org login web`                   | -                 | OAuth for live preview       |

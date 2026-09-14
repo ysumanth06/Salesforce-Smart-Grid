@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Quality Metrics for Agentforce Conversation Design
 
 This guide defines key performance indicators (KPIs), benchmarks, and improvement strategies for evaluating Agentforce agent quality. Use these metrics to measure success and identify areas for optimization.
@@ -21,6 +22,7 @@ Agentforce quality should be measured across four dimensions:
 **Definition:** Percentage of conversations resolved without escalation to a human agent.
 
 **Formula:**
+
 ```
 Resolution Rate = (Conversations Resolved by AI / Total Conversations) × 100
 ```
@@ -28,6 +30,7 @@ Resolution Rate = (Conversations Resolved by AI / Total Conversations) × 100
 **Target Benchmark:** >70%
 
 **Grade Scale:**
+
 - **Excellent:** >80%
 - **Good:** 70-80%
 - **Fair:** 60-70%
@@ -36,6 +39,7 @@ Resolution Rate = (Conversations Resolved by AI / Total Conversations) × 100
 ### How to Measure
 
 **Method 1: Escalation Tracking (Proxy)**
+
 ```
 Resolution Rate ≈ 100% - Escalation Rate
 ```
@@ -43,6 +47,7 @@ Resolution Rate ≈ 100% - Escalation Rate
 If 25% of conversations escalate, resolution rate ≈ 75%.
 
 **Method 2: Post-Conversation Survey**
+
 ```
 Survey Question: "Was your issue resolved?"
   - Yes (resolved)
@@ -53,6 +58,7 @@ Resolution Rate = % who answered "Yes"
 ```
 
 **Method 3: AgentWork Analysis**
+
 ```
 Query AgentWork records:
   - Total conversations: COUNT(*)
@@ -62,18 +68,19 @@ Query AgentWork records:
 
 ### Interpretation
 
-| Resolution Rate | What It Means | Action |
-|-----------------|---------------|--------|
-| **>85%** | AI is highly effective | Maintain current design, look for edge case improvements |
-| **70-85%** | AI is performing well | Identify top escalation reasons and address |
-| **60-70%** | AI is struggling | Major redesign needed—check topic scope, instructions, actions |
-| **<60%** | AI is not adding value | Consider if the use case is suitable for AI |
+| Resolution Rate | What It Means          | Action                                                         |
+| --------------- | ---------------------- | -------------------------------------------------------------- |
+| **>85%**        | AI is highly effective | Maintain current design, look for edge case improvements       |
+| **70-85%**      | AI is performing well  | Identify top escalation reasons and address                    |
+| **60-70%**      | AI is struggling       | Major redesign needed—check topic scope, instructions, actions |
+| **<60%**        | AI is not adding value | Consider if the use case is suitable for AI                    |
 
 ### Improvement Strategies
 
 **If Resolution Rate is Low:**
 
 1. **Analyze Escalation Reasons:**
+
    ```
    Top Escalation Reasons:
      - 35%: Complexity (multi-issue conversations)
@@ -103,6 +110,7 @@ Query AgentWork records:
 **Definition:** Percentage of conversations correctly routed to the right topic on first intent.
 
 **Formula:**
+
 ```
 Classification Accuracy = (Correct Topic Matches / Total Conversations) × 100
 ```
@@ -110,6 +118,7 @@ Classification Accuracy = (Correct Topic Matches / Total Conversations) × 100
 **Target Benchmark:** >90%
 
 **Grade Scale:**
+
 - **Excellent:** >95%
 - **Good:** 90-95%
 - **Fair:** 85-90%
@@ -120,6 +129,7 @@ Classification Accuracy = (Correct Topic Matches / Total Conversations) × 100
 **Method 1: Manual Review (Gold Standard)**
 
 Sample 100 conversations. For each, answer:
+
 - Did the agent route to the correct topic on the first message?
 - If topic switched mid-conversation, was it appropriate?
 
@@ -154,18 +164,19 @@ Target: <15%
 
 ### Interpretation
 
-| Classification Accuracy | What It Means | Action |
-|-------------------------|---------------|--------|
-| **>95%** | Topic descriptions are clear and well-differentiated | Maintain current design |
-| **90-95%** | Generally good, minor ambiguities | Review top misclassification pairs |
-| **85-90%** | Significant ambiguity | Rewrite overlapping topic descriptions |
-| **<85%** | Topics are poorly defined | Major topic architecture redesign |
+| Classification Accuracy | What It Means                                        | Action                                 |
+| ----------------------- | ---------------------------------------------------- | -------------------------------------- |
+| **>95%**                | Topic descriptions are clear and well-differentiated | Maintain current design                |
+| **90-95%**              | Generally good, minor ambiguities                    | Review top misclassification pairs     |
+| **85-90%**              | Significant ambiguity                                | Rewrite overlapping topic descriptions |
+| **<85%**                | Topics are poorly defined                            | Major topic architecture redesign      |
 
 ### Improvement Strategies
 
 **If Classification Accuracy is Low:**
 
 1. **Identify Ambiguous Topic Pairs:**
+
    ```
    Misclassification Analysis:
      - 40% of "Technical Support" conversations misclassified as "Product Help"
@@ -173,6 +184,7 @@ Target: <15%
    ```
 
    **Action:** Disambiguate the overlapping topics:
+
    ```yaml
    # Before (Ambiguous)
    Topic A: Technical Support
@@ -211,6 +223,7 @@ Target: <15%
 **Definition:** Average number of back-and-forth messages (turns) from start to resolution.
 
 **Formula:**
+
 ```
 Avg Turns to Resolution = Total Message Count / Total Resolved Conversations
 ```
@@ -218,6 +231,7 @@ Avg Turns to Resolution = Total Message Count / Total Resolved Conversations
 **Target Benchmark:** <6 turns
 
 **Grade Scale:**
+
 - **Excellent:** <4 turns (efficient, concise)
 - **Good:** 4-6 turns (acceptable for most use cases)
 - **Fair:** 6-8 turns (slow, needs optimization)
@@ -228,6 +242,7 @@ Avg Turns to Resolution = Total Message Count / Total Resolved Conversations
 **Method 1: Conversation Message Count**
 
 Query conversation records:
+
 ```sql
 SELECT AVG(MessageCount)
 FROM Conversation
@@ -238,6 +253,7 @@ AND EscalatedToHuman__c = FALSE
 **Method 2: By Topic**
 
 Compare turn counts across topics to identify inefficiencies:
+
 ```
 Topic                  | Avg Turns | Status
 -------------------------------------------------
@@ -249,18 +265,19 @@ Account Settings       | 4.2       | ✅ Good
 
 ### Interpretation
 
-| Avg Turns | What It Means | Action |
-|-----------|---------------|--------|
-| **<4** | Highly efficient (likely simple Q&A) | Maintain efficiency |
-| **4-6** | Normal for multi-step workflows | Acceptable, monitor for increases |
-| **6-8** | Agent is slow or inefficient | Optimize instructions, reduce redundant questions |
-| **>8** | Major inefficiency, customer frustration | Immediate redesign needed |
+| Avg Turns | What It Means                            | Action                                            |
+| --------- | ---------------------------------------- | ------------------------------------------------- |
+| **<4**    | Highly efficient (likely simple Q&A)     | Maintain efficiency                               |
+| **4-6**   | Normal for multi-step workflows          | Acceptable, monitor for increases                 |
+| **6-8**   | Agent is slow or inefficient             | Optimize instructions, reduce redundant questions |
+| **>8**    | Major inefficiency, customer frustration | Immediate redesign needed                         |
 
 ### Improvement Strategies
 
 **If Turn Count is High:**
 
 1. **Reduce Redundant Questions:**
+
    ```yaml
    # Before (Redundant)
    Agent: What's your order number?
@@ -281,6 +298,7 @@ Account Settings       | 4.2       | ✅ Good
    - Use Flow Get Records to pre-fetch data
 
 3. **Eliminate Unnecessary Confirmations:**
+
    ```yaml
    # Before (Excessive Confirmation)
    Agent: I'll check your order status now. Is that okay?
@@ -293,6 +311,7 @@ Account Settings       | 4.2       | ✅ Good
    ```
 
 4. **Parallelize Data Collection:**
+
    ```yaml
    # Before (Sequential)
    Turn 1: Agent asks for order number
@@ -316,6 +335,7 @@ Account Settings       | 4.2       | ✅ Good
 **Definition:** Percentage of customers who rate their experience positively.
 
 **Formula:**
+
 ```
 CSAT = (Positive Ratings / Total Ratings) × 100
 ```
@@ -323,6 +343,7 @@ CSAT = (Positive Ratings / Total Ratings) × 100
 **Target Benchmark:** >80% (4+ out of 5 stars)
 
 **Grade Scale:**
+
 - **Excellent:** >90%
 - **Good:** 80-90%
 - **Fair:** 70-80%
@@ -333,6 +354,7 @@ CSAT = (Positive Ratings / Total Ratings) × 100
 **Method 1: Post-Conversation Survey**
 
 After conversation ends, trigger a survey:
+
 ```
 Survey Question: "How satisfied were you with this conversation?"
   ⭐ ⭐ ⭐ ⭐ ⭐ (5 stars)
@@ -347,6 +369,7 @@ CSAT = (4-5 star ratings / Total ratings) × 100
 **Method 2: Thumbs Up/Down**
 
 Simpler binary feedback:
+
 ```
 Survey Question: "Was this conversation helpful?"
   👍 Helpful  |  👎 Not Helpful
@@ -357,6 +380,7 @@ CSAT = (Thumbs Up / Total) × 100
 **Method 3: Net Promoter Score (NPS)**
 
 For deeper loyalty measurement:
+
 ```
 Survey Question: "How likely are you to recommend our support to a friend?"
   0 (Not Likely) ... 10 (Very Likely)
@@ -370,12 +394,12 @@ NPS = % Promoters - % Detractors
 
 ### Interpretation
 
-| CSAT Score | What It Means | Action |
-|------------|---------------|--------|
-| **>90%** | Customers are very happy | Maintain quality, scale to more use cases |
-| **80-90%** | Generally satisfied | Identify and fix pain points |
-| **70-80%** | Mixed feedback | Major improvements needed |
-| **<70%** | Customers are unhappy | Urgent redesign or consider removing AI |
+| CSAT Score | What It Means            | Action                                    |
+| ---------- | ------------------------ | ----------------------------------------- |
+| **>90%**   | Customers are very happy | Maintain quality, scale to more use cases |
+| **80-90%** | Generally satisfied      | Identify and fix pain points              |
+| **70-80%** | Mixed feedback           | Major improvements needed                 |
+| **<70%**   | Customers are unhappy    | Urgent redesign or consider removing AI   |
 
 ### Improvement Strategies
 
@@ -386,6 +410,7 @@ NPS = % Promoters - % Detractors
    - Common themes: "Agent didn't understand me", "Too slow", "Didn't solve my problem"
 
 2. **Improve Empathy and Tone:**
+
    ```yaml
    # Before (Robotic)
    Agent: Your request has been processed. Reference number: 12345.
@@ -411,6 +436,7 @@ NPS = % Promoters - % Detractors
 **Definition:** Percentage of conversations that escalate to a human agent.
 
 **Formula:**
+
 ```
 Escalation Rate = (Escalations / Total Conversations) × 100
 ```
@@ -418,6 +444,7 @@ Escalation Rate = (Escalations / Total Conversations) × 100
 **Target Benchmark:** 15-30%
 
 **Grade Scale:**
+
 - **Excellent:** 10-20% (AI handling most, escalating when needed)
 - **Good:** 20-30% (healthy balance)
 - **Fair:** 30-40% (over-escalating, AI not confident)
@@ -435,6 +462,7 @@ FROM Conversation
 ```
 
 **Breakdown by Reason:**
+
 ```sql
 SELECT EscalationReason__c, COUNT(*) AS Count
 FROM Conversation
@@ -445,18 +473,19 @@ ORDER BY Count DESC
 
 ### Interpretation
 
-| Escalation Rate | What It Means | Action |
-|-----------------|---------------|--------|
-| **<10%** | Under-escalating (customers giving up?) | Review CSAT—are customers frustrated? |
-| **10-30%** | Healthy (AI handles most, escalates when needed) | Maintain and optimize |
-| **30-50%** | Over-escalating (AI not confident) | Improve topic classification, add actions |
-| **>50%** | AI is barely helping | Major redesign or consider removing AI |
+| Escalation Rate | What It Means                                    | Action                                    |
+| --------------- | ------------------------------------------------ | ----------------------------------------- |
+| **<10%**        | Under-escalating (customers giving up?)          | Review CSAT—are customers frustrated?     |
+| **10-30%**      | Healthy (AI handles most, escalates when needed) | Maintain and optimize                     |
+| **30-50%**      | Over-escalating (AI not confident)               | Improve topic classification, add actions |
+| **>50%**        | AI is barely helping                             | Major redesign or consider removing AI    |
 
 ### Improvement Strategies
 
 **If Escalation Rate is High:**
 
 1. **Analyze Top Escalation Reasons:**
+
    ```
    Top Reasons:
      - 40%: Complexity (multi-issue conversations)
@@ -486,6 +515,7 @@ ORDER BY Count DESC
 **Definition:** Percentage of conversations that stay within the AI agent (inverse of escalation rate).
 
 **Formula:**
+
 ```
 Containment Rate = 100% - Escalation Rate
 ```
@@ -493,16 +523,19 @@ Containment Rate = 100% - Escalation Rate
 **Target Benchmark:** >70%
 
 **Grade Scale:**
+
 - **Excellent:** >80%
 - **Good:** 70-80%
 - **Fair:** 60-70%
 - **Poor:** <60%
 
 **Note:** Containment Rate and Resolution Rate are related but not identical:
+
 - **Containment Rate:** Did the conversation stay in AI? (No escalation)
 - **Resolution Rate:** Did the AI resolve the issue? (Successful outcome)
 
 Example:
+
 - Conversation stays in AI but doesn't resolve issue → High containment, low resolution (bad)
 - Conversation escalates after AI partially helps → Low containment, medium resolution (acceptable)
 
@@ -513,6 +546,7 @@ Example:
 **Definition:** Percentage of issues resolved in the first conversation session (no follow-up needed).
 
 **Formula:**
+
 ```
 FCR = (Single-Session Resolutions / Total Resolved) × 100
 ```
@@ -520,6 +554,7 @@ FCR = (Single-Session Resolutions / Total Resolved) × 100
 **Target Benchmark:** >60%
 
 **Grade Scale:**
+
 - **Excellent:** >75%
 - **Good:** 60-75%
 - **Fair:** 50-60%
@@ -559,6 +594,7 @@ FCR = % who answered "Yes"
    - Common issue: Agent said "issue resolved" but customer didn't confirm
 
 2. **Improve Confirmation:**
+
    ```yaml
    # Before (No Confirmation)
    Agent: I've reset your password. The reset link has been sent.
@@ -583,6 +619,7 @@ FCR = % who answered "Yes"
 **Definition:** Percentage of errors (misunderstandings, failed actions, wrong topic routing) that are gracefully recovered without escalation.
 
 **Formula:**
+
 ```
 Error Recovery Rate = (Errors Recovered / Total Errors) × 100
 ```
@@ -590,6 +627,7 @@ Error Recovery Rate = (Errors Recovered / Total Errors) × 100
 **Target Benchmark:** >70%
 
 **Grade Scale:**
+
 - **Excellent:** >85%
 - **Good:** 70-85%
 - **Fair:** 60-70%
@@ -600,11 +638,13 @@ Error Recovery Rate = (Errors Recovered / Total Errors) × 100
 **Method 1: Manual Review**
 
 Sample 100 conversations with errors:
+
 - Misclassification (wrong topic)
 - Failed action (API error, timeout)
 - Misunderstanding (agent gives wrong answer)
 
 For each error, did the agent recover?
+
 ```
 Example 1 (Recovered):
   Agent: [Routes to wrong topic]
@@ -633,6 +673,7 @@ Topic Switch + Escalation = Error Not Recovered ❌
 **If Error Recovery Rate is Low:**
 
 1. **Improve Fallback Responses:**
+
    ```yaml
    Fallback Topic Instructions:
    If you don't understand the customer's request, offer choices:
@@ -644,6 +685,7 @@ Topic Switch + Escalation = Error Not Recovered ❌
    ```
 
 2. **Add Error Handling to Actions:**
+
    ```yaml
    Action: Get Order Status
    Action-Level Instructions:
@@ -666,6 +708,7 @@ Topic Switch + Escalation = Error Not Recovered ❌
 **Definition:** Average time (in seconds) from first message to resolution or escalation.
 
 **Formula:**
+
 ```
 Avg Duration = SUM(ConversationDuration) / Total Conversations
 ```
@@ -673,6 +716,7 @@ Avg Duration = SUM(ConversationDuration) / Total Conversations
 **Target Benchmark:** <5 minutes (300 seconds)
 
 **Grade Scale:**
+
 - **Excellent:** <3 minutes
 - **Good:** 3-5 minutes
 - **Fair:** 5-7 minutes
@@ -680,14 +724,15 @@ Avg Duration = SUM(ConversationDuration) / Total Conversations
 
 ### Interpretation
 
-| Duration | What It Means | Action |
-|----------|---------------|--------|
-| **<3 min** | Efficient (likely Q&A or simple workflows) | Maintain efficiency |
-| **3-5 min** | Normal for multi-turn workflows | Acceptable |
-| **5-7 min** | Slow, customer may be frustrated | Optimize for speed |
-| **>7 min** | Too slow, high abandonment risk | Immediate optimization |
+| Duration    | What It Means                              | Action                 |
+| ----------- | ------------------------------------------ | ---------------------- |
+| **<3 min**  | Efficient (likely Q&A or simple workflows) | Maintain efficiency    |
+| **3-5 min** | Normal for multi-turn workflows            | Acceptable             |
+| **5-7 min** | Slow, customer may be frustrated           | Optimize for speed     |
+| **>7 min**  | Too slow, high abandonment risk            | Immediate optimization |
 
 **Note:** Duration is affected by:
+
 - User response time (not in agent's control)
 - Action execution time (API latency, Flow complexity)
 - Agent turn count (more turns = longer duration)
@@ -715,6 +760,7 @@ Avg Duration = SUM(ConversationDuration) / Total Conversations
 **Definition:** Percentage of conversations where the customer stops responding before resolution.
 
 **Formula:**
+
 ```
 Abandonment Rate = (Abandoned Conversations / Total Conversations) × 100
 ```
@@ -722,6 +768,7 @@ Abandonment Rate = (Abandoned Conversations / Total Conversations) × 100
 **Target Benchmark:** <20%
 
 **Grade Scale:**
+
 - **Excellent:** <10%
 - **Good:** 10-20%
 - **Fair:** 20-30%
@@ -730,6 +777,7 @@ Abandonment Rate = (Abandoned Conversations / Total Conversations) × 100
 ### How to Measure
 
 **Definition of Abandonment:**
+
 - Agent sends a message, customer doesn't respond within 5 minutes
 - Conversation ends without resolution or escalation
 
@@ -743,18 +791,19 @@ AND TimeSinceLastMessage > 5 minutes
 
 ### Interpretation
 
-| Abandonment Rate | What It Means | Action |
-|------------------|---------------|--------|
-| **<10%** | Customers are engaged | Maintain quality |
-| **10-20%** | Acceptable (some drop-off is normal) | Monitor for increases |
-| **20-30%** | High abandonment, customers giving up | Immediate investigation |
-| **>30%** | Major UX problem | Urgent redesign |
+| Abandonment Rate | What It Means                         | Action                  |
+| ---------------- | ------------------------------------- | ----------------------- |
+| **<10%**         | Customers are engaged                 | Maintain quality        |
+| **10-20%**       | Acceptable (some drop-off is normal)  | Monitor for increases   |
+| **20-30%**       | High abandonment, customers giving up | Immediate investigation |
+| **>30%**         | Major UX problem                      | Urgent redesign         |
 
 ### Improvement Strategies
 
 **If Abandonment Rate is High:**
 
 1. **Analyze When Abandonment Happens:**
+
    ```
    Turn Abandonment Rate:
      - Turn 1: 5% (normal, user may have changed mind)
@@ -770,6 +819,7 @@ AND TimeSinceLastMessage > 5 minutes
    - Offer alternative: "If you don't have your order number, I can look it up by email address"
 
 3. **Improve Engagement:**
+
    ```yaml
    # Before (Dry)
    Agent: What's your order number?
@@ -785,18 +835,18 @@ AND TimeSinceLastMessage > 5 minutes
 
 Track these 10 metrics in a Salesforce Dashboard:
 
-| Metric | Target | Current | Status |
-|--------|--------|---------|--------|
-| **Resolution Rate** | >70% | 78% | ✅ Good |
-| **Classification Accuracy** | >90% | 92% | ✅ Good |
-| **Avg Turns to Resolution** | <6 | 5.2 | ✅ Good |
-| **Customer Satisfaction (CSAT)** | >80% | 85% | ✅ Good |
-| **Escalation Rate** | 15-30% | 22% | ✅ Good |
-| **Containment Rate** | >70% | 78% | ✅ Good |
-| **First Contact Resolution (FCR)** | >60% | 68% | ✅ Good |
-| **Error Recovery Rate** | >70% | 74% | ✅ Good |
-| **Avg Duration** | <5 min | 4.2 min | ✅ Good |
-| **Abandonment Rate** | <20% | 12% | ✅ Good |
+| Metric                             | Target | Current | Status  |
+| ---------------------------------- | ------ | ------- | ------- |
+| **Resolution Rate**                | >70%   | 78%     | ✅ Good |
+| **Classification Accuracy**        | >90%   | 92%     | ✅ Good |
+| **Avg Turns to Resolution**        | <6     | 5.2     | ✅ Good |
+| **Customer Satisfaction (CSAT)**   | >80%   | 85%     | ✅ Good |
+| **Escalation Rate**                | 15-30% | 22%     | ✅ Good |
+| **Containment Rate**               | >70%   | 78%     | ✅ Good |
+| **First Contact Resolution (FCR)** | >60%   | 68%     | ✅ Good |
+| **Error Recovery Rate**            | >70%   | 74%     | ✅ Good |
+| **Avg Duration**                   | <5 min | 4.2 min | ✅ Good |
+| **Abandonment Rate**               | <20%   | 12%     | ✅ Good |
 
 **Overall Agent Health:** 🟢 Healthy
 
@@ -805,19 +855,23 @@ Track these 10 metrics in a Salesforce Dashboard:
 ## Continuous Improvement Process
 
 ### Step 1: Monitor Weekly
+
 - Review top 3 metrics: Resolution Rate, CSAT, Escalation Rate
 - Flag any metric that drops >5% week-over-week
 
 ### Step 2: Investigate Monthly
+
 - Deep-dive into failing conversations (low CSAT, high turns, abandonment)
 - Identify patterns (specific topics, specific actions, specific times of day)
 
 ### Step 3: Optimize Quarterly
+
 - Implement fixes for top 3 pain points
 - A/B test instruction changes (old vs. new instructions)
 - Measure impact of changes
 
 ### Step 4: Benchmark Annually
+
 - Compare year-over-year metrics
 - Adjust targets based on industry benchmarks and business goals
 - Celebrate wins and share learnings across teams

@@ -32,16 +32,16 @@ Conversation design is never "done." Production usage reveals gaps that testing 
 
 ## Key Performance Indicators
 
-| KPI | Target | Measurement |
-|-----|--------|-------------|
-| Resolution Rate | >70% | Conversations resolved without escalation |
-| Classification Accuracy | >90% | Utterances routed to correct topic |
-| Avg Turns to Resolution | <6 | Efficiency of information gathering |
-| Customer Satisfaction | >4.0/5 | Post-conversation survey |
-| Escalation Rate | <30% | Percentage escalated to human |
-| Containment Rate | >65% | Percentage staying within agent |
-| First Contact Resolution | >60% | Resolved in first session |
-| Error Recovery Rate | >80% | Errors gracefully recovered |
+| KPI                      | Target | Measurement                               |
+| ------------------------ | ------ | ----------------------------------------- |
+| Resolution Rate          | >70%   | Conversations resolved without escalation |
+| Classification Accuracy  | >90%   | Utterances routed to correct topic        |
+| Avg Turns to Resolution  | <6     | Efficiency of information gathering       |
+| Customer Satisfaction    | >4.0/5 | Post-conversation survey                  |
+| Escalation Rate          | <30%   | Percentage escalated to human             |
+| Containment Rate         | >65%   | Percentage staying within agent           |
+| First Contact Resolution | >60%   | Resolved in first session                 |
+| Error Recovery Rate      | >80%   | Errors gracefully recovered               |
 
 ## Utterance Analysis Process
 

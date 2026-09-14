@@ -45,7 +45,8 @@ scenarios:
       - user: "Nothing is working! I need to speak to a real person NOW"
         expect:
           escalation_triggered: true
-          response_contains_any: ["connect", "transfer", "agent", "specialist", "someone"]
+          response_contains_any:
+            ["connect", "transfer", "agent", "specialist", "someone"]
 
   # Scenario 2: Immediate escalation request
   - name: "escalation_immediate_request"
@@ -111,5 +112,5 @@ evaluation:
     - ESCALATION_NOT_TRIGGERED
     - UNNECESSARY_ESCALATION
   scoring:
-    weight: 15  # Part of Edge Case & Guardrail Coverage (15 pts total)
+    weight: 15 # Part of Edge Case & Guardrail Coverage (15 pts total)
     per_scenario: true

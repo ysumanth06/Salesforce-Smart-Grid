@@ -14,12 +14,12 @@ should be strategic, not a catch-all for every failure.
 
 ## Trigger Conditions
 
-| Trigger Type | Condition | Priority | Routing Rule | Estimated Volume |
-|--------------|-----------|----------|--------------|------------------|
-| {{TRIGGER_1_TYPE}} | {{CONDITION_1}} | {{PRIORITY_1}} | {{ROUTING_1}} | {{VOLUME_1}} |
-| {{TRIGGER_2_TYPE}} | {{CONDITION_2}} | {{PRIORITY_2}} | {{ROUTING_2}} | {{VOLUME_2}} |
-| {{TRIGGER_3_TYPE}} | {{CONDITION_3}} | {{PRIORITY_3}} | {{ROUTING_3}} | {{VOLUME_3}} |
-| {{TRIGGER_4_TYPE}} | {{CONDITION_4}} | {{PRIORITY_4}} | {{ROUTING_4}} | {{VOLUME_4}} |
+| Trigger Type       | Condition       | Priority       | Routing Rule  | Estimated Volume |
+| ------------------ | --------------- | -------------- | ------------- | ---------------- |
+| {{TRIGGER_1_TYPE}} | {{CONDITION_1}} | {{PRIORITY_1}} | {{ROUTING_1}} | {{VOLUME_1}}     |
+| {{TRIGGER_2_TYPE}} | {{CONDITION_2}} | {{PRIORITY_2}} | {{ROUTING_2}} | {{VOLUME_2}}     |
+| {{TRIGGER_3_TYPE}} | {{CONDITION_3}} | {{PRIORITY_3}} | {{ROUTING_3}} | {{VOLUME_3}}     |
+| {{TRIGGER_4_TYPE}} | {{CONDITION_4}} | {{PRIORITY_4}} | {{ROUTING_4}} | {{VOLUME_4}}     |
 
 <!--
 Trigger Types:
@@ -45,16 +45,19 @@ Estimated Volume: Daily escalation count for capacity planning
 ### Trigger: {{TRIGGER_1_TYPE}}
 
 **Data to Pass:**
+
 - {{DATA_FIELD_1}}: {{DATA_DESCRIPTION_1}}
 - {{DATA_FIELD_2}}: {{DATA_DESCRIPTION_2}}
 - {{DATA_FIELD_3}}: {{DATA_DESCRIPTION_3}}
 
 **Conversation Summary:**
+
 ```
 {{SUMMARY_TEMPLATE_1}}
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: {{SUBJECT_FORMAT_1}}
 - `Priority`: {{PRIORITY_1}}
 - `Skill Requirements`: {{SKILLS_1}}
@@ -65,15 +68,18 @@ Estimated Volume: Daily escalation count for capacity planning
 ### Trigger: {{TRIGGER_2_TYPE}}
 
 **Data to Pass:**
+
 - {{DATA_FIELD_1}}: {{DATA_DESCRIPTION_1}}
 - {{DATA_FIELD_2}}: {{DATA_DESCRIPTION_2}}
 
 **Conversation Summary:**
+
 ```
 {{SUMMARY_TEMPLATE_2}}
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: {{SUBJECT_FORMAT_2}}
 - `Priority`: {{PRIORITY_2}}
 - `Skill Requirements`: {{SKILLS_2}}
@@ -96,14 +102,17 @@ Repeat for each trigger type. Data to pass should include:
 **Routing Model:** {{ROUTING_MODEL_1}} <!-- Most Available / Least Active / External Routing -->
 
 **Skills Required:**
+
 - {{SKILL_1}}: {{SKILL_LEVEL_1}} <!-- e.g., Billing: Expert -->
 - {{SKILL_2}}: {{SKILL_LEVEL_2}}
 
 **Service Level Agreement:**
+
 - Target Response Time: {{SLA_1}}
 - Escalation Path: {{ESCALATION_PATH_1}}
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: {{MAX_CHATS_1}}
 - Overflow Queue: {{OVERFLOW_QUEUE_1}}
 
@@ -116,14 +125,17 @@ Repeat for each trigger type. Data to pass should include:
 **Routing Model:** {{ROUTING_MODEL_2}}
 
 **Skills Required:**
+
 - {{SKILL_1}}: {{SKILL_LEVEL_1}}
 - {{SKILL_2}}: {{SKILL_LEVEL_2}}
 
 **Service Level Agreement:**
+
 - Target Response Time: {{SLA_2}}
 - Escalation Path: {{ESCALATION_PATH_2}}
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: {{MAX_CHATS_2}}
 - Overflow Queue: {{OVERFLOW_QUEUE_2}}
 
@@ -137,16 +149,19 @@ specialized teams (Billing, Technical, VIP, etc.).
 ### Pre-Escalation (Before Handoff)
 
 **Default Message:**
+
 ```
 {{PRE_ESCALATION_MESSAGE}}
 ```
 
 **Frustrated User Variant:**
+
 ```
 {{PRE_ESCALATION_FRUSTRATED}}
 ```
 
 **High-Priority Variant:**
+
 ```
 {{PRE_ESCALATION_PRIORITY}}
 ```
@@ -162,11 +177,13 @@ Instructions: What the agent says BEFORE transferring. Should:
 ### During Handoff (Wait State)
 
 **Initial Wait Message:**
+
 ```
 {{WAIT_MESSAGE_INITIAL}}
 ```
 
 **Extended Wait Message (if >{{WAIT_THRESHOLD}} seconds):**
+
 ```
 {{WAIT_MESSAGE_EXTENDED}}
 ```
@@ -179,11 +196,13 @@ Extended message should offer alternatives (callback, email, self-service).
 ### Post-Escalation (Human Takes Over)
 
 **Human Agent Greeting Template:**
+
 ```
 {{HUMAN_GREETING}}
 ```
 
 **Context Summary for Human:**
+
 ```
 Agent attempted: {{ATTEMPTED_ACTIONS}}
 User's goal: {{USER_GOAL}}
@@ -219,11 +238,13 @@ Options:
 ### Escalation Metrics
 
 **Success Criteria:**
+
 - First Contact Resolution (FCR) after escalation: {{FCR_TARGET}}%
 - Human agent accepts transfer within: {{ACCEPT_SLA}} seconds
 - User satisfaction (CSAT) for escalated conversations: {{CSAT_TARGET}}
 
 **Monitoring:**
+
 - Daily escalation rate: {{RATE_TARGET}}% of total conversations
 - Top escalation reasons (weekly review): {{TOP_REASONS}}
 - Escalation trend threshold: Alert if rate exceeds {{THRESHOLD}}%
@@ -238,6 +259,7 @@ escalation rates may indicate agent needs more capabilities or training.
 ### Before Triggering Escalation
 
 **Attempt:**
+
 1. {{STRATEGY_1}} <!-- e.g., Rephrase question to clarify intent -->
 2. {{STRATEGY_2}} <!-- e.g., Offer knowledge article or self-service option -->
 3. {{STRATEGY_3}} <!-- e.g., Break complex request into smaller actions -->

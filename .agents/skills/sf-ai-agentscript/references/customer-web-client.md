@@ -30,6 +30,7 @@ sf agent activate --api-name AgentName -o TARGET_ORG
 ## Step 3 — XML patch template
 
 Add after existing `Messaging` plannerSurfaces block:
+
 ```xml
 <!-- Add this SECOND plannerSurfaces block for CustomerWebClient -->
 <plannerSurfaces>

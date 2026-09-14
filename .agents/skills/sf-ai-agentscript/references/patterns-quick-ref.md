@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Agent Script Patterns Quick Reference
 
 > Decision trees and cheat sheets for common Agent Script patterns
@@ -153,11 +154,11 @@ Does the conversation return to original agent?
 
 ## Transition Type Cheat Sheet
 
-| Syntax | Type | Control |
-|--------|------|---------|
-| `@utils.transition to @topic.X` | LLM-chosen | LLM decides when to use |
-| `transition to @topic.X` | Deterministic | Always executes when reached |
-| `@utils.escalate` | Permanent handoff | Human takeover |
+| Syntax                          | Type              | Control                      |
+| ------------------------------- | ----------------- | ---------------------------- |
+| `@utils.transition to @topic.X` | LLM-chosen        | LLM decides when to use      |
+| `transition to @topic.X`        | Deterministic     | Always executes when reached |
+| `@utils.escalate`               | Permanent handoff | Human takeover               |
 
 ---
 
@@ -184,6 +185,7 @@ instructions: ->
 ```
 
 **Why this order?**
+
 1. Post-action at TOP → triggers immediately on loop
 2. Data loading next → LLM needs current data
 3. Instructions last → LLM sees resolved values
@@ -309,31 +311,31 @@ is_verified: mutable boolean = True   # CORRECT
 
 ## Syntax Quick Reference
 
-| Pattern | Purpose |
-|---------|---------|
-| `instructions: ->` | Arrow syntax, enables expressions |
-| `instructions: \|` | Pipe syntax, simple multi-line |
-| `if @variables.x:` | Conditional (pre-LLM) |
-| `run @actions.x` | Execute during resolution |
-| `set @var = @outputs.y` | Capture action output |
-| Curly-bang: {!@variables.x} | Template injection |
-| `available when` | Control action visibility |
-| `transition to @topic.x` | Deterministic topic change |
-| `@utils.transition to` | LLM-chosen topic change |
-| `@utils.escalate` | Human handoff |
+| Pattern                     | Purpose                           |
+| --------------------------- | --------------------------------- |
+| `instructions: ->`          | Arrow syntax, enables expressions |
+| `instructions: \|`          | Pipe syntax, simple multi-line    |
+| `if @variables.x:`          | Conditional (pre-LLM)             |
+| `run @actions.x`            | Execute during resolution         |
+| `set @var = @outputs.y`     | Capture action output             |
+| Curly-bang: {!@variables.x} | Template injection                |
+| `available when`            | Control action visibility         |
+| `transition to @topic.x`    | Deterministic topic change        |
+| `@utils.transition to`      | LLM-chosen topic change           |
+| `@utils.escalate`           | Human handoff                     |
 
 ---
 
 ## The 6 Deterministic Building Blocks
 
-| # | Block | Example |
-|---|-------|---------|
-| 1 | Conditionals | `if @variables.failed_attempts >= 3:` |
-| 2 | Topic Filters | `available when @variables.cart_items > 0` |
-| 3 | Variable Checks | `if @variables.churn_risk >= 80:` |
-| 4 | Inline Actions | `run @actions.load_customer` |
-| 5 | Utility Actions | `@utils.transition`, `@utils.escalate` |
-| 6 | Variable Injection | Curly-bang: {!@variables.customer_name} |
+| #   | Block              | Example                                    |
+| --- | ------------------ | ------------------------------------------ |
+| 1   | Conditionals       | `if @variables.failed_attempts >= 3:`      |
+| 2   | Topic Filters      | `available when @variables.cart_items > 0` |
+| 3   | Variable Checks    | `if @variables.churn_risk >= 80:`          |
+| 4   | Inline Actions     | `run @actions.load_customer`               |
+| 5   | Utility Actions    | `@utils.transition`, `@utils.escalate`     |
+| 6   | Variable Injection | Curly-bang: {!@variables.customer_name}    |
 
 ---
 
@@ -368,11 +370,11 @@ topic conversation:
          with turn=@variables.turn_count
 ```
 
-| ✅ Good Use Case | ❌ Not Ideal For |
-|------------------|------------------|
-| Track conversation metrics | One-time setup (use conditional) |
-| Refresh context every turn | Heavy processing (adds latency) |
-| Log analytics after each response | Actions that might fail often |
+| ✅ Good Use Case                  | ❌ Not Ideal For                 |
+| --------------------------------- | -------------------------------- |
+| Track conversation metrics        | One-time setup (use conditional) |
+| Refresh context every turn        | Heavy processing (adds latency)  |
+| Log analytics after each response | Actions that might fail often    |
 
 #### Action Callbacks Pattern
 
@@ -392,11 +394,11 @@ process_order: @actions.create_order
       with event="ORDER_CREATED"
 ```
 
-| ✅ Good Use Case | ❌ Not Ideal For |
-|------------------|------------------|
-| Audit logging (must happen) | Optional follow-ups (let LLM decide) |
-| Send notification after action | Complex branching logic |
-| Chain dependent actions | More than 1 level of nesting |
+| ✅ Good Use Case               | ❌ Not Ideal For                     |
+| ------------------------------ | ------------------------------------ |
+| Audit logging (must happen)    | Optional follow-ups (let LLM decide) |
+| Send notification after action | Complex branching logic              |
+| Chain dependent actions        | More than 1 level of nesting         |
 
 **Critical Rule**: Only 1 level of `run` nesting allowed!
 
@@ -458,6 +460,7 @@ reasoning:
 ```
 
 **Key Points:**
+
 - Chain as many conditions as needed with `and` or `or`
 - Use `()` grouping for complex expressions: `(a and b) or (c and d)`
 - Works in `if` statements and `available when` clauses
@@ -466,12 +469,12 @@ reasoning:
 
 ### Naming Conventions
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Agent name | PascalCase with underscores | `Customer_Service_Agent` |
-| Topic name | snake_case | `order_management` |
-| Variable name | snake_case | `user_email` |
-| Action name | snake_case | `get_account_details` |
+| Element       | Convention                  | Example                  |
+| ------------- | --------------------------- | ------------------------ |
+| Agent name    | PascalCase with underscores | `Customer_Service_Agent` |
+| Topic name    | snake_case                  | `order_management`       |
+| Variable name | snake_case                  | `user_email`             |
+| Action name   | snake_case                  | `get_account_details`    |
 
 ---
 
@@ -493,11 +496,11 @@ variables:
 
 #### Use Appropriate Types
 
-| Data | Type | Example |
-|------|------|---------|
-| Names, IDs, text | `string` | `"John Doe"` |
-| Counts, amounts | `number` | `42`, `99.99` |
-| Flags, toggles | `boolean` | `True`, `False` |
+| Data             | Type      | Example         |
+| ---------------- | --------- | --------------- |
+| Names, IDs, text | `string`  | `"John Doe"`    |
+| Counts, amounts  | `number`  | `42`, `99.99`   |
+| Flags, toggles   | `boolean` | `True`, `False` |
 
 ---
 
@@ -641,16 +644,16 @@ search_orders: @actions.order_search
 
 ### Validation Scoring Summary
 
-| Pattern | Points | Key Requirement |
-|---------|--------|-----------------|
-| Config block | 10 | All 4 required fields |
-| Linked variables | 10 | EndUserId, RoutableId, ContactId |
-| Topic structure | 10 | label, description, reasoning |
-| Language block | 5 | default_locale present |
-| Lifecycle blocks | 5 | Proper before/after structure |
-| Action callbacks | 5 | No nested run |
-| Error handling | 5 | Validation patterns |
-| Template expressions | 5 | {!@variables.x} syntax |
+| Pattern              | Points | Key Requirement                  |
+| -------------------- | ------ | -------------------------------- |
+| Config block         | 10     | All 4 required fields            |
+| Linked variables     | 10     | EndUserId, RoutableId, ContactId |
+| Topic structure      | 10     | label, description, reasoning    |
+| Language block       | 5      | default_locale present           |
+| Lifecycle blocks     | 5      | Proper before/after structure    |
+| Action callbacks     | 5      | No nested run                    |
+| Error handling       | 5      | Validation patterns              |
+| Template expressions | 5      | {!@variables.x} syntax           |
 
 ---
 
@@ -658,12 +661,12 @@ search_orders: @actions.order_search
 
 #### Problem: LLM Fails to Extract Values Correctly
 
-| Symptom | What Happened | Example |
-|---------|---------------|---------|
+| Symptom                        | What Happened                           | Example                                   |
+| ------------------------------ | --------------------------------------- | ----------------------------------------- |
 | Empty JSON `{}` sent to action | LLM couldn't find value in conversation | User said "look up my account" without ID |
-| Wrong field names | LLM abbreviated or guessed | `_id` instead of `account_id` |
-| Wrong value extracted | LLM picked similar value from context | Picked Contact ID instead of Account ID |
-| Retry/crash cycles | No recovery path after failure | Agent keeps trying same extraction |
+| Wrong field names              | LLM abbreviated or guessed              | `_id` instead of `account_id`             |
+| Wrong value extracted          | LLM picked similar value from context   | Picked Contact ID instead of Account ID   |
+| Retry/crash cycles             | No recovery path after failure          | Agent keeps trying same extraction        |
 
 **Root Cause:** The `...` syntax is **probabilistic** — the LLM infers what value to use. For critical inputs (IDs, amounts, required fields), this unreliability causes downstream failures.
 
@@ -731,12 +734,12 @@ instructions: ->
 
 #### When NOT to Use Slot Filling
 
-| Use Slot Filling (`...`) | Use Variable/Fixed Value |
-|--------------------------|--------------------------|
-| Optional, non-critical inputs | Critical IDs (account, order, case) |
-| User preference inputs | Values that must be validated |
-| One-time collection | Values used across multiple actions |
-| Simple text descriptions | Values with specific formats (dates, IDs) |
+| Use Slot Filling (`...`)      | Use Variable/Fixed Value                  |
+| ----------------------------- | ----------------------------------------- |
+| Optional, non-critical inputs | Critical IDs (account, order, case)       |
+| User preference inputs        | Values that must be validated             |
+| One-time collection           | Values used across multiple actions       |
+| Simple text descriptions      | Values with specific formats (dates, IDs) |
 
 **Decision Rule:** If invalid input would cause downstream failure, use deterministic collection.
 

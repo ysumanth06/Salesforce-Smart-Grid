@@ -4,34 +4,34 @@
 
 ### Data Processing
 
-| Package | Version | License | Purpose |
-|---------|---------|---------|---------|
-| [Polars](https://pola.rs/) | >=1.0.0 | MIT | High-performance DataFrame library with lazy evaluation |
-| [PyArrow](https://arrow.apache.org/docs/python/) | >=15.0.0 | Apache 2.0 | Parquet file format support and columnar processing |
-| [Pydantic](https://docs.pydantic.dev/) | >=2.6.0 | MIT | Data validation and settings management |
+| Package                                          | Version  | License    | Purpose                                                 |
+| ------------------------------------------------ | -------- | ---------- | ------------------------------------------------------- |
+| [Polars](https://pola.rs/)                       | >=1.0.0  | MIT        | High-performance DataFrame library with lazy evaluation |
+| [PyArrow](https://arrow.apache.org/docs/python/) | >=15.0.0 | Apache 2.0 | Parquet file format support and columnar processing     |
+| [Pydantic](https://docs.pydantic.dev/)           | >=2.6.0  | MIT        | Data validation and settings management                 |
 
 ### Authentication
 
-| Package | Version | License | Purpose |
-|---------|---------|---------|---------|
-| [PyJWT](https://pyjwt.readthedocs.io/) | >=2.8.0 | MIT | JWT token generation for Salesforce auth |
+| Package                                  | Version  | License          | Purpose                                  |
+| ---------------------------------------- | -------- | ---------------- | ---------------------------------------- |
+| [PyJWT](https://pyjwt.readthedocs.io/)   | >=2.8.0  | MIT              | JWT token generation for Salesforce auth |
 | [cryptography](https://cryptography.io/) | >=42.0.0 | Apache 2.0 / BSD | Certificate handling for JWT Bearer flow |
 
 ### HTTP & CLI
 
-| Package | Version | License | Purpose |
-|---------|---------|---------|---------|
-| [httpx](https://www.python-httpx.org/) | >=0.27.0 | BSD | Modern async HTTP client for Data Cloud API |
-| [Click](https://click.palletsprojects.com/) | >=8.1.0 | BSD | CLI framework |
-| [Rich](https://rich.readthedocs.io/) | >=13.0.0 | MIT | Terminal formatting, progress bars, tables |
+| Package                                     | Version  | License | Purpose                                     |
+| ------------------------------------------- | -------- | ------- | ------------------------------------------- |
+| [httpx](https://www.python-httpx.org/)      | >=0.27.0 | BSD     | Modern async HTTP client for Data Cloud API |
+| [Click](https://click.palletsprojects.com/) | >=8.1.0  | BSD     | CLI framework                               |
+| [Rich](https://rich.readthedocs.io/)        | >=13.0.0 | MIT     | Terminal formatting, progress bars, tables  |
 
 ## Salesforce APIs Used
 
-| API | Version | Purpose |
-|-----|---------|---------|
-| Data Cloud Query API | v60.0+ | Execute SQL queries against DMOs |
-| Data Cloud Profile API | v60.0+ | Retrieve metadata about DMOs |
-| OAuth 2.0 JWT Bearer | - | Server-to-server authentication |
+| API                    | Version | Purpose                          |
+| ---------------------- | ------- | -------------------------------- |
+| Data Cloud Query API   | v60.0+  | Execute SQL queries against DMOs |
+| Data Cloud Profile API | v60.0+  | Retrieve metadata about DMOs     |
+| OAuth 2.0 JWT Bearer   | -       | Server-to-server authentication  |
 
 ## Related Salesforce Documentation
 
@@ -47,8 +47,8 @@
 
 ## Acknowledgments
 
-| Contributor | Role | Contribution |
-|-------------|------|--------------|
+| Contributor          | Role                                          | Contribution                                                                                                                |
+| -------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **Alejandro Raigon** | Forward Deployed Engineer Director, Anthropic | Domain expertise on Agentforce observability patterns, Session Tracing data model insights, and quality analysis approaches |
 
 ## License

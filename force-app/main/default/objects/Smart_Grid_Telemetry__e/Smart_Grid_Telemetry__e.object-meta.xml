@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description
+  >Telemetry and usage metrics platform event published by Smart Grid actions.</description>
+    <eventType>HighVolume</eventType>
+    <label>Smart Grid Telemetry</label>
+    <pluralLabel>Smart Grid Telemetry Events</pluralLabel>
+    <publishBehavior>PublishImmediately</publishBehavior>
+</CustomObject>

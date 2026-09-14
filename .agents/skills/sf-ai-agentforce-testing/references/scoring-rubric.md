@@ -2,15 +2,15 @@
 
 # Scoring System (100 Points)
 
-| Category | Points | Key Rules |
-|----------|--------|-----------|
-| **Topic Selection Coverage** | 15 | All topics have test cases; various phrasings tested |
-| **Action Invocation** | 15 | All actions tested with valid inputs/outputs |
-| **Multi-Turn Topic Re-matching** | 15 | Topic switching accuracy across turns |
-| **Context Preservation** | 15 | Information retention across turns |
-| **Edge Case & Guardrail Coverage** | 15 | Negative tests; guardrails; escalation |
-| **Test Spec / Scenario Quality** | 10 | Proper YAML; descriptions; clear expectations |
-| **Agentic Fix Success** | 15 | Auto-fixes resolve issues within 3 attempts |
+| Category                           | Points | Key Rules                                            |
+| ---------------------------------- | ------ | ---------------------------------------------------- |
+| **Topic Selection Coverage**       | 15     | All topics have test cases; various phrasings tested |
+| **Action Invocation**              | 15     | All actions tested with valid inputs/outputs         |
+| **Multi-Turn Topic Re-matching**   | 15     | Topic switching accuracy across turns                |
+| **Context Preservation**           | 15     | Information retention across turns                   |
+| **Edge Case & Guardrail Coverage** | 15     | Negative tests; guardrails; escalation               |
+| **Test Spec / Scenario Quality**   | 10     | Proper YAML; descriptions; clear expectations        |
+| **Agentic Fix Success**            | 15     | Auto-fixes resolve issues within 3 attempts          |
 
 ## Scoring Thresholds
 

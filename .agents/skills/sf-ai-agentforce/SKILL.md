@@ -36,10 +36,10 @@ Salesforce **Agentforce** enables organizations to build autonomous AI agents th
 
 ### Two Approaches to Agentforce
 
-| Approach | Skill | When to Use |
-|----------|-------|-------------|
-| **Setup UI / Agentforce Builder** | `sf-ai-agentforce` (this skill) | Declarative agent config, point-and-click topics/actions |
-| **Agent Script DSL** | `sf-ai-agentscript` | Code-first `.agent` files, FSM architecture, version-controlled agents |
+| Approach                          | Skill                           | When to Use                                                            |
+| --------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| **Setup UI / Agentforce Builder** | `sf-ai-agentforce` (this skill) | Declarative agent config, point-and-click topics/actions               |
+| **Agent Script DSL**              | `sf-ai-agentscript`             | Code-first `.agent` files, FSM architecture, version-controlled agents |
 
 Both approaches produce agents that run on the same Agentforce runtime. Choose based on team preference and complexity requirements.
 
@@ -62,16 +62,17 @@ In the Agentforce Builder, topics are configured via **Setup → Agentforce → 
 
 Actions are the executable operations an agent can perform. Each action wraps an underlying invocation target:
 
-| Target Type | Description | Registered Via |
-|-------------|-------------|----------------|
-| **Flow** | Invokes an Autolaunched Flow | GenAiFunction with `invocationTargetType: flow` |
-| **Apex** | Invokes an `@InvocableMethod` | GenAiFunction with `invocationTargetType: apex` |
-| **Prompt Template** | Invokes a PromptTemplate | GenAiFunction with `invocationTargetType: prompt` |
-| **Standard Action** | Built-in platform actions (send email, create record) | Pre-registered by Salesforce |
+| Target Type         | Description                                           | Registered Via                                    |
+| ------------------- | ----------------------------------------------------- | ------------------------------------------------- |
+| **Flow**            | Invokes an Autolaunched Flow                          | GenAiFunction with `invocationTargetType: flow`   |
+| **Apex**            | Invokes an `@InvocableMethod`                         | GenAiFunction with `invocationTargetType: apex`   |
+| **Prompt Template** | Invokes a PromptTemplate                              | GenAiFunction with `invocationTargetType: prompt` |
+| **Standard Action** | Built-in platform actions (send email, create record) | Pre-registered by Salesforce                      |
 
 ### Instructions
 
 Instructions guide the agent's behavior within a topic. They are natural language directives that tell the LLM:
+
 - What steps to follow
 - When to invoke specific actions
 - How to handle edge cases and errors
@@ -84,22 +85,26 @@ Instructions guide the agent's behavior within a topic. They are natural languag
 ### Step-by-Step: Creating an Agent via Setup UI
 
 **1. Navigate to Agentforce Builder**
+
 ```
 Setup → Agentforce → Agents → New Agent
 ```
 
 **2. Choose Agent Type**
+
 - **Service Agent** — Customer-facing support and service
 - **Employee Agent** — Internal productivity and automation
 
 **3. Add Topics**
 For each capability area:
+
 - Provide a clear **Name** and **Description**
 - Write **Instructions** that guide the agent's reasoning
 - Add a **Scope** statement (what's in/out of bounds)
 
 **4. Configure Actions per Topic**
 Assign actions to each topic. Actions can target:
+
 - Autolaunched Flows (most common)
 - Apex InvocableMethods (via GenAiFunction)
 - Prompt Templates (for LLM-generated content)
@@ -107,23 +112,27 @@ Assign actions to each topic. Actions can target:
 
 **5. Set Action Inputs & Outputs**
 For each action:
+
 - Define **inputs** the agent collects from the user (slot filling)
 - Define **outputs** the agent uses in its response
 - Mark which outputs are **displayable** to the user
 
 **6. Configure Agent-Level Settings**
+
 - **System Instructions**: Global persona and behavior guidelines
 - **Default Agent User**: The running user context for the agent
 - **Welcome Message**: Initial greeting
 - **Error Message**: Fallback when something goes wrong
 
 **7. Preview & Test**
+
 ```bash
 # Preview in Agentforce Builder (uses standard org auth)
 sf agent preview --api-name MyAgent --target-org MyOrg
 ```
 
 **8. Publish**
+
 ```bash
 sf agent publish authoring-bundle --api-name MyAgent --target-org MyOrg
 
@@ -135,9 +144,9 @@ sf agent publish authoring-bundle --api-name MyAgent --skip-retrieve --target-or
 
 Manage agent state via CLI (requires agent to be published first):
 
-| Command | Purpose |
-|---------|---------|
-| `sf agent activate --api-name X --target-org Y --json` | Activate a published agent |
+| Command                                                  | Purpose                    |
+| -------------------------------------------------------- | -------------------------- |
+| `sf agent activate --api-name X --target-org Y --json`   | Activate a published agent |
 | `sf agent deactivate --api-name X --target-org Y --json` | Deactivate an active agent |
 
 > **Note**: `sf agent create --spec <file>` exists but is NOT recommended — agents created this way don't use Agent Script and are less flexible. Use the authoring-bundle workflow instead.
@@ -149,6 +158,7 @@ Cross-references: [sf-deploy](../sf-deploy/SKILL.md) for deployment orchestratio
 ### Agent Spec Generation
 
 Generate an agent spec YAML with `sf agent generate agent-spec`. Key flags:
+
 - `--type customer|internal` — Agent type
 - `--role`, `--company-name`, `--company-description` — Core identity
 - `--tone formal|casual|neutral` — Conversational style
@@ -168,7 +178,7 @@ A `GenAiFunction` registers a single action that an Agentforce agent can invoke.
 **Metadata XML Structure:**
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
     <masterLabel>Look Up Order Status</masterLabel>
     <developerName>Lookup_Order_Status</developerName>
@@ -203,24 +213,25 @@ A `GenAiFunction` registers a single action that an Agentforce agent can invoke.
 ```
 
 **File Location:**
+
 ```
 force-app/main/default/genAiFunctions/Lookup_Order_Status.genAiFunction-meta.xml
 ```
 
 ### Invocation Target Types
 
-| `invocationTargetType` | Target Value | Notes |
-|------------------------|--------------|-------|
-| `flow` | Flow API name | Flow must be Active |
-| `apex` | Apex class name | Class must have `@InvocableMethod` |
-| `prompt` | PromptTemplate API name | Template must be Active |
+| `invocationTargetType` | Target Value            | Notes                              |
+| ---------------------- | ----------------------- | ---------------------------------- |
+| `flow`                 | Flow API name           | Flow must be Active                |
+| `apex`                 | Apex class name         | Class must have `@InvocableMethod` |
+| `prompt`               | PromptTemplate API name | Template must be Active            |
 
 ### GenAiPlugin
 
 A `GenAiPlugin` groups multiple `GenAiFunction` entries into a logical unit. This is useful for organizing related actions.
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <GenAiPlugin xmlns="http://soap.sforce.com/2006/04/metadata">
     <masterLabel>Order Management Plugin</masterLabel>
     <developerName>Order_Management_Plugin</developerName>
@@ -239,6 +250,7 @@ A `GenAiPlugin` groups multiple `GenAiFunction` entries into a logical unit. Thi
 ```
 
 **File Location:**
+
 ```
 force-app/main/default/genAiPlugins/Order_Management_Plugin.genAiPlugin-meta.xml
 ```
@@ -275,6 +287,7 @@ sf agent publish authoring-bundle --api-name MyAgent --target-org MyOrg
 **Variable Types:** `freeText` (runtime input) | `recordField` (SObject field binding) | `relatedList` (child records) | `resource` (Static Resource)
 
 **Key Integration Points:**
+
 - **Agent Action**: Register a GenAiFunction with `invocationTargetType: prompt`
 - **Apex**: `ConnectApi.EinsteinLlm.generateMessagesForPromptTemplate()`
 - **Flow**: Use the "Prompt Template" action element
@@ -288,12 +301,14 @@ sf agent publish authoring-bundle --api-name MyAgent --target-org MyOrg
 The **Einstein Models API** (`aiplatform.ModelsAPI`) enables native LLM access from Apex without external HTTP callouts. Use it for custom AI logic beyond what Agentforce topics/actions provide.
 
 **Available Models:**
+
 - `sfdc_ai__DefaultOpenAIGPT4OmniMini` — Cost-effective general tasks
 - `sfdc_ai__DefaultOpenAIGPT4Omni` — Complex reasoning
 - `sfdc_ai__DefaultAnthropic` — Nuanced understanding
 - `sfdc_ai__DefaultGoogleGemini` — Multimodal tasks
 
 **Key Patterns:**
+
 - **Queueable** for single-record async AI processing
 - **Batch** for bulk processing (scope size 10–20)
 - **Platform Events** for notifying completion to LWC/Flow
@@ -315,6 +330,7 @@ The **Einstein Models API** (`aiplatform.ModelsAPI`) enables native LLM access f
 **Requirements:** API v64.0+ (Fall '25), Enhanced Chat V2 enabled in Service Cloud.
 
 **File Structure:**
+
 ```
 force-app/main/default/lightningTypeBundles/OrderDetails/
 ├── schema.json
@@ -345,52 +361,52 @@ sf-metadata → sf-apex → sf-flow → sf-ai-agentforce → sf-deploy
 
 **MANDATORY Delegations:**
 
-| Requirement | Delegate To | Why |
-|-------------|-------------|-----|
-| Flow creation | Use the **sf-flow** skill | 110-point validation, proper XML |
-| Apex creation | Use the **sf-apex** skill | InvocableMethod generation, 150-point scoring |
-| Deployment | Use the **sf-deploy** skill | Centralized deployment orchestration |
+| Requirement   | Delegate To                 | Why                                           |
+| ------------- | --------------------------- | --------------------------------------------- |
+| Flow creation | Use the **sf-flow** skill   | 110-point validation, proper XML              |
+| Apex creation | Use the **sf-apex** skill   | InvocableMethod generation, 150-point scoring |
+| Deployment    | Use the **sf-deploy** skill | Centralized deployment orchestration          |
 
 ---
 
 ## Cross-Skill Integration
 
-| Skill | Purpose | When to Use |
-|-------|---------|-------------|
-| **sf-ai-agentscript** | Agent Script DSL (code-first) | Writing `.agent` files with FSM architecture |
-| **sf-ai-agentforce-testing** | Agent testing | Test execution, coverage analysis, agentic fix loops |
-| **sf-flow** | Flow actions | Creating Autolaunched Flows for agent actions |
-| **sf-apex** | Apex actions | Writing InvocableMethod classes for agent actions |
-| **sf-deploy** | Deployment | Publishing agents, deploying metadata |
-| **sf-metadata** | Object/field setup | Creating SObjects and fields that actions reference |
-| **sf-integration** | External APIs | Named Credentials, External Services for agent callouts |
+| Skill                        | Purpose                       | When to Use                                             |
+| ---------------------------- | ----------------------------- | ------------------------------------------------------- |
+| **sf-ai-agentscript**        | Agent Script DSL (code-first) | Writing `.agent` files with FSM architecture            |
+| **sf-ai-agentforce-testing** | Agent testing                 | Test execution, coverage analysis, agentic fix loops    |
+| **sf-flow**                  | Flow actions                  | Creating Autolaunched Flows for agent actions           |
+| **sf-apex**                  | Apex actions                  | Writing InvocableMethod classes for agent actions       |
+| **sf-deploy**                | Deployment                    | Publishing agents, deploying metadata                   |
+| **sf-metadata**              | Object/field setup            | Creating SObjects and fields that actions reference     |
+| **sf-integration**           | External APIs                 | Named Credentials, External Services for agent callouts |
 
 ### Integration Patterns
 
-| Direction | Pattern | Notes |
-|-----------|---------|-------|
-| Agent → Flow | GenAiFunction targets Flow | Most common action pattern |
-| Agent → Apex | GenAiFunction targets InvocableMethod | For complex business logic |
-| Agent → Prompt | GenAiFunction targets PromptTemplate | For AI-generated content |
-| Agent → Custom Type | GenAiFunction uses LightningTypeBundle | Rich input/output UIs |
-| Agent → External API | Flow/Apex wraps Named Credential callout | Via sf-integration skill |
+| Direction            | Pattern                                  | Notes                      |
+| -------------------- | ---------------------------------------- | -------------------------- |
+| Agent → Flow         | GenAiFunction targets Flow               | Most common action pattern |
+| Agent → Apex         | GenAiFunction targets InvocableMethod    | For complex business logic |
+| Agent → Prompt       | GenAiFunction targets PromptTemplate     | For AI-generated content   |
+| Agent → Custom Type  | GenAiFunction uses LightningTypeBundle   | Rich input/output UIs      |
+| Agent → External API | Flow/Apex wraps Named Credential callout | Via sf-integration skill   |
 
 ---
 
 ## Key Insights
 
-| Insight | Issue | Fix |
-|---------|-------|-----|
-| **GenAiFunction requires active target** | Deploying GenAiFunction before its Flow/Apex target | Deploy targets first, then GenAiFunction |
-| **PromptTemplate field bindings** | `{!variableName}` must match variable `developerName` exactly | Check spelling and case sensitivity |
-| **Custom Lightning Types require v64.0+** | Bundle won't deploy on older API versions | Set `<version>64.0</version>` or higher in package.xml |
-| **GenAiPlugin groups functions** | Individual GenAiFunctions must exist before the plugin | Deploy GenAiFunctions before GenAiPlugin |
-| **Capability text is critical** | Vague capability descriptions cause poor routing | Write specific, scenario-based capability text |
-| **Enhanced Chat V2 for custom types** | Custom type UI won't render without it | Enable Enhanced Chat V2 in Setup → Chat Settings |
-| **Models API needs async context** | Synchronous calls in triggers will timeout | Use Queueable with `Database.AllowsCallouts` |
-| **Input/output names must match** | GenAiFunction input names must match Flow variable API names | Verify exact name match (case-sensitive) |
-| **Validation before publish** | Skipping validation causes late-stage failures | Always run `sf agent validate authoring-bundle` first |
-| **Data type mapping** | GenAiFunction `dataType` must align with target parameter types | Use `Text`, `Number`, `Boolean`, `Date` as appropriate |
+| Insight                                   | Issue                                                           | Fix                                                    |
+| ----------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| **GenAiFunction requires active target**  | Deploying GenAiFunction before its Flow/Apex target             | Deploy targets first, then GenAiFunction               |
+| **PromptTemplate field bindings**         | `{!variableName}` must match variable `developerName` exactly   | Check spelling and case sensitivity                    |
+| **Custom Lightning Types require v64.0+** | Bundle won't deploy on older API versions                       | Set `<version>64.0</version>` or higher in package.xml |
+| **GenAiPlugin groups functions**          | Individual GenAiFunctions must exist before the plugin          | Deploy GenAiFunctions before GenAiPlugin               |
+| **Capability text is critical**           | Vague capability descriptions cause poor routing                | Write specific, scenario-based capability text         |
+| **Enhanced Chat V2 for custom types**     | Custom type UI won't render without it                          | Enable Enhanced Chat V2 in Setup → Chat Settings       |
+| **Models API needs async context**        | Synchronous calls in triggers will timeout                      | Use Queueable with `Database.AllowsCallouts`           |
+| **Input/output names must match**         | GenAiFunction input names must match Flow variable API names    | Verify exact name match (case-sensitive)               |
+| **Validation before publish**             | Skipping validation causes late-stage failures                  | Always run `sf agent validate authoring-bundle` first  |
+| **Data type mapping**                     | GenAiFunction `dataType` must align with target parameter types | Use `Text`, `Number`, `Boolean`, `Date` as appropriate |
 
 ---
 
@@ -398,24 +414,24 @@ sf-metadata → sf-apex → sf-flow → sf-ai-agentforce → sf-deploy
 
 ### Categories
 
-| Category | Points | Key Criteria |
-|----------|--------|--------------|
-| **Agent Configuration** | 20 | System instructions, welcome/error messages, agent user set |
-| **Topic & Action Design** | 25 | Clear descriptions, proper scope, logical routing, capability text |
-| **Metadata Quality** | 20 | Valid GenAiFunction/GenAiPlugin XML, correct target types, input/output definitions |
-| **Integration Patterns** | 15 | Proper orchestration order, dependency management, cross-skill delegation |
-| **PromptTemplate Usage** | 10 | Variable bindings correct, template types appropriate, prompts well-structured |
-| **Deployment Readiness** | 10 | Validation passes, dependencies deployed first, package.xml correct |
+| Category                  | Points | Key Criteria                                                                        |
+| ------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| **Agent Configuration**   | 20     | System instructions, welcome/error messages, agent user set                         |
+| **Topic & Action Design** | 25     | Clear descriptions, proper scope, logical routing, capability text                  |
+| **Metadata Quality**      | 20     | Valid GenAiFunction/GenAiPlugin XML, correct target types, input/output definitions |
+| **Integration Patterns**  | 15     | Proper orchestration order, dependency management, cross-skill delegation           |
+| **PromptTemplate Usage**  | 10     | Variable bindings correct, template types appropriate, prompts well-structured      |
+| **Deployment Readiness**  | 10     | Validation passes, dependencies deployed first, package.xml correct                 |
 
 ### Thresholds
 
-| Score | Rating | Action |
-|-------|--------|--------|
-| 90–100 | Excellent | Deploy with confidence |
-| 80–89 | Very Good | Minor improvements suggested |
-| 70–79 | Good | Review before deploy |
-| 60–69 | Needs Work | Address issues before deploy |
-| < 60 | Critical | **Block deployment** |
+| Score  | Rating     | Action                       |
+| ------ | ---------- | ---------------------------- |
+| 90–100 | Excellent  | Deploy with confidence       |
+| 80–89  | Very Good  | Minor improvements suggested |
+| 70–79  | Good       | Review before deploy         |
+| 60–69  | Needs Work | Address issues before deploy |
+| < 60   | Critical   | **Block deployment**         |
 
 ### Validation Report Format
 
@@ -441,41 +457,41 @@ Issues:
 
 **Tier 2: Detailed References**
 
-| Document | Description | Read When |
-|----------|-------------|-----------|
-| [references/cli-commands.md](references/cli-commands.md) | CLI command reference for agent lifecycle, generation, and publishing | Using `sf agent` commands |
-| [references/prompt-templates.md](references/prompt-templates.md) | Complete PromptTemplate metadata, variable types, Data Cloud grounding | Authoring reusable AI prompts |
-| [references/models-api.md](references/models-api.md) | `aiplatform.ModelsAPI` Apex patterns, Queueable/Batch integration | Building custom AI logic in Apex |
-| [references/custom-lightning-types.md](references/custom-lightning-types.md) | LightningTypeBundle schema/editor/renderer configuration | Creating rich action input/output UIs |
+| Document                                                                     | Description                                                            | Read When                             |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------- |
+| [references/cli-commands.md](references/cli-commands.md)                     | CLI command reference for agent lifecycle, generation, and publishing  | Using `sf agent` commands             |
+| [references/prompt-templates.md](references/prompt-templates.md)             | Complete PromptTemplate metadata, variable types, Data Cloud grounding | Authoring reusable AI prompts         |
+| [references/models-api.md](references/models-api.md)                         | `aiplatform.ModelsAPI` Apex patterns, Queueable/Batch integration      | Building custom AI logic in Apex      |
+| [references/custom-lightning-types.md](references/custom-lightning-types.md) | LightningTypeBundle schema/editor/renderer configuration               | Creating rich action input/output UIs |
 
 **Cross-Skill References**
 
-| Need | Skill |
-|------|-------|
-| Agent Script DSL development | `sf-ai-agentscript` |
-| Agent testing & coverage | `sf-ai-agentforce-testing` |
-| Flow creation for actions | `sf-flow` |
-| Apex InvocableMethod classes | `sf-apex` |
-| Metadata deployment | `sf-deploy` |
+| Need                         | Skill                      |
+| ---------------------------- | -------------------------- |
+| Agent Script DSL development | `sf-ai-agentscript`        |
+| Agent testing & coverage     | `sf-ai-agentforce-testing` |
+| Flow creation for actions    | `sf-flow`                  |
+| Apex InvocableMethod classes | `sf-apex`                  |
+| Metadata deployment          | `sf-deploy`                |
 
 ---
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
+| Version   | Date       | Changes                                                                                                                                                                                                             |
+| --------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **2.0.0** | 2026-02-07 | Complete rewrite. Skill refocused on standard Agentforce platform (Setup UI, GenAiFunction/GenAiPlugin, PromptTemplate, Models API, Custom Lightning Types). Agent Script DSL content moved to `sf-ai-agentscript`. |
 
 ---
 
 ## Sources & Acknowledgments
 
-| Source | Contribution |
-|--------|-------------|
-| [Salesforce Agentforce Documentation](https://developer.salesforce.com/docs/einstein/genai/overview) | Official platform reference |
-| [Salesforce Diaries](https://salesforcediaries.com) | Models API patterns, Custom Lightning Types guide |
-| [trailheadapps/agent-script-recipes](https://github.com/trailheadapps/agent-script-recipes) | Official Salesforce examples |
-| Jag Valaiyapathy | Skill authoring, scoring system, orchestration design |
+| Source                                                                                               | Contribution                                          |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [Salesforce Agentforce Documentation](https://developer.salesforce.com/docs/einstein/genai/overview) | Official platform reference                           |
+| [Salesforce Diaries](https://salesforcediaries.com)                                                  | Models API patterns, Custom Lightning Types guide     |
+| [trailheadapps/agent-script-recipes](https://github.com/trailheadapps/agent-script-recipes)          | Official Salesforce examples                          |
+| Jag Valaiyapathy                                                                                     | Skill authoring, scoring system, orchestration design |
 
 ---
 

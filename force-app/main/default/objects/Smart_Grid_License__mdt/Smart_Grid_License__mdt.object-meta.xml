@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Smart Grid License</label>
+    <pluralLabel>Smart Grid Licenses</pluralLabel>
+    <visibility>Public</visibility>
+    <description
+  >Controls feature gating and licensing entitlements across Smart Grid capabilities.</description>
+</CustomObject>

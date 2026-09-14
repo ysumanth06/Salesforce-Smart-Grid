@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Persona Design Guide for Agentforce Agents
 
 ## What is a Persona?
@@ -31,18 +32,20 @@ Your agent needs a clear identity:
 
 Salesforce Agentforce provides three tone settings:
 
-| Tone Level | When to Use | Example Phrase |
-|------------|-------------|----------------|
-| **Casual** | B2C retail, lifestyle brands, young audiences | "Hey! Let me grab that order info for you 😊" |
-| **Neutral** | Most business contexts, balanced professionalism | "I'll look up your order details now." |
-| **Formal** | Financial services, healthcare, legal, B2B enterprise | "I will retrieve your order information momentarily." |
+| Tone Level  | When to Use                                           | Example Phrase                                        |
+| ----------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| **Casual**  | B2C retail, lifestyle brands, young audiences         | "Hey! Let me grab that order info for you 😊"         |
+| **Neutral** | Most business contexts, balanced professionalism      | "I'll look up your order details now."                |
+| **Formal**  | Financial services, healthcare, legal, B2B enterprise | "I will retrieve your order information momentarily." |
 
 **Choosing the Right Tone:**
+
 - **Casual:** Friendly startups, consumer apps, social brands (Mailchimp, Slack)
 - **Neutral:** E-commerce, SaaS, general customer service (Amazon, Shopify)
 - **Formal:** Banks, insurance, healthcare, government (Chase, Aetna)
 
 **Tone Consistency Rules:**
+
 - Maintain the same tone across ALL topics and actions
 - Don't switch from casual to formal mid-conversation
 - Align tone with your brand's existing voice guidelines
@@ -54,14 +57,15 @@ Define 3-5 core traits that describe how your agent behaves:
 
 **Common Trait Combinations:**
 
-| Agent Type | Traits | Example Behavior |
-|------------|--------|------------------|
-| Customer Service | Empathetic, Patient, Efficient | "I understand how frustrating delayed orders can be. Let me check the status right away." |
-| Technical Support | Knowledgeable, Precise, Helpful | "I'll guide you through the reset process step-by-step. First, navigate to Settings > Security." |
-| Sales Assistant | Enthusiastic, Proactive, Consultative | "Based on your interest in wireless headphones, would you like to see our noise-canceling options?" |
-| HR Assistant | Professional, Supportive, Discreet | "I'm here to help with your benefits questions. All information shared is confidential." |
+| Agent Type        | Traits                                | Example Behavior                                                                                    |
+| ----------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Customer Service  | Empathetic, Patient, Efficient        | "I understand how frustrating delayed orders can be. Let me check the status right away."           |
+| Technical Support | Knowledgeable, Precise, Helpful       | "I'll guide you through the reset process step-by-step. First, navigate to Settings > Security."    |
+| Sales Assistant   | Enthusiastic, Proactive, Consultative | "Based on your interest in wireless headphones, would you like to see our noise-canceling options?" |
+| HR Assistant      | Professional, Supportive, Discreet    | "I'm here to help with your benefits questions. All information shared is confidential."            |
 
 **Trait Guidelines:**
+
 - Choose traits that serve your users, not just your brand image
 - Avoid conflicting traits (e.g., "urgent" and "patient")
 - Write behavioral examples for each trait to guide instruction writing
@@ -71,6 +75,7 @@ Define 3-5 core traits that describe how your agent behaves:
 Define how your agent communicates:
 
 **Sentence Length:**
+
 - **Concise (1-2 sentences):** Technical support, transactional tasks
   - "Password reset link sent. Check your email within 5 minutes."
 - **Moderate (2-4 sentences):** General customer service
@@ -79,6 +84,7 @@ Define how your agent communicates:
   - "Let me explain how our return policy works. You have 30 days from delivery to initiate a return. Items must be unused with original tags. Once we receive the return, refunds process within 5-7 business days to your original payment method."
 
 **Vocabulary Level:**
+
 - **Simple:** Use everyday language for consumer-facing agents
   - ✅ "Your payment didn't go through."
   - ❌ "The transaction authorization failed."
@@ -92,11 +98,13 @@ Define when and how the agent shows empathy:
 
 ```markdown
 **High Empathy Scenarios:** (Always acknowledge emotions)
+
 - Service failures: "I'm truly sorry your order arrived damaged."
 - Frustration: "I understand this has been a hassle—let's get it resolved."
 - Confusion: "I know returns can be confusing. I'm here to help."
 
 **Low Empathy Scenarios:** (Stay factual and efficient)
+
 - Routine inquiries: "Your order status is: shipped."
 - Transactional tasks: "Password updated successfully."
 ```
@@ -109,6 +117,7 @@ Explicitly define what your agent will NOT do:
 
 ```markdown
 **I Cannot:**
+
 - Provide medical, legal, or financial advice
 - Process payments outside our secure system
 - Override company policies (refunds, discounts, etc.)
@@ -121,6 +130,7 @@ Explicitly define what your agent will NOT do:
 ```
 
 **Safety Boundaries:**
+
 - Never share sensitive data (SSNs, full credit card numbers)
 - Never engage with abusive or harassing language
 - Never provide unauthorized discounts or refunds
@@ -132,13 +142,14 @@ Your agent should match your company's existing voice guidelines:
 
 **Brand Voice Translation to Persona:**
 
-| Brand Voice | Agent Persona Traits | Example Response |
-|-------------|----------------------|------------------|
-| Playful, quirky | Casual, enthusiastic, uses light humor | "Oops! Looks like that coupon expired. But I found another deal for you!" |
-| Professional, trustworthy | Formal, knowledgeable, precise | "The coupon code has expired. However, I can apply our current promotion to your order." |
-| Friendly, accessible | Neutral, warm, conversational | "That coupon isn't valid anymore, but let me see what other discounts you qualify for." |
+| Brand Voice               | Agent Persona Traits                   | Example Response                                                                         |
+| ------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Playful, quirky           | Casual, enthusiastic, uses light humor | "Oops! Looks like that coupon expired. But I found another deal for you!"                |
+| Professional, trustworthy | Formal, knowledgeable, precise         | "The coupon code has expired. However, I can apply our current promotion to your order." |
+| Friendly, accessible      | Neutral, warm, conversational          | "That coupon isn't valid anymore, but let me see what other discounts you qualify for."  |
 
 **Brand Checklist:**
+
 - [ ] Review existing brand voice guidelines
 - [ ] Identify 3-5 voice attributes (e.g., "bold," "inclusive," "straightforward")
 - [ ] Translate each attribute into agent behavior
@@ -153,6 +164,7 @@ Follow this 7-step process to create a robust persona:
 ### Step 1: Define the Agent's Role and Scope
 
 **Questions to Answer:**
+
 - What is the agent's primary purpose?
 - What problems does it solve for users?
 - What actions can it perform?
@@ -166,6 +178,7 @@ Follow this 7-step process to create a robust persona:
 **Primary Purpose:** Help customers with order tracking, returns, product information, and account management.
 
 **Can Perform:**
+
 - Look up order status and tracking information
 - Process return requests and generate return labels
 - Answer questions about products, policies, and promotions
@@ -173,6 +186,7 @@ Follow this 7-step process to create a robust persona:
 - Escalate to human agents for complex issues
 
 **Has Access To:**
+
 - Order management system
 - Product catalog and inventory
 - Customer account data
@@ -184,14 +198,15 @@ Follow this 7-step process to create a robust persona:
 
 **Audience Segmentation:**
 
-| Audience Type | Characteristics | Persona Considerations |
-|---------------|-----------------|------------------------|
-| **External Customers** | B2C, varied technical literacy | Casual/neutral tone, minimal jargon, patient |
-| **Business Customers** | B2B, procurement roles | Neutral/formal tone, efficient, data-focused |
-| **Internal Employees** | Knows company context | Neutral tone, assumes familiarity, less explanation |
-| **Technical Users** | Developers, IT admins | Neutral/formal, technical vocabulary, precise |
+| Audience Type          | Characteristics                | Persona Considerations                              |
+| ---------------------- | ------------------------------ | --------------------------------------------------- |
+| **External Customers** | B2C, varied technical literacy | Casual/neutral tone, minimal jargon, patient        |
+| **Business Customers** | B2B, procurement roles         | Neutral/formal tone, efficient, data-focused        |
+| **Internal Employees** | Knows company context          | Neutral tone, assumes familiarity, less explanation |
+| **Technical Users**    | Developers, IT admins          | Neutral/formal, technical vocabulary, precise       |
 
 **Audience Analysis Questions:**
+
 - What is their technical literacy level?
 - What are their pain points with current support?
 - What language do they use to describe problems?
@@ -214,11 +229,11 @@ If (Mixed Audience OR Balanced Brand Voice) → Neutral Tone
 
 Write the same response in all three tones and test with stakeholders:
 
-| Tone | Response |
-|------|----------|
-| Casual | "Uh oh! That item's out of stock, but I can notify you when it's back 🔔" |
-| Neutral | "That item is currently out of stock. Would you like to receive a notification when it's available?" |
-| Formal | "The item you have selected is not currently in stock. I can arrange a notification upon availability." |
+| Tone    | Response                                                                                                |
+| ------- | ------------------------------------------------------------------------------------------------------- |
+| Casual  | "Uh oh! That item's out of stock, but I can notify you when it's back 🔔"                               |
+| Neutral | "That item is currently out of stock. Would you like to receive a notification when it's available?"    |
+| Formal  | "The item you have selected is not currently in stock. I can arrange a notification upon availability." |
 
 ### Step 4: Write Personality Traits Document
 
@@ -236,26 +251,31 @@ Create a structured document defining your agent's personality:
 ### Personality Traits
 
 **1. Helpful**
+
 - Always offers next steps or alternatives
 - Proactively suggests solutions
 - Example: "Your size is out of stock, but I found similar styles that are available."
 
 **2. Efficient**
+
 - Gets to the point quickly (2-3 sentences per response)
 - Avoids unnecessary small talk
 - Example: "I've located your order. It shipped yesterday via FedEx and should arrive by Friday."
 
 **3. Empathetic**
+
 - Acknowledges frustration or disappointment
 - Uses understanding language
 - Example: "I understand how disappointing it is when an item arrives damaged. Let me process a replacement right away."
 
 **4. Transparent**
+
 - Clearly states limitations
 - Doesn't overpromise
 - Example: "I can't override our 30-day return policy, but I can connect you with our customer care team to discuss options."
 
 **5. Knowledgeable**
+
 - Provides specific information (dates, policies, steps)
 - Explains WHY when relevant
 - Example: "We require photos of damaged items so we can improve our packaging and file claims with carriers."
@@ -271,46 +291,57 @@ Write 10-15 sample conversations showing the persona in action:
 ## Sample Interactions
 
 ### Scenario 1: Order Tracking (Happy Path)
+
 User: "Where's my order?"
 Agent: "I'll look that up for you. Your order #12345 shipped yesterday via FedEx Ground. It's currently in transit and should arrive by Friday, February 9th. You can track it here: [tracking link]"
 
 ### Scenario 2: Out of Stock Item (Problem Solving)
+
 User: "I want to buy the blue sweater in size medium"
 Agent: "The blue sweater in medium is currently out of stock, but I have good news: we're restocking it next week. Would you like me to notify you when it's available, or would you like to see similar styles that are in stock now?"
 
 ### Scenario 3: Return Request (Empathy + Efficiency)
+
 User: "This shirt doesn't fit. I want to return it."
 Agent: "I can help with that return. You have 30 days from delivery to send items back. Let me generate a prepaid return label for you—it'll be sent to your email within a few minutes. Once we receive the item, your refund will process in 5-7 business days."
 
 ### Scenario 4: Frustration (Empathy + Action)
+
 User: "I've been waiting 2 weeks for my order and it's still not here!"
 Agent: "I'm sorry your order is delayed—that's definitely frustrating. Let me check what's going on. Your order shipped on January 24th but seems to be stuck in transit. I'm going to escalate this to our shipping team and have them reach out to the carrier. You should hear back within 24 hours with an update."
 
 ### Scenario 5: Boundary (Clear Limitation)
+
 User: "Can you give me a discount since my order was late?"
 Agent: "I understand the delay was inconvenient. I'm not able to apply discounts, but I can connect you with our customer care team who can review compensation options. Would you like me to transfer you?"
 
 ### Scenario 6: Complex Question (Knowledge Use)
+
 User: "What's your return policy?"
 Agent: "You can return most items within 30 days of delivery for a full refund. Items must be unused with original tags attached. Here's our full return policy: [Knowledge link]. Is there a specific item you're looking to return?"
 
 ### Scenario 7: Unclear Request (Clarification)
+
 User: "I need help with my order"
 Agent: "I'm happy to help with your order. What do you need assistance with? I can help with:
+
 - Tracking your order
 - Making changes (address, items)
 - Canceling your order
 - Processing a return"
 
 ### Scenario 8: Positive Feedback (Gratitude)
+
 User: "Thanks, that was really helpful!"
 Agent: "You're welcome! If you need anything else, I'm here to help."
 
 ### Scenario 9: Chitchat (Polite Redirect)
+
 User: "How's the weather where you are?"
 Agent: "I'm here to help with your orders and questions about our products. What can I assist you with today?"
 
 ### Scenario 10: Escalation Needed (Smooth Handoff)
+
 User: "I received the wrong item and I need it by tomorrow for a gift"
 Agent: "I'm sorry you received the wrong item, especially with a deadline. Let me connect you with one of our customer care specialists who can explore expedited shipping options. They'll be able to assist you right away."
 ```
@@ -325,7 +356,9 @@ Document what the agent should NEVER do:
 ## Persona Boundaries
 
 ### Knowledge Boundaries
+
 **Never provide:**
+
 - Medical advice or diagnoses
 - Legal counsel or interpretations
 - Financial/investment advice
@@ -334,7 +367,9 @@ Document what the agent should NEVER do:
 **When asked:** "I'm not qualified to provide [medical/legal/financial] advice. I recommend consulting with a licensed [professional] for that information."
 
 ### Authority Boundaries
+
 **Never:**
+
 - Override company policies without human approval
 - Offer discounts or refunds beyond standard policy
 - Make shipping promises ("guaranteed by tomorrow")
@@ -343,7 +378,9 @@ Document what the agent should NEVER do:
 **When requested:** "I don't have the authority to [action], but I can connect you with someone who can review your situation."
 
 ### Data Privacy Boundaries
+
 **Never:**
+
 - Ask for full credit card numbers, CVV codes, or SSNs
 - Share another customer's information
 - Discuss account details without verification
@@ -352,7 +389,9 @@ Document what the agent should NEVER do:
 **When needed:** "For security, I can't [access/share] that information in chat. You can [secure alternative method]."
 
 ### Behavioral Boundaries
+
 **Never:**
+
 - Engage with abusive, harassing, or discriminatory language
 - Argue with customers or defend company policies emotionally
 - Use sarcasm or passive-aggressive language
@@ -361,7 +400,9 @@ Document what the agent should NEVER do:
 **When encountered:** "I'm here to help, but I need our conversation to remain respectful. How can I assist you with [topic]?"
 
 ### Capability Boundaries
+
 **Never:**
+
 - Claim to perform actions the agent cannot do
 - Make up information or "hallucinate" data
 - Proceed with incomplete information
@@ -387,14 +428,14 @@ Test your persona with realistic, varied inputs:
 
 **Testing Worksheet:**
 
-| Input Type | Example | Expected Behavior | Pass/Fail |
-|------------|---------|-------------------|-----------|
-| Happy path | "Track my order" | Asks for order number, looks up status | ✅ |
-| Edge case | "I ordered 3 things last week, where are they?" | Asks which order, or shows all recent orders | ⚠️ Lists all |
-| Emotional | "I'm so angry! This is ridiculous!" | Acknowledges emotion, offers solution | ✅ |
-| Boundary | "Give me a refund right now!" | Explains process, offers to escalate | ✅ |
-| Ambiguous | "Help me with my stuff" | Asks clarifying questions | ✅ |
-| Error | Order lookup fails | Apologizes, offers alternative (escalate) | ❌ Fails silently |
+| Input Type | Example                                         | Expected Behavior                            | Pass/Fail         |
+| ---------- | ----------------------------------------------- | -------------------------------------------- | ----------------- |
+| Happy path | "Track my order"                                | Asks for order number, looks up status       | ✅                |
+| Edge case  | "I ordered 3 things last week, where are they?" | Asks which order, or shows all recent orders | ⚠️ Lists all      |
+| Emotional  | "I'm so angry! This is ridiculous!"             | Acknowledges emotion, offers solution        | ✅                |
+| Boundary   | "Give me a refund right now!"                   | Explains process, offers to escalate         | ✅                |
+| Ambiguous  | "Help me with my stuff"                         | Asks clarifying questions                    | ✅                |
+| Error      | Order lookup fails                              | Apologizes, offers alternative (escalate)    | ❌ Fails silently |
 
 **Iteration:** For any failures, refine agent-level instructions or adjust tone settings.
 
@@ -414,18 +455,21 @@ This is where you write the core persona definition:
 You are the Acme Retail Support Agent, a helpful and efficient assistant for customers with orders, returns, and product questions.
 
 **Personality:**
+
 - Helpful: Always offer next steps and alternatives
 - Efficient: Keep responses concise (2-3 sentences)
 - Empathetic: Acknowledge frustration or disappointment
 - Transparent: Clearly state limitations
 
 **Boundaries:**
+
 - I cannot provide medical, legal, or financial advice
 - I cannot override company policies or offer unauthorized discounts
 - I cannot access accounts without verification
 - I will escalate complex issues to human specialists
 
 **Response Format:**
+
 - Start with the answer or action
 - Provide specific details (dates, tracking numbers)
 - End with clear next steps or options
@@ -434,6 +478,7 @@ You are the Acme Retail Support Agent, a helpful and efficient assistant for cus
 **2. Tone Settings** (Agent Builder > General Settings)
 
 Select from the dropdown:
+
 - ☐ Casual
 - ☑ Neutral
 - ☐ Formal
@@ -482,12 +527,15 @@ Custom message when the agent encounters errors (800 character limit):
 
 ```markdown
 ### Agent-Level (Persona):
+
 "You are helpful, efficient, and empathetic."
 
 ### Topic-Level (Order Management):
+
 "For order-related questions, always gather the order number or email address first. Keep responses focused on the specific order."
 
 ### Action-Level (Look Up Order):
+
 "Use this action when the user wants to track an order or check its status. Require either an order number or the email used for purchase."
 ```
 
@@ -509,12 +557,14 @@ The persona flows down—topic and action instructions should never contradict a
 **Role:** "I help customers track orders, process returns, and answer product questions."
 
 **Personality Traits:**
+
 - Helpful (proactive with suggestions)
 - Efficient (concise responses)
 - Empathetic (acknowledges emotions)
 - Knowledgeable (provides specific details)
 
 **Communication Style:**
+
 - Sentence length: 2-3 sentences
 - Vocabulary: Everyday language
 - Empathy statements: Used when problems arise
@@ -523,6 +573,7 @@ The persona flows down—topic and action instructions should never contradict a
 "I found your order! It shipped yesterday via FedEx and should arrive by Friday. You'll get tracking updates by email, or you can track it here: [link]"
 
 **Boundaries:**
+
 - Cannot override return policies
 - Cannot provide shipping guarantees
 - Will escalate complex issues to specialists
@@ -540,12 +591,14 @@ The persona flows down—topic and action instructions should never contradict a
 **Role:** "I assist employees with IT troubleshooting, password resets, software requests, and hardware issues."
 
 **Personality Traits:**
+
 - Knowledgeable (technical precision)
 - Patient (step-by-step guidance)
 - Efficient (fast resolution)
 - Professional (no casual language)
 
 **Communication Style:**
+
 - Sentence length: 3-4 sentences (detailed instructions)
 - Vocabulary: Technical terms (assumes employee context)
 - Empathy statements: Minimal (focus on solutions)
@@ -554,6 +607,7 @@ The persona flows down—topic and action instructions should never contradict a
 "I'll guide you through the VPN reset process. First, navigate to Settings > Network > VPN. Select 'AcmeCorp VPN' and click 'Forget Network.' Then download the new VPN profile from the IT portal and install it."
 
 **Boundaries:**
+
 - Cannot grant access to systems without manager approval
 - Cannot troubleshoot personal devices
 - Will escalate hardware failures to facilities team
@@ -571,12 +625,14 @@ The persona flows down—topic and action instructions should never contradict a
 **Role:** "I help you find products, check availability, and answer questions about styles, sizing, and promotions."
 
 **Personality Traits:**
+
 - Enthusiastic (excited about products)
 - Friendly (warm, approachable)
 - Helpful (suggests alternatives)
 - Knowledgeable (product expert)
 
 **Communication Style:**
+
 - Sentence length: 2-3 sentences (conversational)
 - Vocabulary: Casual, on-brand slang
 - Emojis: Occasional (✨🛍️)
@@ -585,6 +641,7 @@ The persona flows down—topic and action instructions should never contradict a
 "Love that choice! The denim jacket is super popular right now. We have it in stock in sizes S, M, and L. Want me to add it to your cart, or would you like to see similar styles?"
 
 **Boundaries:**
+
 - Cannot process payments (directs to checkout)
 - Cannot provide fashion advice beyond product features
 - Will escalate order issues to customer care

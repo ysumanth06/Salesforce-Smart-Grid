@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Escalation Patterns for Agentforce
 
 This guide catalogs escalation triggers, routing patterns, and context handoff mechanisms for Agentforce agents. Effective escalation ensures customers reach human agents at the right time with the right context.
@@ -8,6 +9,7 @@ This guide catalogs escalation triggers, routing patterns, and context handoff m
 ## Escalation Philosophy
 
 **Key Principles:**
+
 1. **Escalate Early, Not Late** — Don't exhaust the customer with failed AI attempts before escalating
 2. **Context is King** — Pass conversation history, key IDs, sentiment, and attempted solutions
 3. **Set Expectations** — Tell the customer what happens next ("You'll be connected in 2-3 minutes")
@@ -24,6 +26,7 @@ This guide catalogs escalation triggers, routing patterns, and context handoff m
 #### Trigger 1.1: Frustration Detection
 
 **Indicators:**
+
 - Repeated phrases ("I already told you", "This is ridiculous", "For the third time")
 - Profanity or strong language (filtered by Einstein Trust Layer, but tone detected)
 - All-caps messages ("THIS DOESN'T WORK")
@@ -46,6 +49,7 @@ Agent-Level Instructions:
 ```
 
 **Example Conversation:**
+
 ```
 User: I've been trying to reset my password for 30 minutes!
 
@@ -60,6 +64,7 @@ Agent: I'm truly sorry this has taken so long. That's unacceptable, and I want
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Frustrated Customers
 Priority: High (routed ahead of normal queue)
@@ -69,6 +74,7 @@ Skill Required: De-escalation Training
 #### Trigger 1.2: Anger Detection
 
 **Indicators:**
+
 - Threats ("I'm going to cancel my account", "I'll report this")
 - Blame statements ("Your company is terrible", "This is a scam")
 - Demands ("I demand a refund", "Get me a manager NOW")
@@ -89,6 +95,7 @@ Agent-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Manager Escalations
 Priority: Urgent (highest priority)
@@ -98,6 +105,7 @@ Skill Required: Manager or Senior Agent
 #### Trigger 1.3: Distress / Self-Harm
 
 **Indicators:**
+
 - References to self-harm, suicide, or harm to others
 - Extreme emotional distress
 
@@ -121,6 +129,7 @@ Agent-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Crisis Escalations
 Priority: Emergency (bypasses all queues)
@@ -139,6 +148,7 @@ Alert: Supervisor notified immediately
 **Definition:** Conversation exceeds 8-10 turns without resolution.
 
 **Indicators:**
+
 - Customer and agent have exchanged 8+ messages
 - No clear progress toward resolution
 - Same topic, multiple failed attempts
@@ -159,6 +169,7 @@ Agent-Level Instructions:
 ```
 
 **Example:**
+
 ```
 Turn 1: User asks for help with feature
 Turn 2: Agent asks clarifying question
@@ -175,6 +186,7 @@ Turn 8: Agent escalates → "Let me connect you with a specialist..."
 **Definition:** Agent attempts the same action 2-3 times and it fails each time.
 
 **Indicators:**
+
 - API call fails twice
 - User reports "still not working" after 2 solution attempts
 - Same error occurs multiple times
@@ -193,6 +205,7 @@ Action-Level Instructions (for each action):
 ```
 
 **Example (Password Reset Failure):**
+
 ```
 Turn 1: Agent sends reset link
 Turn 2: User: "Link doesn't work"
@@ -206,6 +219,7 @@ Turn 5: Agent escalates → "Let me connect you with technical support..."
 **Definition:** Customer raises 2+ unrelated issues in one conversation.
 
 **Indicators:**
+
 - Topic switches mid-conversation
 - Multiple problems mentioned ("...and also my account is locked, and I need a refund")
 
@@ -234,6 +248,7 @@ Agent-Level Instructions:
 **Definition:** Request involves amounts exceeding agent's authorization limit.
 
 **Examples:**
+
 - Refund over $500
 - Order cancellation over $1,000
 - Credit adjustment over $100
@@ -256,6 +271,7 @@ Action-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Manager Approvals
 Priority: High
@@ -272,6 +288,7 @@ Context Passed:
 **Definition:** Customer requests something outside standard policy.
 
 **Examples:**
+
 - Return after 30-day window
 - Waive restocking fee
 - Expedite shipping for free
@@ -295,6 +312,7 @@ Instructions:
 ```
 
 **Example Conversation:**
+
 ```
 User: I bought this 45 days ago but I've been traveling. Can I still return it?
 
@@ -313,8 +331,9 @@ Agent: Great! I've created a case and a manager will contact you within 2 hours.
 **Definition:** Customer is flagged as VIP, enterprise account, or high-value customer.
 
 **Indicators:**
-- Account.VIP__c = true
-- Account.Annual_Revenue__c > $100,000
+
+- Account.VIP\_\_c = true
+- Account.Annual_Revenue\_\_c > $100,000
 - Account.Type = 'Enterprise'
 
 **Priority Level:** High
@@ -332,6 +351,7 @@ Agent-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: VIP Support
 Priority: High
@@ -348,6 +368,7 @@ SLA: 5-minute response time (vs. 15 minutes for standard)
 #### Trigger 4.1: Direct Request for Human
 
 **Phrases:**
+
 - "I want to talk to a person"
 - "Transfer me to an agent"
 - "Get me a human"
@@ -369,6 +390,7 @@ Agent-Level Instructions:
 ```
 
 **Anti-Pattern (Don't Do This):**
+
 ```
 ❌ User: I want to talk to a person.
 
@@ -377,6 +399,7 @@ Agent-Level Instructions:
 ```
 
 **Correct Pattern:**
+
 ```
 ✅ User: I want to talk to a person.
 
@@ -386,6 +409,7 @@ Agent-Level Instructions:
 #### Trigger 4.2: Request for Manager/Supervisor
 
 **Phrases:**
+
 - "I want to speak to your manager"
 - "Get me a supervisor"
 - "Let me talk to someone in charge"
@@ -404,6 +428,7 @@ Agent-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Manager Escalations
 Priority: High
@@ -418,6 +443,7 @@ Priority: High
 #### Trigger 5.1: Legal / Compliance Concerns
 
 **Indicators:**
+
 - Mentions of lawsuits, lawyers, legal action
 - GDPR/privacy concerns (data deletion, access requests)
 - Regulatory compliance questions
@@ -438,6 +464,7 @@ Agent-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Legal / Compliance
 Priority: High
@@ -448,6 +475,7 @@ Alert: Legal team notified via email
 #### Trigger 5.2: Security Incidents
 
 **Indicators:**
+
 - "My account was hacked"
 - "Someone stole my password"
 - "Unauthorized charges on my card"
@@ -471,6 +499,7 @@ Agent-Level Instructions:
 ```
 
 **Omni-Channel Routing:**
+
 ```yaml
 Queue: Security Incidents
 Priority: Urgent
@@ -506,6 +535,7 @@ Agentforce includes a pre-configured **Escalation Topic** that integrates with O
    - Create rules for priority (VIP, frustrated, urgent)
 
 **Escalation Topic Behavior:**
+
 ```
 User: "I want to talk to someone."
 
@@ -555,29 +585,32 @@ Steps:
 
 ### Essential Context (Always Pass)
 
-| Field | Source | Example |
-|-------|--------|---------|
-| **Customer Name** | Contact.Name | "John Doe" |
-| **Account ID** | Contact.AccountId | "0018X000001AbCd" |
+| Field                    | Source               | Example                                              |
+| ------------------------ | -------------------- | ---------------------------------------------------- |
+| **Customer Name**        | Contact.Name         | "John Doe"                                           |
+| **Account ID**           | Contact.AccountId    | "0018X000001AbCd"                                    |
 | **Conversation Summary** | AI-generated summary | "Customer unable to reset password after 2 attempts" |
-| **Sentiment** | Agent assessment | "Frustrated" |
-| **Turn Count** | Count of messages | 8 |
-| **Topics Attempted** | List of topics | "Password Reset, Account Settings" |
+| **Sentiment**            | Agent assessment     | "Frustrated"                                         |
+| **Turn Count**           | Count of messages    | 8                                                    |
+| **Topics Attempted**     | List of topics       | "Password Reset, Account Settings"                   |
 
 ### Domain-Specific Context
 
 **For Technical Support Escalations:**
+
 - Error messages user reported
 - Device/OS information (if collected)
 - Troubleshooting steps already attempted
 - Reproduction steps
 
 **For Billing Escalations:**
+
 - Order ID or Invoice ID
 - Amount in question
 - Billing history (last 3 transactions)
 
 **For Refund Escalations:**
+
 - Order ID
 - Refund amount requested
 - Eligibility check result (eligible vs. ineligible + reason)
@@ -608,6 +641,7 @@ Steps:
 **Human Agent View:**
 
 When the human agent accepts the chat, they see:
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ New Chat: John Doe (Account: Acme Corp - VIP)              │
@@ -643,14 +677,15 @@ Human agent can immediately see the context and pick up the conversation without
 
 **Healthy Escalation Rate:** 15-30% of conversations
 
-| Rate | Interpretation | Action |
-|------|----------------|--------|
-| **<10%** | Under-escalating (customers frustrated, giving up) | Review escalation triggers—are they too strict? |
-| **10-30%** | Healthy (AI handling most, escalating when needed) | Monitor and optimize |
-| **30-50%** | Over-escalating (AI not confident) | Improve topic classification, add training data |
-| **>50%** | AI not adding value (most convos escalate) | Redesign agent scope, simplify topics |
+| Rate       | Interpretation                                     | Action                                          |
+| ---------- | -------------------------------------------------- | ----------------------------------------------- |
+| **<10%**   | Under-escalating (customers frustrated, giving up) | Review escalation triggers—are they too strict? |
+| **10-30%** | Healthy (AI handling most, escalating when needed) | Monitor and optimize                            |
+| **30-50%** | Over-escalating (AI not confident)                 | Improve topic classification, add training data |
+| **>50%**   | AI not adding value (most convos escalate)         | Redesign agent scope, simplify topics           |
 
 **Track by Reason:**
+
 - **Customer Request:** 5-10% (acceptable, user preference)
 - **Complexity:** 5-10% (improve AI training for these scenarios)
 - **Frustration:** <5% (if higher, fix root cause—slow responses, repeated failures)
@@ -667,6 +702,7 @@ Human agent can immediately see the context and pick up the conversation without
 **Target:** <10%
 
 **How to Measure:**
+
 - Post-escalation survey: "Could the AI have resolved this?"
 - Agent tagging: "Escalation Not Needed"
 
@@ -679,10 +715,11 @@ Human agent can immediately see the context and pick up the conversation without
 **Target:** >90%
 
 **How to Measure:**
+
 - Post-escalation survey: "Did you have the context you needed?"
 - Track if human agent asks for information AI already collected
 
-**If Low:** Improve context passing in AgentWork.CustomContext__c.
+**If Low:** Improve context passing in AgentWork.CustomContext\_\_c.
 
 ### Metric 3: Re-Escalation Rate
 

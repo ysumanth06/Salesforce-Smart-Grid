@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Test Specification Guide
 
 Complete reference for creating YAML test specifications for Agentforce agents using `sf agent test create`.
@@ -37,12 +38,12 @@ testCases:
 
 ### Required Top-Level Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Display name for the test (MasterLabel). **Deploy FAILS without this.** |
-| `subjectType` | string | Must be `AGENT` |
-| `subjectName` | string | Agent BotDefinition DeveloperName (API name) |
-| `testCases` | array | List of test case objects |
+| Field         | Type   | Description                                                             |
+| ------------- | ------ | ----------------------------------------------------------------------- |
+| `name`        | string | Display name for the test (MasterLabel). **Deploy FAILS without this.** |
+| `subjectType` | string | Must be `AGENT`                                                         |
+| `subjectName` | string | Agent BotDefinition DeveloperName (API name)                            |
+| `testCases`   | array  | List of test case objects                                               |
 
 > **Do NOT add** `apiVersion`, `kind`, `metadata`, or `settings` — these are not part of the CLI YAML schema and will be silently ignored or cause errors.
 
@@ -52,24 +53,24 @@ testCases:
 
 Each test case supports these fields:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `utterance` | string | **Yes** | User input message to test |
-| `expectedTopic` | string | No | Expected topic the agent should route to |
-| `expectedActions` | string[] | No | Flat list of action name strings expected to be invoked |
-| `expectedOutcome` | string | No | Natural language description of expected agent response |
-| `contextVariables` | array | No | Variables to inject into the test session |
-| `conversationHistory` | array | No | Prior conversation turns for multi-turn context |
+| Field                 | Type     | Required | Description                                             |
+| --------------------- | -------- | -------- | ------------------------------------------------------- |
+| `utterance`           | string   | **Yes**  | User input message to test                              |
+| `expectedTopic`       | string   | No       | Expected topic the agent should route to                |
+| `expectedActions`     | string[] | No       | Flat list of action name strings expected to be invoked |
+| `expectedOutcome`     | string   | No       | Natural language description of expected agent response |
+| `contextVariables`    | array    | No       | Variables to inject into the test session               |
+| `conversationHistory` | array    | No       | Prior conversation turns for multi-turn context         |
 
 ### What the CLI Actually Validates
 
 The CLI runs three assertions per test case:
 
-| Assertion | Based On | Behavior |
-|-----------|----------|----------|
-| `topic_assertion` | `expectedTopic` | Exact match against runtime topic `developerName` |
+| Assertion           | Based On          | Behavior                                                                      |
+| ------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| `topic_assertion`   | `expectedTopic`   | Exact match against runtime topic `developerName`                             |
 | `actions_assertion` | `expectedActions` | **Superset matching** — passes if agent invoked at least the expected actions |
-| `output_validation` | `expectedOutcome` | LLM-as-judge evaluates if agent response satisfies the description |
+| `output_validation` | `expectedOutcome` | LLM-as-judge evaluates if agent response satisfies the description            |
 
 ---
 
@@ -93,10 +94,10 @@ testCases:
 
 The `expectedTopic` value depends on the topic type:
 
-| Topic Type | Format | Example |
-|------------|--------|---------|
-| Standard (Escalation, Off_Topic) | `localDeveloperName` | `Escalation` |
-| Promoted (p_16j... prefix) | Full runtime `developerName` with hash | `p_16jPl000000GwEX_Topic_16j8eeef13560aa` |
+| Topic Type                       | Format                                 | Example                                   |
+| -------------------------------- | -------------------------------------- | ----------------------------------------- |
+| Standard (Escalation, Off_Topic) | `localDeveloperName`                   | `Escalation`                              |
+| Promoted (p_16j... prefix)       | Full runtime `developerName` with hash | `p_16jPl000000GwEX_Topic_16j8eeef13560aa` |
 
 See [topic-name-resolution.md](topic-name-resolution.md) for the complete guide, including the discovery workflow for promoted topics.
 
@@ -146,15 +147,16 @@ testCases:
 ### Superset Matching
 
 Action assertions use **superset matching**:
+
 - Expected: `[get_order_status]` / Actual: `[get_order_status, summarize_record]` → **PASS**
 - The agent can invoke additional actions beyond what's expected and the test still passes.
 
 ### Empty Actions
 
-| Pattern | Meaning | Current Behavior |
-|---------|---------|------------------|
-| `expectedActions:` omitted | "Not testing actions" | PASS regardless of what fires |
-| `expectedActions: []` | "Testing that NO actions fire" | Currently same behavior (PASS regardless), but documents intent |
+| Pattern                    | Meaning                        | Current Behavior                                                |
+| -------------------------- | ------------------------------ | --------------------------------------------------------------- |
+| `expectedActions:` omitted | "Not testing actions"          | PASS regardless of what fires                                   |
+| `expectedActions: []`      | "Testing that NO actions fire" | Currently same behavior (PASS regardless), but documents intent |
 
 **Best practice:** Use `expectedActions: []` explicitly for opt-out tests to document your intent that no action should fire, even though the CLI currently treats it the same as omitted. This makes the test self-documenting and future-proofs against framework changes.
 
@@ -167,7 +169,7 @@ Action assertions use **superset matching**:
 # Empty list — DELIBERATE assertion: "NO action should fire"
 - utterance: "No thanks, I'm all set"
   expectedTopic: feedback_collection
-  expectedActions: []    # Documents intent: opt-out should NOT trigger feedback action
+  expectedActions: [] # Documents intent: opt-out should NOT trigger feedback action
   expectedOutcome: "Agent gracefully accepts the opt-out without pushing for feedback"
 ```
 
@@ -176,6 +178,7 @@ Action assertions use **superset matching**:
 For GenAiPlannerBundle agents, action names in test results include a hash suffix (e.g., `Store_Feedback_179a9701f17c194`). Short name **prefix matching** works — you can use the prefix in `expectedActions` and the CLI will match.
 
 **Discovery workflow:**
+
 ```bash
 # Run with --verbose to see full action names
 sf agent test run --api-name Discovery --wait 10 --verbose --result-format json --json --target-org [alias]
@@ -210,7 +213,7 @@ The CLI uses an LLM-as-judge to evaluate whether the agent's actual response sat
 
 > **Gotcha:** Omitting `expectedOutcome` causes `output_validation` to report `ERROR` status with "Skip metric result due to missing expected input". This is **harmless** — `topic_assertion` and `actions_assertion` still run normally.
 
-> **Important: `output_validation` judges TEXT, not actions.** The LLM-as-judge evaluates the agent's **text response** only — it does NOT inspect action results, sObject writes, or internal state changes. Write `expectedOutcome` about what the agent *says*, not what it *does* internally.
+> **Important: `output_validation` judges TEXT, not actions.** The LLM-as-judge evaluates the agent's **text response** only — it does NOT inspect action results, sObject writes, or internal state changes. Write `expectedOutcome` about what the agent _says_, not what it _does_ internally.
 >
 > ```yaml
 > # ❌ WRONG — references internal action behavior
@@ -257,11 +260,11 @@ testCases:
 
 ### Conversation History Format
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `role` | Yes | `user` or `agent` (NOT `assistant`) |
-| `message` | Yes | The message content |
-| `topic` | Agent only | Topic name for agent turns |
+| Field     | Required   | Description                         |
+| --------- | ---------- | ----------------------------------- |
+| `role`    | Yes        | `user` or `agent` (NOT `assistant`) |
+| `message` | Yes        | The message content                 |
+| `topic`   | Agent only | Topic name for agent turns          |
 
 ### Deep Conversation History for Protocol Stage Testing
 
@@ -276,7 +279,7 @@ By providing 4-8 turns of `conversationHistory`, you can position the agent at a
     - role: user
       message: "I need to check my account status"
     - role: agent
-      topic: account_support          # Local developer name — no hash suffix needed
+      topic: account_support # Local developer name — no hash suffix needed
       message: "I found your account. Everything looks good — your balance is current."
     - role: user
       message: "Great, that answers my question"
@@ -300,7 +303,7 @@ testCases:
   - utterance: "What's the status of my account?"
     expectedTopic: account_lookup
     contextVariables:
-      - name: "$Context.RoutableId"    # Prefixed format (recommended) — bare RoutableId also works
+      - name: "$Context.RoutableId" # Prefixed format (recommended) — bare RoutableId also works
         value: "0Mw8X000000XXXXX"
       - name: CaseId
         value: "5008X000000XXXXX"
@@ -387,12 +390,12 @@ Agent Script agents (`.agent` files) have unique testing requirements due to the
 
 ### Key Differences from GenAiPlannerBundle Agents
 
-| Aspect | Agent Script | GenAiPlannerBundle |
-|--------|-------------|-------------------|
-| Single-utterance test | Captures transition action only | May capture business action |
-| Action names in results | Level 1 definition name | GenAiFunction name |
-| `subjectName` source | `config.developer_name` in `.agent` | Directory name of bundle |
-| Action test approach | Use `conversationHistory` for `apex://` | Standard single-utterance |
+| Aspect                  | Agent Script                            | GenAiPlannerBundle          |
+| ----------------------- | --------------------------------------- | --------------------------- |
+| Single-utterance test   | Captures transition action only         | May capture business action |
+| Action names in results | Level 1 definition name                 | GenAiFunction name          |
+| `subjectName` source    | `config.developer_name` in `.agent`     | Directory name of bundle    |
+| Action test approach    | Use `conversationHistory` for `apex://` | Standard single-utterance   |
 
 ### Routing Test (Transition Action)
 
@@ -401,7 +404,7 @@ testCases:
   - utterance: "I want to check my order status"
     expectedTopic: order_status
     expectedActions:
-      - go_order_status    # Transition action from start_agent
+      - go_order_status # Transition action from start_agent
 ```
 
 ### Action Test (with conversationHistory)
@@ -417,7 +420,7 @@ testCases:
         message: "Could you provide the Order ID?"
     expectedTopic: order_status
     expectedActions:
-      - get_order_status    # Level 1 definition name, NOT check_status
+      - get_order_status # Level 1 definition name, NOT check_status
 ```
 
 ### Permission Pre-Check
@@ -432,12 +435,12 @@ See [agentscript-testing-patterns.md](agentscript-testing-patterns.md) for 5 det
 
 ### Test Coverage
 
-| Aspect | Recommendation |
-|--------|----------------|
-| Topics | Test every topic with 3+ phrasings |
-| Actions | Test every action at least once |
+| Aspect     | Recommendation                         |
+| ---------- | -------------------------------------- |
+| Topics     | Test every topic with 3+ phrasings     |
+| Actions    | Test every action at least once        |
 | Escalation | Test trigger and non-trigger scenarios |
-| Edge cases | Test typos, gibberish, long inputs |
+| Edge cases | Test typos, gibberish, long inputs     |
 
 ### Organization
 
@@ -518,27 +521,27 @@ Each spec is deployed independently via `sf agent test create`, then executed in
 
 ## Known Gotchas
 
-| Issue | Detail |
-|-------|--------|
-| **`name:` is mandatory** | Deploy fails with "Required fields are missing: [MasterLabel]" if omitted |
-| **`expectedActions` is a flat string list** | NOT objects with `name`/`invoked`/`outputs` — those are fabricated fields |
-| **Empty `expectedActions: []` means "not testing"** | Will PASS even if actions are invoked |
-| **Missing `expectedOutcome` causes harmless ERROR** | `output_validation` reports ERROR but topic/action assertions still work |
-| **CLI has NO MessagingSession context** | Flows that need `recordId` will error at runtime (agent handles gracefully) |
-| **`--use-most-recent` broken on `test results`** | Confirmed broken on v2.123.1. Use `--job-id` explicitly for `test results`, or use `test resume --use-most-recent` (works) |
-| **Promoted topics need full runtime name** | `localDeveloperName` only resolves for standard topics |
-| **`instruction_following` crashes Testing Center UI** | `No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION` — CLI works fine but UI breaks. Remove this metric if users need Testing Center UI access. |
+| Issue                                                        | Detail                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name:` is mandatory**                                     | Deploy fails with "Required fields are missing: [MasterLabel]" if omitted                                                                                                                                                                                                     |
+| **`expectedActions` is a flat string list**                  | NOT objects with `name`/`invoked`/`outputs` — those are fabricated fields                                                                                                                                                                                                     |
+| **Empty `expectedActions: []` means "not testing"**          | Will PASS even if actions are invoked                                                                                                                                                                                                                                         |
+| **Missing `expectedOutcome` causes harmless ERROR**          | `output_validation` reports ERROR but topic/action assertions still work                                                                                                                                                                                                      |
+| **CLI has NO MessagingSession context**                      | Flows that need `recordId` will error at runtime (agent handles gracefully)                                                                                                                                                                                                   |
+| **`--use-most-recent` broken on `test results`**             | Confirmed broken on v2.123.1. Use `--job-id` explicitly for `test results`, or use `test resume --use-most-recent` (works)                                                                                                                                                    |
+| **Promoted topics need full runtime name**                   | `localDeveloperName` only resolves for standard topics                                                                                                                                                                                                                        |
+| **`instruction_following` crashes Testing Center UI**        | `No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION` — CLI works fine but UI breaks. Remove this metric if users need Testing Center UI access.                                                                                                         |
 | **Standard platform topics intercept before custom routing** | `Inappropriate_Content`, `Prompt_Injection`, `Reverse_Engineering` fire BEFORE the custom planner. Don't use custom topic names for these guardrail tests. See [topic-name-resolution.md](topic-name-resolution.md#standard-platform-topics-intercept-before-custom-routing). |
-| **`coherence` misleading for deflection agents** | Evaluates whether the response "answers" the user's question — scores 2-3 for correct deflections. Use `expectedOutcome` for guardrail/deflection tests instead. |
+| **`coherence` misleading for deflection agents**             | Evaluates whether the response "answers" the user's question — scores 2-3 for correct deflections. Use `expectedOutcome` for guardrail/deflection tests instead.                                                                                                              |
 
 ---
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| "Required fields are missing: [MasterLabel]" | Missing `name:` field | Add `name:` to top of YAML |
-| Topic assertion fails | Wrong topic name format | See [topic-name-resolution.md](topic-name-resolution.md) |
-| Action assertion unexpected PASS | Superset matching | Expected is subset of actual — this is correct behavior |
-| `output_validation` shows ERROR | No `expectedOutcome` provided | Add `expectedOutcome` or ignore — harmless |
-| "Agent not found" | Wrong `subjectName` | Verify agent DeveloperName in org |
+| Issue                                        | Cause                         | Solution                                                 |
+| -------------------------------------------- | ----------------------------- | -------------------------------------------------------- |
+| "Required fields are missing: [MasterLabel]" | Missing `name:` field         | Add `name:` to top of YAML                               |
+| Topic assertion fails                        | Wrong topic name format       | See [topic-name-resolution.md](topic-name-resolution.md) |
+| Action assertion unexpected PASS             | Superset matching             | Expected is subset of actual — this is correct behavior  |
+| `output_validation` shows ERROR              | No `expectedOutcome` provided | Add `expectedOutcome` or ignore — harmless               |
+| "Agent not found"                            | Wrong `subjectName`           | Verify agent DeveloperName in org                        |

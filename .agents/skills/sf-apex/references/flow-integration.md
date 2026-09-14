@@ -1,4 +1,5 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Apex Flow Integration Guide
 
 This guide covers creating Apex classes callable from Salesforce Flows using `@InvocableMethod` and `@InvocableVariable`.
@@ -28,9 +29,9 @@ This guide covers creating Apex classes callable from Salesforce Flows using `@I
 
 ## Quick Reference
 
-| Annotation | Purpose | Required |
-|------------|---------|----------|
-| `@InvocableMethod` | Marks method as Flow-callable | Yes |
+| Annotation           | Purpose                          | Required           |
+| -------------------- | -------------------------------- | ------------------ |
+| `@InvocableMethod`   | Marks method as Flow-callable    | Yes                |
 | `@InvocableVariable` | Marks property as Flow parameter | Yes (for wrappers) |
 
 ---
@@ -53,13 +54,13 @@ public static List<Response> execute(List<Request> requests) {
 
 ### Parameters
 
-| Parameter | Description | Required |
-|-----------|-------------|----------|
-| `label` | Display name in Flow Builder action list | Yes |
-| `description` | Help text shown when configuring action | No |
-| `category` | Groups actions in Flow Builder | No |
-| `callout` | Set `true` if method makes HTTP callouts | No (default: false) |
-| `configurationEditor` | Custom LWC for configuration UI | No |
+| Parameter             | Description                              | Required            |
+| --------------------- | ---------------------------------------- | ------------------- |
+| `label`               | Display name in Flow Builder action list | Yes                 |
+| `description`         | Help text shown when configuring action  | No                  |
+| `category`            | Groups actions in Flow Builder           | No                  |
+| `callout`             | Set `true` if method makes HTTP callouts | No (default: false) |
+| `configurationEditor` | Custom LWC for configuration UI          | No                  |
 
 ### Method Signature Rules
 
@@ -85,39 +86,39 @@ public static List<String> execute(List<Id> recordIds)
 
 ```apex
 public class Request {
-    @InvocableVariable(
-        label='Record ID'
-        description='The ID of the record to process'
-        required=true
-    )
-    public Id recordId;
+  @InvocableVariable(
+    label='Record ID'
+    description='The ID of the record to process'
+    required=true
+  )
+  public Id recordId;
 }
 ```
 
 ### Parameters
 
-| Parameter | Description | Required |
-|-----------|-------------|----------|
-| `label` | Display name in Flow mapping UI | Yes |
-| `description` | Help text for the variable | No |
-| `required` | Whether Flow must provide a value | No (default: false) |
+| Parameter     | Description                       | Required            |
+| ------------- | --------------------------------- | ------------------- |
+| `label`       | Display name in Flow mapping UI   | Yes                 |
+| `description` | Help text for the variable        | No                  |
+| `required`    | Whether Flow must provide a value | No (default: false) |
 
 ### Supported Data Types
 
-| Type | Flow Equivalent | Notes |
-|------|-----------------|-------|
-| `Boolean` | Boolean | |
-| `Date` | Date | |
-| `DateTime` | DateTime | |
-| `Decimal` | Number | |
-| `Double` | Number | |
-| `Integer` | Number | |
-| `Long` | Number | |
-| `String` | Text | |
-| `Time` | Time | |
-| `Id` | Text (Record ID) | Stores as 18-char ID |
-| `SObject` | Record | Any standard/custom object |
-| `List<T>` | Collection | Collection of any above type |
+| Type       | Flow Equivalent  | Notes                        |
+| ---------- | ---------------- | ---------------------------- |
+| `Boolean`  | Boolean          |                              |
+| `Date`     | Date             |                              |
+| `DateTime` | DateTime         |                              |
+| `Decimal`  | Number           |                              |
+| `Double`   | Number           |                              |
+| `Integer`  | Number           |                              |
+| `Long`     | Number           |                              |
+| `String`   | Text             |                              |
+| `Time`     | Time             |                              |
+| `Id`       | Text (Record ID) | Stores as 18-char ID         |
+| `SObject`  | Record           | Any standard/custom object   |
+| `List<T>`  | Collection       | Collection of any above type |
 
 ---
 
@@ -127,61 +128,60 @@ The recommended pattern uses wrapper classes for clean data exchange:
 
 ```apex
 public class AccountProcessorInvocable {
+  @InvocableMethod(label='Process Account' category='Account')
+  public static List<Response> execute(List<Request> requests) {
+    List<Response> responses = new List<Response>();
 
-    @InvocableMethod(label='Process Account' category='Account')
-    public static List<Response> execute(List<Request> requests) {
-        List<Response> responses = new List<Response>();
-
-        for (Request req : requests) {
-            Response res = new Response();
-            try {
-                // Process the request
-                res = processRequest(req);
-            } catch (Exception e) {
-                res.isSuccess = false;
-                res.errorMessage = e.getMessage();
-            }
-            responses.add(res);
-        }
-
-        return responses;
+    for (Request req : requests) {
+      Response res = new Response();
+      try {
+        // Process the request
+        res = processRequest(req);
+      } catch (Exception e) {
+        res.isSuccess = false;
+        res.errorMessage = e.getMessage();
+      }
+      responses.add(res);
     }
 
-    private static Response processRequest(Request req) {
-        // Business logic here
-        Response res = new Response();
-        res.isSuccess = true;
-        res.outputMessage = 'Processed successfully';
-        return res;
-    }
+    return responses;
+  }
 
-    // ═══════════════════════════════════════════════════════════════
-    // REQUEST WRAPPER
-    // ═══════════════════════════════════════════════════════════════
-    public class Request {
-        @InvocableVariable(label='Account ID' required=true)
-        public Id accountId;
+  private static Response processRequest(Request req) {
+    // Business logic here
+    Response res = new Response();
+    res.isSuccess = true;
+    res.outputMessage = 'Processed successfully';
+    return res;
+  }
 
-        @InvocableVariable(label='Operation Type')
-        public String operation;
-    }
+  // ═══════════════════════════════════════════════════════════════
+  // REQUEST WRAPPER
+  // ═══════════════════════════════════════════════════════════════
+  public class Request {
+    @InvocableVariable(label='Account ID' required=true)
+    public Id accountId;
 
-    // ═══════════════════════════════════════════════════════════════
-    // RESPONSE WRAPPER
-    // ═══════════════════════════════════════════════════════════════
-    public class Response {
-        @InvocableVariable(label='Is Success')
-        public Boolean isSuccess;
+    @InvocableVariable(label='Operation Type')
+    public String operation;
+  }
 
-        @InvocableVariable(label='Error Message')
-        public String errorMessage;
+  // ═══════════════════════════════════════════════════════════════
+  // RESPONSE WRAPPER
+  // ═══════════════════════════════════════════════════════════════
+  public class Response {
+    @InvocableVariable(label='Is Success')
+    public Boolean isSuccess;
 
-        @InvocableVariable(label='Output Message')
-        public String outputMessage;
+    @InvocableVariable(label='Error Message')
+    public String errorMessage;
 
-        @InvocableVariable(label='Result Record ID')
-        public Id outputRecordId;
-    }
+    @InvocableVariable(label='Output Message')
+    public String outputMessage;
+
+    @InvocableVariable(label='Result Record ID')
+    public Id outputRecordId;
+  }
 }
 ```
 
@@ -299,6 +299,7 @@ public class InvocableException extends Exception {}
 ```
 
 **Flow Fault Connector:**
+
 ```xml
 <actionCalls>
     <name>Call_Apex</name>
@@ -317,8 +318,8 @@ public class InvocableException extends Exception {}
 
 ```apex
 public class Request {
-    @InvocableVariable(label='Account IDs' required=true)
-    public List<Id> accountIds;  // Flow passes a collection
+  @InvocableVariable(label='Account IDs' required=true)
+  public List<Id> accountIds; // Flow passes a collection
 }
 ```
 
@@ -326,14 +327,15 @@ public class Request {
 
 ```apex
 public class Response {
-    @InvocableVariable(label='Processed Accounts')
-    public List<Account> accounts;  // Flow receives a collection
+  @InvocableVariable(label='Processed Accounts')
+  public List<Account> accounts; // Flow receives a collection
 }
 ```
 
 ### Collection Iteration in Flow
 
 When your invocable returns a List inside the Response, Flow can:
+
 1. Use it directly in data tables
 2. Loop over it with a Loop element
 3. Pass it to another invocable action
@@ -363,7 +365,7 @@ insert decision.getRecords();
 ```apex
 // Always use 'with sharing' unless there's a specific reason not to
 public with sharing class AccountInvocable {
-    // Respects org-wide defaults and sharing rules
+  // Respects org-wide defaults and sharing rules
 }
 ```
 
@@ -374,70 +376,85 @@ public with sharing class AccountInvocable {
 ```apex
 @IsTest
 private class AccountInvocableTest {
+  @IsTest
+  static void testSuccessScenario() {
+    // Setup test data
+    Account testAccount = new Account(Name = 'Test Account');
+    insert testAccount;
 
-    @IsTest
-    static void testSuccessScenario() {
-        // Setup test data
-        Account testAccount = new Account(Name = 'Test Account');
-        insert testAccount;
+    // Create request
+    AccountInvocable.Request req = new AccountInvocable.Request();
+    req.accountId = testAccount.Id;
+    req.operation = 'process';
 
-        // Create request
-        AccountInvocable.Request req = new AccountInvocable.Request();
-        req.accountId = testAccount.Id;
-        req.operation = 'process';
+    // Execute
+    Test.startTest();
+    List<AccountInvocable.Response> responses = AccountInvocable.execute(
+      new List<AccountInvocable.Request>{ req }
+    );
+    Test.stopTest();
 
-        // Execute
-        Test.startTest();
-        List<AccountInvocable.Response> responses =
-            AccountInvocable.execute(new List<AccountInvocable.Request>{ req });
-        Test.stopTest();
+    // Verify
+    System.assertEquals(1, responses.size(), 'Should return one response');
+    System.assertEquals(true, responses[0].isSuccess, 'Should succeed');
+    System.assertNotEquals(
+      null,
+      responses[0].outputRecordId,
+      'Should return record ID'
+    );
+  }
 
-        // Verify
-        System.assertEquals(1, responses.size(), 'Should return one response');
-        System.assertEquals(true, responses[0].isSuccess, 'Should succeed');
-        System.assertNotEquals(null, responses[0].outputRecordId, 'Should return record ID');
+  @IsTest
+  static void testBulkExecution() {
+    // Test with multiple records to verify bulkification
+    List<Account> accounts = new List<Account>();
+    for (Integer i = 0; i < 200; i++) {
+      accounts.add(new Account(Name = 'Test ' + i));
+    }
+    insert accounts;
+
+    List<AccountInvocable.Request> requests = new List<AccountInvocable.Request>();
+    for (Account acc : accounts) {
+      AccountInvocable.Request req = new AccountInvocable.Request();
+      req.accountId = acc.Id;
+      requests.add(req);
     }
 
-    @IsTest
-    static void testBulkExecution() {
-        // Test with multiple records to verify bulkification
-        List<Account> accounts = new List<Account>();
-        for (Integer i = 0; i < 200; i++) {
-            accounts.add(new Account(Name = 'Test ' + i));
-        }
-        insert accounts;
+    Test.startTest();
+    List<AccountInvocable.Response> responses = AccountInvocable.execute(
+      requests
+    );
+    Test.stopTest();
 
-        List<AccountInvocable.Request> requests = new List<AccountInvocable.Request>();
-        for (Account acc : accounts) {
-            AccountInvocable.Request req = new AccountInvocable.Request();
-            req.accountId = acc.Id;
-            requests.add(req);
-        }
-
-        Test.startTest();
-        List<AccountInvocable.Response> responses = AccountInvocable.execute(requests);
-        Test.stopTest();
-
-        System.assertEquals(200, responses.size(), 'Should handle bulk records');
-        for (AccountInvocable.Response res : responses) {
-            System.assertEquals(true, res.isSuccess, 'All should succeed');
-        }
+    System.assertEquals(200, responses.size(), 'Should handle bulk records');
+    for (AccountInvocable.Response res : responses) {
+      System.assertEquals(true, res.isSuccess, 'All should succeed');
     }
+  }
 
-    @IsTest
-    static void testErrorHandling() {
-        // Test with invalid ID
-        AccountInvocable.Request req = new AccountInvocable.Request();
-        req.accountId = '001000000000000AAA';  // Non-existent ID
+  @IsTest
+  static void testErrorHandling() {
+    // Test with invalid ID
+    AccountInvocable.Request req = new AccountInvocable.Request();
+    req.accountId = '001000000000000AAA'; // Non-existent ID
 
-        Test.startTest();
-        List<AccountInvocable.Response> responses =
-            AccountInvocable.execute(new List<AccountInvocable.Request>{ req });
-        Test.stopTest();
+    Test.startTest();
+    List<AccountInvocable.Response> responses = AccountInvocable.execute(
+      new List<AccountInvocable.Request>{ req }
+    );
+    Test.stopTest();
 
-        System.assertEquals(false, responses[0].isSuccess, 'Should fail for invalid ID');
-        System.assertNotEquals(null, responses[0].errorMessage, 'Should have error message');
-    }
+    System.assertEquals(
+      false,
+      responses[0].isSuccess,
+      'Should fail for invalid ID'
+    );
+    System.assertNotEquals(
+      null,
+      responses[0].errorMessage,
+      'Should have error message'
+    );
+  }
 }
 ```
 
@@ -484,10 +501,10 @@ When your Invocable is deployed, Flows call it like this:
 
 ## Cross-Skill Integration
 
-| Integration | See Also |
-|-------------|----------|
-| Flow → LWC → Apex | [triangle-pattern.md](triangle-pattern.md) |
-| Apex → LWC | via @AuraEnabled controller pattern |
+| Integration        | See Also                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| Flow → LWC → Apex  | [triangle-pattern.md](triangle-pattern.md)                  |
+| Apex → LWC         | via @AuraEnabled controller pattern                         |
 | Agentforce Actions | sf-ai-agentscript skill (similar pattern for agent actions) |
 
 ---

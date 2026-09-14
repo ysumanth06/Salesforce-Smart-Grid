@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Topic Name Resolution in CLI Tests
 
 ## Overview
@@ -9,11 +10,11 @@ When writing `expectedTopic` in YAML test specs for `sf agent test create`, the 
 
 ## Three Topic Name Formats
 
-| Format | Example | Where Found |
-|--------|---------|-------------|
-| `localDeveloperName` | `Escalation` | Planner bundle XML `<localDeveloperName>` tag |
-| `developerName` (bundle) | `Escalation_16j548d53a8a3b0` | Planner bundle XML `<developerName>` tag |
-| `developerName` (runtime) | `Escalation_16j9d687a53f890` | Test results `.generatedData.topic` |
+| Format                    | Example                      | Where Found                                   |
+| ------------------------- | ---------------------------- | --------------------------------------------- |
+| `localDeveloperName`      | `Escalation`                 | Planner bundle XML `<localDeveloperName>` tag |
+| `developerName` (bundle)  | `Escalation_16j548d53a8a3b0` | Planner bundle XML `<developerName>` tag      |
+| `developerName` (runtime) | `Escalation_16j9d687a53f890` | Test results `.generatedData.topic`           |
 
 > **Important:** The bundle `developerName` hash and the runtime `developerName` hash may differ. Always use the **runtime** value from test results.
 
@@ -49,11 +50,11 @@ Standard topics are built-in topics that come with every agent:
 
 Three platform-level standard topics exist **above** the custom planner engine (`GenAiPlannerBundle`). These intercept utterances **before** the agent's custom topic routing sees them:
 
-| Platform Topic | Triggers On |
-|----------------|-------------|
-| `Inappropriate_Content` | Hate speech, violence, sexual content, insults |
-| `Prompt_Injection` | Instruction override attempts ("ignore your instructions", "you are now...") |
-| `Reverse_Engineering` | Requests to reveal system instructions ("what are your instructions?") |
+| Platform Topic          | Triggers On                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `Inappropriate_Content` | Hate speech, violence, sexual content, insults                               |
+| `Prompt_Injection`      | Instruction override attempts ("ignore your instructions", "you are now...") |
+| `Reverse_Engineering`   | Requests to reveal system instructions ("what are your instructions?")       |
 
 **Impact on Testing:**
 
@@ -97,10 +98,10 @@ Promoted topics are custom topics created in the Salesforce Setup UI. They have 
 
 ### Summary Table
 
-| Topic Type | YAML `expectedTopic` Value | Resolution |
-|------------|---------------------------|------------|
+| Topic Type                             | YAML `expectedTopic` Value                | Resolution                       |
+| -------------------------------------- | ----------------------------------------- | -------------------------------- |
 | Standard (Escalation, Off_Topic, etc.) | `localDeveloperName` (e.g., `Escalation`) | Framework resolves automatically |
-| Promoted (p_16j... prefix) | Full runtime `developerName` with hash | Must be exact match |
+| Promoted (p_16j... prefix)             | Full runtime `developerName` with hash    | Must be exact match              |
 
 ---
 
@@ -153,12 +154,12 @@ sf agent test run --api-name My_Agent_Tests --wait 10 --result-format json --jso
 
 ## Where to Find Topic Names
 
-| Source | How to Access | What You Get |
-|--------|---------------|--------------|
-| **Test results JSON** | `.result.testCases[].generatedData.topic` | Runtime `developerName` (most reliable) |
+| Source                 | How to Access                                                                | What You Get                                |
+| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- |
+| **Test results JSON**  | `.result.testCases[].generatedData.topic`                                    | Runtime `developerName` (most reliable)     |
 | **Planner bundle XML** | `retrieve GenAiPlannerBundle` → `<developerName>` and `<localDeveloperName>` | Bundle names (hash may differ from runtime) |
-| **SOQL** | `SELECT DeveloperName FROM GenAiPlugin WHERE ...` | Metadata names |
-| **Setup UI** | Einstein > Agents > Topics | Display labels (not API names) |
+| **SOQL**               | `SELECT DeveloperName FROM GenAiPlugin WHERE ...`                            | Metadata names                              |
+| **Setup UI**           | Einstein > Agents > Topics                                                   | Display labels (not API names)              |
 
 ---
 

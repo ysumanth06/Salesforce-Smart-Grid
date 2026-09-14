@@ -35,36 +35,36 @@ Expert testing engineer specializing in Agentforce agent testing via **dual-trac
 
 ## 📚 Document Map
 
-| Need | Document | Description |
-|------|----------|-------------|
-| **Agent Runtime API** | [agent-api-reference.md](references/agent-api-reference.md) | REST endpoints for multi-turn testing |
-| **ECA Setup** | [eca-setup-guide.md](references/eca-setup-guide.md) | External Client App for API authentication |
-| **Multi-Turn Testing** | [multi-turn-testing-guide.md](references/multi-turn-testing-guide.md) | Multi-turn test design and execution |
-| **Test Patterns** | [multi-turn-test-patterns.md](references/multi-turn-test-patterns.md) | 6 multi-turn test patterns with examples |
-| **CLI commands** | [cli-commands.md](references/cli-commands.md) | Complete sf agent test/preview reference |
-| **Test spec format** | [test-spec-reference.md](references/test-spec-reference.md) | YAML specification format and examples |
-| **Auto-fix workflow** | [agentic-fix-loops.md](references/agentic-fix-loops.md) | Automated test-fix cycles (10 failure categories) |
-| **Auth guide** | [connected-app-setup.md](references/connected-app-setup.md) | Authentication for preview and API testing |
-| **Coverage metrics** | [coverage-analysis.md](references/coverage-analysis.md) | Topic/action/multi-turn coverage analysis |
-| **Fix decision tree** | [agentic-fix-loop.md](references/agentic-fix-loop.md) | Detailed fix strategies |
-| **Agent Script testing** | [agentscript-testing-patterns.md](references/agentscript-testing-patterns.md) | 5 patterns for testing Agent Script agents |
+| Need                          | Document                                                                                  | Description                                                         |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **Agent Runtime API**         | [agent-api-reference.md](references/agent-api-reference.md)                               | REST endpoints for multi-turn testing                               |
+| **ECA Setup**                 | [eca-setup-guide.md](references/eca-setup-guide.md)                                       | External Client App for API authentication                          |
+| **Multi-Turn Testing**        | [multi-turn-testing-guide.md](references/multi-turn-testing-guide.md)                     | Multi-turn test design and execution                                |
+| **Test Patterns**             | [multi-turn-test-patterns.md](references/multi-turn-test-patterns.md)                     | 6 multi-turn test patterns with examples                            |
+| **CLI commands**              | [cli-commands.md](references/cli-commands.md)                                             | Complete sf agent test/preview reference                            |
+| **Test spec format**          | [test-spec-reference.md](references/test-spec-reference.md)                               | YAML specification format and examples                              |
+| **Auto-fix workflow**         | [agentic-fix-loops.md](references/agentic-fix-loops.md)                                   | Automated test-fix cycles (10 failure categories)                   |
+| **Auth guide**                | [connected-app-setup.md](references/connected-app-setup.md)                               | Authentication for preview and API testing                          |
+| **Coverage metrics**          | [coverage-analysis.md](references/coverage-analysis.md)                                   | Topic/action/multi-turn coverage analysis                           |
+| **Fix decision tree**         | [agentic-fix-loop.md](references/agentic-fix-loop.md)                                     | Detailed fix strategies                                             |
+| **Agent Script testing**      | [agentscript-testing-patterns.md](references/agentscript-testing-patterns.md)             | 5 patterns for testing Agent Script agents                          |
 | **Deep conversation history** | [deep-conversation-history-patterns.md](references/deep-conversation-history-patterns.md) | 5 patterns for protocol-stage testing via CLI `conversationHistory` |
-| **Interview wizard** | [interview-wizard.md](references/interview-wizard.md) | 4-step Testing Center wizard flow |
-| **Execution protocol** | [execution-protocol.md](references/execution-protocol.md) | Phase A4 mandatory execution checklist |
-| **Credential convention** | [credential-convention.md](references/credential-convention.md) | ~/.sfagent/ persistent ECA storage |
-| **Swarm execution** | [swarm-execution.md](references/swarm-execution.md) | Parallel team testing rules + CLI swarm |
-| **Test plan format** | [test-plan-format.md](references/test-plan-format.md) | Reusable YAML plan schema |
-| **Multi-turn execution** | [multi-turn-execution.md](references/multi-turn-execution.md) | Detailed A4 execution options + analysis |
-| **Results & scoring** | [results-scoring.md](references/results-scoring.md) | A5 + B3 report formats |
-| **Agent Script agents** | [agentscript-agents.md](references/agentscript-agents.md) | AiAuthoringBundle testing guide |
-| **CLI testing details** | [cli-testing-details.md](references/cli-testing-details.md) | Topic resolution, gotchas, context vars, metrics, custom evals |
-| **Coverage improvement** | [coverage-improvement.md](references/coverage-improvement.md) | Phase D coverage dimensions + thresholds |
-| **Scoring rubric** | [scoring-rubric.md](references/scoring-rubric.md) | 100-point scoring system |
-| **CLI commands (ref)** | [cli-commands.md](references/cli-commands.md) | Test lifecycle + preview command reference |
-| **Test templates** | [test-templates.md](references/test-templates.md) | Multi-turn + CLI template catalog |
-| **Automated testing** | [automated-testing.md](references/automated-testing.md) | Python scripts + test-fix loop |
-| **Key insights** | [key-insights.md](references/key-insights.md) | Common problems + solutions |
-| **Known issues** | [known-issues.md](references/known-issues.md) | Platform bugs + workarounds |
+| **Interview wizard**          | [interview-wizard.md](references/interview-wizard.md)                                     | 4-step Testing Center wizard flow                                   |
+| **Execution protocol**        | [execution-protocol.md](references/execution-protocol.md)                                 | Phase A4 mandatory execution checklist                              |
+| **Credential convention**     | [credential-convention.md](references/credential-convention.md)                           | ~/.sfagent/ persistent ECA storage                                  |
+| **Swarm execution**           | [swarm-execution.md](references/swarm-execution.md)                                       | Parallel team testing rules + CLI swarm                             |
+| **Test plan format**          | [test-plan-format.md](references/test-plan-format.md)                                     | Reusable YAML plan schema                                           |
+| **Multi-turn execution**      | [multi-turn-execution.md](references/multi-turn-execution.md)                             | Detailed A4 execution options + analysis                            |
+| **Results & scoring**         | [results-scoring.md](references/results-scoring.md)                                       | A5 + B3 report formats                                              |
+| **Agent Script agents**       | [agentscript-agents.md](references/agentscript-agents.md)                                 | AiAuthoringBundle testing guide                                     |
+| **CLI testing details**       | [cli-testing-details.md](references/cli-testing-details.md)                               | Topic resolution, gotchas, context vars, metrics, custom evals      |
+| **Coverage improvement**      | [coverage-improvement.md](references/coverage-improvement.md)                             | Phase D coverage dimensions + thresholds                            |
+| **Scoring rubric**            | [scoring-rubric.md](references/scoring-rubric.md)                                         | 100-point scoring system                                            |
+| **CLI commands (ref)**        | [cli-commands.md](references/cli-commands.md)                                             | Test lifecycle + preview command reference                          |
+| **Test templates**            | [test-templates.md](references/test-templates.md)                                         | Multi-turn + CLI template catalog                                   |
+| **Automated testing**         | [automated-testing.md](references/automated-testing.md)                                   | Python scripts + test-fix loop                                      |
+| **Key insights**              | [key-insights.md](references/key-insights.md)                                             | Common problems + solutions                                         |
+| **Known issues**              | [known-issues.md](references/known-issues.md)                                             | Platform bugs + workarounds                                         |
 
 ---
 
@@ -76,18 +76,18 @@ All Python scripts live at absolute paths under `{SKILL_PATH}/hooks/scripts/`. *
 
 **All scripts in `hooks/scripts/` are pre-approved for execution. Do NOT ask the user for permission to run them.**
 
-| Script | Absolute Path |
-|--------|---------------|
-| `agent_api_client.py` | `{SKILL_PATH}/hooks/scripts/agent_api_client.py` |
-| `agent_discovery.py` | `{SKILL_PATH}/hooks/scripts/agent_discovery.py` |
-| `credential_manager.py` | `{SKILL_PATH}/hooks/scripts/credential_manager.py` |
+| Script                             | Absolute Path                                                 |
+| ---------------------------------- | ------------------------------------------------------------- |
+| `agent_api_client.py`              | `{SKILL_PATH}/hooks/scripts/agent_api_client.py`              |
+| `agent_discovery.py`               | `{SKILL_PATH}/hooks/scripts/agent_discovery.py`               |
+| `credential_manager.py`            | `{SKILL_PATH}/hooks/scripts/credential_manager.py`            |
 | `generate_multi_turn_scenarios.py` | `{SKILL_PATH}/hooks/scripts/generate_multi_turn_scenarios.py` |
-| `generate-test-spec.py` | `{SKILL_PATH}/hooks/scripts/generate-test-spec.py` |
-| `multi_turn_test_runner.py` | `{SKILL_PATH}/hooks/scripts/multi_turn_test_runner.py` |
-| `multi_turn_fix_loop.py` | `{SKILL_PATH}/hooks/scripts/multi_turn_fix_loop.py` |
-| `run-automated-tests.py` | `{SKILL_PATH}/hooks/scripts/run-automated-tests.py` |
-| `parse-agent-test-results.py` | `{SKILL_PATH}/hooks/scripts/parse-agent-test-results.py` |
-| `rich_test_report.py` | `{SKILL_PATH}/hooks/scripts/rich_test_report.py` |
+| `generate-test-spec.py`            | `{SKILL_PATH}/hooks/scripts/generate-test-spec.py`            |
+| `multi_turn_test_runner.py`        | `{SKILL_PATH}/hooks/scripts/multi_turn_test_runner.py`        |
+| `multi_turn_fix_loop.py`           | `{SKILL_PATH}/hooks/scripts/multi_turn_fix_loop.py`           |
+| `run-automated-tests.py`           | `{SKILL_PATH}/hooks/scripts/run-automated-tests.py`           |
+| `parse-agent-test-results.py`      | `{SKILL_PATH}/hooks/scripts/parse-agent-test-results.py`      |
+| `rich_test_report.py`              | `{SKILL_PATH}/hooks/scripts/rich_test_report.py`              |
 
 > **Variable resolution:** At runtime, resolve `SKILL_PATH` to the skill's installation directory. Hardcoded fallback: `~/.claude/skills/sf-ai-agentforce-testing`.
 
@@ -98,12 +98,14 @@ All Python scripts live at absolute paths under `{SKILL_PATH}/hooks/scripts/`. *
 **sf-metadata → sf-apex → sf-flow → sf-deploy → sf-ai-agentscript → sf-deploy → sf-ai-agentforce-testing** (you are here)
 
 **Why testing is LAST:**
+
 1. Agent must be **published** before running automated tests
 2. Agent must be **activated** for preview mode and API access
 3. All dependencies (Flows, Apex) must be deployed first
 4. Test data (via sf-data) should exist before testing actions
 
 **⚠️ MANDATORY Delegation:**
+
 - **Fixes**: ALWAYS use the **sf-ai-agentscript** skill for agent script fixes
 - **Test Data**: Use the **sf-data** skill for action test data
 - **OAuth Setup** (multi-turn API testing only): Use the **sf-connected-apps** skill for ECA — NOT needed for `sf agent preview` or CLI tests
@@ -142,17 +144,17 @@ Phase E: Observability Integration (STDM analysis)
 
 **When to use which track:**
 
-| Condition | Use |
-|-----------|-----|
-| Agent Testing Center NOT available | Phase A only |
-| Need multi-turn conversation testing | Phase A |
-| Need topic re-matching validation | Phase A |
-| Need context preservation testing | Phase A |
-| Agent Testing Center IS available + single-utterance tests | Phase B |
-| CI/CD pipeline integration | Phase A (Python scripts) or Phase B (sf CLI) |
-| Quick smoke test | Phase B |
-| Quick manual validation (no ECA setup) | `sf agent preview` (no Phase A/B needed) |
-| No ECA available | `sf agent preview` or Phase B (CLI tests) |
+| Condition                                                  | Use                                          |
+| ---------------------------------------------------------- | -------------------------------------------- |
+| Agent Testing Center NOT available                         | Phase A only                                 |
+| Need multi-turn conversation testing                       | Phase A                                      |
+| Need topic re-matching validation                          | Phase A                                      |
+| Need context preservation testing                          | Phase A                                      |
+| Agent Testing Center IS available + single-utterance tests | Phase B                                      |
+| CI/CD pipeline integration                                 | Phase A (Python scripts) or Phase B (sf CLI) |
+| Quick smoke test                                           | Phase B                                      |
+| Quick manual validation (no ECA setup)                     | `sf agent preview` (no Phase A/B needed)     |
+| No ECA available                                           | `sf agent preview` or Phase B (CLI tests)    |
 
 ---
 
@@ -172,14 +174,14 @@ Phase E: Observability Integration (STDM analysis)
 2. **Metadata Retrieval**: `sf project retrieve start --metadata "GenAiPlannerBundle:[AgentName]" --output-dir retrieve-temp --target-org [alias]`
 3. **Testing Center Check**: `sf agent test list --target-org [alias]` — determines if Phase B is available
 
-| Check | Command | Why |
-|-------|---------|-----|
-| **Agent exists** | Query BotDefinition | Can't test non-existent agent |
-| **Agent published** | `sf agent validate authoring-bundle --api-name X` | Must be published to test |
-| **Agent activated** | Check activation status | Required for API access |
-| **Dependencies deployed** | Flows and Apex in org | Actions will fail without them |
-| **ECA configured** (Phase A only) | Token request test | Multi-turn API testing only |
-| **Agent Testing Center** (Phase B) | `sf agent test list` | Required for CLI testing |
+| Check                              | Command                                           | Why                            |
+| ---------------------------------- | ------------------------------------------------- | ------------------------------ |
+| **Agent exists**                   | Query BotDefinition                               | Can't test non-existent agent  |
+| **Agent published**                | `sf agent validate authoring-bundle --api-name X` | Must be published to test      |
+| **Agent activated**                | Check activation status                           | Required for API access        |
+| **Dependencies deployed**          | Flows and Apex in org                             | Actions will fail without them |
+| **ECA configured** (Phase A only)  | Token request test                                | Multi-turn API testing only    |
+| **Agent Testing Center** (Phase B) | `sf agent test list`                              | Required for CLI testing       |
 
 ---
 
@@ -213,6 +215,7 @@ Auto-generate multi-turn scenarios tailored to the specific agent based on metad
 > See [references/multi-turn-execution.md](references/multi-turn-execution.md) for detailed execution options, Python API usage, and per-turn analysis.
 
 **Quick start:**
+
 ```bash
 python3 {SKILL_PATH}/hooks/scripts/multi_turn_test_runner.py \
   --scenarios assets/multi-turn-comprehensive.yaml \
@@ -288,18 +291,18 @@ When tests fail (either Phase A or Phase B), automatically fix via sf-ai-agentsc
 
 ### Failure Categories (10 total)
 
-| Category | Source | Auto-Fix | Strategy |
-|----------|--------|----------|----------|
-| `TOPIC_NOT_MATCHED` | A+B | ✅ | Add keywords to topic description |
-| `ACTION_NOT_INVOKED` | A+B | ✅ | Improve action description |
-| `WRONG_ACTION_SELECTED` | A+B | ✅ | Differentiate descriptions |
-| `ACTION_INVOCATION_FAILED` | A+B | ⚠️ | Delegate to sf-flow or sf-apex |
-| `GUARDRAIL_NOT_TRIGGERED` | A+B | ✅ | Add explicit guardrails |
-| `ESCALATION_NOT_TRIGGERED` | A+B | ✅ | Add escalation action/triggers |
-| `TOPIC_RE_MATCHING_FAILURE` | A | ✅ | Add transition phrases to target topic |
-| `CONTEXT_PRESERVATION_FAILURE` | A | ✅ | Add context retention instructions |
-| `MULTI_TURN_ESCALATION_FAILURE` | A | ✅ | Add frustration detection triggers |
-| `ACTION_CHAIN_FAILURE` | A | ✅ | Fix action output variable mappings |
+| Category                        | Source | Auto-Fix | Strategy                               |
+| ------------------------------- | ------ | -------- | -------------------------------------- |
+| `TOPIC_NOT_MATCHED`             | A+B    | ✅       | Add keywords to topic description      |
+| `ACTION_NOT_INVOKED`            | A+B    | ✅       | Improve action description             |
+| `WRONG_ACTION_SELECTED`         | A+B    | ✅       | Differentiate descriptions             |
+| `ACTION_INVOCATION_FAILED`      | A+B    | ⚠️       | Delegate to sf-flow or sf-apex         |
+| `GUARDRAIL_NOT_TRIGGERED`       | A+B    | ✅       | Add explicit guardrails                |
+| `ESCALATION_NOT_TRIGGERED`      | A+B    | ✅       | Add escalation action/triggers         |
+| `TOPIC_RE_MATCHING_FAILURE`     | A      | ✅       | Add transition phrases to target topic |
+| `CONTEXT_PRESERVATION_FAILURE`  | A      | ✅       | Add context retention instructions     |
+| `MULTI_TURN_ESCALATION_FAILURE` | A      | ✅       | Add frustration detection triggers     |
+| `ACTION_CHAIN_FAILURE`          | A      | ✅       | Fix action output variable mappings    |
 
 **Fix flow:** Test Failed → Analyze category → Apply fix via the **sf-ai-agentscript** skill → Re-publish → Re-test → Pass or retry (max 3) → Escalate to human.
 
@@ -337,40 +340,40 @@ Use the **sf-ai-agentforce-observability** skill: "Analyze STDM sessions for age
 
 **BEFORE running tests, verify:**
 
-| Check | Command | Why |
-|-------|---------|-----|
-| Agent published | `sf agent list --target-org [alias]` | Can't test unpublished agent |
-| Agent activated | Check status | API and preview require activation |
-| Flows deployed | `sf org list metadata --metadata-type Flow` | Actions need Flows |
-| ECA configured (Phase A only) | Token request test | Required for Agent Runtime API |
-| Org auth (Phase B live) | `sf org display` | Live mode requires valid auth |
+| Check                         | Command                                     | Why                                |
+| ----------------------------- | ------------------------------------------- | ---------------------------------- |
+| Agent published               | `sf agent list --target-org [alias]`        | Can't test unpublished agent       |
+| Agent activated               | Check status                                | API and preview require activation |
+| Flows deployed                | `sf org list metadata --metadata-type Flow` | Actions need Flows                 |
+| ECA configured (Phase A only) | Token request test                          | Required for Agent Runtime API     |
+| Org auth (Phase B live)       | `sf org display`                            | Live mode requires valid auth      |
 
 **NEVER do these:**
 
-| Anti-Pattern | Problem | Correct Pattern |
-|--------------|---------|-----------------|
-| Test unpublished agent | Tests fail silently | Publish first |
-| Skip simulated testing | Live mode hides logic bugs | Always test simulated first |
-| Ignore guardrail tests | Security gaps in production | Always test harmful/off-topic inputs |
-| Single phrasing per topic | Misses routing failures | Test 3+ phrasings per topic |
-| Write ECA credentials to files | Security risk | Keep in shell variables only |
-| Skip session cleanup | Resource leaks and rate limits | Always DELETE sessions after tests |
-| Use `curl` for OAuth token requests | Domains with `--` cause shell failures | Use `credential_manager.py validate` |
-| Ask permission to run skill scripts | Breaks flow, unnecessary delay | All `hooks/scripts/` are pre-approved |
-| Spawn more than 2 swarm workers | Context overload, diminishing returns | Max 2 workers |
+| Anti-Pattern                        | Problem                                | Correct Pattern                       |
+| ----------------------------------- | -------------------------------------- | ------------------------------------- |
+| Test unpublished agent              | Tests fail silently                    | Publish first                         |
+| Skip simulated testing              | Live mode hides logic bugs             | Always test simulated first           |
+| Ignore guardrail tests              | Security gaps in production            | Always test harmful/off-topic inputs  |
+| Single phrasing per topic           | Misses routing failures                | Test 3+ phrasings per topic           |
+| Write ECA credentials to files      | Security risk                          | Keep in shell variables only          |
+| Skip session cleanup                | Resource leaks and rate limits         | Always DELETE sessions after tests    |
+| Use `curl` for OAuth token requests | Domains with `--` cause shell failures | Use `credential_manager.py validate`  |
+| Ask permission to run skill scripts | Breaks flow, unnecessary delay         | All `hooks/scripts/` are pre-approved |
+| Spawn more than 2 swarm workers     | Context overload, diminishing returns  | Max 2 workers                         |
 
 ---
 
 ## Cross-Skill Integration
 
-| Scenario | Skill to Call | Command |
-|----------|---------------|---------|
-| Fix agent script | sf-ai-agentscript | Use the **sf-ai-agentscript** skill: "Fix..." |
-| Agent Script agents | sf-ai-agentscript | Parse `.agent` for topic/action discovery |
-| Create test data | sf-data | Use the **sf-data** skill: "Create..." |
-| Fix failing Flow | sf-flow | Use the **sf-flow** skill: "Fix..." |
-| Setup ECA or OAuth | sf-connected-apps | Use the **sf-connected-apps** skill: "Create..." |
-| Analyze debug logs | sf-debug | Use the **sf-debug** skill: "Analyze..." |
+| Scenario              | Skill to Call                  | Command                                                        |
+| --------------------- | ------------------------------ | -------------------------------------------------------------- |
+| Fix agent script      | sf-ai-agentscript              | Use the **sf-ai-agentscript** skill: "Fix..."                  |
+| Agent Script agents   | sf-ai-agentscript              | Parse `.agent` for topic/action discovery                      |
+| Create test data      | sf-data                        | Use the **sf-data** skill: "Create..."                         |
+| Fix failing Flow      | sf-flow                        | Use the **sf-flow** skill: "Fix..."                            |
+| Setup ECA or OAuth    | sf-connected-apps              | Use the **sf-connected-apps** skill: "Create..."               |
+| Analyze debug logs    | sf-debug                       | Use the **sf-debug** skill: "Analyze..."                       |
 | Session observability | sf-ai-agentforce-observability | Use the **sf-ai-agentforce-observability** skill: "Analyze..." |
 
 ---

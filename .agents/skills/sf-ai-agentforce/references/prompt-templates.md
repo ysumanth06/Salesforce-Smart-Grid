@@ -28,12 +28,12 @@
 
 ## Template Types
 
-| Type | Use Case | Example |
-|------|----------|---------|
-| `flexPrompt` | General purpose, maximum flexibility | Custom AI tasks |
-| `salesGeneration` | Sales content creation | Email drafts, proposals |
-| `fieldCompletion` | Suggest field values | Auto-populate fields |
-| `recordSummary` | Summarize record data | Case summaries, account briefs |
+| Type              | Use Case                             | Example                        |
+| ----------------- | ------------------------------------ | ------------------------------ |
+| `flexPrompt`      | General purpose, maximum flexibility | Custom AI tasks                |
+| `salesGeneration` | Sales content creation               | Email drafts, proposals        |
+| `fieldCompletion` | Suggest field values                 | Auto-populate fields           |
+| `recordSummary`   | Summarize record data                | Case summaries, account briefs |
 
 ---
 
@@ -42,7 +42,7 @@
 ### Full Schema
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <!-- Required: API name -->
     <fullName>{{TemplateName}}</fullName>
@@ -70,7 +70,8 @@
     <!-- Variable definitions (0 or more) -->
     <promptTemplateVariables>
         <developerName>{{variableName}}</developerName>
-        <promptTemplateVariableType>{{freeText|recordField|relatedList|resource}}</promptTemplateVariableType>
+        <promptTemplateVariableType
+    >{{freeText|recordField|relatedList|resource}}</promptTemplateVariableType>
         <isRequired>{{true|false}}</isRequired>
         <!-- For recordField type -->
         <objectType>{{ObjectApiName}}</objectType>
@@ -96,6 +97,7 @@ User-provided text input at runtime.
 ```
 
 **Usage in prompt:**
+
 ```
 Customer Question: {!customerQuestion}
 ```
@@ -115,6 +117,7 @@ Binds to a specific field on a Salesforce record.
 ```
 
 **Relationship traversal:**
+
 ```xml
 <promptTemplateVariables>
     <developerName>ownerEmail</developerName>
@@ -161,7 +164,7 @@ Content from a Static Resource.
 **Use Case:** Answer questions using knowledge base context.
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Knowledge_Assistant</fullName>
     <masterLabel>Knowledge Assistant</masterLabel>
@@ -207,6 +210,7 @@ Response:
 ```
 
 **File Location:**
+
 ```
 force-app/main/default/promptTemplates/Knowledge_Assistant.promptTemplate-meta.xml
 ```
@@ -218,11 +222,12 @@ force-app/main/default/promptTemplates/Knowledge_Assistant.promptTemplate-meta.x
 **Use Case:** Generate executive summary for Opportunity records.
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Opportunity_Executive_Summary</fullName>
     <masterLabel>Opportunity Executive Summary</masterLabel>
-    <description>Generates executive briefing for opportunity reviews</description>
+    <description
+  >Generates executive briefing for opportunity reviews</description>
 
     <type>recordSummary</type>
     <isActive>true</isActive>
@@ -350,11 +355,12 @@ Format the output with clear section headers.
 **Use Case:** Generate follow-up email after a sales call.
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Sales_Follow_Up_Email</fullName>
     <masterLabel>Sales Follow-Up Email Generator</masterLabel>
-    <description>Generates personalized follow-up emails after sales meetings</description>
+    <description
+  >Generates personalized follow-up emails after sales meetings</description>
 
     <type>salesGeneration</type>
     <isActive>true</isActive>
@@ -481,11 +487,12 @@ Keep the email under 200 words. Match the specified tone.
 **Use Case:** Suggest case resolution notes based on case history.
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Case_Resolution_Suggestion</fullName>
     <masterLabel>Case Resolution Suggestion</masterLabel>
-    <description>Suggests resolution notes for cases based on history</description>
+    <description
+  >Suggests resolution notes for cases based on history</description>
 
     <type>fieldCompletion</type>
     <isActive>true</isActive>
@@ -644,12 +651,12 @@ topic content_generation:
 
 **Key Syntax Points:**
 
-| Element | Requirement | Example |
-|---------|-------------|---------|
-| Target protocol | `generatePromptResponse://` | `target: "generatePromptResponse://My_Template"` |
-| Input naming | Must have `"Input:"` prefix | `"Input:customerName": string` |
-| Output field | Use `promptResponse` | `promptResponse: string` |
-| Template name | Must match PromptTemplate API name | Template file: `My_Template.promptTemplate-meta.xml` |
+| Element         | Requirement                        | Example                                              |
+| --------------- | ---------------------------------- | ---------------------------------------------------- |
+| Target protocol | `generatePromptResponse://`        | `target: "generatePromptResponse://My_Template"`     |
+| Input naming    | Must have `"Input:"` prefix        | `"Input:customerName": string`                       |
+| Output field    | Use `promptResponse`               | `promptResponse: string`                             |
+| Template name   | Must match PromptTemplate API name | Template file: `My_Template.promptTemplate-meta.xml` |
 
 **Mapping Template Variables:**
 
@@ -668,11 +675,12 @@ Agent Script Input          →  PromptTemplate Variable
 1. **Create PromptTemplate** (`force-app/main/default/promptTemplates/Generate_Personalized_Schedule.promptTemplate-meta.xml`):
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Generate_Personalized_Schedule</fullName>
     <masterLabel>Generate Personalized Schedule</masterLabel>
-    <description>Creates personalized schedules based on user preferences</description>
+    <description
+  >Creates personalized schedules based on user preferences</description>
     <type>flexPrompt</type>
     <isActive>true</isActive>
 
@@ -720,28 +728,25 @@ sf project deploy start -m "PromptTemplate:Generate_Personalized_Schedule"
 
 ```apex
 public class PromptTemplateService {
+  public static String generateSummary(Id recordId, String templateName) {
+    // Build input map
+    Map<String, String> inputMap = new Map<String, String>();
+    inputMap.put('recordId', recordId);
 
-    public static String generateSummary(Id recordId, String templateName) {
-        // Build input map
-        Map<String, String> inputMap = new Map<String, String>();
-        inputMap.put('recordId', recordId);
+    // Build prompt input
+    ConnectApi.EinsteinPromptTemplateGenerationsInput input = new ConnectApi.EinsteinPromptTemplateGenerationsInput();
+    input.isPreview = false;
+    input.inputParams = inputMap;
 
-        // Build prompt input
-        ConnectApi.EinsteinPromptTemplateGenerationsInput input =
-            new ConnectApi.EinsteinPromptTemplateGenerationsInput();
-        input.isPreview = false;
-        input.inputParams = inputMap;
+    // Evaluate prompt
+    ConnectApi.EinsteinPromptTemplateGenerationsRepresentation result = ConnectApi.EinsteinLlm.generateMessagesForPromptTemplate(
+      templateName,
+      input
+    );
 
-        // Evaluate prompt
-        ConnectApi.EinsteinPromptTemplateGenerationsRepresentation result =
-            ConnectApi.EinsteinLlm.generateMessagesForPromptTemplate(
-                templateName,
-                input
-            );
-
-        // Return generated text
-        return result.generations[0].text;
-    }
+    // Return generated text
+    return result.generations[0].text;
+  }
 }
 ```
 
@@ -771,11 +776,11 @@ For enhanced context using Data Cloud:
 
 ### Retrieval Strategies
 
-| Strategy | Description |
-|----------|-------------|
-| `semantic` | Vector-based semantic search |
-| `keyword` | Traditional keyword matching |
-| `hybrid` | Combination of semantic + keyword |
+| Strategy   | Description                       |
+| ---------- | --------------------------------- |
+| `semantic` | Vector-based semantic search      |
+| `keyword`  | Traditional keyword matching      |
+| `hybrid`   | Combination of semantic + keyword |
 
 ---
 
@@ -784,7 +789,7 @@ For enhanced context using Data Cloud:
 ### package.xml Entry
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>*</members>
@@ -849,12 +854,12 @@ sf project deploy start -m "PromptTemplate:*"
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Variable not replaced | Typo in {!name} | Check variable developerName exactly matches |
-| "Field not accessible" | FLS issue | Check profile/permission set |
-| Empty output | Required field is null | Make variable optional or add fallback |
-| Unexpected format | Model interpretation | Be more specific in instructions |
+| Issue                  | Cause                  | Solution                                     |
+| ---------------------- | ---------------------- | -------------------------------------------- |
+| Variable not replaced  | Typo in {!name}        | Check variable developerName exactly matches |
+| "Field not accessible" | FLS issue              | Check profile/permission set                 |
+| Empty output           | Required field is null | Make variable optional or add fallback       |
+| Unexpected format      | Model interpretation   | Be more specific in instructions             |
 
 ---
 

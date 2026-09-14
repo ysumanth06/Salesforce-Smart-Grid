@@ -1,4 +1,5 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Apex Patterns Deep Dive
 
 Comprehensive guide to advanced Apex patterns including Trigger Actions Framework, Flow Integration, and architectural patterns.
@@ -38,70 +39,78 @@ Comprehensive guide to advanced Apex patterns including Trigger Actions Framewor
 All triggers MUST use the Trigger Actions Framework pattern when the package is installed:
 
 **Trigger** (one per object):
+
 ```apex
-trigger AccountTrigger on Account (
-    before insert, after insert,
-    before update, after update,
-    before delete, after delete, after undelete
+trigger AccountTrigger on Account(
+  before insert,
+  after insert,
+  before update,
+  after update,
+  before delete,
+  after delete,
+  after undelete
 ) {
-    new MetadataTriggerHandler().run();
+  new MetadataTriggerHandler().run();
 }
 ```
 
 **Single-Context Action Class** (one interface):
+
 ```apex
 public class TA_Account_SetDefaults implements TriggerAction.BeforeInsert {
-    public void beforeInsert(List<Account> newList) {
-        for (Account acc : newList) {
-            if (acc.Industry == null) {
-                acc.Industry = 'Other';
-            }
-        }
+  public void beforeInsert(List<Account> newList) {
+    for (Account acc : newList) {
+      if (acc.Industry == null) {
+        acc.Industry = 'Other';
+      }
     }
+  }
 }
 ```
 
 **Multi-Context Action Class** (multiple interfaces):
+
 ```apex
 public class TA_Lead_CalculateScore implements TriggerAction.BeforeInsert, TriggerAction.BeforeUpdate {
+  // Called on new record creation
+  public void beforeInsert(List<Lead> newList) {
+    calculateScores(newList);
+  }
 
-    // Called on new record creation
-    public void beforeInsert(List<Lead> newList) {
-        calculateScores(newList);
+  // Called on record updates
+  public void beforeUpdate(List<Lead> newList, List<Lead> oldList) {
+    // Only recalculate if scoring fields changed
+    List<Lead> leadsToScore = new List<Lead>();
+    Map<Id, Lead> oldMap = new Map<Id, Lead>(oldList);
+
+    for (Lead newLead : newList) {
+      Lead oldLead = oldMap.get(newLead.Id);
+      if (scoringFieldsChanged(newLead, oldLead)) {
+        leadsToScore.add(newLead);
+      }
     }
 
-    // Called on record updates
-    public void beforeUpdate(List<Lead> newList, List<Lead> oldList) {
-        // Only recalculate if scoring fields changed
-        List<Lead> leadsToScore = new List<Lead>();
-        Map<Id, Lead> oldMap = new Map<Id, Lead>(oldList);
-
-        for (Lead newLead : newList) {
-            Lead oldLead = oldMap.get(newLead.Id);
-            if (scoringFieldsChanged(newLead, oldLead)) {
-                leadsToScore.add(newLead);
-            }
-        }
-
-        if (!leadsToScore.isEmpty()) {
-            calculateScores(leadsToScore);
-        }
+    if (!leadsToScore.isEmpty()) {
+      calculateScores(leadsToScore);
     }
+  }
 
-    private void calculateScores(List<Lead> leads) {
-        // Scoring logic here
-        for (Lead l : leads) {
-            Integer score = 0;
-            if (l.Industry == 'Technology') score += 10;
-            if (l.NumberOfEmployees != null && l.NumberOfEmployees > 100) score += 20;
-            l.Score__c = score;
-        }
+  private void calculateScores(List<Lead> leads) {
+    // Scoring logic here
+    for (Lead l : leads) {
+      Integer score = 0;
+      if (l.Industry == 'Technology')
+        score += 10;
+      if (l.NumberOfEmployees != null && l.NumberOfEmployees > 100)
+        score += 20;
+      l.Score__c = score;
     }
+  }
 
-    private Boolean scoringFieldsChanged(Lead newLead, Lead oldLead) {
-        return newLead.Industry != oldLead.Industry ||
-               newLead.NumberOfEmployees != oldLead.NumberOfEmployees;
-    }
+  private Boolean scoringFieldsChanged(Lead newLead, Lead oldLead) {
+    return newLead.Industry != oldLead.Industry ||
+      newLead.NumberOfEmployees != oldLead.NumberOfEmployees;
+  }
 }
 ```
 
@@ -113,18 +122,19 @@ public class TA_Lead_CalculateScore implements TriggerAction.BeforeInsert, Trigg
 
 For each trigger action class, create a Custom Metadata record:
 
-| Field | Value | Description |
-|-------|-------|-------------|
-| Label | TA Lead Calculate Score | Human-readable name |
-| Trigger_Action_Name__c | TA_Lead_CalculateScore | Apex class name |
-| Object__c | Lead | sObject API name |
-| Context__c | Before Insert | Trigger context |
-| Order__c | 1 | Execution order (lower = first) |
-| Active__c | true | Enable/disable without deploy |
+| Field                    | Value                   | Description                     |
+| ------------------------ | ----------------------- | ------------------------------- |
+| Label                    | TA Lead Calculate Score | Human-readable name             |
+| Trigger_Action_Name\_\_c | TA_Lead_CalculateScore  | Apex class name                 |
+| Object\_\_c              | Lead                    | sObject API name                |
+| Context\_\_c             | Before Insert           | Trigger context                 |
+| Order\_\_c               | 1                       | Execution order (lower = first) |
+| Active\_\_c              | true                    | Enable/disable without deploy   |
 
 **Example Custom Metadata XML** (`Trigger_Action.TA_Lead_CalculateScore_BI.md-meta.xml`):
+
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata">
     <label>TA Lead Calculate Score - Before Insert</label>
     <protected>false</protected>
@@ -150,6 +160,7 @@ For each trigger action class, create a Custom Metadata record:
 **NOTE**: Create separate CMT records for each context (Before Insert, Before Update, etc.)
 
 **Deploy Custom Metadata:**
+
 ```bash
 sf project deploy start --metadata CustomMetadata:Trigger_Action.TA_Lead_CalculateScore_BI --target-org myorg
 ```
@@ -161,53 +172,53 @@ sf project deploy start --metadata CustomMetadata:Trigger_Action.TA_Lead_Calcula
 **Use this when TAF package is NOT installed in the target org:**
 
 ```apex
-trigger LeadTrigger on Lead (before insert, before update) {
+trigger LeadTrigger on Lead(before insert, before update) {
+  LeadScoringService scoringService = new LeadScoringService();
 
-    LeadScoringService scoringService = new LeadScoringService();
-
-    if (Trigger.isBefore) {
-        if (Trigger.isInsert) {
-            scoringService.calculateScores(Trigger.new);
-        }
-        else if (Trigger.isUpdate) {
-            scoringService.recalculateIfChanged(Trigger.new, Trigger.oldMap);
-        }
+  if (Trigger.isBefore) {
+    if (Trigger.isInsert) {
+      scoringService.calculateScores(Trigger.new);
+    } else if (Trigger.isUpdate) {
+      scoringService.recalculateIfChanged(Trigger.new, Trigger.oldMap);
     }
+  }
 }
 ```
 
 **Service Class:**
+
 ```apex
 public with sharing class LeadScoringService {
+  public void calculateScores(List<Lead> leads) {
+    for (Lead l : leads) {
+      Integer score = 0;
+      if (l.Industry == 'Technology')
+        score += 10;
+      if (l.NumberOfEmployees != null && l.NumberOfEmployees > 100)
+        score += 20;
+      l.Score__c = score;
+    }
+  }
 
-    public void calculateScores(List<Lead> leads) {
-        for (Lead l : leads) {
-            Integer score = 0;
-            if (l.Industry == 'Technology') score += 10;
-            if (l.NumberOfEmployees != null && l.NumberOfEmployees > 100) score += 20;
-            l.Score__c = score;
-        }
+  public void recalculateIfChanged(List<Lead> newLeads, Map<Id, Lead> oldMap) {
+    List<Lead> leadsToScore = new List<Lead>();
+
+    for (Lead newLead : newLeads) {
+      Lead oldLead = oldMap.get(newLead.Id);
+      if (scoringFieldsChanged(newLead, oldLead)) {
+        leadsToScore.add(newLead);
+      }
     }
 
-    public void recalculateIfChanged(List<Lead> newLeads, Map<Id, Lead> oldMap) {
-        List<Lead> leadsToScore = new List<Lead>();
-
-        for (Lead newLead : newLeads) {
-            Lead oldLead = oldMap.get(newLead.Id);
-            if (scoringFieldsChanged(newLead, oldLead)) {
-                leadsToScore.add(newLead);
-            }
-        }
-
-        if (!leadsToScore.isEmpty()) {
-            calculateScores(leadsToScore);
-        }
+    if (!leadsToScore.isEmpty()) {
+      calculateScores(leadsToScore);
     }
+  }
 
-    private Boolean scoringFieldsChanged(Lead newLead, Lead oldLead) {
-        return newLead.Industry != oldLead.Industry ||
-               newLead.NumberOfEmployees != oldLead.NumberOfEmployees;
-    }
+  private Boolean scoringFieldsChanged(Lead newLead, Lead oldLead) {
+    return newLead.Industry != oldLead.Industry ||
+      newLead.NumberOfEmployees != oldLead.NumberOfEmployees;
+  }
 }
 ```
 
@@ -218,15 +229,15 @@ public with sharing class LeadScoringService {
 
 ### TAF vs Standard Pattern Comparison
 
-| Feature | TAF Pattern | Standard Pattern |
-|---------|-------------|------------------|
-| **Package Required** | Yes | No |
-| **Complexity** | Lower (single-purpose classes) | Higher (monolithic trigger) |
-| **Maintainability** | High (separate files) | Medium (one trigger file) |
-| **Declarative Control** | Yes (CMT records) | No |
-| **Order Control** | Yes (Order__c field) | Manual in code |
-| **Bypass Mechanism** | Built-in (Active__c) | Manual Custom Setting |
-| **Testing** | Easy (test action classes) | Medium (test trigger + service) |
+| Feature                 | TAF Pattern                    | Standard Pattern                |
+| ----------------------- | ------------------------------ | ------------------------------- |
+| **Package Required**    | Yes                            | No                              |
+| **Complexity**          | Lower (single-purpose classes) | Higher (monolithic trigger)     |
+| **Maintainability**     | High (separate files)          | Medium (one trigger file)       |
+| **Declarative Control** | Yes (CMT records)              | No                              |
+| **Order Control**       | Yes (Order\_\_c field)         | Manual in code                  |
+| **Bypass Mechanism**    | Built-in (Active\_\_c)         | Manual Custom Setting           |
+| **Testing**             | Easy (test action classes)     | Medium (test trigger + service) |
 
 **Recommendation**: Use TAF when available, fall back to Standard Pattern when TAF is not installed.
 
@@ -238,9 +249,9 @@ Apex classes can be called from Flow using `@InvocableMethod`. This pattern enab
 
 ### Quick Reference
 
-| Annotation | Purpose |
-|------------|---------|
-| `@InvocableMethod` | Makes method callable from Flow |
+| Annotation           | Purpose                                         |
+| -------------------- | ----------------------------------------------- |
+| `@InvocableMethod`   | Makes method callable from Flow                 |
 | `@InvocableVariable` | Exposes properties in Request/Response wrappers |
 
 ### Template
@@ -251,33 +262,32 @@ Use `assets/invocable-method.cls` for the complete pattern with Request/Response
 
 ```apex
 public with sharing class RecordProcessor {
+  @InvocableMethod(label='Process Record' category='Custom')
+  public static List<Response> execute(List<Request> requests) {
+    List<Response> responses = new List<Response>();
 
-    @InvocableMethod(label='Process Record' category='Custom')
-    public static List<Response> execute(List<Request> requests) {
-        List<Response> responses = new List<Response>();
-
-        for (Request req : requests) {
-            Response res = new Response();
-            res.isSuccess = true;
-            res.processedId = req.recordId;
-            responses.add(res);
-        }
-
-        return responses;
+    for (Request req : requests) {
+      Response res = new Response();
+      res.isSuccess = true;
+      res.processedId = req.recordId;
+      responses.add(res);
     }
 
-    public class Request {
-        @InvocableVariable(label='Record ID' required=true)
-        public Id recordId;
-    }
+    return responses;
+  }
 
-    public class Response {
-        @InvocableVariable(label='Is Success')
-        public Boolean isSuccess;
+  public class Request {
+    @InvocableVariable(label='Record ID' required=true)
+    public Id recordId;
+  }
 
-        @InvocableVariable(label='Processed ID')
-        public Id processedId;
-    }
+  public class Response {
+    @InvocableVariable(label='Is Success')
+    public Boolean isSuccess;
+
+    @InvocableVariable(label='Processed ID')
+    public Id processedId;
+  }
 }
 ```
 
@@ -285,79 +295,92 @@ public with sharing class RecordProcessor {
 
 ```apex
 public with sharing class AccountValidator {
+  @InvocableMethod(
+    label='Validate Account Data'
+    description='Validates account data and returns validation results'
+    category='Account Management'
+  )
+  public static List<ValidationResponse> validateAccounts(
+    List<ValidationRequest> requests
+  ) {
+    List<ValidationResponse> responses = new List<ValidationResponse>();
 
-    @InvocableMethod(
-        label='Validate Account Data'
-        description='Validates account data and returns validation results'
-        category='Account Management'
+    // Collect all Account IDs for bulk query
+    Set<Id> accountIds = new Set<Id>();
+    for (ValidationRequest req : requests) {
+      accountIds.add(req.accountId);
+    }
+
+    // Bulk query
+    Map<Id, Account> accountMap = new Map<Id, Account>(
+      [
+        SELECT Id, Name, Industry, AnnualRevenue, Phone
+        FROM Account
+        WHERE Id IN :accountIds
+        WITH USER_MODE
+      ]
+    );
+
+    // Process each request
+    for (ValidationRequest req : requests) {
+      ValidationResponse res = new ValidationResponse();
+
+      Account acc = accountMap.get(req.accountId);
+      if (acc == null) {
+        res.isValid = false;
+        res.errorMessage = 'Account not found';
+        responses.add(res);
+        continue;
+      }
+
+      // Validation logic
+      List<String> errors = new List<String>();
+
+      if (String.isBlank(acc.Name)) {
+        errors.add('Name is required');
+      }
+      if (String.isBlank(acc.Industry)) {
+        errors.add('Industry is required');
+      }
+      if (acc.AnnualRevenue == null || acc.AnnualRevenue <= 0) {
+        errors.add('Annual Revenue must be greater than 0');
+      }
+
+      res.isValid = errors.isEmpty();
+      res.errorMessage = errors.isEmpty() ? null : String.join(errors, '; ');
+      res.validatedAccountId = acc.Id;
+
+      responses.add(res);
+    }
+
+    return responses;
+  }
+
+  public class ValidationRequest {
+    @InvocableVariable(
+      label='Account ID'
+      description='ID of account to validate'
+      required=true
     )
-    public static List<ValidationResponse> validateAccounts(List<ValidationRequest> requests) {
-        List<ValidationResponse> responses = new List<ValidationResponse>();
+    public Id accountId;
+  }
 
-        // Collect all Account IDs for bulk query
-        Set<Id> accountIds = new Set<Id>();
-        for (ValidationRequest req : requests) {
-            accountIds.add(req.accountId);
-        }
+  public class ValidationResponse {
+    @InvocableVariable(
+      label='Is Valid'
+      description='Whether account passed validation'
+    )
+    public Boolean isValid;
 
-        // Bulk query
-        Map<Id, Account> accountMap = new Map<Id, Account>(
-            [SELECT Id, Name, Industry, AnnualRevenue, Phone
-             FROM Account
-             WHERE Id IN :accountIds
-             WITH USER_MODE]
-        );
+    @InvocableVariable(
+      label='Error Message'
+      description='Validation error details'
+    )
+    public String errorMessage;
 
-        // Process each request
-        for (ValidationRequest req : requests) {
-            ValidationResponse res = new ValidationResponse();
-
-            Account acc = accountMap.get(req.accountId);
-            if (acc == null) {
-                res.isValid = false;
-                res.errorMessage = 'Account not found';
-                responses.add(res);
-                continue;
-            }
-
-            // Validation logic
-            List<String> errors = new List<String>();
-
-            if (String.isBlank(acc.Name)) {
-                errors.add('Name is required');
-            }
-            if (String.isBlank(acc.Industry)) {
-                errors.add('Industry is required');
-            }
-            if (acc.AnnualRevenue == null || acc.AnnualRevenue <= 0) {
-                errors.add('Annual Revenue must be greater than 0');
-            }
-
-            res.isValid = errors.isEmpty();
-            res.errorMessage = errors.isEmpty() ? null : String.join(errors, '; ');
-            res.validatedAccountId = acc.Id;
-
-            responses.add(res);
-        }
-
-        return responses;
-    }
-
-    public class ValidationRequest {
-        @InvocableVariable(label='Account ID' description='ID of account to validate' required=true)
-        public Id accountId;
-    }
-
-    public class ValidationResponse {
-        @InvocableVariable(label='Is Valid' description='Whether account passed validation')
-        public Boolean isValid;
-
-        @InvocableVariable(label='Error Message' description='Validation error details')
-        public String errorMessage;
-
-        @InvocableVariable(label='Validated Account ID')
-        public Id validatedAccountId;
-    }
+    @InvocableVariable(label='Validated Account ID')
+    public Id validatedAccountId;
+  }
 }
 ```
 
@@ -373,6 +396,7 @@ public with sharing class AccountValidator {
 ### Common Patterns
 
 **Pattern 1: DML Operations**
+
 ```apex
 @InvocableMethod(label='Create Related Contacts')
 public static List<Response> createContacts(List<Request> requests) {
@@ -401,6 +425,7 @@ public static List<Response> createContacts(List<Request> requests) {
 ```
 
 **Pattern 2: External Callouts**
+
 ```apex
 @InvocableMethod(label='Send to External System')
 public static List<Response> sendData(List<Request> requests) {
@@ -427,6 +452,7 @@ public static List<Response> sendData(List<Request> requests) {
 ```
 
 **See Also**:
+
 - [references/flow-integration.md](../references/flow-integration.md) - Complete @InvocableMethod guide
 - [references/triangle-pattern.md](../references/triangle-pattern.md) - Flow-LWC-Apex triangle (Apex perspective)
 
@@ -436,35 +462,38 @@ public static List<Response> sendData(List<Request> requests) {
 
 ### Decision Matrix
 
-| Scenario | Use | Pros | Cons |
-|----------|-----|------|------|
-| Simple callout, fire-and-forget | `@future(callout=true)` | Simple, built-in | No return value, no chaining |
-| Complex logic, needs chaining | `Queueable` | Return ID, chain jobs, complex types | More code |
-| Process millions of records | `Batch Apex` | Handles huge volumes | Complex, overhead |
-| Scheduled/recurring job | `Schedulable` | Cron-like scheduling | Requires separate Queueable/Batch |
-| Post-queueable cleanup | `Queueable Finalizer` | Guaranteed execution | Only for Queueable |
+| Scenario                        | Use                     | Pros                                 | Cons                              |
+| ------------------------------- | ----------------------- | ------------------------------------ | --------------------------------- |
+| Simple callout, fire-and-forget | `@future(callout=true)` | Simple, built-in                     | No return value, no chaining      |
+| Complex logic, needs chaining   | `Queueable`             | Return ID, chain jobs, complex types | More code                         |
+| Process millions of records     | `Batch Apex`            | Handles huge volumes                 | Complex, overhead                 |
+| Scheduled/recurring job         | `Schedulable`           | Cron-like scheduling                 | Requires separate Queueable/Batch |
+| Post-queueable cleanup          | `Queueable Finalizer`   | Guaranteed execution                 | Only for Queueable                |
 
 ### @future Pattern
 
 ```apex
 public class CalloutService {
+  @future(callout=true)
+  public static void sendDataToExternalSystem(Set<Id> recordIds) {
+    // Cannot pass complex objects, only primitives
+    List<Account> accounts = [
+      SELECT Id, Name
+      FROM Account
+      WHERE Id IN :recordIds
+    ];
 
-    @future(callout=true)
-    public static void sendDataToExternalSystem(Set<Id> recordIds) {
-        // Cannot pass complex objects, only primitives
-        List<Account> accounts = [SELECT Id, Name FROM Account WHERE Id IN :recordIds];
+    HttpRequest req = new HttpRequest();
+    req.setEndpoint('callout:MyNamedCredential/api');
+    req.setMethod('POST');
+    req.setBody(JSON.serialize(accounts));
 
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint('callout:MyNamedCredential/api');
-        req.setMethod('POST');
-        req.setBody(JSON.serialize(accounts));
+    Http http = new Http();
+    HttpResponse res = http.send(req);
 
-        Http http = new Http();
-        HttpResponse res = http.send(req);
-
-        // Process response (no return to caller)
-        System.debug('Response: ' + res.getBody());
-    }
+    // Process response (no return to caller)
+    System.debug('Response: ' + res.getBody());
+  }
 }
 ```
 
@@ -607,49 +636,45 @@ Database.executeBatch(new AccountBatchProcessor(), 200); // Batch size
 
 ```apex
 public with sharing class AccountService {
+  // Public interface methods
+  public static List<Account> createAccounts(List<AccountRequest> requests) {
+    validateRequests(requests);
 
-    // Public interface methods
-    public static List<Account> createAccounts(List<AccountRequest> requests) {
-        validateRequests(requests);
+    List<Account> accounts = buildAccounts(requests);
+    insert accounts;
 
-        List<Account> accounts = buildAccounts(requests);
-        insert accounts;
+    // Post-processing
+    handlePostCreation(accounts);
 
-        // Post-processing
-        handlePostCreation(accounts);
+    return accounts;
+  }
 
-        return accounts;
+  // Private helper methods
+  private static void validateRequests(List<AccountRequest> requests) {
+    for (AccountRequest req : requests) {
+      if (String.isBlank(req.name)) {
+        throw new IllegalArgumentException('Account name is required');
+      }
     }
+  }
 
-    // Private helper methods
-    private static void validateRequests(List<AccountRequest> requests) {
-        for (AccountRequest req : requests) {
-            if (String.isBlank(req.name)) {
-                throw new IllegalArgumentException('Account name is required');
-            }
-        }
+  private static List<Account> buildAccounts(List<AccountRequest> requests) {
+    List<Account> accounts = new List<Account>();
+    for (AccountRequest req : requests) {
+      accounts.add(new Account(Name = req.name, Industry = req.industry));
     }
+    return accounts;
+  }
 
-    private static List<Account> buildAccounts(List<AccountRequest> requests) {
-        List<Account> accounts = new List<Account>();
-        for (AccountRequest req : requests) {
-            accounts.add(new Account(
-                Name = req.name,
-                Industry = req.industry
-            ));
-        }
-        return accounts;
-    }
+  private static void handlePostCreation(List<Account> accounts) {
+    // Create related records, send notifications, etc.
+  }
 
-    private static void handlePostCreation(List<Account> accounts) {
-        // Create related records, send notifications, etc.
-    }
-
-    // Inner class for structured requests
-    public class AccountRequest {
-        public String name;
-        public String industry;
-    }
+  // Inner class for structured requests
+  public class AccountRequest {
+    public String name;
+    public String industry;
+  }
 }
 ```
 
@@ -657,39 +682,40 @@ public with sharing class AccountService {
 
 ```apex
 public inherited sharing class AccountSelector {
+  public static List<Account> selectById(Set<Id> accountIds) {
+    return [
+      SELECT Id, Name, Industry, AnnualRevenue, Type
+      FROM Account
+      WHERE Id IN :accountIds
+      WITH USER_MODE
+    ];
+  }
 
-    public static List<Account> selectById(Set<Id> accountIds) {
-        return [
-            SELECT Id, Name, Industry, AnnualRevenue, Type
-            FROM Account
-            WHERE Id IN :accountIds
-            WITH USER_MODE
-        ];
-    }
+  public static List<Account> selectByIndustry(String industry) {
+    return [
+      SELECT Id, Name, Industry, AnnualRevenue
+      FROM Account
+      WHERE Industry = :industry
+      WITH USER_MODE
+      LIMIT 200
+    ];
+  }
 
-    public static List<Account> selectByIndustry(String industry) {
-        return [
-            SELECT Id, Name, Industry, AnnualRevenue
-            FROM Account
-            WHERE Industry = :industry
-            WITH USER_MODE
-            LIMIT 200
-        ];
-    }
-
-    public static Map<Id, Account> selectByIdWithContacts(Set<Id> accountIds) {
-        return new Map<Id, Account>([
-            SELECT Id, Name,
-                   (SELECT Id, Name, Email FROM Contacts)
-            FROM Account
-            WHERE Id IN :accountIds
-            WITH USER_MODE
-        ]);
-    }
+  public static Map<Id, Account> selectByIdWithContacts(Set<Id> accountIds) {
+    return new Map<Id, Account>(
+      [
+        SELECT Id, Name, (SELECT Id, Name, Email FROM Contacts)
+        FROM Account
+        WHERE Id IN :accountIds
+        WITH USER_MODE
+      ]
+    );
+  }
 }
 ```
 
 **Benefits**:
+
 - Centralized SOQL queries
 - Reusable across multiple classes
 - Easier to test (mock Selector)
@@ -700,6 +726,7 @@ public inherited sharing class AccountSelector {
 ## Reference
 
 **Full Documentation**: See `references/` folder for comprehensive guides:
+
 - `trigger-actions-framework.md` - TAF setup and advanced patterns
 - `design-patterns.md` - 12 Apex design patterns
 - `flow-integration.md` - Complete @InvocableMethod guide

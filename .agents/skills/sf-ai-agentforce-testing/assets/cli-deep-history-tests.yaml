@@ -36,15 +36,15 @@ testCases:
   # ═══════════════════════════════════════════════════════════════
 
   - utterance: "Thanks for the help"
-    expectedTopic: [feedback_topic]       # e.g., feedback_collection
+    expectedTopic: [feedback_topic] # e.g., feedback_collection
     expectedActions:
-      - [feedback_action]                 # e.g., collect_feedback
+      - [feedback_action] # e.g., collect_feedback
     expectedOutcome: "Agent initiates feedback collection, such as asking for a rating"
     conversationHistory:
       - role: user
         message: "I need to check my account status"
       - role: agent
-        topic: [business_topic]           # e.g., account_support — local name, no hash
+        topic: [business_topic] # e.g., account_support — local name, no hash
         message: "I found your account. Everything looks good — your balance is current."
       - role: user
         message: "Great, that answers my question"
@@ -61,13 +61,13 @@ testCases:
   - utterance: "I'd give it a 4 out of 5"
     expectedTopic: [feedback_topic]
     expectedActions:
-      - [store_feedback_action]           # e.g., store_feedback, record_rating
+      - [store_feedback_action] # e.g., store_feedback, record_rating
     expectedOutcome: "Agent acknowledges the rating and asks a follow-up question"
     conversationHistory:
       - role: user
         message: "I need help checking my order"
       - role: agent
-        topic: [order_topic]              # e.g., order_lookup
+        topic: [order_topic] # e.g., order_lookup
         message: "Your order #12345 is scheduled for delivery tomorrow."
       - role: user
         message: "Thanks, that's helpful"
@@ -82,9 +82,9 @@ testCases:
   # ═══════════════════════════════════════════════════════════════
 
   - utterance: "Yes, please process the payment"
-    expectedTopic: [payment_topic]        # e.g., make_payment
+    expectedTopic: [payment_topic] # e.g., make_payment
     expectedActions:
-      - [process_payment_action]          # e.g., process_payment, generate_payment_link
+      - [process_payment_action] # e.g., process_payment, generate_payment_link
     expectedOutcome: "Agent confirms the payment is being processed"
     contextVariables:
       - name: "$Context.RoutableId"
@@ -95,7 +95,7 @@ testCases:
       - role: user
         message: "I'd like to make a payment"
       - role: agent
-        topic: [auth_topic]              # e.g., user_authentication
+        topic: [auth_topic] # e.g., user_authentication
         message: "I can help with that. For security, can you verify your name on the account?"
       - role: user
         message: "John Smith"
@@ -117,13 +117,13 @@ testCases:
 
   - utterance: "No thanks, I'm all set"
     expectedTopic: [feedback_topic]
-    expectedActions: []                   # DELIBERATE: asserts NO action fires
+    expectedActions: [] # DELIBERATE: asserts NO action fires
     expectedOutcome: "Agent gracefully accepts the opt-out without pushing for feedback"
     conversationHistory:
       - role: user
         message: "I need to check my account"
       - role: agent
-        topic: [account_topic]           # e.g., account_support
+        topic: [account_topic] # e.g., account_support
         message: "Your account looks good. Balance is current."
       - role: user
         message: "Great, thanks"
@@ -139,9 +139,9 @@ testCases:
   # ═══════════════════════════════════════════════════════════════
 
   - utterance: "Actually, can you also check on my recent order?"
-    expectedTopic: [order_topic]          # e.g., order_lookup
+    expectedTopic: [order_topic] # e.g., order_lookup
     expectedActions:
-      - [order_lookup_action]             # e.g., get_order_status
+      - [order_lookup_action] # e.g., get_order_status
     expectedOutcome: "Agent acknowledges the new request and begins order lookup"
     conversationHistory:
       - role: user

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
     GenAiFunction Template: Apex Invocation (Agent Builder UI / GenAiPlannerBundle ONLY)
 
@@ -44,7 +44,6 @@
     <isConfirmationRequired>{{true|false}}</isConfirmationRequired>
     <masterLabel>{{FunctionLabel}}</masterLabel>
 </GenAiFunction>
-
 <!--
     input/schema.json example:
     {

@@ -37,12 +37,8 @@
     {
       "name": "org_fixtures",
       "description": "Structurally valid examples that are expected to block only on org-specific resources in the currently resolved target org.",
-      "files": [
-        "skills/sf-ai-agentscript/assets/escalation-pattern.agent"
-      ],
-      "allowBlockingIds": [
-        "ASV-ORG-007"
-      ],
+      "files": ["skills/sf-ai-agentscript/assets/escalation-pattern.agent"],
+      "allowBlockingIds": ["ASV-ORG-007"],
       "allowWarningIds": [
         "ASV-CFG-004",
         "ASV-CFG-007",

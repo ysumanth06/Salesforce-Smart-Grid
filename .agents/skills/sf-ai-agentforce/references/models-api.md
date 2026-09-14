@@ -58,12 +58,12 @@ Setup → Permission Sets → Einstein Generative AI User → Assign to users
 
 ## Available Models
 
-| Model Name | Description | Use Case |
-|------------|-------------|----------|
-| `sfdc_ai__DefaultOpenAIGPT4OmniMini` | GPT-4o Mini | Cost-effective general tasks |
-| `sfdc_ai__DefaultOpenAIGPT4Omni` | GPT-4o | Complex reasoning tasks |
-| `sfdc_ai__DefaultAnthropic` | Claude (Anthropic) | Nuanced understanding |
-| `sfdc_ai__DefaultGoogleGemini` | Google Gemini | Multimodal tasks |
+| Model Name                           | Description        | Use Case                     |
+| ------------------------------------ | ------------------ | ---------------------------- |
+| `sfdc_ai__DefaultOpenAIGPT4OmniMini` | GPT-4o Mini        | Cost-effective general tasks |
+| `sfdc_ai__DefaultOpenAIGPT4Omni`     | GPT-4o             | Complex reasoning tasks      |
+| `sfdc_ai__DefaultAnthropic`          | Claude (Anthropic) | Nuanced understanding        |
+| `sfdc_ai__DefaultGoogleGemini`       | Google Gemini      | Multimodal tasks             |
 
 > **Note**: Available models depend on your Salesforce edition and Einstein entitlements.
 
@@ -75,35 +75,35 @@ Setup → Permission Sets → Einstein Generative AI User → Assign to users
 
 ```apex
 public class ModelsApiExample {
+  public static String generateText(String prompt) {
+    // Create the request
+    aiplatform.ModelsAPI.createGenerations_Request request = new aiplatform.ModelsAPI.createGenerations_Request();
 
-    public static String generateText(String prompt) {
-        // Create the request
-        aiplatform.ModelsAPI.createGenerations_Request request =
-            new aiplatform.ModelsAPI.createGenerations_Request();
+    // Set the model
+    request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
 
-        // Set the model
-        request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
+    // Create the generation input
+    aiplatform.ModelsAPI_GenerationRequest genRequest = new aiplatform.ModelsAPI_GenerationRequest();
+    genRequest.prompt = prompt;
 
-        // Create the generation input
-        aiplatform.ModelsAPI_GenerationRequest genRequest =
-            new aiplatform.ModelsAPI_GenerationRequest();
-        genRequest.prompt = prompt;
+    request.body = genRequest;
 
-        request.body = genRequest;
+    // Call the API
+    aiplatform.ModelsAPI.createGenerations_Response response = aiplatform.ModelsAPI.createGenerations(
+      request
+    );
 
-        // Call the API
-        aiplatform.ModelsAPI.createGenerations_Response response =
-            aiplatform.ModelsAPI.createGenerations(request);
-
-        // Extract the generated text
-        if (response.Code200 != null &&
-            response.Code200.generations != null &&
-            !response.Code200.generations.isEmpty()) {
-            return response.Code200.generations[0].text;
-        }
-
-        return null;
+    // Extract the generated text
+    if (
+      response.Code200 != null &&
+      response.Code200.generations != null &&
+      !response.Code200.generations.isEmpty()
+    ) {
+      return response.Code200.generations[0].text;
     }
+
+    return null;
+  }
 }
 ```
 
@@ -117,11 +117,11 @@ Use Queueable for async AI processing with record context:
 
 ```apex
 // DON'T DO THIS - blocks transaction, hits limits
-trigger CaseTrigger on Case (after insert) {
-    for (Case c : Trigger.new) {
-        String summary = ModelsApiExample.generateText(c.Description);
-        // This will fail or timeout
-    }
+trigger CaseTrigger on Case(after insert) {
+  for (Case c : Trigger.new) {
+    String summary = ModelsApiExample.generateText(c.Description);
+    // This will fail or timeout
+  }
 }
 ```
 
@@ -133,89 +133,95 @@ trigger CaseTrigger on Case (after insert) {
  * @implements Database.AllowsCallouts - Required for API calls
  */
 public with sharing class CaseSummaryQueueable implements Queueable, Database.AllowsCallouts {
+  private List<Id> caseIds;
 
-    private List<Id> caseIds;
+  public CaseSummaryQueueable(List<Id> caseIds) {
+    this.caseIds = caseIds;
+  }
 
-    public CaseSummaryQueueable(List<Id> caseIds) {
-        this.caseIds = caseIds;
+  public void execute(QueueableContext context) {
+    // Query cases
+    List<Case> cases = [
+      SELECT Id, Subject, Description
+      FROM Case
+      WHERE Id IN :caseIds
+      WITH USER_MODE
+    ];
+
+    List<Case> toUpdate = new List<Case>();
+
+    for (Case c : cases) {
+      try {
+        // Generate summary using Models API
+        String summary = generateCaseSummary(c);
+
+        if (String.isNotBlank(summary)) {
+          c.AI_Summary__c = summary;
+          toUpdate.add(c);
+        }
+      } catch (Exception e) {
+        System.debug(
+          LoggingLevel.ERROR,
+          'AI Summary Error for Case ' + c.Id + ': ' + e.getMessage()
+        );
+      }
     }
 
-    public void execute(QueueableContext context) {
-        // Query cases
-        List<Case> cases = [
-            SELECT Id, Subject, Description
-            FROM Case
-            WHERE Id IN :caseIds
-            WITH USER_MODE
-        ];
+    // Update records
+    if (!toUpdate.isEmpty()) {
+      update toUpdate;
+    }
+  }
 
-        List<Case> toUpdate = new List<Case>();
+  private String generateCaseSummary(Case c) {
+    String prompt =
+      'Summarize this customer support case in 2-3 sentences:\n\n' +
+      'Subject: ' +
+      c.Subject +
+      '\n' +
+      'Description: ' +
+      c.Description;
 
-        for (Case c : cases) {
-            try {
-                // Generate summary using Models API
-                String summary = generateCaseSummary(c);
+    aiplatform.ModelsAPI.createGenerations_Request request = new aiplatform.ModelsAPI.createGenerations_Request();
+    request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
 
-                if (String.isNotBlank(summary)) {
-                    c.AI_Summary__c = summary;
-                    toUpdate.add(c);
-                }
-            } catch (Exception e) {
-                System.debug(LoggingLevel.ERROR,
-                    'AI Summary Error for Case ' + c.Id + ': ' + e.getMessage());
-            }
-        }
+    aiplatform.ModelsAPI_GenerationRequest genRequest = new aiplatform.ModelsAPI_GenerationRequest();
+    genRequest.prompt = prompt;
+    request.body = genRequest;
 
-        // Update records
-        if (!toUpdate.isEmpty()) {
-            update toUpdate;
-        }
+    aiplatform.ModelsAPI.createGenerations_Response response = aiplatform.ModelsAPI.createGenerations(
+      request
+    );
+
+    if (
+      response.Code200 != null &&
+      response.Code200.generations != null &&
+      !response.Code200.generations.isEmpty()
+    ) {
+      return response.Code200.generations[0].text;
     }
 
-    private String generateCaseSummary(Case c) {
-        String prompt = 'Summarize this customer support case in 2-3 sentences:\n\n' +
-            'Subject: ' + c.Subject + '\n' +
-            'Description: ' + c.Description;
-
-        aiplatform.ModelsAPI.createGenerations_Request request =
-            new aiplatform.ModelsAPI.createGenerations_Request();
-        request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
-
-        aiplatform.ModelsAPI_GenerationRequest genRequest =
-            new aiplatform.ModelsAPI_GenerationRequest();
-        genRequest.prompt = prompt;
-        request.body = genRequest;
-
-        aiplatform.ModelsAPI.createGenerations_Response response =
-            aiplatform.ModelsAPI.createGenerations(request);
-
-        if (response.Code200 != null &&
-            response.Code200.generations != null &&
-            !response.Code200.generations.isEmpty()) {
-            return response.Code200.generations[0].text;
-        }
-
-        return null;
-    }
+    return null;
+  }
 }
 ```
 
 ### Invoking from Trigger
 
 ```apex
-trigger CaseTrigger on Case (after insert) {
-    List<Id> newCaseIds = new List<Id>();
+trigger CaseTrigger on Case(after insert) {
+  List<Id> newCaseIds = new List<Id>();
 
-    for (Case c : Trigger.new) {
-        if (String.isNotBlank(c.Description)) {
-            newCaseIds.add(c.Id);
-        }
+  for (Case c : Trigger.new) {
+    if (String.isNotBlank(c.Description)) {
+      newCaseIds.add(c.Id);
     }
+  }
 
-    if (!newCaseIds.isEmpty()) {
-        // Enqueue async processing - non-blocking
-        System.enqueueJob(new CaseSummaryQueueable(newCaseIds));
-    }
+  if (!newCaseIds.isEmpty()) {
+    // Enqueue async processing - non-blocking
+    System.enqueueJob(new CaseSummaryQueueable(newCaseIds));
+  }
 }
 ```
 
@@ -230,94 +236,107 @@ For bulk AI processing, use Batch Apex:
  * @description Batch job for generating AI content on records
  * @implements Database.AllowsCallouts, Database.Stateful
  */
-public with sharing class OpportunitySummaryBatch
-    implements Database.Batchable<sObject>, Database.AllowsCallouts, Database.Stateful {
+public with sharing class OpportunitySummaryBatch implements Database.Batchable<sObject>, Database.AllowsCallouts, Database.Stateful {
+  // Track statistics across batches
+  private Integer successCount = 0;
+  private Integer errorCount = 0;
 
-    // Track statistics across batches
-    private Integer successCount = 0;
-    private Integer errorCount = 0;
+  public Database.QueryLocator start(Database.BatchableContext bc) {
+    // Query records needing AI summary
+    return Database.getQueryLocator(
+      [
+        SELECT Id, Name, Description, StageName, Amount
+        FROM Opportunity
+        WHERE AI_Summary__c = NULL AND Description != NULL
+        ORDER BY CreatedDate DESC
+      ]
+    );
+  }
 
-    public Database.QueryLocator start(Database.BatchableContext bc) {
-        // Query records needing AI summary
-        return Database.getQueryLocator([
-            SELECT Id, Name, Description, StageName, Amount
-            FROM Opportunity
-            WHERE AI_Summary__c = null
-            AND Description != null
-            ORDER BY CreatedDate DESC
-        ]);
-    }
+  public void execute(Database.BatchableContext bc, List<Opportunity> scope) {
+    List<Opportunity> toUpdate = new List<Opportunity>();
 
-    public void execute(Database.BatchableContext bc, List<Opportunity> scope) {
-        List<Opportunity> toUpdate = new List<Opportunity>();
+    for (Opportunity opp : scope) {
+      try {
+        String summary = generateOpportunitySummary(opp);
 
-        for (Opportunity opp : scope) {
-            try {
-                String summary = generateOpportunitySummary(opp);
-
-                if (String.isNotBlank(summary)) {
-                    opp.AI_Summary__c = summary;
-                    toUpdate.add(opp);
-                    successCount++;
-                }
-            } catch (Exception e) {
-                errorCount++;
-                System.debug(LoggingLevel.ERROR,
-                    'AI Summary Error for Opp ' + opp.Id + ': ' + e.getMessage());
-            }
+        if (String.isNotBlank(summary)) {
+          opp.AI_Summary__c = summary;
+          toUpdate.add(opp);
+          successCount++;
         }
-
-        if (!toUpdate.isEmpty()) {
-            update toUpdate;
-        }
+      } catch (Exception e) {
+        errorCount++;
+        System.debug(
+          LoggingLevel.ERROR,
+          'AI Summary Error for Opp ' + opp.Id + ': ' + e.getMessage()
+        );
+      }
     }
 
-    public void finish(Database.BatchableContext bc) {
-        System.debug('Batch Complete. Success: ' + successCount + ', Errors: ' + errorCount);
+    if (!toUpdate.isEmpty()) {
+      update toUpdate;
+    }
+  }
 
-        // Optional: Send completion notification
-        // Messaging.SingleEmailMessage email = ...
+  public void finish(Database.BatchableContext bc) {
+    System.debug(
+      'Batch Complete. Success: ' + successCount + ', Errors: ' + errorCount
+    );
+
+    // Optional: Send completion notification
+    // Messaging.SingleEmailMessage email = ...
+  }
+
+  private String generateOpportunitySummary(Opportunity opp) {
+    String prompt =
+      'Create a brief sales summary for this opportunity:\n\n' +
+      'Name: ' +
+      opp.Name +
+      '\n' +
+      'Stage: ' +
+      opp.StageName +
+      '\n' +
+      'Amount: $' +
+      opp.Amount +
+      '\n' +
+      'Description: ' +
+      opp.Description +
+      '\n\n' +
+      'Summarize in 2-3 sentences focusing on key points.';
+
+    // Use same API pattern as Queueable
+    aiplatform.ModelsAPI.createGenerations_Request request = new aiplatform.ModelsAPI.createGenerations_Request();
+    request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
+
+    aiplatform.ModelsAPI_GenerationRequest genRequest = new aiplatform.ModelsAPI_GenerationRequest();
+    genRequest.prompt = prompt;
+    request.body = genRequest;
+
+    aiplatform.ModelsAPI.createGenerations_Response response = aiplatform.ModelsAPI.createGenerations(
+      request
+    );
+
+    if (
+      response.Code200 != null &&
+      response.Code200.generations != null &&
+      !response.Code200.generations.isEmpty()
+    ) {
+      return response.Code200.generations[0].text;
     }
 
-    private String generateOpportunitySummary(Opportunity opp) {
-        String prompt = 'Create a brief sales summary for this opportunity:\n\n' +
-            'Name: ' + opp.Name + '\n' +
-            'Stage: ' + opp.StageName + '\n' +
-            'Amount: $' + opp.Amount + '\n' +
-            'Description: ' + opp.Description + '\n\n' +
-            'Summarize in 2-3 sentences focusing on key points.';
-
-        // Use same API pattern as Queueable
-        aiplatform.ModelsAPI.createGenerations_Request request =
-            new aiplatform.ModelsAPI.createGenerations_Request();
-        request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
-
-        aiplatform.ModelsAPI_GenerationRequest genRequest =
-            new aiplatform.ModelsAPI_GenerationRequest();
-        genRequest.prompt = prompt;
-        request.body = genRequest;
-
-        aiplatform.ModelsAPI.createGenerations_Response response =
-            aiplatform.ModelsAPI.createGenerations(request);
-
-        if (response.Code200 != null &&
-            response.Code200.generations != null &&
-            !response.Code200.generations.isEmpty()) {
-            return response.Code200.generations[0].text;
-        }
-
-        return null;
-    }
+    return null;
+  }
 }
 ```
 
 ### Batch Size Considerations
 
-| Batch Size | AI Calls/Batch | Recommended For |
-|------------|----------------|-----------------|
-| 1-5 | 1-5 | Complex prompts, detailed output |
-| 10-20 | 10-20 | Standard summaries |
-| 50+ | Avoid | Risk of timeout, use smaller batches |
+| Batch Size | AI Calls/Batch | Recommended For                      |
+| ---------- | -------------- | ------------------------------------ |
+| 1-5        | 1-5            | Complex prompts, detailed output     |
+| 10-20      | 10-20          | Standard summaries                   |
+| 50+        | Avoid          | Risk of timeout, use smaller batches |
 
 ```apex
 // Execute with smaller batch size for AI processing
@@ -332,71 +351,82 @@ Post AI-generated content to Chatter:
 
 ```apex
 public with sharing class ChatterAIService {
+  /**
+   * @description Generate and post AI insight to Chatter
+   * @param recordId The record to analyze
+   * @param feedMessage Additional context for the post
+   */
+  public static void postAIInsight(Id recordId, String feedMessage) {
+    // Query record context
+    Account acc = [
+      SELECT Name, Industry, AnnualRevenue, Description
+      FROM Account
+      WHERE Id = :recordId
+      LIMIT 1
+    ];
 
-    /**
-     * @description Generate and post AI insight to Chatter
-     * @param recordId The record to analyze
-     * @param feedMessage Additional context for the post
-     */
-    public static void postAIInsight(Id recordId, String feedMessage) {
-        // Query record context
-        Account acc = [
-            SELECT Name, Industry, AnnualRevenue, Description
-            FROM Account
-            WHERE Id = :recordId
-            LIMIT 1
-        ];
+    // Generate insight using Models API
+    String prompt =
+      'Analyze this account and provide 3 key business insights:\n\n' +
+      'Company: ' +
+      acc.Name +
+      '\n' +
+      'Industry: ' +
+      acc.Industry +
+      '\n' +
+      'Revenue: $' +
+      acc.AnnualRevenue +
+      '\n' +
+      'Description: ' +
+      acc.Description +
+      '\n\n' +
+      'Format as numbered bullet points.';
 
-        // Generate insight using Models API
-        String prompt = 'Analyze this account and provide 3 key business insights:\n\n' +
-            'Company: ' + acc.Name + '\n' +
-            'Industry: ' + acc.Industry + '\n' +
-            'Revenue: $' + acc.AnnualRevenue + '\n' +
-            'Description: ' + acc.Description + '\n\n' +
-            'Format as numbered bullet points.';
+    String insight = generateText(prompt);
 
-        String insight = generateText(prompt);
+    if (String.isNotBlank(insight)) {
+      // Create Chatter post
+      ConnectApi.FeedItemInput feedInput = new ConnectApi.FeedItemInput();
+      ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
+      ConnectApi.TextSegmentInput textSegment = new ConnectApi.TextSegmentInput();
 
-        if (String.isNotBlank(insight)) {
-            // Create Chatter post
-            ConnectApi.FeedItemInput feedInput = new ConnectApi.FeedItemInput();
-            ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
-            ConnectApi.TextSegmentInput textSegment = new ConnectApi.TextSegmentInput();
+      textSegment.text = '🤖 AI Account Insight:\n\n' + insight;
+      messageInput.messageSegments = new List<ConnectApi.MessageSegmentInput>{
+        textSegment
+      };
+      feedInput.body = messageInput;
+      feedInput.feedElementType = ConnectApi.FeedElementType.FeedItem;
+      feedInput.subjectId = recordId;
 
-            textSegment.text = '🤖 AI Account Insight:\n\n' + insight;
-            messageInput.messageSegments = new List<ConnectApi.MessageSegmentInput>{ textSegment };
-            feedInput.body = messageInput;
-            feedInput.feedElementType = ConnectApi.FeedElementType.FeedItem;
-            feedInput.subjectId = recordId;
+      ConnectApi.ChatterFeeds.postFeedElement(
+        Network.getNetworkId(),
+        feedInput
+      );
+    }
+  }
 
-            ConnectApi.ChatterFeeds.postFeedElement(
-                Network.getNetworkId(),
-                feedInput
-            );
-        }
+  private static String generateText(String prompt) {
+    aiplatform.ModelsAPI.createGenerations_Request request = new aiplatform.ModelsAPI.createGenerations_Request();
+    request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
+
+    aiplatform.ModelsAPI_GenerationRequest genRequest = new aiplatform.ModelsAPI_GenerationRequest();
+    genRequest.prompt = prompt;
+    request.body = genRequest;
+
+    aiplatform.ModelsAPI.createGenerations_Response response = aiplatform.ModelsAPI.createGenerations(
+      request
+    );
+
+    if (
+      response.Code200 != null &&
+      response.Code200.generations != null &&
+      !response.Code200.generations.isEmpty()
+    ) {
+      return response.Code200.generations[0].text;
     }
 
-    private static String generateText(String prompt) {
-        aiplatform.ModelsAPI.createGenerations_Request request =
-            new aiplatform.ModelsAPI.createGenerations_Request();
-        request.modelName = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
-
-        aiplatform.ModelsAPI_GenerationRequest genRequest =
-            new aiplatform.ModelsAPI_GenerationRequest();
-        genRequest.prompt = prompt;
-        request.body = genRequest;
-
-        aiplatform.ModelsAPI.createGenerations_Response response =
-            aiplatform.ModelsAPI.createGenerations(request);
-
-        if (response.Code200 != null &&
-            response.Code200.generations != null &&
-            !response.Code200.generations.isEmpty()) {
-            return response.Code200.generations[0].text;
-        }
-
-        return null;
-    }
+    return null;
+  }
 }
 ```
 
@@ -406,12 +436,12 @@ public with sharing class ChatterAIService {
 
 ### Limits to Consider
 
-| Limit | Value | Mitigation |
-|-------|-------|------------|
-| Callout time | 120s total | Use smaller batches, Queueable chaining |
-| Callouts per transaction | 100 | Batch records, use async |
-| CPU time | 10s sync, 60s async | Use Queueable/Batch |
-| Heap size | 6MB sync, 12MB async | Limit prompt/response size |
+| Limit                    | Value                | Mitigation                              |
+| ------------------------ | -------------------- | --------------------------------------- |
+| Callout time             | 120s total           | Use smaller batches, Queueable chaining |
+| Callouts per transaction | 100                  | Batch records, use async                |
+| CPU time                 | 10s sync, 60s async  | Use Queueable/Batch                     |
+| Heap size                | 6MB sync, 12MB async | Limit prompt/response size              |
 
 ### Best Practices
 
@@ -456,44 +486,47 @@ public with sharing class ChatterAIService {
 
 ```apex
 public with sharing class AIGenerationService {
+  private static final String DEFAULT_MODEL = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
 
-    private static final String DEFAULT_MODEL = 'sfdc_ai__DefaultOpenAIGPT4OmniMini';
+  /**
+   * @description Generate text with standard configuration
+   */
+  public static String generate(String prompt) {
+    return generate(prompt, DEFAULT_MODEL);
+  }
 
-    /**
-     * @description Generate text with standard configuration
-     */
-    public static String generate(String prompt) {
-        return generate(prompt, DEFAULT_MODEL);
+  /**
+   * @description Generate text with specific model
+   */
+  public static String generate(String prompt, String modelName) {
+    try {
+      aiplatform.ModelsAPI.createGenerations_Request request = new aiplatform.ModelsAPI.createGenerations_Request();
+      request.modelName = modelName;
+
+      aiplatform.ModelsAPI_GenerationRequest genRequest = new aiplatform.ModelsAPI_GenerationRequest();
+      genRequest.prompt = prompt;
+      request.body = genRequest;
+
+      aiplatform.ModelsAPI.createGenerations_Response response = aiplatform.ModelsAPI.createGenerations(
+        request
+      );
+
+      if (
+        response.Code200 != null &&
+        response.Code200.generations != null &&
+        !response.Code200.generations.isEmpty()
+      ) {
+        return response.Code200.generations[0].text;
+      }
+    } catch (Exception e) {
+      System.debug(
+        LoggingLevel.ERROR,
+        'AI Generation Error: ' + e.getMessage()
+      );
     }
 
-    /**
-     * @description Generate text with specific model
-     */
-    public static String generate(String prompt, String modelName) {
-        try {
-            aiplatform.ModelsAPI.createGenerations_Request request =
-                new aiplatform.ModelsAPI.createGenerations_Request();
-            request.modelName = modelName;
-
-            aiplatform.ModelsAPI_GenerationRequest genRequest =
-                new aiplatform.ModelsAPI_GenerationRequest();
-            genRequest.prompt = prompt;
-            request.body = genRequest;
-
-            aiplatform.ModelsAPI.createGenerations_Response response =
-                aiplatform.ModelsAPI.createGenerations(request);
-
-            if (response.Code200 != null &&
-                response.Code200.generations != null &&
-                !response.Code200.generations.isEmpty()) {
-                return response.Code200.generations[0].text;
-            }
-        } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR, 'AI Generation Error: ' + e.getMessage());
-        }
-
-        return null;
-    }
+    return null;
+  }
 }
 ```
 
@@ -503,34 +536,32 @@ public with sharing class AIGenerationService {
 // Platform Event: AI_Generation_Complete__e
 // Fields: Record_Id__c (Text), Status__c (Text), Summary__c (Long Text)
 
-public with sharing class AIQueueableWithNotification
-    implements Queueable, Database.AllowsCallouts {
+public with sharing class AIQueueableWithNotification implements Queueable, Database.AllowsCallouts {
+  private Id recordId;
 
-    private Id recordId;
+  public AIQueueableWithNotification(Id recordId) {
+    this.recordId = recordId;
+  }
 
-    public AIQueueableWithNotification(Id recordId) {
-        this.recordId = recordId;
+  public void execute(QueueableContext context) {
+    String summary;
+    String status = 'Success';
+
+    try {
+      // Generate AI content
+      summary = AIGenerationService.generate('...');
+    } catch (Exception e) {
+      status = 'Error: ' + e.getMessage();
     }
 
-    public void execute(QueueableContext context) {
-        String summary;
-        String status = 'Success';
+    // Publish completion event
+    AI_Generation_Complete__e event = new AI_Generation_Complete__e();
+    event.Record_Id__c = recordId;
+    event.Status__c = status;
+    event.Summary__c = summary;
 
-        try {
-            // Generate AI content
-            summary = AIGenerationService.generate('...');
-        } catch (Exception e) {
-            status = 'Error: ' + e.getMessage();
-        }
-
-        // Publish completion event
-        AI_Generation_Complete__e event = new AI_Generation_Complete__e();
-        event.Record_Id__c = recordId;
-        event.Status__c = status;
-        event.Summary__c = summary;
-
-        EventBus.publish(event);
-    }
+    EventBus.publish(event);
+  }
 }
 ```
 
@@ -564,13 +595,13 @@ subscribeToAICompletion() {
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| "Model not found" | Invalid model name | Use exact name: `sfdc_ai__DefaultOpenAIGPT4OmniMini` |
-| "Access denied" | Missing permission | Assign Einstein Generative AI User permission set |
-| "Callout not allowed" | Sync context restriction | Use Queueable with `Database.AllowsCallouts` |
-| Timeout errors | Large prompt/response | Reduce prompt size, use batch with smaller scope |
-| Empty response | Null check failed | Always validate `response.Code200` and `generations` |
+| Issue                 | Cause                    | Solution                                             |
+| --------------------- | ------------------------ | ---------------------------------------------------- |
+| "Model not found"     | Invalid model name       | Use exact name: `sfdc_ai__DefaultOpenAIGPT4OmniMini` |
+| "Access denied"       | Missing permission       | Assign Einstein Generative AI User permission set    |
+| "Callout not allowed" | Sync context restriction | Use Queueable with `Database.AllowsCallouts`         |
+| Timeout errors        | Large prompt/response    | Reduce prompt size, use batch with smaller scope     |
+| Empty response        | Null check failed        | Always validate `response.Code200` and `generations` |
 
 ---
 

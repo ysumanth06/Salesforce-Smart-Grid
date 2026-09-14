@@ -1,41 +1,43 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Apex Design Patterns
 
 ## Factory Pattern
 
 ### Purpose
+
 Centralize object creation, enable dependency injection, simplify testing.
 
 ### Implementation
 
 ```apex
 public virtual class Factory {
-    private static Factory instance;
+  private static Factory instance;
 
-    public static Factory getInstance() {
-        if (instance == null) {
-            instance = new Factory();
-        }
-        return instance;
+  public static Factory getInstance() {
+    if (instance == null) {
+      instance = new Factory();
     }
+    return instance;
+  }
 
-    @TestVisible
-    private static void setInstance(Factory mockFactory) {
-        instance = mockFactory;
-    }
+  @TestVisible
+  private static void setInstance(Factory mockFactory) {
+    instance = mockFactory;
+  }
 
-    // Service getters - virtual for mocking
-    public virtual AccountService getAccountService() {
-        return new AccountService();
-    }
+  // Service getters - virtual for mocking
+  public virtual AccountService getAccountService() {
+    return new AccountService();
+  }
 
-    public virtual ContactService getContactService() {
-        return new ContactService();
-    }
+  public virtual ContactService getContactService() {
+    return new ContactService();
+  }
 
-    public virtual PaymentGateway getPaymentGateway() {
-        return new StripePaymentGateway();
-    }
+  public virtual PaymentGateway getPaymentGateway() {
+    return new StripePaymentGateway();
+  }
 }
 ```
 
@@ -43,23 +45,23 @@ public virtual class Factory {
 
 ```apex
 public class OrderProcessor {
-    private AccountService accountService;
-    private PaymentGateway gateway;
+  private AccountService accountService;
+  private PaymentGateway gateway;
 
-    public OrderProcessor() {
-        this(Factory.getInstance());
-    }
+  public OrderProcessor() {
+    this(Factory.getInstance());
+  }
 
-    @TestVisible
-    private OrderProcessor(Factory factory) {
-        this.accountService = factory.getAccountService();
-        this.gateway = factory.getPaymentGateway();
-    }
+  @TestVisible
+  private OrderProcessor(Factory factory) {
+    this.accountService = factory.getAccountService();
+    this.gateway = factory.getPaymentGateway();
+  }
 
-    public void process(Order__c order) {
-        Account acc = accountService.getAccount(order.Account__c);
-        gateway.charge(order.Total__c);
-    }
+  public void process(Order__c order) {
+    Account acc = accountService.getAccount(order.Account__c);
+    gateway.charge(order.Total__c);
+  }
 }
 ```
 
@@ -68,30 +70,29 @@ public class OrderProcessor {
 ```apex
 @isTest
 private class OrderProcessorTest {
+  @isTest
+  static void testProcess() {
+    // Set mock factory
+    Factory.setInstance(new MockFactory());
 
-    @isTest
-    static void testProcess() {
-        // Set mock factory
-        Factory.setInstance(new MockFactory());
+    OrderProcessor processor = new OrderProcessor();
 
-        OrderProcessor processor = new OrderProcessor();
+    Test.startTest();
+    processor.process(new Order__c());
+    Test.stopTest();
 
-        Test.startTest();
-        processor.process(new Order__c());
-        Test.stopTest();
+    // Assertions
+  }
 
-        // Assertions
+  private class MockFactory extends Factory {
+    public override AccountService getAccountService() {
+      return new MockAccountService();
     }
 
-    private class MockFactory extends Factory {
-        public override AccountService getAccountService() {
-            return new MockAccountService();
-        }
-
-        public override PaymentGateway getPaymentGateway() {
-            return new MockPaymentGateway();
-        }
+    public override PaymentGateway getPaymentGateway() {
+      return new MockPaymentGateway();
     }
+  }
 }
 ```
 
@@ -100,43 +101,43 @@ private class OrderProcessorTest {
 ## Repository Pattern
 
 ### Purpose
+
 Abstract data access, provide strongly-typed queries, enable DML mocking.
 
 ### Implementation
 
 ```apex
 public virtual class AccountRepository {
+  public virtual List<Account> getByIds(Set<Id> accountIds) {
+    return [
+      SELECT Id, Name, Industry, AnnualRevenue
+      FROM Account
+      WHERE Id IN :accountIds
+      WITH USER_MODE
+    ];
+  }
 
-    public virtual List<Account> getByIds(Set<Id> accountIds) {
-        return [
-            SELECT Id, Name, Industry, AnnualRevenue
-            FROM Account
-            WHERE Id IN :accountIds
-            WITH USER_MODE
-        ];
-    }
+  public virtual List<Account> getByIndustry(String industry) {
+    return [
+      SELECT Id, Name, AnnualRevenue
+      FROM Account
+      WHERE Industry = :industry
+      WITH USER_MODE
+    ];
+  }
 
-    public virtual List<Account> getByIndustry(String industry) {
-        return [
-            SELECT Id, Name, AnnualRevenue
-            FROM Account
-            WHERE Industry = :industry
-            WITH USER_MODE
-        ];
-    }
+  public virtual Account getById(Id accountId) {
+    List<Account> accounts = getByIds(new Set<Id>{ accountId });
+    return accounts.isEmpty() ? null : accounts[0];
+  }
 
-    public virtual Account getById(Id accountId) {
-        List<Account> accounts = getByIds(new Set<Id>{accountId});
-        return accounts.isEmpty() ? null : accounts[0];
-    }
+  public virtual void save(List<Account> accounts) {
+    upsert accounts;
+  }
 
-    public virtual void save(List<Account> accounts) {
-        upsert accounts;
-    }
-
-    public virtual void remove(List<Account> accounts) {
-        delete accounts;
-    }
+  public virtual void remove(List<Account> accounts) {
+    delete accounts;
+  }
 }
 ```
 
@@ -144,24 +145,24 @@ public virtual class AccountRepository {
 
 ```apex
 public class AccountService {
-    private AccountRepository repo;
+  private AccountRepository repo;
 
-    public AccountService() {
-        this.repo = new AccountRepository();
-    }
+  public AccountService() {
+    this.repo = new AccountRepository();
+  }
 
-    @TestVisible
-    private AccountService(AccountRepository repo) {
-        this.repo = repo;
-    }
+  @TestVisible
+  private AccountService(AccountRepository repo) {
+    this.repo = repo;
+  }
 
-    public List<Account> getTechnologyAccounts() {
-        return repo.getByIndustry('Technology');
-    }
+  public List<Account> getTechnologyAccounts() {
+    return repo.getByIndustry('Technology');
+  }
 
-    public void updateAccounts(List<Account> accounts) {
-        repo.save(accounts);
-    }
+  public void updateAccounts(List<Account> accounts) {
+    repo.save(accounts);
+  }
 }
 ```
 
@@ -170,33 +171,32 @@ public class AccountService {
 ```apex
 @isTest
 private class AccountServiceTest {
+  @isTest
+  static void testGetTechnologyAccounts() {
+    MockAccountRepository mockRepo = new MockAccountRepository();
+    mockRepo.accountsToReturn = new List<Account>{
+      new Account(Name = 'Test', Industry = 'Technology')
+    };
 
-    @isTest
-    static void testGetTechnologyAccounts() {
-        MockAccountRepository mockRepo = new MockAccountRepository();
-        mockRepo.accountsToReturn = new List<Account>{
-            new Account(Name = 'Test', Industry = 'Technology')
-        };
+    AccountService service = new AccountService(mockRepo);
 
-        AccountService service = new AccountService(mockRepo);
+    Test.startTest();
+    List<Account> results = service.getTechnologyAccounts();
+    Test.stopTest();
 
-        Test.startTest();
-        List<Account> results = service.getTechnologyAccounts();
-        Test.stopTest();
+    Assert.areEqual(1, results.size());
+    Assert.areEqual('Technology', mockRepo.lastIndustryQueried);
+  }
 
-        Assert.areEqual(1, results.size());
-        Assert.areEqual('Technology', mockRepo.lastIndustryQueried);
+  private class MockAccountRepository extends AccountRepository {
+    public List<Account> accountsToReturn = new List<Account>();
+    public String lastIndustryQueried;
+
+    public override List<Account> getByIndustry(String industry) {
+      this.lastIndustryQueried = industry;
+      return accountsToReturn;
     }
-
-    private class MockAccountRepository extends AccountRepository {
-        public List<Account> accountsToReturn = new List<Account>();
-        public String lastIndustryQueried;
-
-        public override List<Account> getByIndustry(String industry) {
-            this.lastIndustryQueried = industry;
-            return accountsToReturn;
-        }
-    }
+  }
 }
 ```
 
@@ -205,51 +205,53 @@ private class AccountServiceTest {
 ## Selector Pattern
 
 ### Purpose
+
 Centralize SOQL queries per object, enforce security, enable reuse.
 
 ### Implementation
 
 ```apex
 public inherited sharing class AccountSelector {
+  public List<Account> selectById(Set<Id> ids) {
+    return [
+      SELECT Id, Name, Industry, AnnualRevenue, BillingCity
+      FROM Account
+      WHERE Id IN :ids
+      WITH USER_MODE
+    ];
+  }
 
-    public List<Account> selectById(Set<Id> ids) {
-        return [
-            SELECT Id, Name, Industry, AnnualRevenue, BillingCity
-            FROM Account
-            WHERE Id IN :ids
-            WITH USER_MODE
-        ];
-    }
+  public List<Account> selectByIdWithContacts(Set<Id> ids) {
+    return [
+      SELECT
+        Id,
+        Name,
+        Industry,
+        (SELECT Id, FirstName, LastName, Email FROM Contacts)
+      FROM Account
+      WHERE Id IN :ids
+      WITH USER_MODE
+    ];
+  }
 
-    public List<Account> selectByIdWithContacts(Set<Id> ids) {
-        return [
-            SELECT Id, Name, Industry,
-                (SELECT Id, FirstName, LastName, Email FROM Contacts)
-            FROM Account
-            WHERE Id IN :ids
-            WITH USER_MODE
-        ];
-    }
+  public List<Account> selectByName(String name) {
+    return [
+      SELECT Id, Name, Industry
+      FROM Account
+      WHERE Name LIKE :('%' + name + '%')
+      WITH USER_MODE
+      LIMIT 100
+    ];
+  }
 
-    public List<Account> selectByName(String name) {
-        return [
-            SELECT Id, Name, Industry
-            FROM Account
-            WHERE Name LIKE :('%' + name + '%')
-            WITH USER_MODE
-            LIMIT 100
-        ];
-    }
-
-    public List<Account> selectActiveByIndustry(String industry) {
-        return [
-            SELECT Id, Name, AnnualRevenue
-            FROM Account
-            WHERE Industry = :industry
-            AND Status__c = 'Active'
-            WITH USER_MODE
-        ];
-    }
+  public List<Account> selectActiveByIndustry(String industry) {
+    return [
+      SELECT Id, Name, AnnualRevenue
+      FROM Account
+      WHERE Industry = :industry AND Status__c = 'Active'
+      WITH USER_MODE
+    ];
+  }
 }
 ```
 
@@ -257,11 +259,11 @@ public inherited sharing class AccountSelector {
 
 ```apex
 public class AccountService {
-    private AccountSelector selector = new AccountSelector();
+  private AccountSelector selector = new AccountSelector();
 
-    public Map<Id, Account> getAccountsMap(Set<Id> ids) {
-        return new Map<Id, Account>(selector.selectById(ids));
-    }
+  public Map<Id, Account> getAccountsMap(Set<Id> ids) {
+    return new Map<Id, Account>(selector.selectById(ids));
+  }
 }
 ```
 
@@ -270,53 +272,58 @@ public class AccountService {
 ## Builder Pattern
 
 ### Purpose
+
 Construct complex objects step-by-step, improve readability.
 
 ### Implementation
 
 ```apex
 public class AccountBuilder {
-    private Account record;
+  private Account record;
 
-    public AccountBuilder() {
-        this.record = new Account();
-    }
+  public AccountBuilder() {
+    this.record = new Account();
+  }
 
-    public AccountBuilder withName(String name) {
-        this.record.Name = name;
-        return this;
-    }
+  public AccountBuilder withName(String name) {
+    this.record.Name = name;
+    return this;
+  }
 
-    public AccountBuilder withIndustry(String industry) {
-        this.record.Industry = industry;
-        return this;
-    }
+  public AccountBuilder withIndustry(String industry) {
+    this.record.Industry = industry;
+    return this;
+  }
 
-    public AccountBuilder withAnnualRevenue(Decimal revenue) {
-        this.record.AnnualRevenue = revenue;
-        return this;
-    }
+  public AccountBuilder withAnnualRevenue(Decimal revenue) {
+    this.record.AnnualRevenue = revenue;
+    return this;
+  }
 
-    public AccountBuilder withBillingAddress(String city, String state, String country) {
-        this.record.BillingCity = city;
-        this.record.BillingState = state;
-        this.record.BillingCountry = country;
-        return this;
-    }
+  public AccountBuilder withBillingAddress(
+    String city,
+    String state,
+    String country
+  ) {
+    this.record.BillingCity = city;
+    this.record.BillingState = state;
+    this.record.BillingCountry = country;
+    return this;
+  }
 
-    public AccountBuilder withParent(Id parentId) {
-        this.record.ParentId = parentId;
-        return this;
-    }
+  public AccountBuilder withParent(Id parentId) {
+    this.record.ParentId = parentId;
+    return this;
+  }
 
-    public Account build() {
-        return this.record;
-    }
+  public Account build() {
+    return this.record;
+  }
 
-    public Account buildAndInsert() {
-        insert this.record;
-        return this.record;
-    }
+  public Account buildAndInsert() {
+    insert this.record;
+    return this.record;
+  }
 }
 ```
 
@@ -342,43 +349,47 @@ Account testAccount = new AccountBuilder()
 ## Singleton Pattern
 
 ### Purpose
+
 Ensure single instance, cache expensive operations.
 
 ### Implementation
 
 ```apex
 public class ConfigurationService {
-    private static ConfigurationService instance;
-    private Map<String, String> settings;
+  private static ConfigurationService instance;
+  private Map<String, String> settings;
 
-    private ConfigurationService() {
-        // Load settings once
-        this.settings = new Map<String, String>();
-        for (Configuration__mdt config : [SELECT DeveloperName, Value__c FROM Configuration__mdt]) {
-            settings.put(config.DeveloperName, config.Value__c);
-        }
+  private ConfigurationService() {
+    // Load settings once
+    this.settings = new Map<String, String>();
+    for (Configuration__mdt config : [
+      SELECT DeveloperName, Value__c
+      FROM Configuration__mdt
+    ]) {
+      settings.put(config.DeveloperName, config.Value__c);
     }
+  }
 
-    public static ConfigurationService getInstance() {
-        if (instance == null) {
-            instance = new ConfigurationService();
-        }
-        return instance;
+  public static ConfigurationService getInstance() {
+    if (instance == null) {
+      instance = new ConfigurationService();
     }
+    return instance;
+  }
 
-    public String getSetting(String key) {
-        return settings.get(key);
-    }
+  public String getSetting(String key) {
+    return settings.get(key);
+  }
 
-    public String getSetting(String key, String defaultValue) {
-        return settings.containsKey(key) ? settings.get(key) : defaultValue;
-    }
+  public String getSetting(String key, String defaultValue) {
+    return settings.containsKey(key) ? settings.get(key) : defaultValue;
+  }
 
-    // For testing
-    @TestVisible
-    private static void reset() {
-        instance = null;
-    }
+  // For testing
+  @TestVisible
+  private static void reset() {
+    instance = null;
+  }
 }
 ```
 
@@ -394,6 +405,7 @@ String timeout = ConfigurationService.getInstance().getSetting('TIMEOUT', '30000
 ## Strategy Pattern
 
 ### Purpose
+
 Define family of algorithms, make them interchangeable.
 
 ### Implementation
@@ -454,23 +466,23 @@ public class TieredDiscount implements DiscountStrategy {
 
 ```apex
 public class PricingService {
-    private Map<String, DiscountStrategy> strategies;
+  private Map<String, DiscountStrategy> strategies;
 
-    public PricingService() {
-        strategies = new Map<String, DiscountStrategy>{
-            'PERCENTAGE_10' => new PercentageDiscount(10),
-            'FIXED_50' => new FixedAmountDiscount(50),
-            'TIERED' => new TieredDiscount()
-        };
-    }
+  public PricingService() {
+    strategies = new Map<String, DiscountStrategy>{
+      'PERCENTAGE_10' => new PercentageDiscount(10),
+      'FIXED_50' => new FixedAmountDiscount(50),
+      'TIERED' => new TieredDiscount()
+    };
+  }
 
-    public Decimal applyDiscount(String discountType, Decimal amount) {
-        DiscountStrategy strategy = strategies.get(discountType);
-        if (strategy == null) {
-            return 0;
-        }
-        return strategy.calculate(amount);
+  public Decimal applyDiscount(String discountType, Decimal amount) {
+    DiscountStrategy strategy = strategies.get(discountType);
+    if (strategy == null) {
+      return 0;
     }
+    return strategy.calculate(amount);
+  }
 }
 ```
 
@@ -479,43 +491,44 @@ public class PricingService {
 ## Unit of Work Pattern
 
 ### Purpose
+
 Manage DML as single transaction, track changes, enable rollback.
 
 ### Basic Implementation
 
 ```apex
 public class UnitOfWork {
-    private List<SObject> newRecords = new List<SObject>();
-    private List<SObject> dirtyRecords = new List<SObject>();
-    private List<SObject> deletedRecords = new List<SObject>();
+  private List<SObject> newRecords = new List<SObject>();
+  private List<SObject> dirtyRecords = new List<SObject>();
+  private List<SObject> deletedRecords = new List<SObject>();
 
-    public void registerNew(SObject record) {
-        newRecords.add(record);
-    }
+  public void registerNew(SObject record) {
+    newRecords.add(record);
+  }
 
-    public void registerNew(List<SObject> records) {
-        newRecords.addAll(records);
-    }
+  public void registerNew(List<SObject> records) {
+    newRecords.addAll(records);
+  }
 
-    public void registerDirty(SObject record) {
-        dirtyRecords.add(record);
-    }
+  public void registerDirty(SObject record) {
+    dirtyRecords.add(record);
+  }
 
-    public void registerDeleted(SObject record) {
-        deletedRecords.add(record);
-    }
+  public void registerDeleted(SObject record) {
+    deletedRecords.add(record);
+  }
 
-    public void commitWork() {
-        Savepoint sp = Database.setSavepoint();
-        try {
-            insert newRecords;
-            update dirtyRecords;
-            delete deletedRecords;
-        } catch (Exception e) {
-            Database.rollback(sp);
-            throw e;
-        }
+  public void commitWork() {
+    Savepoint sp = Database.setSavepoint();
+    try {
+      insert newRecords;
+      update dirtyRecords;
+      delete deletedRecords;
+    } catch (Exception e) {
+      Database.rollback(sp);
+      throw e;
     }
+  }
 }
 ```
 
@@ -523,20 +536,24 @@ public class UnitOfWork {
 
 ```apex
 public class OrderService {
-    public void processOrder(Order__c order, List<OrderItem__c> items) {
-        UnitOfWork uow = new UnitOfWork();
+  public void processOrder(Order__c order, List<OrderItem__c> items) {
+    UnitOfWork uow = new UnitOfWork();
 
-        // Register all changes
-        uow.registerNew(order);
-        uow.registerNew(items);
+    // Register all changes
+    uow.registerNew(order);
+    uow.registerNew(items);
 
-        Account acc = [SELECT Id, Order_Count__c FROM Account WHERE Id = :order.Account__c];
-        acc.Order_Count__c = (acc.Order_Count__c ?? 0) + 1;
-        uow.registerDirty(acc);
+    Account acc = [
+      SELECT Id, Order_Count__c
+      FROM Account
+      WHERE Id = :order.Account__c
+    ];
+    acc.Order_Count__c = (acc.Order_Count__c ?? 0) + 1;
+    uow.registerDirty(acc);
 
-        // Single commit - all or nothing
-        uow.commitWork();
-    }
+    // Single commit - all or nothing
+    uow.commitWork();
+  }
 }
 ```
 
@@ -545,6 +562,7 @@ public class OrderService {
 ## Decorator Pattern
 
 ### Purpose
+
 Add functionality dynamically without modifying original class. Stack behaviors flexibly.
 
 ### Implementation
@@ -628,6 +646,7 @@ service.send('Your order shipped!', userId);
 ```
 
 ### When to Use
+
 - Adding cross-cutting concerns (logging, caching, validation)
 - When inheritance leads to class explosion
 - Stacking behaviors that can be combined independently
@@ -637,6 +656,7 @@ service.send('Your order shipped!', userId);
 ## Observer Pattern
 
 ### Purpose
+
 Define one-to-many dependency where observers are notified of state changes automatically.
 
 ### Implementation
@@ -694,22 +714,22 @@ public class IntegrationSyncObserver implements AccountObserver {
 ```apex
 // TriggerHandler or Action class
 public class AccountTriggerHandler {
+  static {
+    // Register observers once
+    AccountSubject.attach(new SalesNotificationObserver());
+    AccountSubject.attach(new IntegrationSyncObserver());
+  }
 
-    static {
-        // Register observers once
-        AccountSubject.attach(new SalesNotificationObserver());
-        AccountSubject.attach(new IntegrationSyncObserver());
+  public void afterUpdate(List<Account> newList, Map<Id, Account> oldMap) {
+    for (Account acc : newList) {
+      AccountSubject.notifyObservers(oldMap.get(acc.Id), acc);
     }
-
-    public void afterUpdate(List<Account> newList, Map<Id, Account> oldMap) {
-        for (Account acc : newList) {
-            AccountSubject.notifyObservers(oldMap.get(acc.Id), acc);
-        }
-    }
+  }
 }
 ```
 
 ### Platform Events Alternative
+
 For decoupled, async observers, use Platform Events:
 
 ```apex
@@ -727,6 +747,7 @@ trigger AccountUpdatedSubscriber on Account_Updated__e (after insert) {
 ## Command Pattern
 
 ### Purpose
+
 Encapsulate requests as objects, enabling queuing, logging, undo, and parameterized execution.
 
 ### Implementation
@@ -822,6 +843,7 @@ invoker.undoLast();
 ```
 
 ### Use Cases
+
 - Wizard/multi-step processes with undo
 - Audit trail with replayable operations
 - Batch processing with deferred execution
@@ -832,6 +854,7 @@ invoker.undoLast();
 ## Facade Pattern
 
 ### Purpose
+
 Provide simplified interface to complex subsystems. Reduce coupling between client and implementation details.
 
 ### Implementation
@@ -947,6 +970,7 @@ if (result.success) {
 ```
 
 ### When to Use
+
 - Simplifying access to complex subsystems
 - Creating API layers for external integrations
 - Reducing dependencies on multiple services
@@ -956,8 +980,8 @@ if (result.success) {
 
 ## Domain Class Pattern
 
-> 💡 *Principles inspired by "Clean Apex Code" by Pablo Gonzalez.
-> [Purchase the book](https://link.springer.com/book/10.1007/979-8-8688-1411-2) for complete coverage.*
+> 💡 _Principles inspired by "Clean Apex Code" by Pablo Gonzalez.
+> [Purchase the book](https://link.springer.com/book/10.1007/979-8-8688-1411-2) for complete coverage._
 
 ### Purpose
 
@@ -965,7 +989,7 @@ Encapsulate business rules in domain-specific classes, making code read like pla
 
 ### Implementation
 
-```apex
+````apex
 /**
  * Domain class encapsulating Account business rules
  * Rules live here, not scattered across triggers/services
@@ -999,11 +1023,11 @@ public class AccountRules {
         return targetIndustries.contains(account.Industry) &&
                targetCountries.contains(account.BillingCountry);
 1000     }
-1001 
+1001
 1002     public static Boolean requiresExecutiveApproval(Account account, Decimal dealValue) {
 1003         return isStrategicAccount(account) && dealValue > 500000;
 1004     }
-1005 
+1005
 1006     public static Boolean isEligibleForDiscount(Account account) {
 1007         return account.Customer_Since__c != null &&
 1008                account.Customer_Since__c.monthsBetween(Date.today()) > 24 &&
@@ -1011,71 +1035,71 @@ public class AccountRules {
 1010     }
 1011 }
 1012 ```
-1013 
+1013
 1014 ### Usage
-1015 
+1015
 1016 ```apex
 1017 // Reads like plain English
 1018 public void processOpportunity(Opportunity opp, Account account) {
 1019     if (AccountRules.isStrategicAccount(account)) {
 1020         assignToEnterpriseTeam(opp);
 1021     }
-1022 
+1022
 1023     if (AccountRules.requiresExecutiveApproval(account, opp.Amount)) {
 1024         routeForApproval(opp);
 1025     }
-1026 
+1026
 1027     if (AccountRules.isEligibleForDiscount(account)) {
 1028         applyLoyaltyDiscount(opp);
 1029     }
 1030 }
 1031 ```
-1032 
+1032
 1033 ### When to Use
-1034 
+1034
 1035 - Business rules are reused across multiple classes
 1036 - Complex boolean logic needs to be readable
 1037 - Rules change frequently (centralized = easier updates)
 1038 - You want trigger/service code to read like business requirements
-1039 
+1039
 1040 ### Relationship to Other Patterns
-1041 
+1041
 1042 | Pattern | Relationship |
 1043 |---------|--------------|
 1044 | Selector | Domain class uses Selector for data access |
 1045 | Service | Service orchestrates, Domain validates |
 1046 | Repository | Domain class is data-agnostic |
 1047 | Strategy | Domain rules can use Strategy for variations |
-1048 
+1048
 1049 ---
-1050 
+1050
 1051 ## Abstraction Level Management
-1052 
+1052
 1053 > 💡 *Principles inspired by "Clean Apex Code" by Pablo Gonzalez.
 1054 > [Purchase the book](https://link.springer.com/book/10.1007/979-8-8688-1411-2) for complete coverage.*
-1055 
+1055
 1056 ### Purpose
-1057 
+1057
 1058 Ensure each method operates at a consistent level of abstraction. Don't mix high-level orchestration with low-level implementation details.
-1059 
+1059
 1060 ### The Problem
-1061 
+1061
 1062 ```apex
 1063 // BAD: Mixed abstraction levels
 1064 public void processNewCustomer(Account account) {
 1065     // HIGH-LEVEL: Validation
 1066     validateAccount(account);
-1067 
+1067
 1068     // LOW-LEVEL: String manipulation (doesn't belong here)
 1069     String sanitizedPhone = account.Phone.replaceAll('[^0-9]', '');
 1070     if (sanitizedPhone.length() == 10) {
 1071         sanitizedPhone = '1' + sanitizedPhone;
 1072     }
 1073     account.Phone = '+' + sanitizedPhone;
-1074 
+1074
 1075     // HIGH-LEVEL: Save
 1076     insert account;
-1077 
+1077
 1078     // LOW-LEVEL: HTTP details (doesn't belong here)
 1079     HttpRequest req = new HttpRequest();
 1080     req.setEndpoint('https://api.crm.com/customers');
@@ -1084,14 +1108,14 @@ public class AccountRules {
 1083     req.setBody(JSON.serialize(account));
 1084     Http http = new Http();
 1085     HttpResponse res = http.send(req);
-1086 
+1086
 1087     // HIGH-LEVEL: Notification
 1088     sendWelcomeEmail(account);
 1089 }
 1090 ```
-1091 
+1091
 1092 ### The Solution
-1093 
+1093
 1094 ```apex
 1095 // GOOD: Consistent high-level abstraction
 1096 public void processNewCustomer(Account account) {
@@ -1101,25 +1125,25 @@ public class AccountRules {
 1100     syncToExternalCRM(account);
 1101     sendWelcomeEmail(account);
 1102 }
-1103 
+1103
 1104 // Low-level details extracted to focused methods
 1105 private void normalizePhoneNumber(Account account) {
 1106     if (String.isBlank(account.Phone)) return;
-1107 
+1107
 1108     String digitsOnly = account.Phone.replaceAll('[^0-9]', '');
 1109     if (digitsOnly.length() == 10) {
 1110         digitsOnly = '1' + digitsOnly;
 1111     }
 1112     account.Phone = '+' + digitsOnly;
 1113 }
-1114 
+1114
 1115 private void syncToExternalCRM(Account account) {
 1116     CRMIntegrationService.syncCustomer(account);
 1117 }
 1118 ```
-1119 
+1119
 1120 ### Abstraction Layers in Apex
-1121 
+1121
 1122 ```
 1123 ┌─────────────────────────────────────────────────────────────┐
 1124 │  TRIGGER LAYER                                              │
@@ -1151,33 +1175,33 @@ public class AccountRules {
 1150 │  - Integration services for external calls                  │
 1151 └─────────────────────────────────────────────────────────────┘
 1152 ```
-1153 
+1153
 1154 ### Guidelines
-1155 
+1155
 1156 | Level | Should Contain | Should NOT Contain |
 1157 |-------|---------------|-------------------|
 1158 | High (Orchestration) | Method calls, flow control | SOQL, DML, string parsing |
 1159 | Mid (Domain) | Business rules, validation | HTTP calls, database queries |
 1160 | Low (Data Access) | SOQL, DML, HTTP | Business decisions |
-1161 
+1161
 1162 ### Signs of Mixed Abstraction
-1163 
+1163
 1164 - A method has both `[SELECT ...]` and business logic
 1165 - HTTP request building next to email sending
 1166 - String manipulation in a method that also updates records
 1167 - Governor limit checks scattered among business rules
-1168 
+1168
 1169 ### Benefits
-1170 
+1170
 1171 - Each method is easier to understand in isolation
 1172 - Methods at the same level can be tested with similar techniques
 1173 - Changes to implementation don't affect orchestration
 1174 - Code reads like a high-level description of the process
-1175 
+1175
 1176 ---
-1177 
+1177
 1178 ## Pattern Selection Guide
-1179 
+1179
 1180 | Need | Pattern |
 1181 |------|---------|
 1182 | Centralize object creation | Factory |
@@ -1192,3 +1216,4 @@ public class AccountRules {
 1191 | Simplify complex systems | Facade |
 1192 | Encapsulate business rules | Domain Class |
 1193 | Consistent method structure | Abstraction Levels |
+````

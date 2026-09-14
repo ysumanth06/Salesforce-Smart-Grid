@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Smart Grid Data Quality</masterLabel>
+    <description
+  >Side inspection panel for dataset health, duplicates, and missing values.</description>
+</LightningComponentBundle>

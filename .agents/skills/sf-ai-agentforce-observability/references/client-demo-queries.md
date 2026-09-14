@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # STDM Query Walkthrough - Client Demo
 
 Step-by-step queries for exploring Session Tracing Data Model in Data Cloud Query Console.
@@ -161,15 +162,15 @@ ORDER BY InvocationCount DESC
 
 ## Field Reference
 
-| Friendly Name | Actual Field |
-|---------------|--------------|
-| SessionID | `ssot__Id__c` |
-| StartTime | `ssot__StartTimestamp__c` |
-| EndTime | `ssot__EndTimestamp__c` |
-| EndType | `ssot__AiAgentSessionEndType__c` |
-| InteractionID | `ssot__Id__c` |
-| Topic | `ssot__TopicApiName__c` |
-| StepType | `ssot__AiAgentInteractionStepType__c` |
-| ActionName | `ssot__Name__c` |
-| MessageType | `ssot__AiAgentInteractionMessageType__c` |
-| Content | `ssot__ContentText__c` |
+| Friendly Name | Actual Field                             |
+| ------------- | ---------------------------------------- |
+| SessionID     | `ssot__Id__c`                            |
+| StartTime     | `ssot__StartTimestamp__c`                |
+| EndTime       | `ssot__EndTimestamp__c`                  |
+| EndType       | `ssot__AiAgentSessionEndType__c`         |
+| InteractionID | `ssot__Id__c`                            |
+| Topic         | `ssot__TopicApiName__c`                  |
+| StepType      | `ssot__AiAgentInteractionStepType__c`    |
+| ActionName    | `ssot__Name__c`                          |
+| MessageType   | `ssot__AiAgentInteractionMessageType__c` |
+| Content       | `ssot__ContentText__c`                   |

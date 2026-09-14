@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Industry Frameworks for Agentforce Conversation Design
 
 This guide maps five leading conversation design frameworks to Salesforce Agentforce implementations. Use these frameworks as lenses to evaluate and improve your agent's conversational quality.
@@ -18,9 +19,11 @@ This guide maps five leading conversation design frameworks to Salesforce Agentf
 Google adapts philosopher Paul Grice's four maxims for conversational AI:
 
 ##### Maxim of Quantity
+
 **Principle:** Provide the right amount of information—not too much, not too little.
 
 **Agentforce Application:**
+
 ```yaml
 # Topic-Level Instruction Example
 Instructions: |
@@ -30,6 +33,7 @@ Instructions: |
 ```
 
 **Example Violation:**
+
 ```
 User: What's your return policy?
 
@@ -41,6 +45,7 @@ Agent: Our return policy states that all returns must be initiated within
 ```
 
 **Example Adherence:**
+
 ```
 User: What's your return policy?
 
@@ -51,9 +56,11 @@ Agent: You can return items within 30 days of purchase for a full refund.
 ```
 
 ##### Maxim of Quality
+
 **Principle:** Be truthful and evidence-based. Don't guess or hallucinate.
 
 **Agentforce Application:**
+
 ```yaml
 # Agent-Level Instruction Example
 Instructions: |
@@ -66,6 +73,7 @@ Instructions: |
 ```
 
 **Anti-Pattern: Hallucination**
+
 ```
 User: Do you offer price matching?
 
@@ -74,6 +82,7 @@ Agent: Yes, we match any competitor's price within 15 days of purchase!
 ```
 
 **Correct: Acknowledge Uncertainty**
+
 ```
 User: Do you offer price matching?
 
@@ -83,9 +92,11 @@ Agent: I don't see a price matching policy in our current documentation.
 ```
 
 ##### Maxim of Relation (Relevance)
+
 **Principle:** Stay on topic. Don't introduce unrelated information.
 
 **Agentforce Application:**
+
 ```yaml
 # Topic-Level Instruction Example
 Topic: Password Reset
@@ -96,6 +107,7 @@ Instructions: |
 ```
 
 **Example Violation:**
+
 ```
 User: I forgot my password.
 
@@ -106,6 +118,7 @@ Agent: I can help you reset your password! By the way, did you know we just
 ```
 
 **Example Adherence:**
+
 ```
 User: I forgot my password.
 
@@ -114,9 +127,11 @@ Agent: I can help you reset it. What's the email address associated with
 ```
 
 ##### Maxim of Manner (Clarity)
+
 **Principle:** Be clear, concise, and orderly. Avoid jargon and ambiguity.
 
 **Agentforce Application:**
+
 ```yaml
 # Agent-Level Tone Setting
 Tone: Casual
@@ -126,12 +141,14 @@ Instructions: |
 ```
 
 **Example Violation:**
+
 ```
 Agent: To authenticate your identity, we'll need to initiate a verification
        protocol via SMS OTP to your registered MSISDN.
 ```
 
 **Example Adherence:**
+
 ```
 Agent: To verify your identity, I'll send a code to your phone number.
        Let me know when you receive it.
@@ -140,19 +157,21 @@ Agent: To verify your identity, I'll send a code to your phone number.
 #### 2. Persona Development
 
 **Google's Framework:**
+
 - **Professional:** Knowledgeable, formal, authoritative
 - **Friendly:** Warm, conversational, empathetic
 - **Enthusiastic:** Energetic, motivating, positive
 
 **Agentforce Mapping:**
 
-| Google Persona | Agentforce Tone | Use Case |
-|----------------|-----------------|----------|
-| Professional | Formal | Financial services, healthcare, legal |
-| Friendly | Casual | Retail, hospitality, consumer tech |
-| Enthusiastic | Casual (with positivity) | Fitness, education, community platforms |
+| Google Persona | Agentforce Tone          | Use Case                                |
+| -------------- | ------------------------ | --------------------------------------- |
+| Professional   | Formal                   | Financial services, healthcare, legal   |
+| Friendly       | Casual                   | Retail, hospitality, consumer tech      |
+| Enthusiastic   | Casual (with positivity) | Fitness, education, community platforms |
 
 **Example Configuration:**
+
 ```yaml
 Agent Settings:
   Tone: Casual
@@ -171,11 +190,13 @@ Agent-Level Instructions: |
 Google identifies four error types and recovery strategies:
 
 ##### Error Type 1: No Match
+
 **Problem:** Agent didn't understand the user's input.
 
 **Google Strategy:** Rapid reprompt with context.
 
 **Agentforce Implementation:**
+
 ```yaml
 Topic: Fallback / Out of Scope
 Instructions: |
@@ -189,11 +210,13 @@ Instructions: |
 ```
 
 ##### Error Type 2: Ambiguity
+
 **Problem:** User's intent could match multiple topics.
 
 **Google Strategy:** Clarify with options.
 
 **Agentforce Implementation:**
+
 ```
 User: I need to change my account.
 
@@ -205,11 +228,13 @@ Agent: I can help with that! What would you like to change?
 ```
 
 ##### Error Type 3: System Error
+
 **Problem:** Action failed (API timeout, Flow error).
 
 **Google Strategy:** Apologize, explain, offer alternative.
 
 **Agentforce Implementation:**
+
 ```yaml
 Action: Create Case (Apex)
 Error Handling: |
@@ -220,11 +245,13 @@ Error Handling: |
 ```
 
 ##### Error Type 4: Unexpected Input
+
 **Problem:** User provides information in wrong format or context.
 
 **Google Strategy:** Gentle correction with example.
 
 **Agentforce Implementation:**
+
 ```
 Agent: What's the order number you need help with?
 
@@ -249,13 +276,13 @@ Agent: I'll need the order number to look that up—it's a 8-digit number
 
 IBM's patterns map directly to Agentforce implementations (see [conversation-patterns.md](conversation-patterns.md)):
 
-| IBM Pattern | Agentforce Implementation | Primary Mechanism |
-|-------------|---------------------------|-------------------|
-| Q&A | Knowledge retrieval, simple lookups | Knowledge actions, Flow queries |
-| Information Gathering | Multi-turn data collection | Flow with input variables |
-| Process Automation | Guided workflows | Sequential actions with state tracking |
-| Troubleshooting | Diagnosis trees | Branching Flow logic |
-| Human Handoff | Escalation | Omni-Channel routing |
+| IBM Pattern           | Agentforce Implementation           | Primary Mechanism                      |
+| --------------------- | ----------------------------------- | -------------------------------------- |
+| Q&A                   | Knowledge retrieval, simple lookups | Knowledge actions, Flow queries        |
+| Information Gathering | Multi-turn data collection          | Flow with input variables              |
+| Process Automation    | Guided workflows                    | Sequential actions with state tracking |
+| Troubleshooting       | Diagnosis trees                     | Branching Flow logic                   |
+| Human Handoff         | Escalation                          | Omni-Channel routing                   |
 
 **IBM's Key Insight:** Most conversations are combinations of these five patterns, not standalone interactions.
 
@@ -264,19 +291,21 @@ IBM's patterns map directly to Agentforce implementations (see [conversation-pat
 #### 2. Conversation State Management
 
 **IBM Framework:**
+
 - **Context Variables:** Store data across turns (user inputs, intermediate results)
 - **Slots:** Required information to complete an intent
 - **Session Variables:** Temporary data cleared after conversation ends
 
 **Agentforce Equivalent:**
 
-| IBM Concept | Agentforce Implementation |
-|-------------|---------------------------|
+| IBM Concept       | Agentforce Implementation                               |
+| ----------------- | ------------------------------------------------------- |
 | Context Variables | Agentforce maintains turn-by-turn context automatically |
-| Slots | Flow Input Variables in Information Gathering actions |
-| Session Variables | Flow Variables scoped to conversation session |
+| Slots             | Flow Input Variables in Information Gathering actions   |
+| Session Variables | Flow Variables scoped to conversation session           |
 
 **Example: Multi-Turn State Tracking**
+
 ```yaml
 Flow: Collect Case Details
 Variables:
@@ -297,6 +326,7 @@ Decision: What to Ask Next
 #### 3. Intent Confidence Thresholds
 
 **IBM Recommendation:**
+
 - **High confidence (>0.8):** Execute action immediately
 - **Medium confidence (0.5-0.8):** Confirm with user before executing
 - **Low confidence (<0.5):** Clarify intent
@@ -320,6 +350,7 @@ Instructions: |
 **IBM Framework:** Allow users to digress (go off-topic mid-conversation), then return to original topic.
 
 **Example Digression:**
+
 ```
 Agent: What's your order number? [Information Gathering for refund]
 
@@ -376,6 +407,7 @@ Agent-Level Instructions: |
 ```
 
 **Anti-Pattern: Hidden AI**
+
 ```
 ❌ Don't pretend to be human:
    "Hi, I'm Sarah from Customer Service!"
@@ -403,6 +435,7 @@ Agent-Level Instructions: |
 **Pattern: Thumbs Up/Down**
 
 While Agentforce doesn't have built-in thumbs up/down UI, you can implement feedback via:
+
 - **Post-Chat Survey:** Triggered via Flow after conversation ends
 - **Explicit Feedback Prompt:** "Was this helpful? Reply YES or NO."
 
@@ -436,6 +469,7 @@ Agent: You can return items within 30 days for a full refund.
 **Agentforce Application:**
 
 **Prevention via Validation:**
+
 ```yaml
 Action: Update Email Address
 Action-Level Instructions: |
@@ -446,6 +480,7 @@ Action-Level Instructions: |
 ```
 
 **Recovery via Undo:**
+
 ```yaml
 Topic: Cancel Subscription
 Instructions: |
@@ -472,6 +507,7 @@ Action-Level Instructions: |
 ```
 
 **Pattern: Acknowledge Before Acting**
+
 ```
 Agent: Let me look up your order details... [acknowledge, then act]
        [5 second pause while Flow runs]
@@ -497,6 +533,7 @@ Agent: Let me look up your order details... [acknowledge, then act]
 Define brand voice in a style guide, then encode in Agent-Level Instructions:
 
 **Example: Casual Tech Brand**
+
 ```yaml
 Agent-Level Instructions: |
   Our brand voice is friendly, approachable, and knowledgeable. Use:
@@ -511,6 +548,7 @@ Agent-Level Instructions: |
 ```
 
 **Example: Formal Financial Brand**
+
 ```yaml
 Agent-Level Instructions: |
   Our brand voice is professional, trustworthy, and precise. Use:
@@ -531,6 +569,7 @@ Agent-Level Instructions: |
 **Agentforce Application:**
 
 **Anti-Pattern: Conflicting Instructions**
+
 ```yaml
 Agent-Level: |
   Always provide detailed explanations for your recommendations.
@@ -540,6 +579,7 @@ Topic-Level: |
 ```
 
 **Best Practice: Hierarchical Clarity**
+
 ```yaml
 Agent-Level: |
   Provide concise responses (2-3 sentences) unless the customer asks for
@@ -556,22 +596,25 @@ Topic-Level (Technical Support): |
 
 **Agentforce Application:**
 
-| Accessibility Need | Design Pattern |
-|--------------------|----------------|
-| **Screen Reader Users** | Avoid relying on formatting (bold, italics) to convey meaning. Say "IMPORTANT:" instead of just using bold. |
-| **Cognitive Disabilities** | Use simple language, short sentences, bullet points for lists. |
-| **Visual Impairments** | Don't use color alone to convey info ("click the red button" → "click the Cancel button") |
-| **Motor Impairments** | Offer button-based choices, not just free-text input. |
+| Accessibility Need         | Design Pattern                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Screen Reader Users**    | Avoid relying on formatting (bold, italics) to convey meaning. Say "IMPORTANT:" instead of just using bold. |
+| **Cognitive Disabilities** | Use simple language, short sentences, bullet points for lists.                                              |
+| **Visual Impairments**     | Don't use color alone to convey info ("click the red button" → "click the Cancel button")                   |
+| **Motor Impairments**      | Offer button-based choices, not just free-text input.                                                       |
 
 **Example: Button-Based Choices**
-```yaml
-Agent: What would you like help with today?
-       [Order Status] [Returns] [Technical Support] [Talk to a Person]
 
-       # Instead of forcing free-text input, provide clickable options
+```yaml
+Agent:
+  What would you like help with today?
+  [Order Status] [Returns] [Technical Support] [Talk to a Person]
+
+  # Instead of forcing free-text input, provide clickable options
 ```
 
 In Agentforce, you can implement this via:
+
 - **Quick Reply Buttons:** Configured in Chat Settings (Embedded Service)
 - **Prompt Text:** "Reply 1 for Order Status, 2 for Returns, 3 for Technical Support"
 
@@ -592,6 +635,7 @@ Salesforce defines five agentic patterns based on autonomy and collaboration:
 **Definition:** React to user input in real-time via chat/voice.
 
 **Characteristics:**
+
 - User-initiated
 - Turn-by-turn interaction
 - Context-aware within session
@@ -600,6 +644,7 @@ Salesforce defines five agentic patterns based on autonomy and collaboration:
 **Agentforce Implementation:** This is the default Agentforce pattern.
 
 **Use Cases:**
+
 - Customer support chatbots
 - IT helpdesk assistants
 - Sales qualification bots
@@ -609,16 +654,19 @@ Salesforce defines five agentic patterns based on autonomy and collaboration:
 **Definition:** Initiate conversations based on triggers (e.g., abandoned cart, case SLA breach).
 
 **Characteristics:**
+
 - System-initiated
 - Event-driven
 - Outbound messaging (email, SMS, push notification)
 
 **Agentforce Implementation:**
+
 - **Trigger:** Flow triggered by Platform Event or Scheduled Job
 - **Action:** Flow sends message via SMS (Twilio) or Email
 - **Handoff:** If customer responds, route to conversational Agentforce agent
 
 **Example Flow:**
+
 ```
 Trigger: Case.Age > 48 hours AND Status = 'Open'
 Action: Send SMS to customer: "Your support case hasn't been resolved yet.
@@ -631,15 +679,18 @@ If Response = YES: Route to Agentforce agent with case context
 **Definition:** Observe user activity and provide suggestions without blocking workflow.
 
 **Characteristics:**
+
 - Non-intrusive
 - Recommendation-based
 - Integrated into UI (Einstein for Sales, Einstein Activity Capture)
 
 **Agentforce Implementation:**
+
 - **Not native to Agentforce** (Agentforce is conversational)
 - **Alternative:** Einstein Next Best Action in Salesforce UI
 
 **Example (Outside Agentforce):**
+
 - Sales rep views Account record → Einstein suggests "This customer is at risk of churn. Recommend scheduling a check-in call."
 
 #### 4. Autonomous Agents
@@ -647,17 +698,20 @@ If Response = YES: Route to Agentforce agent with case context
 **Definition:** Execute multi-step tasks without human approval (within defined guardrails).
 
 **Characteristics:**
+
 - Long-running workflows
 - Multi-action execution
 - Operates asynchronously
 
 **Agentforce Implementation:**
+
 - **Example:** Agent automatically resolves cases when conditions are met
   - Trigger: Case with Type = 'Password Reset' AND Email Sent = True
   - Action: Wait 24 hours → If no customer response, auto-close case with note
   - No human approval needed (within policy)
 
 **Guardrails Required:**
+
 - Limit to low-risk actions (auto-close cases, send reminders, update fields)
 - Never autonomous for high-risk actions (delete data, issue refunds over $X)
 
@@ -666,6 +720,7 @@ If Response = YES: Route to Agentforce agent with case context
 **Definition:** Multiple specialized agents working together, each handling a domain.
 
 **Characteristics:**
+
 - Agent-to-agent handoff
 - Orchestration layer
 - Shared context
@@ -673,15 +728,18 @@ If Response = YES: Route to Agentforce agent with case context
 **Agentforce Implementation:**
 
 **Pattern: Domain-Specific Agents**
+
 - **Agent 1:** Pre-Sales (lead qualification, product info)
 - **Agent 2:** Order Support (order status, shipping, returns)
 - **Agent 3:** Technical Support (troubleshooting, bug reports)
 
 **Orchestration:**
+
 - **Master Agent:** Routes to specialist agent based on user intent
 - **Context Passing:** When Agent 1 hands off to Agent 2, pass conversation summary + key IDs
 
 **Implementation:**
+
 ```yaml
 Master Agent: "Customer Service Hub"
   Topic: Route to Specialist
@@ -698,13 +756,13 @@ Master Agent: "Customer Service Hub"
 
 ## Framework Comparison Matrix
 
-| Framework | Primary Focus | Best Used For | Agentforce Strength |
-|-----------|---------------|---------------|---------------------|
-| **Google Conversation Design** | Human-centered principles, persona | Defining agent personality, error handling | Agent-level instructions, tone settings |
-| **IBM Natural Conversation** | Patterns, state management | Multi-turn flows, slot filling | Flow variables, topic transitions |
-| **PatternFly AI** | Enterprise UX, transparency, ethics | Trust-building, accessibility | Welcome messages, feedback loops |
-| **Salesforce Conversational AI** | Brand consistency, LLM prompts | Instruction writing, cross-channel voice | Instruction hierarchy, brand voice guide |
-| **Salesforce Architect Agentic** | Agent taxonomy, orchestration | Multi-agent systems, autonomy levels | Handoff mechanisms, agent specialization |
+| Framework                        | Primary Focus                       | Best Used For                              | Agentforce Strength                      |
+| -------------------------------- | ----------------------------------- | ------------------------------------------ | ---------------------------------------- |
+| **Google Conversation Design**   | Human-centered principles, persona  | Defining agent personality, error handling | Agent-level instructions, tone settings  |
+| **IBM Natural Conversation**     | Patterns, state management          | Multi-turn flows, slot filling             | Flow variables, topic transitions        |
+| **PatternFly AI**                | Enterprise UX, transparency, ethics | Trust-building, accessibility              | Welcome messages, feedback loops         |
+| **Salesforce Conversational AI** | Brand consistency, LLM prompts      | Instruction writing, cross-channel voice   | Instruction hierarchy, brand voice guide |
+| **Salesforce Architect Agentic** | Agent taxonomy, orchestration       | Multi-agent systems, autonomy levels       | Handoff mechanisms, agent specialization |
 
 ---
 
@@ -714,13 +772,13 @@ Real-world Agentforce agents should blend frameworks:
 
 ### Example: E-Commerce Support Agent
 
-| Design Decision | Framework Applied | Agentforce Configuration |
-|-----------------|-------------------|--------------------------|
-| **Persona: Friendly helper** | Google (Persona) | Tone: Casual, conversational instructions |
-| **Pattern: Information Gathering for returns** | IBM (Patterns) | Flow with input variables for return request |
-| **Transparency: "I'm an AI assistant"** | PatternFly (Transparency) | Welcome message disclosure |
-| **Brand voice: Match website tone** | Salesforce Conv AI (Brand) | Style guide encoded in agent instructions |
-| **Handoff to human for refunds >$500** | Salesforce Architect (Autonomy) | Escalation topic with Omni-Channel routing |
+| Design Decision                                | Framework Applied               | Agentforce Configuration                     |
+| ---------------------------------------------- | ------------------------------- | -------------------------------------------- |
+| **Persona: Friendly helper**                   | Google (Persona)                | Tone: Casual, conversational instructions    |
+| **Pattern: Information Gathering for returns** | IBM (Patterns)                  | Flow with input variables for return request |
+| **Transparency: "I'm an AI assistant"**        | PatternFly (Transparency)       | Welcome message disclosure                   |
+| **Brand voice: Match website tone**            | Salesforce Conv AI (Brand)      | Style guide encoded in agent instructions    |
+| **Handoff to human for refunds >$500**         | Salesforce Architect (Autonomy) | Escalation topic with Omni-Channel routing   |
 
 ---
 

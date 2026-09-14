@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Builder Trace API — Reverse-Engineered Internal Endpoint
 
 How the Agentforce Builder's "Trace" tab renders real-time execution telemetry, the exact internal API endpoints, request/response schemas, and how to capture trace data programmatically.
@@ -15,28 +16,28 @@ The Agentforce Builder's Trace tab is powered by two distinct systems:
 
 The **live** trace rendered during Builder testing uses an **Aura controller action** — confirmed via CDP network capture:
 
-| Aspect | Detail |
-|--------|--------|
-| **Endpoint** | `serviceComponent://ui.agent.authoring.components.aura.controller.AgentAuthoringController/ACTION$getSimulationPlanTraces` |
-| **Protocol** | Aura framework (POST to `/aura`) |
-| **Auth** | Cookie-based browser session (no explicit `Authorization` header) |
-| **Trigger** | Called automatically after SSE stream delivers `INFORM` event |
-| **Input** | `{ planId, sessionId, version: "1.0" }` |
-| **Output** | `PlanSuccessResponse` with `plan[]` array of 13 step types |
-| **Latency** | Real-time (called after agent responds) |
-| **Persistence** | Transient — not stored in STDM |
+| Aspect          | Detail                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Endpoint**    | `serviceComponent://ui.agent.authoring.components.aura.controller.AgentAuthoringController/ACTION$getSimulationPlanTraces` |
+| **Protocol**    | Aura framework (POST to `/aura`)                                                                                           |
+| **Auth**        | Cookie-based browser session (no explicit `Authorization` header)                                                          |
+| **Trigger**     | Called automatically after SSE stream delivers `INFORM` event                                                              |
+| **Input**       | `{ planId, sessionId, version: "1.0" }`                                                                                    |
+| **Output**      | `PlanSuccessResponse` with `plan[]` array of 13 step types                                                                 |
+| **Latency**     | Real-time (called after agent responds)                                                                                    |
+| **Persistence** | Transient — not stored in STDM                                                                                             |
 
 ### Layer 2: Persisted Session Tracing (STDM in Data Cloud)
 
 After 5-15 minutes, a **subset** of trace data is persisted to Data Cloud across 24 DMOs:
 
-| Aspect | Detail |
-|--------|--------|
-| **Storage** | Data Cloud (Data 360) |
-| **Query API** | Data Cloud Query API (SQL-like) |
-| **Auth** | JWT Bearer via External Client App |
-| **Step Types** | 5 (vs 13 in real-time trace) |
-| **Retention** | 13 months (prod) / 30 days (sandbox) |
+| Aspect         | Detail                               |
+| -------------- | ------------------------------------ |
+| **Storage**    | Data Cloud (Data 360)                |
+| **Query API**  | Data Cloud Query API (SQL-like)      |
+| **Auth**       | JWT Bearer via External Client App   |
+| **Step Types** | 5 (vs 13 in real-time trace)         |
+| **Retention**  | 13 months (prod) / 30 days (sandbox) |
 
 See [data-model-reference.md](data-model-reference.md) and [query-patterns.md](query-patterns.md) for full STDM documentation.
 
@@ -103,11 +104,11 @@ X-B3-SpanId: {span_id}
 
 ### SSE Event Types
 
-| Event Type | Purpose | Key Fields |
-|------------|---------|------------|
-| `TEXT_CHUNK` | Streaming response text | `offset`, `message.message` (word/phrase) |
-| `INFORM` | Final complete response | `message.message`, `planId`, `feedbackId`, `isContentSafe`, `citedReferences[]` |
-| `END_OF_TURN` | Turn completion marker | `message.type: "EndOfTurn"` |
+| Event Type    | Purpose                 | Key Fields                                                                      |
+| ------------- | ----------------------- | ------------------------------------------------------------------------------- |
+| `TEXT_CHUNK`  | Streaming response text | `offset`, `message.message` (word/phrase)                                       |
+| `INFORM`      | Final complete response | `message.message`, `planId`, `feedbackId`, `isContentSafe`, `citedReferences[]` |
+| `END_OF_TURN` | Turn completion marker  | `message.type: "EndOfTurn"`                                                     |
 
 ### INFORM Event Schema (Critical — Contains `planId`)
 
@@ -151,16 +152,18 @@ URL-encoded body (decoded):
 
 ```json
 {
-  "actions": [{
-    "id": "48;a",
-    "descriptor": "serviceComponent://ui.agent.authoring.components.aura.controller.AgentAuthoringController/ACTION$getSimulationPlanTraces",
-    "callingDescriptor": "UNKNOWN",
-    "params": {
-      "planId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-      "sessionId": "019xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "version": "1.0"
+  "actions": [
+    {
+      "id": "48;a",
+      "descriptor": "serviceComponent://ui.agent.authoring.components.aura.controller.AgentAuthoringController/ACTION$getSimulationPlanTraces",
+      "callingDescriptor": "UNKNOWN",
+      "params": {
+        "planId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+        "sessionId": "019xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        "version": "1.0"
+      }
     }
-  }]
+  ]
 }
 ```
 
@@ -191,21 +194,21 @@ URL-encoded body (decoded):
 
 Captured from a single agent turn (46 steps total):
 
-| Step Type | Count | Description | Key Data Fields |
-|-----------|-------|-------------|-----------------|
-| `VariableUpdateStep` | 28 | Variable state change | `variable_updates[].{variable_name, variable_past_value, variable_new_value, variable_change_reason, directive_context}` |
-| `BeforeReasoningIterationStep` | 3 | Pre-iteration setup | `agent_name`, `action_names[]` |
-| `NodeEntryStateStep` | 2 | Topic/agent entry | `agent_name`, `directive_context`, `state_variables{}` |
-| `BeforeReasoningStep` | 2 | Pre-reasoning setup | `agent_name`, `action_names[]` |
-| `EnabledToolsStep` | 2 | Available tools list | `agent_name`, `enabled_tools[]`, `directive_context` |
-| `LLMStep` | 2 | LLM call with full prompt | `agent_name`, `prompt_name`, `prompt_content`, `execution_latency`, `messages_sent[]`, `tools_sent[]`, `response_messages[]` |
-| `UserInputStep` | 1 | User message | `message` |
-| `SessionInitialStateStep` | 1 | Session init state | `variable_values{}`, `directive_context` |
-| `TransitionStep` | 1 | Topic transition | `from_agent`, `to_agent`, `current_state{}`, `transition_type`, `transition_mode`, `directive_context` |
-| `FunctionStep` | 1 | Flow/Apex action | `function.{name, input{}, output{}, errors}`, `executionLatency` |
-| `AfterReasoningStep` | 1 | Post-reasoning cleanup | `agent_name`, `action_names[]` |
-| `ReasoningStep` | 1 | Grounding evaluation | `category` (GROUNDED/UNGROUNDED), `reason` |
-| `PlannerResponseStep` | 1 | Final response | `message`, `responseType`, `isContentSafe`, `safetyScore.category_scores{}` |
+| Step Type                      | Count | Description               | Key Data Fields                                                                                                              |
+| ------------------------------ | ----- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `VariableUpdateStep`           | 28    | Variable state change     | `variable_updates[].{variable_name, variable_past_value, variable_new_value, variable_change_reason, directive_context}`     |
+| `BeforeReasoningIterationStep` | 3     | Pre-iteration setup       | `agent_name`, `action_names[]`                                                                                               |
+| `NodeEntryStateStep`           | 2     | Topic/agent entry         | `agent_name`, `directive_context`, `state_variables{}`                                                                       |
+| `BeforeReasoningStep`          | 2     | Pre-reasoning setup       | `agent_name`, `action_names[]`                                                                                               |
+| `EnabledToolsStep`             | 2     | Available tools list      | `agent_name`, `enabled_tools[]`, `directive_context`                                                                         |
+| `LLMStep`                      | 2     | LLM call with full prompt | `agent_name`, `prompt_name`, `prompt_content`, `execution_latency`, `messages_sent[]`, `tools_sent[]`, `response_messages[]` |
+| `UserInputStep`                | 1     | User message              | `message`                                                                                                                    |
+| `SessionInitialStateStep`      | 1     | Session init state        | `variable_values{}`, `directive_context`                                                                                     |
+| `TransitionStep`               | 1     | Topic transition          | `from_agent`, `to_agent`, `current_state{}`, `transition_type`, `transition_mode`, `directive_context`                       |
+| `FunctionStep`                 | 1     | Flow/Apex action          | `function.{name, input{}, output{}, errors}`, `executionLatency`                                                             |
+| `AfterReasoningStep`           | 1     | Post-reasoning cleanup    | `agent_name`, `action_names[]`                                                                                               |
+| `ReasoningStep`                | 1     | Grounding evaluation      | `category` (GROUNDED/UNGROUNDED), `reason`                                                                                   |
+| `PlannerResponseStep`          | 1     | Final response            | `message`, `responseType`, `isContentSafe`, `safetyScore.category_scores{}`                                                  |
 
 ### Common Fields (All Step Types)
 
@@ -242,9 +245,9 @@ Contains the **full LLM prompt, tool definitions, and response** — the most va
     "execution_latency": 1879
   },
   "messages_sent": [
-    {"role": "system", "content": "Topic Selector & Safety Router..."},
-    {"role": "user", "content": "I need help with my order"},
-    {"role": "system", "content": "Customer: Jane Doe..."}
+    { "role": "system", "content": "Topic Selector & Safety Router..." },
+    { "role": "user", "content": "I need help with my order" },
+    { "role": "system", "content": "Customer: Jane Doe..." }
   ],
   "tools_sent": [
     "go_order_support",
@@ -254,7 +257,11 @@ Contains the **full LLM prompt, tool definitions, and response** — the most va
     "Reverse_Engineering"
   ],
   "response_messages": [
-    {"role": "assistant", "content": "", "tool_invocation": {"name": "go_order_support", "arguments": "{}"}}
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_invocation": { "name": "go_order_support", "arguments": "{}" }
+    }
   ]
 }
 ```
@@ -270,8 +277,8 @@ Shows Flow/Apex invocation with input/output:
   "type": "FunctionStep",
   "function": {
     "name": "Get_Order_Status",
-    "input": {"orderId": "ORD-12345"},
-    "output": {"status": "Shipped", "trackingNumber": "1Z999..."},
+    "input": { "orderId": "ORD-12345" },
+    "output": { "status": "Shipped", "trackingNumber": "1Z999..." },
     "errors": null
   },
   "executionLatency": 2675
@@ -290,7 +297,11 @@ Shows topic-to-topic transitions with full state:
   "data": {
     "from_agent": "Topic Selector",
     "to_agent": "order_support",
-    "current_state": {"authenticated": true, "customer_name": "Jane Doe", "...": "..."},
+    "current_state": {
+      "authenticated": true,
+      "customer_name": "Jane Doe",
+      "...": "..."
+    },
     "transition_type": "ROUTING",
     "transition_mode": "DIRECT",
     "directive_context": "on_message"
@@ -314,8 +325,14 @@ Contains the safety score breakdown:
     "safetyScore": {
       "safety_score": 0.99,
       "category_scores": {
-        "toxicity": 0, "hate": 0, "identity": 0, "violence": 0,
-        "physical": 0, "sexual": 0, "profanity": 0, "biased": 0
+        "toxicity": 0,
+        "hate": 0,
+        "identity": 0,
+        "violence": 0,
+        "physical": 0,
+        "sexual": 0,
+        "profanity": 0,
+        "biased": 0
       }
     }
   }
@@ -340,21 +357,21 @@ The agent's self-assessment of response quality:
 
 ## Real-Time → STDM Field Mapping (Confirmed)
 
-| Real-Time Step Type (13) | Persisted STDM Step Type (5) | Data Loss |
-|--------------------------|------------------------------|-----------|
-| `UserInputStep` | `AIAgentInteractionMessage` (Input type) | None |
-| `SessionInitialStateStep` | Not directly persisted | Full state lost |
-| `NodeEntryStateStep` | `TOPIC_STEP` (partially) | State variables lost |
-| `VariableUpdateStep` | `PreStepVariableText__c` / `PostStepVariableText__c` | Change reasons lost |
-| `BeforeReasoningStep` | Not persisted | Action list lost |
-| `BeforeReasoningIterationStep` | Not persisted | Iteration data lost |
-| `EnabledToolsStep` | Not persisted | Tool list lost |
-| `LLMStep` | `LLM_STEP` | Full prompt content lost; only input/output summaries kept |
-| `TransitionStep` | `TOPIC_STEP` (partially) | Transition mode/type lost |
-| `FunctionStep` | `ACTION_STEP` | Input/output preserved; latency lost |
-| `AfterReasoningStep` | Not persisted | Cleanup data lost |
-| `ReasoningStep` | `LLM_STEP` (ReactValidationPrompt) | Grounding category/reason lost |
-| `PlannerResponseStep` | `AIAgentInteractionMessage` (Output type) | Safety scores lost; content preserved |
+| Real-Time Step Type (13)       | Persisted STDM Step Type (5)                         | Data Loss                                                  |
+| ------------------------------ | ---------------------------------------------------- | ---------------------------------------------------------- |
+| `UserInputStep`                | `AIAgentInteractionMessage` (Input type)             | None                                                       |
+| `SessionInitialStateStep`      | Not directly persisted                               | Full state lost                                            |
+| `NodeEntryStateStep`           | `TOPIC_STEP` (partially)                             | State variables lost                                       |
+| `VariableUpdateStep`           | `PreStepVariableText__c` / `PostStepVariableText__c` | Change reasons lost                                        |
+| `BeforeReasoningStep`          | Not persisted                                        | Action list lost                                           |
+| `BeforeReasoningIterationStep` | Not persisted                                        | Iteration data lost                                        |
+| `EnabledToolsStep`             | Not persisted                                        | Tool list lost                                             |
+| `LLMStep`                      | `LLM_STEP`                                           | Full prompt content lost; only input/output summaries kept |
+| `TransitionStep`               | `TOPIC_STEP` (partially)                             | Transition mode/type lost                                  |
+| `FunctionStep`                 | `ACTION_STEP`                                        | Input/output preserved; latency lost                       |
+| `AfterReasoningStep`           | Not persisted                                        | Cleanup data lost                                          |
+| `ReasoningStep`                | `LLM_STEP` (ReactValidationPrompt)                   | Grounding category/reason lost                             |
+| `PlannerResponseStep`          | `AIAgentInteractionMessage` (Output type)            | Safety scores lost; content preserved                      |
 
 **Key finding**: The real-time trace contains **13 step types** vs **5 in STDM**. The most valuable debugging data (full LLM prompts, variable change reasons, safety scores, grounding evaluations) is **not persisted** to Data Cloud.
 
@@ -398,11 +415,11 @@ Params: {
 
 ## Auth Patterns (Confirmed)
 
-| Endpoint | Auth Method | Header |
-|----------|------------|--------|
-| **SSE Stream** (`/messages/stream`) | JWT Bearer token | `Authorization: Bearer eyJ...` |
-| **Aura Trace** (`/aura` + `getSimulationPlanTraces`) | Browser cookies | `X-SFDC-Page-Cache`, `X-SFDC-Request-Id` (no Authorization header) |
-| **Aura Telemetry** (`/aura` + instrumentation) | Browser cookies | Same as above |
+| Endpoint                                             | Auth Method      | Header                                                             |
+| ---------------------------------------------------- | ---------------- | ------------------------------------------------------------------ |
+| **SSE Stream** (`/messages/stream`)                  | JWT Bearer token | `Authorization: Bearer eyJ...`                                     |
+| **Aura Trace** (`/aura` + `getSimulationPlanTraces`) | Browser cookies  | `X-SFDC-Page-Cache`, `X-SFDC-Request-Id` (no Authorization header) |
+| **Aura Telemetry** (`/aura` + instrumentation)       | Browser cookies  | Same as above                                                      |
 
 > **Important**: The trace endpoint (`getSimulationPlanTraces`) uses **cookie-based auth only**. It cannot be called with a standalone JWT token. You must maintain a browser session.
 
@@ -459,6 +476,7 @@ Steps in trace:   [count]
 ```
 
 Key findings from initial investigation:
+
 - Architecture is **Aura-based** (Hypothesis A confirmed)
 - SSE stream at `api.salesforce.com` delivers messages; trace is fetched separately via Aura
 - 13 step types in real-time vs 5 in persisted STDM
@@ -470,12 +488,12 @@ Key findings from initial investigation:
 
 ## Programmatic Access Comparison
 
-| API | Trace Depth | Step Types | Full Prompts | Safety Scores | Auth | Docs |
-|-----|------------|------------|-------------|---------------|------|------|
-| **Builder Trace** (this doc) | 13 step types, full state | 13 | ✅ Yes | ✅ Yes | Browser cookies | Internal |
-| **Data Cloud STDM** | 5 step types, summaries | 5 | ❌ No | ❌ No | JWT Bearer | [query-patterns.md](query-patterns.md) |
-| **Testing API** | Actions + topic only | N/A | ❌ No | ❌ No | OAuth | [Salesforce Docs](https://developer.salesforce.com/docs/einstein/genai/guide/testing-api-cli.html) |
-| **Agent Runtime API** | Messages only — no trace | N/A | ❌ No | ❌ No | OAuth | [Salesforce Docs](https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-overview.html) |
+| API                          | Trace Depth               | Step Types | Full Prompts | Safety Scores | Auth            | Docs                                                                                                  |
+| ---------------------------- | ------------------------- | ---------- | ------------ | ------------- | --------------- | ----------------------------------------------------------------------------------------------------- |
+| **Builder Trace** (this doc) | 13 step types, full state | 13         | ✅ Yes       | ✅ Yes        | Browser cookies | Internal                                                                                              |
+| **Data Cloud STDM**          | 5 step types, summaries   | 5          | ❌ No        | ❌ No         | JWT Bearer      | [query-patterns.md](query-patterns.md)                                                                |
+| **Testing API**              | Actions + topic only      | N/A        | ❌ No        | ❌ No         | OAuth           | [Salesforce Docs](https://developer.salesforce.com/docs/einstein/genai/guide/testing-api-cli.html)    |
+| **Agent Runtime API**        | Messages only — no trace  | N/A        | ❌ No        | ❌ No         | OAuth           | [Salesforce Docs](https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-overview.html) |
 
 ---
 

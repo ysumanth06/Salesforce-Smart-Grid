@@ -1,8 +1,9 @@
 <!-- Parent: sf-apex/SKILL.md -->
+
 # Code Smells & Refactoring Guide
 
-> 💡 *Principles inspired by "Clean Apex Code" by Pablo Gonzalez.
-> [Purchase the book](https://link.springer.com/book/10.1007/979-8-8688-1411-2) for complete coverage.*
+> 💡 _Principles inspired by "Clean Apex Code" by Pablo Gonzalez.
+> [Purchase the book](https://link.springer.com/book/10.1007/979-8-8688-1411-2) for complete coverage._
 
 ## Overview
 
@@ -118,6 +119,7 @@ private void sendRequiredNotifications(Opportunity opp) {
 ### When to Extract
 
 Extract a method when:
+
 - The code block can be understood independently
 - It doesn't require knowledge of the caller's implementation
 - It serves a purpose beyond the immediate use case
@@ -552,6 +554,7 @@ A class that knows too much or does too much.
 ### Solution
 
 Split by responsibility:
+
 - Extract domain classes for business rules
 - Create selectors for data access
 - Separate services for different business operations
@@ -563,16 +566,16 @@ See [Design Patterns: Domain Class Pattern](design-patterns.md#domain-class-patt
 
 ## Refactoring Decision Guide
 
-| Smell | Quick Fix | Proper Fix |
-|-------|-----------|------------|
-| Long method | Extract method | Separate concerns into classes |
-| Mixed abstraction | Extract low-level to methods | Create abstraction layers |
-| Boolean parameters | Options object | Strategy pattern |
-| Magic numbers | Named constants | Configuration class |
-| Complex conditionals | Named booleans | Domain class |
-| Duplicate code | Extract method | Selector/Service pattern |
-| Deep nesting | Guard clauses | Command pattern |
-| God class | Split methods | Proper architecture |
+| Smell                | Quick Fix                    | Proper Fix                     |
+| -------------------- | ---------------------------- | ------------------------------ |
+| Long method          | Extract method               | Separate concerns into classes |
+| Mixed abstraction    | Extract low-level to methods | Create abstraction layers      |
+| Boolean parameters   | Options object               | Strategy pattern               |
+| Magic numbers        | Named constants              | Configuration class            |
+| Complex conditionals | Named booleans               | Domain class                   |
+| Duplicate code       | Extract method               | Selector/Service pattern       |
+| Deep nesting         | Guard clauses                | Command pattern                |
+| God class            | Split methods                | Proper architecture            |
 
 ---
 

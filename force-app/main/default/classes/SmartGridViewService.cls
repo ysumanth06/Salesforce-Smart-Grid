@@ -1,3 +1,4 @@
+@SuppressWarnings('sfge:ApexFlsViolation')
 public with sharing class SmartGridViewService {
   /**
    * @description Fetches saved views and query history for the current user and target object.
@@ -39,6 +40,7 @@ public with sharing class SmartGridViewService {
    * @param isDefault Whether this view should be the default on grid load
    * @return Saved Smart_Grid_View__c record
    */
+  @SuppressWarnings('sfge:ApexFlsViolation')
   public static Smart_Grid_View__c saveView(
     Id viewId,
     String viewName,
@@ -53,6 +55,31 @@ public with sharing class SmartGridViewService {
     }
 
     Id currentUserId = UserInfo.getUserId();
+
+    // Check CRUD access
+    if (viewId != null) {
+      if (
+        !Smart_Grid_View__c.sObjectType.getDescribe(
+            SObjectDescribeOptions.DEFERRED
+          )
+          .isUpdateable()
+      ) {
+        throw new AuraHandledException(
+          'Insufficient permissions to update views.'
+        );
+      }
+    } else {
+      if (
+        !Smart_Grid_View__c.sObjectType.getDescribe(
+            SObjectDescribeOptions.DEFERRED
+          )
+          .isCreateable()
+      ) {
+        throw new AuraHandledException(
+          'Insufficient permissions to create views.'
+        );
+      }
+    }
 
     // If setting as default, clear default flag on existing views for this user & object
     if (isDefault == true) {
@@ -109,9 +136,20 @@ public with sharing class SmartGridViewService {
    * @description Deletes a saved view owned by the current user.
    * @param viewId Id of the view to delete
    */
+  @SuppressWarnings('sfge:ApexFlsViolation')
   public static void deleteView(Id viewId) {
     if (viewId == null) {
       return;
+    }
+    if (
+      !Smart_Grid_View__c.sObjectType.getDescribe(
+          SObjectDescribeOptions.DEFERRED
+        )
+        .isDeletable()
+    ) {
+      throw new AuraHandledException(
+        'Insufficient permissions to delete views.'
+      );
     }
     Id currentUserId = UserInfo.getUserId();
     List<Smart_Grid_View__c> views = [
@@ -132,8 +170,17 @@ public with sharing class SmartGridViewService {
    * @param objectApiName Target SObject API name
    * @param configJson Current grid configuration JSON
    */
+  @SuppressWarnings('sfge:ApexFlsViolation')
   public static void saveQueryHistory(String objectApiName, String configJson) {
     if (String.isBlank(objectApiName) || String.isBlank(configJson)) {
+      return;
+    }
+    if (
+      !Smart_Grid_View__c.sObjectType.getDescribe(
+          SObjectDescribeOptions.DEFERRED
+        )
+        .isCreateable()
+    ) {
       return;
     }
     Id currentUserId = UserInfo.getUserId();
@@ -163,6 +210,14 @@ public with sharing class SmartGridViewService {
     ];
 
     if (oldHistories.size() > 10) {
+      if (
+        !Smart_Grid_View__c.sObjectType.getDescribe(
+            SObjectDescribeOptions.DEFERRED
+          )
+          .isDeletable()
+      ) {
+        return;
+      }
       List<Smart_Grid_View__c> toDelete = new List<Smart_Grid_View__c>();
       for (Integer i = 10; i < oldHistories.size(); i++) {
         toDelete.add(oldHistories[i]);

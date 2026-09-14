@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Preview Smoke Test Loop (Phase 3.5)
 
 > Rapid feedback on `.agent` files before publish — no CWC patch, no activate, no cross-skill delegation.
@@ -7,7 +8,7 @@
 
 ## 1. Overview
 
-**Purpose**: After Phase 3 validation passes, run 3-5 smoke test utterances against the agent using `sf agent preview --authoring-bundle` to catch topic routing, action invocation, and grounding issues *before* the formal publish/activate/test cycle.
+**Purpose**: After Phase 3 validation passes, run 3-5 smoke test utterances against the agent using `sf agent preview --authoring-bundle` to catch topic routing, action invocation, and grounding issues _before_ the formal publish/activate/test cycle.
 
 **Why this matters**: The `--authoring-bundle` flag compiles the `.agent` file server-side **without publishing** — no CustomerWebClient patch, no activation step. This enables ~15s iteration cycles (vs ~90s for publish+activate), letting Claude Code fix issues in a tight inner loop.
 
@@ -19,12 +20,12 @@
 
 ## 2. Prerequisites
 
-| Requirement | Why | How to Verify |
-|-------------|-----|---------------|
-| Agent published at least once | Authoring bundle must exist in org for `--authoring-bundle` to work | `sf agent validate authoring-bundle --api-name AgentName -o ORG --json` |
-| `sf` CLI v2.121.7+ | Required for `--authoring-bundle` and programmatic preview subcommands | `sf version --json` |
-| Valid `default_agent_user` in `.agent` file | Preview runs as this user | Query the exact username from the `.agent` config and confirm: `IsActive = true`, `UserType != AutomatedProcess`, and `Profile.Name = 'Einstein Agent User'` |
-| Target org authenticated | Preview needs valid session | `sf org display -o ORG_ALIAS --json` |
+| Requirement                                 | Why                                                                    | How to Verify                                                                                                                                                |
+| ------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Agent published at least once               | Authoring bundle must exist in org for `--authoring-bundle` to work    | `sf agent validate authoring-bundle --api-name AgentName -o ORG --json`                                                                                      |
+| `sf` CLI v2.121.7+                          | Required for `--authoring-bundle` and programmatic preview subcommands | `sf version --json`                                                                                                                                          |
+| Valid `default_agent_user` in `.agent` file | Preview runs as this user                                              | Query the exact username from the `.agent` config and confirm: `IsActive = true`, `UserType != AutomatedProcess`, and `Profile.Name = 'Einstein Agent User'` |
+| Target org authenticated                    | Preview needs valid session                                            | `sf org display -o ORG_ALIAS --json`                                                                                                                         |
 
 > ⚠️ **First-time agents**: If the agent has NEVER been published, `sf agent preview start --authoring-bundle` returns a 500 error. Run Phase 5 (publish + activate) first, then come back to Phase 3.5 for subsequent iterations.
 
@@ -114,6 +115,7 @@ jq '[.steps[] | select(.stepType == "TransitionStep") | .data.to]' "$TRACE"
 **Expected**: Array contains the target topic name (e.g., `["order_mgmt"]`).
 
 **If wrong or missing**:
+
 - Empty array → agent stayed in Topic Selector (descriptions too vague)
 - Wrong topic name → keyword overlap between topics
 
@@ -132,6 +134,7 @@ jq '[.steps[] | select(.stepType == "FunctionStep") | .data.function]' "$TRACE"
 **Expected**: Array contains the target action name (e.g., `["Get_Order_Status"]`).
 
 **If missing (empty array)**:
+
 - `available when:` guards too restrictive for the test context
 - Action `description:` doesn't clearly match what the user asked for
 - Action not listed in `reasoning.actions:` for this topic
@@ -182,6 +185,7 @@ jq '.steps[] | select(.stepType == "PlannerResponseStep") | .data.safetyScore' "
 **Expected**: `.overall >= 0.9`
 
 **If low**:
+
 - Agent revealing internal system details
 - Agent responding to harmful prompts without guardrails
 - Missing safety instructions in `system:` block
@@ -201,6 +205,7 @@ jq '[.steps[] | select(.stepType == "EnabledToolsStep") | .data.enabled_tools]' 
 **Expected**: Array includes the action names defined in the topic's `reasoning.actions:`.
 
 **If missing**:
+
 - `available when:` conditions not met for the test context
 - Action defined in wrong topic
 - Action `target:` protocol invalid (flow not deployed, apex class not found)
@@ -211,15 +216,15 @@ jq '[.steps[] | select(.stepType == "EnabledToolsStep") | .data.enabled_tools]' 
 
 ## 5. Fix Strategies Reference
 
-| Failure | Target Block | Edit Strategy | Example |
-|---------|-------------|---------------|---------|
-| **TOPIC_NOT_MATCHED** | `topic X: description:` | Add keywords from test utterance | `"Handle orders"` → `"Handle order queries, order status, package tracking, shipping updates"` |
-| **ACTION_NOT_INVOKED** | `reasoning.actions: X description:` | Make description more trigger-specific | `"Get order"` → `"Look up order status when user asks about their order, package, or delivery"` |
-| **ACTION_NOT_INVOKED** | `available when:` | Relax guard condition | Remove overly restrictive `@variables.X == True` if variable isn't set yet |
-| **WRONG_ACTION_SELECTED** | Both competing `description:` fields | Differentiate with exclusion language | Add `"NOT for returns"` to order action, `"ONLY for returns"` to refund action |
-| **UNGROUNDED_RESPONSE** | `reasoning: instructions: ->` | Add explicit data references | `"Help the customer"` → `"Help the customer using {!@variables.order_data} from Get_Order action"` |
-| **LOW_SAFETY_SCORE** | `system: instructions:` | Add safety guidelines | Add `CRITICAL: Never reveal internal system details or customer PII` |
-| **TOOL_NOT_VISIBLE** | `available when:` | Ensure guard matches test state | Set test variables before action, or remove guards for initial smoke test |
+| Failure                   | Target Block                         | Edit Strategy                          | Example                                                                                            |
+| ------------------------- | ------------------------------------ | -------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **TOPIC_NOT_MATCHED**     | `topic X: description:`              | Add keywords from test utterance       | `"Handle orders"` → `"Handle order queries, order status, package tracking, shipping updates"`     |
+| **ACTION_NOT_INVOKED**    | `reasoning.actions: X description:`  | Make description more trigger-specific | `"Get order"` → `"Look up order status when user asks about their order, package, or delivery"`    |
+| **ACTION_NOT_INVOKED**    | `available when:`                    | Relax guard condition                  | Remove overly restrictive `@variables.X == True` if variable isn't set yet                         |
+| **WRONG_ACTION_SELECTED** | Both competing `description:` fields | Differentiate with exclusion language  | Add `"NOT for returns"` to order action, `"ONLY for returns"` to refund action                     |
+| **UNGROUNDED_RESPONSE**   | `reasoning: instructions: ->`        | Add explicit data references           | `"Help the customer"` → `"Help the customer using {!@variables.order_data} from Get_Order action"` |
+| **LOW_SAFETY_SCORE**      | `system: instructions:`              | Add safety guidelines                  | Add `CRITICAL: Never reveal internal system details or customer PII`                               |
+| **TOOL_NOT_VISIBLE**      | `available when:`                    | Ensure guard matches test state        | Set test variables before action, or remove guards for initial smoke test                          |
 
 ### Fix Application Pattern
 
@@ -259,6 +264,7 @@ topic returns:
 ### Iteration 1: Derive utterances and run preview
 
 **Derived utterances** (one per topic + one guardrail + one multi-turn):
+
 1. `"Where is my order?"` → should route to `order_mgmt`
 2. `"I want to return this"` → should route to `returns`
 3. `"Tell me a joke"` → should trigger guardrail (off-topic)
@@ -316,6 +322,7 @@ jq '[.steps[] | select(.stepType == "FunctionStep") | .data.function]' "$TRACES_
 ```
 
 **Diagnosis**: Topic routing fixed, but `Get_Order_Status` action not invoked because:
+
 1. `available when @variables.order_id != ""` — but `order_id` is empty (user didn't provide it yet)
 2. Description `"Get order"` is too vague for the planner to match
 
@@ -341,27 +348,27 @@ get_order: @actions.Get_Order_Status
 
 ## 7. Error Handling
 
-| Error | Cause | Resolution |
-|-------|-------|------------|
-| **500 from `preview start`** | Agent never published (authoring bundle doesn't exist in org) | Run Phase 5 first (publish + activate), then return to Phase 3.5 |
-| **Empty traces directory** | `sf agent preview end` may not write traces in all CLI versions | Check `--json` output of `preview end` for inline trace data; upgrade CLI if needed |
-| **`sessionId` is null** | Auth expired or org session invalid | Re-authenticate: `sf org login web --alias ORG_ALIAS` |
-| **No TransitionStep in trace** | Agent used Topic Selector but didn't route to any topic | Topic descriptions are too vague — add more keywords |
-| **No FunctionStep in trace** | Planner didn't select any action | Check `available when:` guards and action descriptions |
-| **`preview send` timeout** | Preview compilation taking too long | `.agent` file may be too complex; simplify or wait longer |
-| **Session already ended** | Sending to an expired/ended session | Start a new session with `preview start` |
+| Error                          | Cause                                                           | Resolution                                                                          |
+| ------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **500 from `preview start`**   | Agent never published (authoring bundle doesn't exist in org)   | Run Phase 5 first (publish + activate), then return to Phase 3.5                    |
+| **Empty traces directory**     | `sf agent preview end` may not write traces in all CLI versions | Check `--json` output of `preview end` for inline trace data; upgrade CLI if needed |
+| **`sessionId` is null**        | Auth expired or org session invalid                             | Re-authenticate: `sf org login web --alias ORG_ALIAS`                               |
+| **No TransitionStep in trace** | Agent used Topic Selector but didn't route to any topic         | Topic descriptions are too vague — add more keywords                                |
+| **No FunctionStep in trace**   | Planner didn't select any action                                | Check `available when:` guards and action descriptions                              |
+| **`preview send` timeout**     | Preview compilation taking too long                             | `.agent` file may be too complex; simplify or wait longer                           |
+| **Session already ended**      | Sending to an expired/ended session                             | Start a new session with `preview start`                                            |
 
 ### Context Variable Limitations in Preview
 
 > ⛔ `sf agent preview` does NOT support context/session variable injection. There are no `--context`, `--session-var`, or `--variables` flags on any preview subcommand.
 
-| Variable Source | Works in Preview? | Alternative |
-|----------------|:-----------------:|-------------|
-| `@session.sessionID` | ❌ | Agent Runtime API with session context |
-| `@context.customerId` | ❌ | Agent Runtime API with `contextVariables` |
-| `@context.RoutableId` | ❌ | Agent Runtime API with `contextVariables` |
-| Mutable vars (defaults) | ✅ | Works normally via default values |
-| `with param=...` (slot-filling) | ✅ | Works normally via LLM extraction |
+| Variable Source                 | Works in Preview? | Alternative                               |
+| ------------------------------- | :---------------: | ----------------------------------------- |
+| `@session.sessionID`            |        ❌         | Agent Runtime API with session context    |
+| `@context.customerId`           |        ❌         | Agent Runtime API with `contextVariables` |
+| `@context.RoutableId`           |        ❌         | Agent Runtime API with `contextVariables` |
+| Mutable vars (defaults)         |        ✅         | Works normally via default values         |
+| `with param=...` (slot-filling) |        ✅         | Works normally via LLM extraction         |
 
 > **Impact**: If your agent relies on `@context` or `@session` variables for routing or guards, those paths CANNOT be tested via `sf agent preview`. Use the Agent Runtime API (`/einstein/ai-agent/v1`) with `contextVariables` in the request body instead.
 
@@ -369,17 +376,17 @@ get_order: @actions.Get_Order_Status
 
 ## 8. Phase 3.5 vs Phase 4 Comparison
 
-| Aspect | Phase 3.5 (Inner Loop) | Phase 4 (Formal Testing) |
-|--------|----------------------|------------------------|
-| **When** | Pre-publish (`--authoring-bundle`) | Post-publish + activate |
-| **Scope** | 3-5 smoke utterances | 20-100+ test cases |
-| **Depth** | Topic routing + action invocation | Multi-turn, re-matching, context preservation |
-| **Speed** | ~15s per iteration (no publish needed) | ~90s+ per iteration (publish + CWC + activate) |
-| **Fix loop** | Self-contained in sf-ai-agentscript | Cross-skill delegation to sf-ai-agentforce-testing |
-| **Skill** | sf-ai-agentscript (internal) | sf-ai-agentforce-testing (Phase A/B/C) |
-| **Auth** | sf CLI org auth (Named User JWT) | ECA + Client Credentials (for API testing) |
-| **Traces** | Local `~/.sf/sfdx/agents/` JSON files | Agent Runtime API response + STDM |
-| **Tools needed** | Bash, Read, Edit, `jq` | Python scripts, credential_manager, multi_turn_test_runner |
+| Aspect           | Phase 3.5 (Inner Loop)                 | Phase 4 (Formal Testing)                                   |
+| ---------------- | -------------------------------------- | ---------------------------------------------------------- |
+| **When**         | Pre-publish (`--authoring-bundle`)     | Post-publish + activate                                    |
+| **Scope**        | 3-5 smoke utterances                   | 20-100+ test cases                                         |
+| **Depth**        | Topic routing + action invocation      | Multi-turn, re-matching, context preservation              |
+| **Speed**        | ~15s per iteration (no publish needed) | ~90s+ per iteration (publish + CWC + activate)             |
+| **Fix loop**     | Self-contained in sf-ai-agentscript    | Cross-skill delegation to sf-ai-agentforce-testing         |
+| **Skill**        | sf-ai-agentscript (internal)           | sf-ai-agentforce-testing (Phase A/B/C)                     |
+| **Auth**         | sf CLI org auth (Named User JWT)       | ECA + Client Credentials (for API testing)                 |
+| **Traces**       | Local `~/.sf/sfdx/agents/` JSON files  | Agent Runtime API response + STDM                          |
+| **Tools needed** | Bash, Read, Edit, `jq`                 | Python scripts, credential_manager, multi_turn_test_runner |
 
 ---
 

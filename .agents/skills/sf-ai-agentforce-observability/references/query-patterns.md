@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Data Cloud Query Patterns
 
 Common query patterns for extracting and analyzing Agentforce session tracing data.
@@ -442,6 +443,7 @@ ORDER BY MessageSentTime ASC;
 ```
 
 **Tips for Finding Session IDs:**
+
 - For Service Agent: Use `ssot__RelatedMessagingSessionId__c` field on `ssot__AiAgentSession__dlm`
 - Use start/end timestamp fields to narrow down timeframes
 
@@ -503,14 +505,15 @@ LIMIT 100;
 
 **Detector Types (Live API Verified - T6 Discovery):**
 
-| Detector Type | Occurrences | Categories/Values |
-|---------------|-------------|-------------------|
-| `TOXICITY` | 627,603 | `hate`, `identity`, `physical`, `profanity`, `safety_score`, `sexual`, `toxicity`, `violence` |
-| `PROMPT_DEFENSE` | 119,050 | `aggregatePromptAttackScore`, `isPromptAttackDetected` |
-| `PII` | 27,805 | `CREDIT_CARD`, `EMAIL_ADDRESS`, `PERSON`, `US_PHONE_NUMBER` |
-| `InstructionAdherence` | 16,380 | `High`, `Low`, `Uncertain` |
+| Detector Type          | Occurrences | Categories/Values                                                                             |
+| ---------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `TOXICITY`             | 627,603     | `hate`, `identity`, `physical`, `profanity`, `safety_score`, `sexual`, `toxicity`, `violence` |
+| `PROMPT_DEFENSE`       | 119,050     | `aggregatePromptAttackScore`, `isPromptAttackDetected`                                        |
+| `PII`                  | 27,805      | `CREDIT_CARD`, `EMAIL_ADDRESS`, `PERSON`, `US_PHONE_NUMBER`                                   |
+| `InstructionAdherence` | 16,380      | `High`, `Low`, `Uncertain`                                                                    |
 
 **Detection Thresholds:**
+
 - **Toxicity**: `value__c >= 0.5` indicates toxic content
 - **PII**: Any category present indicates PII detection
 - **PROMPT_DEFENSE**: `isPromptAttackDetected` = `true` indicates attack
@@ -618,10 +621,10 @@ ORDER BY InteractionStepStartTime;
 
 **Key Step Names for Analysis:**
 
-| Step Name | Purpose |
-|-----------|---------|
-| `AiCopilot__ReactTopicPrompt` | Topic routing decision |
-| `AiCopilot__ReactInitialPrompt` | Initial planning/reasoning |
+| Step Name                          | Purpose                                   |
+| ---------------------------------- | ----------------------------------------- |
+| `AiCopilot__ReactTopicPrompt`      | Topic routing decision                    |
+| `AiCopilot__ReactInitialPrompt`    | Initial planning/reasoning                |
 | `AiCopilot__ReactValidationPrompt` | Response validation (hallucination check) |
 
 ---
@@ -764,6 +767,7 @@ LIMIT 10;
 ```
 
 **Parameters:**
+
 - `{{USER_QUERY}}`: The search query text
 - `{{FILTER_CLAUSE}}`: Optional filter like `'Country_Code__c=''US'''`
 - `{{KNOWLEDGE_ARTICLE_DMO}}`: Your org's Knowledge DMO name (e.g., `Knowledge_kav_Prod_00D58000000JmkM__dlm`)
@@ -799,6 +803,7 @@ ORDER BY st.ssot__StartTimestamp__c;
 ```
 
 **ACTION_STEP Output Contains:**
+
 - `actionName`: The invoked action (e.g., `General_FAQ0_16jWi00000001...`)
 - `actionInput`: Parameters passed to the action
 - Retrieved knowledge chunks in the response
@@ -947,6 +952,7 @@ ORDER BY transition_count DESC;
 ```
 
 **Use Cases:**
+
 - Identify common topic escalation paths
 - Find topics that frequently need fallback routing
 - Understand user journey patterns
@@ -996,7 +1002,7 @@ ORDER BY t.ssot__CreatedDate__c DESC;
 
 Find sessions that have been tagged:
 
-```sql
+````sql
 SELECT
 1000     s.ssot__Id__c AS SessionId,
 1001     s.ssot__StartTimestamp__c,
@@ -1009,11 +1015,11 @@ SELECT
 1008 ORDER BY s.ssot__StartTimestamp__c DESC
 1009 LIMIT 100;
 1010 ```
-1011 
+1011
 1012 ### Tag Distribution Analysis
-1013 
+1013
 1014 Count sessions by tag:
-1015 
+1015
 1016 ```sql
 1017 SELECT
 1018     td.ssot__Name__c AS TagName,
@@ -1027,11 +1033,11 @@ SELECT
 1026 GROUP BY td.ssot__Name__c
 1027 ORDER BY SessionCount DESC;
 1028 ```
-1029 
+1029
 1030 ### Tags by Agent
-1031 
+1031
 1032 Find which tags are configured for each agent:
-1033 
+1033
 1034 ```sql
 1035 SELECT
 1036     tda.ssot__AiAgentApiName__c AS AgentName,
@@ -1043,11 +1049,11 @@ SELECT
 1042     ON tda.ssot__AiAgentTagDefinitionId__c = td.ssot__Id__c
 1043 ORDER BY tda.ssot__AiAgentApiName__c, td.ssot__Name__c;
 1044 ```
-1045 
+1045
 1046 ### Tag Values with Ratings
-1047 
+1047
 1048 Get tag values (useful for rating-based tags):
-1049 
+1049
 1050 ```sql
 1051 SELECT
 1052     td.ssot__Name__c AS TagName,
@@ -1060,17 +1066,17 @@ SELECT
 1059 WHERE t.ssot__IsActive__c = true
 1060 ORDER BY td.ssot__Name__c, t.ssot__Value__c;
 1061 ```
-1062 
+1062
 1063 ---
-1064 
+1064
 1065 ## Step Analysis Patterns ✅ NEW
-1066 
+1066
 1067 Query patterns for analyzing step execution, LLM calls, and action performance.
-1068 
+1068
 1069 ### LLM Step Analysis by Prompt Type
-1070 
+1070
 1071 Analyze LLM steps by the prompt type:
-1072 
+1072
 1073 ```sql
 1074 SELECT
 1075     ssot__Name__c AS PromptName,
@@ -1083,19 +1089,19 @@ SELECT
 1082 GROUP BY ssot__Name__c
 1083 ORDER BY Invocations DESC;
 1084 ```
-1085 
+1085
 1086 ### Common LLM Prompts
-1087 
+1087
 1088 | Prompt Name | Purpose |
 1089 |-------------|---------|
 1090 | `AiCopilot__ReactInitialPrompt` | Initial planning/reasoning |
 1091 | `AiCopilot__ReactTopicPrompt` | Topic classification/routing |
 1092 | `AiCopilot__ReactValidationPrompt` | Response validation (hallucination check) |
-1093 
+1093
 1094 ### Top Actions by Invocation
-1095 
+1095
 1096 Find the most frequently called actions:
-1097 
+1097
 1098 ```sql
 1099 SELECT
 1100     ssot__Name__c AS ActionName,
@@ -1109,11 +1115,11 @@ SELECT
 1108 ORDER BY InvocationCount DESC
 1109 LIMIT 20;
 1110 ```
-1111 
+1111
 1112 ### Step Chain Analysis (Following PrevStepId)
-1113 
+1113
 1114 Trace the step execution chain within an interaction:
-1115 
+1115
 1116 ```sql
 1117 WITH RECURSIVE step_chain AS (
 1118     -- Base: find the first step (no PrevStepId)
@@ -1126,9 +1132,9 @@ SELECT
 1125     FROM ssot__AIAgentInteractionStep__dlm
 1126     WHERE ssot__AiAgentInteractionId__c = '{{INTERACTION_ID}}'
 1127       AND ssot__PrevStepId__c IS NULL
-1128 
+1128
 1129     UNION ALL
-1130 
+1130
 1131     -- Recursive: follow PrevStepId chain
 1132     SELECT
 1133         s.ssot__Id__c,
@@ -1144,19 +1150,19 @@ SELECT
 1143 FROM step_chain
 1144 ORDER BY depth;
 1145 ```
-1146 
+1146
 1147 **Note:** Steps use linear `PrevStepId` sequencing. There is no hierarchical parent-child relationship.
-1148 
+1148
 1149 ---
-1150 
+1150
 1151 ## Moment-Interaction Junction Queries ✅ NEW
-1152 
+1152
 1153 Query the junction table linking Moments to Interactions for many-to-many analysis.
-1154 
+1154
 1155 ### Moments with Their Interactions
-1156 
+1156
 1157 Get all interactions associated with a moment:
-1158 
+1158
 1159 ```sql
 1160 SELECT
 1161     m.ssot__Id__c AS MomentId,
@@ -1171,11 +1177,11 @@ SELECT
 1170 WHERE m.ssot__StartTimestamp__c >= current_date - INTERVAL '7' DAY
 1171 LIMIT 50;
 1172 ```
-1173 
+1173
 1174 ### Interactions per Moment (Aggregated)
-1175 
+1175
 1176 Count interactions associated with each moment:
-1177 
+1177
 1178 ```sql
 1179 SELECT
 1180     mi.ssot__AiAgentMomentId__c AS MomentId,
@@ -1186,11 +1192,11 @@ SELECT
 1185 ORDER BY InteractionCount DESC
 1186 LIMIT 20;
 1187 ```
-1188 
+1188
 1189 ### Full Session Tree with Moments
-1190 
+1190
 1191 Get complete session data including the Moment-Interaction relationship:
-1192 
+1192
 1193 ```sql
 1194 SELECT
 1195     s.ssot__Id__c AS SessionId,
@@ -1209,13 +1215,13 @@ SELECT
 1208 WHERE s.ssot__Id__c = '{{SESSION_ID}}'
 1209 ORDER BY m.ssot__StartTimestamp__c, i.ssot__StartTimestamp__c;
 1210 ```
-1211 
+1211
 1212 ---
-1213 
+1213
 1214 ## Entity Relationship Reference
-1215 
+1215
 1216 ### Session Tracing Data Model (STDM)
-1217 
+1217
 1218 ```
 1219 Session (ssot__AiAgentSession__dlm)
 1220 ├── SessionParticipant (ssot__AIAgentSessionParticipant__dlm)  [1:N]
@@ -1229,9 +1235,9 @@ SELECT
 1228 └── TagAssociation (ssot__AiAgentTagAssociation__dlm)          [1:N] ✅ NEW
 1229     └── → links to TagDefinition & Tag
 1230 ```
-1231 
+1231
 1232 ### Tagging Data Model ✅ NEW
-1233 
+1233
 1234 ```
 1235 TagDefinition (ssot__AiAgentTagDefinition__dlm)
 1236 └── Tag (ssot__AiAgentTag__dlm)                    [1:N]
@@ -1239,9 +1245,9 @@ SELECT
 1238         ├── → Session (AiAgentSessionId)
 1239         └── → Moment (AiAgentMomentId)
 1240 ```
-1241 
+1241
 1242 ### Quality Data Model (GenAI Trust Layer) ✅ T6 Verified
-1243 
+1243
 1244 ```
 1245 GenAIGeneration__dlm
 1246 ├── GenAIContentQuality__dlm          [1:1]
@@ -1252,18 +1258,18 @@ SELECT
 1251 └── GenAIFeedback__dlm                [1:N]
 1252     └── GenAIFeedbackDetail__dlm      [1:N]
 1253 ```
-1254 
+1254
 1255 **Detector Categories (Live API Verified):**
-1256 
+1256
 1257 | Detector | Categories |
 1258 |----------|------------|
 1259 | `TOXICITY` | `hate`, `identity`, `physical`, `profanity`, `safety_score`, `sexual`, `toxicity`, `violence` |
 1260 | `PII` | `CREDIT_CARD`, `EMAIL_ADDRESS`, `PERSON`, `US_PHONE_NUMBER` |
 1261 | `PROMPT_DEFENSE` | `aggregatePromptAttackScore`, `isPromptAttackDetected` |
 1262 | `InstructionAdherence` | `High`, `Low`, `Uncertain` |
-1263 
+1263
 1264 ### Gateway Data Model (GenAI Request/Response) ✅ T6 Verified
-1265 
+1265
 1266 ```
 1267 GenAIGatewayRequest__dlm (30 fields)
 1268 ├── GenAIGatewayResponse__dlm         [1:1]
@@ -1273,20 +1279,20 @@ SELECT
 1272 │   └── GenAIGtwyObjRecCitationRef__dlm  [1:N]
 1273 └── GenAIGeneration__dlm              [1:N] (via generationGroupId)
 1274 ```
-1275 
+1275
 1276 **Key Join Fields:**
 1277 - `ssot__GenerationId__c` on Steps → `generationId__c` on Generation
 1278 - `ssot__GenAiGatewayRequestId__c` on Steps → `gatewayRequestId__c` on GatewayRequest
 1279 - `parent__c` on ContentQuality → `generationId__c` on Generation
 1280 - `parent__c` on ContentCategory → `id__c` on ContentQuality
 1281 - `parent__c` on FeedbackDetail → `feedbackId__c` on Feedback
-1282 
+1282
 1283 ---
-1284 
+1284
 1285 ## Template Variables
-1286 
+1286
 1287 The query templates use these placeholders:
-1288 
+1288
 1289 | Variable | Description | Example |
 1290 |----------|-------------|---------|
 1291 | `{{START_DATE}}` | Start timestamp | `2026-01-01T00:00:00.000Z` |
@@ -1295,3 +1301,4 @@ SELECT
 1294 | `{{SESSION_IDS}}` | Comma-separated session IDs | `'a0x...', 'a0x...'` |
 1295 | `{{SESSION_ID}}` | Single session ID | `'01999669-0a54-724f-80d6-9cb495a7cee4'` |
 1296 | `{{INTERACTION_IDS}}` | Comma-separated interaction IDs | `'a0y...', 'a0y...'` |
+````

@@ -1,0 +1,167 @@
+<template>
+  <template lwc:if={isOpen}>
+    <div class="assistant-drawer slds-is-fixed" data-testid="assistant-drawer">
+      <!-- Header -->
+      <div class="drawer-header slds-grid slds-grid_vertical-align-center">
+        <div class="slds-grid slds-grid_vertical-align-center slds-grow">
+          <lightning-icon
+            icon-name="utility:einstein"
+            size="small"
+            class="ai-avatar slds-var-m-right_small"
+          ></lightning-icon>
+          <div>
+            <h2 class="drawer-title">Data Assistant</h2>
+            <p class="drawer-subtitle">
+              Conversational Analytics for {objectApiName}
+            </p>
+          </div>
+        </div>
+        <div class="slds-grid slds-grid_vertical-align-center">
+          <button
+            class="slds-button slds-button_icon slds-button_icon-inverse slds-var-m-right_xx-small"
+            title="Clear Chat History"
+            onclick={handleClearHistory}
+            data-testid="clear-history-btn"
+          >
+            <lightning-icon
+              icon-name="utility:delete"
+              size="x-small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Clear History</span>
+          </button>
+          <button
+            class="slds-button slds-button_icon slds-button_icon-inverse"
+            title="Close Assistant"
+            onclick={handleClose}
+            data-testid="close-assistant-btn"
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              size="x-small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Thread -->
+      <div
+        class="chat-thread slds-var-p-around_medium"
+        data-testid="chat-thread"
+      >
+        <!-- Starter Prompts (if chat is empty) -->
+        <template lwc:if={isThreadEmpty}>
+          <div
+            class="welcome-box slds-text-align_center slds-var-p-around_large"
+          >
+            <div class="sparkle-icon-wrap slds-var-m-bottom_small">
+              <lightning-icon
+                icon-name="utility:sparkles"
+                size="medium"
+                class="welcome-sparkle"
+              ></lightning-icon>
+            </div>
+            <h3 class="welcome-heading">
+              How can I help with your data today?
+            </h3>
+            <p class="welcome-text slds-var-m-bottom_medium">
+              Ask questions in natural language about totals, averages, or
+              counts.
+            </p>
+
+            <div class="starter-chips slds-grid slds-wrap">
+              <template for:each={starterChips} for:item="chip">
+                <button
+                  key={chip}
+                  class="starter-btn"
+                  data-question={chip}
+                  onclick={handleSelectStarterChip}
+                  data-testid="starter-chip"
+                >
+                  <lightning-icon
+                    icon-name="utility:chat"
+                    size="xx-small"
+                    class="slds-var-m-right_xxx-small"
+                  ></lightning-icon>
+                  {chip}
+                </button>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- Message Bubbles -->
+        <template for:each={messages} for:item="msg">
+          <div key={msg.id} class={msg.containerClass}>
+            <template lwc:if={msg.isAssistant}>
+              <div class="bubble assistant-bubble">
+                <div
+                  class="slds-grid slds-grid_vertical-align-center slds-var-m-bottom_xxx-small"
+                >
+                  <lightning-icon
+                    icon-name="utility:einstein"
+                    size="xx-small"
+                    class="msg-avatar slds-var-m-right_xxx-small"
+                  ></lightning-icon>
+                  <span class="msg-sender">Smart Grid AI</span>
+                </div>
+                <div class="msg-content">{msg.text}</div>
+              </div>
+            </template>
+            <template lwc:else>
+              <div class="bubble user-bubble">
+                <div class="msg-content">{msg.text}</div>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Thinking Indicator -->
+        <template lwc:if={isThinking}>
+          <div class="msg-row assistant-row">
+            <div class="bubble assistant-bubble thinking-bubble">
+              <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Input Footer -->
+      <div class="drawer-footer slds-var-p-around_small">
+        <div class="input-wrap slds-grid slds-grid_vertical-align-center">
+          <input
+            type="text"
+            class="chat-input slds-grow"
+            placeholder="Ask about revenue, metrics, counts..."
+            value={inputText}
+            oninput={handleInputChange}
+            onkeydown={handleInputKeyDown}
+            disabled={isThinking}
+            data-testid="assistant-input"
+          />
+          <button
+            class="send-btn slds-button slds-button_icon slds-button_icon-brand slds-var-m-left_x-small"
+            title="Send Message"
+            onclick={handleSend}
+            disabled={isSendDisabled}
+            data-testid="assistant-send-btn"
+          >
+            <lightning-icon
+              icon-name="utility:send"
+              size="x-small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-backdrop" onclick={handleClose}></div>
+  </template>
+</template>

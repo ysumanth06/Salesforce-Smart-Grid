@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentscript/SKILL.md -->
+
 # Actions Reference
 
 > Migrated from the former `sf-ai-agentforce-legacy/references/actions-reference.md` on 2026-02-07.
@@ -16,40 +17,40 @@ All actions in Agent Script support these properties:
 
 ### Action Definition Properties
 
-| Property | Type | Required | Description | TDD |
-|----------|------|----------|-------------|-----|
-| `target` | String | Yes | Executable target (see Action Target Types below) | v1.3.0 |
-| `description` | String | Yes | Explains behavior for LLM decision-making | v1.3.0 |
-| `label` | String | No | Display name in UI (valid on action definitions, topics, and I/O fields) | v2.2.0 |
-| `inputs` | Object | No | Input parameters and requirements | v1.3.0 |
-| `outputs` | Object | No | Return parameters | v1.3.0 |
-| `available_when` | Expression | No | Conditional availability for the LLM | v1.3.0 |
-| `require_user_confirmation` | Boolean | No | Ask user to confirm before execution (compiles; runtime no-op per Issue 6) | v2.2.0 |
-| `include_in_progress_indicator` | Boolean | No | Show progress indicator during execution | v2.2.0 |
-| `progress_indicator_message` | String | No | Custom message shown during execution (e.g., "Processing your request...") | v2.2.0 |
+| Property                        | Type       | Required | Description                                                                | TDD    |
+| ------------------------------- | ---------- | -------- | -------------------------------------------------------------------------- | ------ |
+| `target`                        | String     | Yes      | Executable target (see Action Target Types below)                          | v1.3.0 |
+| `description`                   | String     | Yes      | Explains behavior for LLM decision-making                                  | v1.3.0 |
+| `label`                         | String     | No       | Display name in UI (valid on action definitions, topics, and I/O fields)   | v2.2.0 |
+| `inputs`                        | Object     | No       | Input parameters and requirements                                          | v1.3.0 |
+| `outputs`                       | Object     | No       | Return parameters                                                          | v1.3.0 |
+| `available_when`                | Expression | No       | Conditional availability for the LLM                                       | v1.3.0 |
+| `require_user_confirmation`     | Boolean    | No       | Ask user to confirm before execution (compiles; runtime no-op per Issue 6) | v2.2.0 |
+| `include_in_progress_indicator` | Boolean    | No       | Show progress indicator during execution                                   | v2.2.0 |
+| `progress_indicator_message`    | String     | No       | Custom message shown during execution (e.g., "Processing your request...") | v2.2.0 |
 
 > **Note**: `label`, `require_user_confirmation`, `include_in_progress_indicator`, and `progress_indicator_message` are valid on action definitions with `target:` but NOT on `@utils.transition` utility actions (see Val_Action_Properties vs Val_Action_Meta_Props).
 
 ### Input Properties (TDD Validated v2.2.0)
 
-| Property | Type | Description | TDD |
-|----------|------|-------------|-----|
-| `description` | String | Explains the input parameter to LLM | v1.3.0 |
-| `label` | String | Display name in UI | v2.2.0 |
-| `is_required` | Boolean | Marks input as mandatory for the LLM | v2.2.0 |
-| `is_user_input` | Boolean | LLM extracts value from conversation context | v2.2.0 |
-| `complex_data_type_name` | String | Lightning data type mapping | v2.1.0 |
+| Property                 | Type    | Description                                  | TDD    |
+| ------------------------ | ------- | -------------------------------------------- | ------ |
+| `description`            | String  | Explains the input parameter to LLM          | v1.3.0 |
+| `label`                  | String  | Display name in UI                           | v2.2.0 |
+| `is_required`            | Boolean | Marks input as mandatory for the LLM         | v2.2.0 |
+| `is_user_input`          | Boolean | LLM extracts value from conversation context | v2.2.0 |
+| `complex_data_type_name` | String  | Lightning data type mapping                  | v2.1.0 |
 
 ### Output Properties (Updated v2.2.0)
 
-| Property | Type | Description | TDD |
-|----------|------|-------------|-----|
-| `description` | String | Explains the output parameter | v1.3.0 |
-| `label` | String | Display name in UI | v2.2.0 |
-| `is_displayable` | Boolean | `False` = hide from user display (standard name for `filter_from_agent`) | v2.2.0 |
-| `is_used_by_planner` | Boolean | `True` = LLM can reason about this value for routing decisions | v2.2.0 |
-| `filter_from_agent` | Boolean | Alias for `is_displayable: False` — set `True` to hide sensitive data from LLM | v1.3.0 |
-| `complex_data_type_name` | String | Lightning data type mapping | v2.1.0 |
+| Property                 | Type    | Description                                                                    | TDD    |
+| ------------------------ | ------- | ------------------------------------------------------------------------------ | ------ |
+| `description`            | String  | Explains the output parameter                                                  | v1.3.0 |
+| `label`                  | String  | Display name in UI                                                             | v2.2.0 |
+| `is_displayable`         | Boolean | `False` = hide from user display (standard name for `filter_from_agent`)       | v2.2.0 |
+| `is_used_by_planner`     | Boolean | `True` = LLM can reason about this value for routing decisions                 | v2.2.0 |
+| `filter_from_agent`      | Boolean | Alias for `is_displayable: False` — set `True` to hide sensitive data from LLM | v1.3.0 |
+| `complex_data_type_name` | String  | Lightning data type mapping                                                    | v2.1.0 |
 
 > **`is_displayable` vs `filter_from_agent`**: Both control the same behavior. `is_displayable: False` is the standard property name (used in SKILL.md and zero-hallucination patterns). `filter_from_agent: True` is an older alias that achieves the same result.
 
@@ -82,30 +83,31 @@ actions:
 
 AgentScript supports **22+ action target types**. Use the correct protocol for your integration:
 
-| Short Name | Long Name | Description | Use Case |
-|------------|-----------|-------------|----------|
-| `flow` | `flow` | Salesforce Flow | Most common — Autolaunched Flows |
-| `apex` | `apex` | Apex Class | Custom business logic |
-| `prompt` | `generatePromptResponse` | Prompt Template | AI-generated responses |
-| `standardInvocableAction` | `standardInvocableAction` | Built-in Salesforce actions | Send email, create task, etc. |
-| `externalService` | `externalService` | External API via OpenAPI schema | External system calls |
-| `quickAction` | `quickAction` | Object-specific quick actions | Log call, create related record |
-| `api` | `api` | REST API calls | Direct API invocation |
-| `apexRest` | `apexRest` | Custom REST endpoints | Custom @RestResource classes |
-| `serviceCatalog` | `createCatalogItemRequest` | Service Catalog | Service catalog requests |
-| `integrationProcedureAction` | `executeIntegrationProcedure` | OmniStudio Integration | Industry Cloud procedures |
-| `expressionSet` | `runExpressionSet` | Expression calculations | Decision matrix, calculations |
-| `cdpMlPrediction` | `cdpMlPrediction` | CDP ML predictions | Data Cloud predictions |
-| `externalConnector` | `externalConnector` | External system connector | Pre-built connectors |
-| `slack` | `slack` | Slack integration | Slack messaging |
-| `namedQuery` | `namedQuery` | Predefined queries | Saved SOQL queries |
-| `auraEnabled` | `auraEnabled` | Lightning component methods | @AuraEnabled Apex methods |
-| `mcpTool` | `mcpTool` | Model Context Protocol | MCP tool integrations |
-| `retriever` | `retriever` | Knowledge retrieval | RAG/knowledge base queries |
+| Short Name                   | Long Name                     | Description                     | Use Case                         |
+| ---------------------------- | ----------------------------- | ------------------------------- | -------------------------------- |
+| `flow`                       | `flow`                        | Salesforce Flow                 | Most common — Autolaunched Flows |
+| `apex`                       | `apex`                        | Apex Class                      | Custom business logic            |
+| `prompt`                     | `generatePromptResponse`      | Prompt Template                 | AI-generated responses           |
+| `standardInvocableAction`    | `standardInvocableAction`     | Built-in Salesforce actions     | Send email, create task, etc.    |
+| `externalService`            | `externalService`             | External API via OpenAPI schema | External system calls            |
+| `quickAction`                | `quickAction`                 | Object-specific quick actions   | Log call, create related record  |
+| `api`                        | `api`                         | REST API calls                  | Direct API invocation            |
+| `apexRest`                   | `apexRest`                    | Custom REST endpoints           | Custom @RestResource classes     |
+| `serviceCatalog`             | `createCatalogItemRequest`    | Service Catalog                 | Service catalog requests         |
+| `integrationProcedureAction` | `executeIntegrationProcedure` | OmniStudio Integration          | Industry Cloud procedures        |
+| `expressionSet`              | `runExpressionSet`            | Expression calculations         | Decision matrix, calculations    |
+| `cdpMlPrediction`            | `cdpMlPrediction`             | CDP ML predictions              | Data Cloud predictions           |
+| `externalConnector`          | `externalConnector`           | External system connector       | Pre-built connectors             |
+| `slack`                      | `slack`                       | Slack integration               | Slack messaging                  |
+| `namedQuery`                 | `namedQuery`                  | Predefined queries              | Saved SOQL queries               |
+| `auraEnabled`                | `auraEnabled`                 | Lightning component methods     | @AuraEnabled Apex methods        |
+| `mcpTool`                    | `mcpTool`                     | Model Context Protocol          | MCP tool integrations            |
+| `retriever`                  | `retriever`                   | Knowledge retrieval             | RAG/knowledge base queries       |
 
 **Target Format**: `<type>://<DeveloperName>` (e.g., `flow://Get_Account_Info`, `standardInvocableAction://sendEmail`)
 
 **Common Examples:**
+
 ```agentscript
 # Flow action (most common)
 target: "flow://Get_Customer_Orders"
@@ -129,10 +131,10 @@ target: "externalService://Stripe_Payment_API"
 
 ## Action Invocation Methods
 
-| Method | Syntax | Behavior | AiAuthoringBundle | GenAiPlannerBundle |
-|--------|--------|----------|-------------------|-------------------|
-| **Actions Block** | `actions:` in `reasoning:` | LLM chooses which to execute | ✅ Works | ✅ Works |
-| **Deterministic** | `run @actions.name` | Always executes when code path is reached | ⚠️ Partial (see below) | ✅ Works |
+| Method            | Syntax                     | Behavior                                  | AiAuthoringBundle      | GenAiPlannerBundle |
+| ----------------- | -------------------------- | ----------------------------------------- | ---------------------- | ------------------ |
+| **Actions Block** | `actions:` in `reasoning:` | LLM chooses which to execute              | ✅ Works               | ✅ Works           |
+| **Deterministic** | `run @actions.name`        | Always executes when code path is reached | ⚠️ Partial (see below) | ✅ Works           |
 
 ### Deployment Method Capabilities
 
@@ -250,6 +252,7 @@ For an action to work with agents, the Flow must:
 4. **Be Active** — `status: Active`
 
 **Flow Variable Example:**
+
 ```xml
 <variables>
     <name>subject</name>
@@ -262,12 +265,12 @@ For an action to work with agents, the Flow must:
 
 ### Best Practices
 
-| Practice | Description |
-|----------|-------------|
+| Practice          | Description                                       |
+| ----------------- | ------------------------------------------------- |
 | Descriptive names | Use clear Flow API names that describe the action |
-| Error handling | Include fault paths in your Flow |
-| Bulkification | Design Flows to handle multiple records |
-| Governor limits | Avoid SOQL/DML in loops |
+| Error handling    | Include fault paths in your Flow                  |
+| Bulkification     | Design Flows to handle multiple records           |
+| Governor limits   | Avoid SOQL/DML in loops                           |
 
 ---
 
@@ -283,10 +286,10 @@ For an action to work with agents, the Flow must:
 
 ### Two Deployment Paths (CRITICAL DISTINCTION)
 
-| Deployment Method | How Apex Actions Work | GenAiFunction Required? |
-|-------------------|----------------------|------------------------|
-| **AiAuthoringBundle** (.agent file) | `apex://ClassName` target in topic actions block | **NO** |
-| **Agent Builder UI** (GenAiPlannerBundle) | GenAiFunction metadata wraps the Apex class | **YES** |
+| Deployment Method                         | How Apex Actions Work                            | GenAiFunction Required? |
+| ----------------------------------------- | ------------------------------------------------ | ----------------------- |
+| **AiAuthoringBundle** (.agent file)       | `apex://ClassName` target in topic actions block | **NO**                  |
+| **Agent Builder UI** (GenAiPlannerBundle) | GenAiFunction metadata wraps the Apex class      | **YES**                 |
 
 > ⚠️ **The official [agent-script-recipes](https://github.com/trailheadapps/agent-script-recipes) repo uses `apex://ClassName` directly with ZERO GenAiFunction metadata.** GenAiFunction is only needed when configuring agents through the Agent Builder UI or deploying via GenAiPlannerBundle.
 
@@ -296,44 +299,49 @@ For an action to work with agents, the Flow must:
 
 ```apex
 public with sharing class CalculateDiscountAction {
+  public class DiscountRequest {
+    @InvocableVariable(label='Order Amount' required=true)
+    public Decimal orderAmount;
 
-    public class DiscountRequest {
-        @InvocableVariable(label='Order Amount' required=true)
-        public Decimal orderAmount;
+    @InvocableVariable(label='Customer Tier' required=true)
+    public String customerTier;
+  }
 
-        @InvocableVariable(label='Customer Tier' required=true)
-        public String customerTier;
+  public class DiscountResult {
+    @InvocableVariable(label='Discount Percentage')
+    public Decimal discountPercentage;
+
+    @InvocableVariable(label='Final Amount')
+    public Decimal finalAmount;
+  }
+
+  @InvocableMethod(
+    label='Calculate Discount'
+    description='Calculates discount based on order amount and customer tier'
+  )
+  public static List<DiscountResult> calculateDiscount(
+    List<DiscountRequest> requests
+  ) {
+    List<DiscountResult> results = new List<DiscountResult>();
+    for (DiscountRequest req : requests) {
+      DiscountResult result = new DiscountResult();
+      result.discountPercentage = getTierDiscount(req.customerTier);
+      result.finalAmount =
+        req.orderAmount * (1 - result.discountPercentage / 100);
+      results.add(result);
     }
+    return results;
+  }
 
-    public class DiscountResult {
-        @InvocableVariable(label='Discount Percentage')
-        public Decimal discountPercentage;
-
-        @InvocableVariable(label='Final Amount')
-        public Decimal finalAmount;
-    }
-
-    @InvocableMethod(
-        label='Calculate Discount'
-        description='Calculates discount based on order amount and customer tier'
-    )
-    public static List<DiscountResult> calculateDiscount(List<DiscountRequest> requests) {
-        List<DiscountResult> results = new List<DiscountResult>();
-        for (DiscountRequest req : requests) {
-            DiscountResult result = new DiscountResult();
-            result.discountPercentage = getTierDiscount(req.customerTier);
-            result.finalAmount = req.orderAmount * (1 - result.discountPercentage / 100);
-            results.add(result);
-        }
-        return results;
-    }
-
-    private static Decimal getTierDiscount(String tier) {
-        Map<String, Decimal> tierDiscounts = new Map<String, Decimal>{
-            'Bronze' => 5, 'Silver' => 10, 'Gold' => 15, 'Platinum' => 20
-        };
-        return tierDiscounts.containsKey(tier) ? tierDiscounts.get(tier) : 0;
-    }
+  private static Decimal getTierDiscount(String tier) {
+    Map<String, Decimal> tierDiscounts = new Map<String, Decimal>{
+      'Bronze' => 5,
+      'Silver' => 10,
+      'Gold' => 15,
+      'Platinum' => 20
+    };
+    return tierDiscounts.containsKey(tier) ? tierDiscounts.get(tier) : 0;
+  }
 }
 ```
 
@@ -376,12 +384,12 @@ topic discount_calculator:
 
 Action `inputs:` and `outputs:` names in Agent Script must **exactly match** the `@InvocableVariable` field names in the Apex class:
 
-| Agent Script I/O Name | Apex @InvocableVariable Field | Result |
-|------------------------|-------------------------------|--------|
-| `orderAmount` | `public Decimal orderAmount` | ✅ Publishes |
-| `order_amount` | `public Decimal orderAmount` | ❌ `invalid input 'order_amount'` |
-| `wrong_name` | `public String outputText` | ❌ `invalid output 'wrong_name'` |
-| *(subset of outputs)* | *(declares fewer than all)* | ✅ Publishes (partial is valid) |
+| Agent Script I/O Name | Apex @InvocableVariable Field | Result                            |
+| --------------------- | ----------------------------- | --------------------------------- |
+| `orderAmount`         | `public Decimal orderAmount`  | ✅ Publishes                      |
+| `order_amount`        | `public Decimal orderAmount`  | ❌ `invalid input 'order_amount'` |
+| `wrong_name`          | `public String outputText`    | ❌ `invalid output 'wrong_name'`  |
+| _(subset of outputs)_ | _(declares fewer than all)_   | ✅ Publishes (partial is valid)   |
 
 > **Partial Output Pattern**: You can declare a **subset** of the target's outputs in your action definition — you don't need to map every output parameter. This is useful when you only need one field from a multi-output action.
 
@@ -457,13 +465,13 @@ If you're NOT using Agent Script and are building agents through the Agent Build
 
 ### Security Considerations
 
-| Consideration | Implementation |
-|---------------|----------------|
+| Consideration  | Implementation                                        |
+| -------------- | ----------------------------------------------------- |
 | Authentication | Always use Named Credentials (never hardcode secrets) |
-| Permissions | Use Permission Sets to grant Named Principal access |
-| Error handling | Implement fault paths in Flow |
-| Logging | Log callout details for debugging |
-| Timeouts | Set appropriate timeout values |
+| Permissions    | Use Permission Sets to grant Named Principal access   |
+| Error handling | Implement fault paths in Flow                         |
+| Logging        | Log callout details for debugging                     |
+| Timeouts       | Set appropriate timeout values                        |
 
 ---
 
@@ -501,19 +509,19 @@ connections:
 
 ### Connection Block Properties
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `outbound_route_type` | String | Yes | **`"OmniChannelFlow"` is the only TDD-validated value.** SKILL.md mentions `"Queue"` and `"Skill"` but the `connections:` block itself is not GA (see known-issues.md Issue 16). |
-| `outbound_route_name` | String | Yes | API name of Omni-Channel Flow (must exist in org) |
-| `escalation_message` | String | Yes | Message shown to user during transfer |
-| `adaptive_response_allowed` | Boolean | No | Allow agent to adapt responses during escalation (default: False) |
+| Property                    | Type    | Required | Description                                                                                                                                                                      |
+| --------------------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `outbound_route_type`       | String  | Yes      | **`"OmniChannelFlow"` is the only TDD-validated value.** SKILL.md mentions `"Queue"` and `"Skill"` but the `connections:` block itself is not GA (see known-issues.md Issue 16). |
+| `outbound_route_name`       | String  | Yes      | API name of Omni-Channel Flow (must exist in org)                                                                                                                                |
+| `escalation_message`        | String  | Yes      | Message shown to user during transfer                                                                                                                                            |
+| `adaptive_response_allowed` | Boolean | No       | Allow agent to adapt responses during escalation (default: False)                                                                                                                |
 
 ### Supported Channels
 
-| Channel | Description | Use Case |
-|---------|-------------|----------|
-| `messaging` | Chat/messaging channels | Enhanced Chat, Web Chat, In-App |
-| `telephony` | Voice/phone channels | Service Cloud Voice, phone support |
+| Channel     | Description             | Use Case                           |
+| ----------- | ----------------------- | ---------------------------------- |
+| `messaging` | Chat/messaging channels | Enhanced Chat, Web Chat, In-App    |
+| `telephony` | Voice/phone channels    | Service Cloud Voice, phone support |
 
 **CRITICAL**: Values like `"queue"`, `"skill"`, `"agent"` for `outbound_route_type` cause validation errors!
 
@@ -560,21 +568,21 @@ actions:
 
 ### Prompt Template Types
 
-| Type | Use Case |
-|------|----------|
-| `flexPrompt` | General purpose, maximum flexibility |
-| `salesGeneration` | Sales content (emails, proposals) |
-| `fieldCompletion` | Suggest field values |
-| `recordSummary` | Summarize record data |
+| Type              | Use Case                             |
+| ----------------- | ------------------------------------ |
+| `flexPrompt`      | General purpose, maximum flexibility |
+| `salesGeneration` | Sales content (emails, proposals)    |
+| `fieldCompletion` | Suggest field values                 |
+| `recordSummary`   | Summarize record data                |
 
 ### Template Variable Types
 
-| Variable Type | Description |
-|---------------|-------------|
-| `freeText` | User-provided text input |
+| Variable Type | Description                    |
+| ------------- | ------------------------------ |
+| `freeText`    | User-provided text input       |
 | `recordField` | Bound to specific record field |
-| `relatedList` | Data from related records |
-| `resource` | Static resource content |
+| `relatedList` | Data from related records      |
+| `resource`    | Static resource content        |
 
 ---
 
@@ -603,17 +611,17 @@ When building agents with external API integrations, follow this order:
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
+| Issue                                         | Cause                                                                        | Solution                                                                                         |
+| --------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `Tool target 'X' is not an action definition` | Action not defined in topic `actions:` block, or target doesn't exist in org | Define action with `target:` in topic-level `actions:` block; ensure Apex class/Flow is deployed |
-| `invalid input 'X'` or `invalid output 'X'` | I/O name doesn't match `@InvocableVariable` field name in Apex | Use exact field names from the Apex wrapper class (case-sensitive) |
-| `Internal Error` with inputs-only action | Action has `inputs:` but no `outputs:` block | Add `outputs:` block — the server-side compiler requires it (see known-issues.md Issue 15) |
-| `Internal Error` with bare @InvocableMethod | Apex uses `List<String>` without `@InvocableVariable` wrappers | Refactor Apex to use wrapper classes with `@InvocableVariable` annotations |
-| `apex://` target not found | Apex class not deployed or missing `@InvocableMethod` | Deploy class first, ensure it has `@InvocableMethod` annotation |
-| Flow action fails | Flow not active or not Autolaunched | Activate the Flow; ensure it's Autolaunched (not Screen) |
-| API action timeout | External system slow | Increase timeout, add retry logic |
-| Permission denied | Missing Named Principal access | Grant Permission Set |
-| Action not appearing in Agent Builder UI | GenAiFunction not deployed (UI path only) | Deploy GenAiFunction metadata (only needed for Agent Builder UI, not Agent Script) |
+| `invalid input 'X'` or `invalid output 'X'`   | I/O name doesn't match `@InvocableVariable` field name in Apex               | Use exact field names from the Apex wrapper class (case-sensitive)                               |
+| `Internal Error` with inputs-only action      | Action has `inputs:` but no `outputs:` block                                 | Add `outputs:` block — the server-side compiler requires it (see known-issues.md Issue 15)       |
+| `Internal Error` with bare @InvocableMethod   | Apex uses `List<String>` without `@InvocableVariable` wrappers               | Refactor Apex to use wrapper classes with `@InvocableVariable` annotations                       |
+| `apex://` target not found                    | Apex class not deployed or missing `@InvocableMethod`                        | Deploy class first, ensure it has `@InvocableMethod` annotation                                  |
+| Flow action fails                             | Flow not active or not Autolaunched                                          | Activate the Flow; ensure it's Autolaunched (not Screen)                                         |
+| API action timeout                            | External system slow                                                         | Increase timeout, add retry logic                                                                |
+| Permission denied                             | Missing Named Principal access                                               | Grant Permission Set                                                                             |
+| Action not appearing in Agent Builder UI      | GenAiFunction not deployed (UI path only)                                    | Deploy GenAiFunction metadata (only needed for Agent Builder UI, not Agent Script)               |
 
 ### Debugging Tips
 

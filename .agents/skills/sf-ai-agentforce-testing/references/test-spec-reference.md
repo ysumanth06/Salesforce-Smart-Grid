@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Test Spec Reference
 
 Complete reference for the Agentforce agent test specification YAML format used by `sf agent test create`.
@@ -8,6 +9,7 @@ Complete reference for the Agentforce agent test specification YAML format used 
 Test specifications define automated test cases for Agentforce agents. The YAML is parsed by the `@salesforce/agents` CLI plugin, which converts it to `AiEvaluationDefinition` metadata and deploys it to the org.
 
 **Related Documentation:**
+
 - [SKILL.md](../SKILL.md) - Main skill documentation
 - [references/test-spec-guide.md](../references/test-spec-guide.md) - Comprehensive test spec guide
 - [references/topic-name-resolution.md](../references/topic-name-resolution.md) - Topic name format rules
@@ -43,30 +45,30 @@ testCases:
 
 ### Top-Level Fields
 
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `name` | **Yes** | string | Display name (MasterLabel). Deploy fails without this. |
-| `subjectType` | **Yes** | string | Must be `AGENT` |
-| `subjectName` | **Yes** | string | Agent BotDefinition DeveloperName |
-| `testCases` | **Yes** | array | List of test case objects |
+| Field         | Required | Type   | Description                                            |
+| ------------- | -------- | ------ | ------------------------------------------------------ |
+| `name`        | **Yes**  | string | Display name (MasterLabel). Deploy fails without this. |
+| `subjectType` | **Yes**  | string | Must be `AGENT`                                        |
+| `subjectName` | **Yes**  | string | Agent BotDefinition DeveloperName                      |
+| `testCases`   | **Yes**  | array  | List of test case objects                              |
 
 ### Test Case Fields
 
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `utterance` | **Yes** | string | User input message to test |
-| `expectedTopic` | No | string | Expected topic name (see [topic name resolution](#topic-name-resolution)) |
-| `expectedActions` | No | string[] | Flat list of expected action name strings |
-| `expectedOutcome` | No | string | Natural language description of expected response |
-| `contextVariables` | No | array | Session context variables to inject |
-| `conversationHistory` | No | array | Prior conversation turns for multi-turn tests |
+| Field                 | Required | Type     | Description                                                               |
+| --------------------- | -------- | -------- | ------------------------------------------------------------------------- |
+| `utterance`           | **Yes**  | string   | User input message to test                                                |
+| `expectedTopic`       | No       | string   | Expected topic name (see [topic name resolution](#topic-name-resolution)) |
+| `expectedActions`     | No       | string[] | Flat list of expected action name strings                                 |
+| `expectedOutcome`     | No       | string   | Natural language description of expected response                         |
+| `contextVariables`    | No       | array    | Session context variables to inject                                       |
+| `conversationHistory` | No       | array    | Prior conversation turns for multi-turn tests                             |
 
 ### Context Variable Fields
 
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `name` | Yes | string | Variable name — both `$Context.RoutableId` (recommended) and bare `RoutableId` work. |
-| `value` | Yes | string | Variable value (e.g., a MessagingSession ID) |
+| Field   | Required | Type   | Description                                                                          |
+| ------- | -------- | ------ | ------------------------------------------------------------------------------------ |
+| `name`  | Yes      | string | Variable name — both `$Context.RoutableId` (recommended) and bare `RoutableId` work. |
+| `value` | Yes      | string | Variable value (e.g., a MessagingSession ID)                                         |
 
 **Context Variable Details:**
 
@@ -79,6 +81,7 @@ testCases:
   - `CaseId` — Case record ID
 
 **Discovery:** Find valid IDs for testing:
+
 ```bash
 # Find an active MessagingSession ID for RoutableId
 sf data query --query "SELECT Id FROM MessagingSession WHERE Status='Active' LIMIT 1" --target-org [alias]
@@ -88,9 +91,10 @@ sf data query --query "SELECT Id FROM Case ORDER BY CreatedDate DESC LIMIT 1" --
 ```
 
 **Example:**
+
 ```yaml
 contextVariables:
-  - name: "$Context.RoutableId"  # Prefixed format (recommended) — bare RoutableId also works
+  - name: "$Context.RoutableId" # Prefixed format (recommended) — bare RoutableId also works
     value: "0Mwbb000007MGoTCAW"
   - name: CaseId
     value: "500XX0000000001"
@@ -100,19 +104,19 @@ contextVariables:
 
 Custom evaluations allow JSONPath-based assertions on action inputs and outputs.
 
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `label` | Yes | string | Human-readable description of what's being checked |
-| `name` | Yes | string | Evaluation type: `string_comparison` or `numeric_comparison` |
-| `parameters` | Yes | array | List of parameter objects (operator, actual, expected) |
+| Field        | Required | Type   | Description                                                  |
+| ------------ | -------- | ------ | ------------------------------------------------------------ |
+| `label`      | Yes      | string | Human-readable description of what's being checked           |
+| `name`       | Yes      | string | Evaluation type: `string_comparison` or `numeric_comparison` |
+| `parameters` | Yes      | array  | List of parameter objects (operator, actual, expected)       |
 
 **Parameter Fields:**
 
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `name` | Yes | string | Parameter name: `operator`, `actual`, or `expected` |
-| `value` | Yes | string | Parameter value (literal or JSONPath expression) |
-| `isReference` | Yes | boolean | `true` if `value` is a JSONPath expression to resolve against `generatedData` |
+| Field         | Required | Type    | Description                                                                   |
+| ------------- | -------- | ------- | ----------------------------------------------------------------------------- |
+| `name`        | Yes      | string  | Parameter name: `operator`, `actual`, or `expected`                           |
+| `value`       | Yes      | string  | Parameter value (literal or JSONPath expression)                              |
+| `isReference` | Yes      | boolean | `true` if `value` is a JSONPath expression to resolve against `generatedData` |
 
 **String Comparison Operators:** `equals`, `contains`, `startswith`, `endswith`
 
@@ -121,6 +125,7 @@ Custom evaluations allow JSONPath-based assertions on action inputs and outputs.
 > **⚠️ SPRING '26 PLATFORM BUG:** Custom evaluations with `isReference: true` (JSONPath) cause the server to return "RETRY" status. The results API then crashes with `INTERNAL_SERVER_ERROR: The specified enum type has no constant with the specified name: RETRY`. This is a **server-side bug** (confirmed via direct `curl`), not a CLI issue. See [Known Issues](#known-issues).
 
 **Example:**
+
 ```yaml
 customEvaluations:
   - label: "supportPath is Field Support"
@@ -131,13 +136,14 @@ customEvaluations:
         isReference: false
       - name: actual
         value: "$.generatedData.invokedActions[0][0].function.input.supportPath"
-        isReference: true       # JSONPath reference resolved against generatedData
+        isReference: true # JSONPath reference resolved against generatedData
       - name: expected
         value: "Field Support"
         isReference: false
 ```
 
 **Building JSONPath Expressions:**
+
 1. Run tests with `--verbose` flag to see `generatedData` JSON
 2. Note: `invokedActions` is **stringified JSON** — `"[[{...}]]"` not a parsed array
 3. Common paths:
@@ -150,20 +156,22 @@ customEvaluations:
 
 Metrics add platform quality scoring to test cases. Specify as a flat list of metric names.
 
-| Metric | Score Range | Description |
-|--------|-------------|-------------|
-| `coherence` | 1-5 | Response clarity, grammar, and logical flow. Works well — typically scores 4-5 for clear responses. **⚠️ Scores deflection agents poorly** (2-3) because it evaluates whether the response "answers" the user's question, not whether the agent behaved correctly. For deflection/guardrail tests, use `expectedOutcome` instead. |
-| `completeness` | 1-5 | How fully the response addresses the query. **⚠️ Penalizes triage/routing agents** that transfer instead of "solving" the problem — unsuitable for routing agents. |
-| `conciseness` | 1-5 | **⚠️ BROKEN** — Returns score=0 with empty `metricExplainability` on most tests. Platform bug. |
-| `instruction_following` | 0-1 | Whether the agent follows its instructions. **⚠️ Two bugs:** (1) Labels "FAILURE" even at score=1 — threshold mismatch. (2) **Crashes Testing Center UI** with `No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION` — remove from YAML if users need UI access. |
-| `output_latency_milliseconds` | Raw ms | Reports raw latency in milliseconds. No pass/fail grading — useful for performance baselining only. |
+| Metric                        | Score Range | Description                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coherence`                   | 1-5         | Response clarity, grammar, and logical flow. Works well — typically scores 4-5 for clear responses. **⚠️ Scores deflection agents poorly** (2-3) because it evaluates whether the response "answers" the user's question, not whether the agent behaved correctly. For deflection/guardrail tests, use `expectedOutcome` instead. |
+| `completeness`                | 1-5         | How fully the response addresses the query. **⚠️ Penalizes triage/routing agents** that transfer instead of "solving" the problem — unsuitable for routing agents.                                                                                                                                                                |
+| `conciseness`                 | 1-5         | **⚠️ BROKEN** — Returns score=0 with empty `metricExplainability` on most tests. Platform bug.                                                                                                                                                                                                                                    |
+| `instruction_following`       | 0-1         | Whether the agent follows its instructions. **⚠️ Two bugs:** (1) Labels "FAILURE" even at score=1 — threshold mismatch. (2) **Crashes Testing Center UI** with `No enum constant AiEvaluationMetricType.INSTRUCTION_FOLLOWING_EVALUATION` — remove from YAML if users need UI access.                                             |
+| `output_latency_milliseconds` | Raw ms      | Reports raw latency in milliseconds. No pass/fail grading — useful for performance baselining only.                                                                                                                                                                                                                               |
 
 **Recommended Metrics:**
+
 - Use `coherence` + `output_latency_milliseconds` for baseline quality scoring
 - Skip `conciseness` (broken) and `completeness` (misleading for routing agents)
 - Use `instruction_following` with caution — check the score value, ignore the PASS/FAILURE label
 
 **Example:**
+
 ```yaml
 testCases:
   - utterance: "I need help with my doorbell camera"
@@ -179,11 +187,11 @@ testCases:
 
 ### Conversation History Fields
 
-| Field | Required | Type | Description |
-|-------|----------|------|-------------|
-| `role` | Yes | string | `user` or `agent` (NOT `assistant`) |
-| `message` | Yes | string | Message content |
-| `topic` | Agent only | string | Topic name for agent turns |
+| Field     | Required   | Type   | Description                         |
+| --------- | ---------- | ------ | ----------------------------------- |
+| `role`    | Yes        | string | `user` or `agent` (NOT `assistant`) |
+| `message` | Yes        | string | Message content                     |
+| `topic`   | Agent only | string | Topic name for agent turns          |
 
 ---
 
@@ -239,7 +247,7 @@ testCases:
       - create_support_case
 ```
 
-**Superset matching:** The CLI passes if the agent invokes *at least* the expected actions. Extra actions don't cause failure.
+**Superset matching:** The CLI passes if the agent invokes _at least_ the expected actions. Extra actions don't cause failure.
 
 ### 3. Outcome Validation Tests
 
@@ -252,7 +260,7 @@ testCases:
     expectedOutcome: "Agent should explain the return process with step-by-step instructions"
 ```
 
-> **Important: `output_validation` judges TEXT, not actions.** The LLM-as-judge evaluates the agent's **text response** only — it does NOT inspect action results, sObject writes, or internal state changes. Write `expectedOutcome` about what the agent *says*, not what it *does* internally.
+> **Important: `output_validation` judges TEXT, not actions.** The LLM-as-judge evaluates the agent's **text response** only — it does NOT inspect action results, sObject writes, or internal state changes. Write `expectedOutcome` about what the agent _says_, not what it _does_ internally.
 >
 > ```yaml
 > # ❌ WRONG — references internal action behavior
@@ -350,16 +358,17 @@ testCases:
 
 The `expectedTopic` format depends on the topic type:
 
-| Topic Type | Use | Example |
-|------------|-----|---------|
-| **Standard** (Escalation, Off_Topic, etc.) | `localDeveloperName` | `Escalation` |
-| **Promoted** (p_16j... prefix) | Full runtime `developerName` with hash | `p_16jPl000000GwEX_Topic_16j8eeef13560aa` |
+| Topic Type                                 | Use                                    | Example                                   |
+| ------------------------------------------ | -------------------------------------- | ----------------------------------------- |
+| **Standard** (Escalation, Off_Topic, etc.) | `localDeveloperName`                   | `Escalation`                              |
+| **Promoted** (p_16j... prefix)             | Full runtime `developerName` with hash | `p_16jPl000000GwEX_Topic_16j8eeef13560aa` |
 
 **Standard topics** resolve automatically — the CLI framework maps `Escalation` to the full hash-suffixed runtime name.
 
 **Promoted topics** require the exact runtime `developerName`. The `localDeveloperName` does NOT resolve.
 
 **Discovery workflow:**
+
 1. Run a test with your best guess
 2. Check results: `jq '.result.testCases[].generatedData.topic'`
 3. Update spec with actual runtime names
@@ -374,30 +383,30 @@ The CLI evaluates assertions per test case based on which fields are specified:
 
 ### Core Assertions (per test case fields)
 
-| Assertion | YAML Field | Logic |
-|-----------|------------|-------|
-| `topic_assertion` | `expectedTopic` | Exact match (with resolution for standard topics) |
+| Assertion           | YAML Field        | Logic                                             |
+| ------------------- | ----------------- | ------------------------------------------------- |
+| `topic_assertion`   | `expectedTopic`   | Exact match (with resolution for standard topics) |
 | `actions_assertion` | `expectedActions` | Superset — passes if actual contains all expected |
-| `output_validation` | `expectedOutcome` | LLM-as-judge semantic evaluation |
+| `output_validation` | `expectedOutcome` | LLM-as-judge semantic evaluation                  |
 
 ### Custom Evaluations (via `customEvaluations`)
 
-| Assertion | Type | Logic |
-|-----------|------|-------|
-| `string_comparison` | `customEvaluations` | JSONPath string assertion (`equals`, `contains`, `startswith`, `endswith`) |
-| `numeric_comparison` | `customEvaluations` | JSONPath numeric assertion (`equals`, `greater_than`, `less_than`, etc.) |
+| Assertion            | Type                | Logic                                                                      |
+| -------------------- | ------------------- | -------------------------------------------------------------------------- |
+| `string_comparison`  | `customEvaluations` | JSONPath string assertion (`equals`, `contains`, `startswith`, `endswith`) |
+| `numeric_comparison` | `customEvaluations` | JSONPath numeric assertion (`equals`, `greater_than`, `less_than`, etc.)   |
 
 > **⚠️ Spring '26 Bug:** Custom evaluations cause server RETRY → HTTP 500. See [Known Issues](#known-issues).
 
 ### Metrics (via `metrics`)
 
-| Metric | Source | Scoring |
-|--------|--------|---------|
-| `coherence` | `metrics` | LLM quality score (1-5) |
-| `completeness` | `metrics` | LLM completeness score (1-5) |
-| `conciseness` | `metrics` | **⚠️ BROKEN** — returns score=0 in Spring '26 |
-| `instruction_following` | `metrics` | LLM instruction score (0-1) |
-| `output_latency_milliseconds` | `metrics` | Raw latency in ms (no grading) |
+| Metric                        | Source    | Scoring                                       |
+| ----------------------------- | --------- | --------------------------------------------- |
+| `coherence`                   | `metrics` | LLM quality score (1-5)                       |
+| `completeness`                | `metrics` | LLM completeness score (1-5)                  |
+| `conciseness`                 | `metrics` | **⚠️ BROKEN** — returns score=0 in Spring '26 |
+| `instruction_following`       | `metrics` | LLM instruction score (0-1)                   |
+| `output_latency_milliseconds` | `metrics` | Raw latency in ms (no grading)                |
 
 ### Result JSON Structure
 
@@ -474,19 +483,19 @@ When `--verbose` is used, `generatedData` includes additional fields — notably
 
 ## Test Spec Templates
 
-| Template | Purpose | CLI Compatible |
-|----------|---------|----------------|
-| `agentscript-test-spec.yaml` | Agent Script agents with conversationHistory pattern | **Yes** |
-| `standard-test-spec.yaml` | Reference format with all field types | **Yes** |
-| `basic-test-spec.yaml` | Quick start (5 tests) | **Yes** |
-| `comprehensive-test-spec.yaml` | Full coverage (20+ tests) with context vars, metrics, custom evals | **Yes** |
-| `context-vars-test-spec.yaml` | Context variable patterns (RoutableId, EndUserId) | **Yes** |
-| `custom-eval-test-spec.yaml` | Custom evaluations with JSONPath assertions (**⚠️ Spring '26 bug**) | **Yes** (bug blocks results) |
-| `cli-auth-guardrail-tests.yaml` | Auth gate, guardrail, ambiguous routing, and session tests | **Yes** |
-| `cli-deep-history-tests.yaml` | Deep conversation history patterns (protocol activation, mid-stage, opt-out, session persistence) | **Yes** |
-| `escalation-tests.yaml` | Escalation scenarios | **No** — Phase A (API) only |
-| `guardrail-tests.yaml` | Guardrail scenarios | **No** — Phase A (API) only |
-| `multi-turn-*.yaml` | Multi-turn API scenarios | **No** — Phase A (API) only |
+| Template                        | Purpose                                                                                           | CLI Compatible               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `agentscript-test-spec.yaml`    | Agent Script agents with conversationHistory pattern                                              | **Yes**                      |
+| `standard-test-spec.yaml`       | Reference format with all field types                                                             | **Yes**                      |
+| `basic-test-spec.yaml`          | Quick start (5 tests)                                                                             | **Yes**                      |
+| `comprehensive-test-spec.yaml`  | Full coverage (20+ tests) with context vars, metrics, custom evals                                | **Yes**                      |
+| `context-vars-test-spec.yaml`   | Context variable patterns (RoutableId, EndUserId)                                                 | **Yes**                      |
+| `custom-eval-test-spec.yaml`    | Custom evaluations with JSONPath assertions (**⚠️ Spring '26 bug**)                               | **Yes** (bug blocks results) |
+| `cli-auth-guardrail-tests.yaml` | Auth gate, guardrail, ambiguous routing, and session tests                                        | **Yes**                      |
+| `cli-deep-history-tests.yaml`   | Deep conversation history patterns (protocol activation, mid-stage, opt-out, session persistence) | **Yes**                      |
+| `escalation-tests.yaml`         | Escalation scenarios                                                                              | **No** — Phase A (API) only  |
+| `guardrail-tests.yaml`          | Guardrail scenarios                                                                               | **No** — Phase A (API) only  |
+| `multi-turn-*.yaml`             | Multi-turn API scenarios                                                                          | **No** — Phase A (API) only  |
 
 ---
 
@@ -526,25 +535,25 @@ sf agent test results --job-id <JOB_ID> --result-format json --json --target-org
 
 ## Known Gotchas
 
-| Gotcha | Detail |
-|--------|--------|
-| `name:` is mandatory | Deploy fails with "Required fields are missing: [MasterLabel]" |
-| `expectedActions` is flat strings | `- action_name` NOT `- name: action_name, invoked: true` |
-| Empty `expectedActions: []` | Means "not testing" — passes even when actions are invoked |
-| Missing `expectedOutcome` | `output_validation` reports ERROR — this is harmless |
-| `--use-most-recent` broken on `test results` | Confirmed broken on v2.123.1. Use `--job-id` for `test results`, or use `test resume --use-most-recent` (works) |
-| No MessagingSession context | CLI tests have no session — flows needing `recordId` error at runtime. Use `contextVariables` with `RoutableId` to inject a real session ID. |
-| Promoted topic names | Must use full runtime `developerName` with hash suffix |
-| contextVariables `name` format | Both `$Context.RoutableId` and bare `RoutableId` work — runtime resolves both. `$Context.` prefix recommended. |
-| customEvaluations → RETRY bug | **⚠️ Spring '26:** Server returns RETRY status → REST API 500 error. See [Known Issues](#known-issues). |
-| `conciseness` metric broken | Returns score=0 with empty explanation on most tests — platform bug |
-| `instruction_following` threshold | Labels FAILURE even at score=1 with "follows perfectly" explanation — threshold mismatch |
-| `completeness` unsuitable for routing | Penalizes triage agents that transfer instead of "solving" the user's problem |
-| Agent Script single-utterance limit | Multi-topic agents consume first reasoning cycle on topic transition (`go_<topic>`). Use `conversationHistory` to test business actions |
-| Agent Script action names | Use Level 1 definition name (`get_order_status`), NOT Level 2 invocation name (`check_status`) in `expectedActions` |
-| Agent Script permissions | `WITH USER_MODE` Apex silently returns 0 rows if Einstein Agent User lacks object permissions |
-| Topic hash drift on republish | Runtime `developerName` hash changes after agent republish. Tests with hardcoded full names break. Use `localDeveloperName` for standard topics; re-run discovery after each publish for promoted topics. |
-| API vs CLI action visibility gap | Multi-turn API testing may report `has_action_result: false` for actions that actually fired. CLI `--verbose` output is authoritative for action verification — always cross-check with CLI results when API shows missing actions. |
+| Gotcha                                       | Detail                                                                                                                                                                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name:` is mandatory                         | Deploy fails with "Required fields are missing: [MasterLabel]"                                                                                                                                                                      |
+| `expectedActions` is flat strings            | `- action_name` NOT `- name: action_name, invoked: true`                                                                                                                                                                            |
+| Empty `expectedActions: []`                  | Means "not testing" — passes even when actions are invoked                                                                                                                                                                          |
+| Missing `expectedOutcome`                    | `output_validation` reports ERROR — this is harmless                                                                                                                                                                                |
+| `--use-most-recent` broken on `test results` | Confirmed broken on v2.123.1. Use `--job-id` for `test results`, or use `test resume --use-most-recent` (works)                                                                                                                     |
+| No MessagingSession context                  | CLI tests have no session — flows needing `recordId` error at runtime. Use `contextVariables` with `RoutableId` to inject a real session ID.                                                                                        |
+| Promoted topic names                         | Must use full runtime `developerName` with hash suffix                                                                                                                                                                              |
+| contextVariables `name` format               | Both `$Context.RoutableId` and bare `RoutableId` work — runtime resolves both. `$Context.` prefix recommended.                                                                                                                      |
+| customEvaluations → RETRY bug                | **⚠️ Spring '26:** Server returns RETRY status → REST API 500 error. See [Known Issues](#known-issues).                                                                                                                             |
+| `conciseness` metric broken                  | Returns score=0 with empty explanation on most tests — platform bug                                                                                                                                                                 |
+| `instruction_following` threshold            | Labels FAILURE even at score=1 with "follows perfectly" explanation — threshold mismatch                                                                                                                                            |
+| `completeness` unsuitable for routing        | Penalizes triage agents that transfer instead of "solving" the user's problem                                                                                                                                                       |
+| Agent Script single-utterance limit          | Multi-topic agents consume first reasoning cycle on topic transition (`go_<topic>`). Use `conversationHistory` to test business actions                                                                                             |
+| Agent Script action names                    | Use Level 1 definition name (`get_order_status`), NOT Level 2 invocation name (`check_status`) in `expectedActions`                                                                                                                 |
+| Agent Script permissions                     | `WITH USER_MODE` Apex silently returns 0 rows if Einstein Agent User lacks object permissions                                                                                                                                       |
+| Topic hash drift on republish                | Runtime `developerName` hash changes after agent republish. Tests with hardcoded full names break. Use `localDeveloperName` for standard topics; re-run discovery after each publish for promoted topics.                           |
+| API vs CLI action visibility gap             | Multi-turn API testing may report `has_action_result: false` for actions that actually fired. CLI `--verbose` output is authoritative for action verification — always cross-check with CLI results when API shows missing actions. |
 
 ---
 
@@ -557,6 +566,7 @@ sf agent test results --job-id <JOB_ID> --result-format json --json --target-org
 **Error**: `INTERNAL_SERVER_ERROR: The specified enum type has no constant with the specified name: RETRY`
 
 **Scope**:
+
 - Server returns "RETRY" status for test cases with custom evaluations using `isReference: true`
 - Results API endpoint crashes with HTTP 500 when fetching results
 - Both filter expressions `[?(@.field == 'value')]` AND direct indexing `[0][0]` trigger the bug
@@ -565,6 +575,7 @@ sf agent test results --job-id <JOB_ID> --result-format json --json --target-org
 **Confirmed**: Direct `curl` to REST endpoint returns same 500 — NOT a CLI parsing issue
 
 **Workaround**:
+
 1. Use Testing Center UI (Setup → Agent Testing) — may display results
 2. Skip custom evaluations until platform patch
 3. Use `expectedOutcome` (LLM-as-judge) for response validation instead

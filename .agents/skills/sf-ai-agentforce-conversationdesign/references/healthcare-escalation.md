@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Escalation Matrix
 
 ## Agent Overview
@@ -10,22 +11,23 @@
 
 ## Trigger Conditions
 
-| Trigger Type | Condition | Priority | Routing Rule | Estimated Volume |
-|--------------|-----------|----------|--------------|------------------|
-| Medical Emergency | User mentions chest pain, difficulty breathing, severe bleeding, suicidal ideation | P1 (Immediate) | Emergency Nurse Queue | 5-10/day |
-| Prescription Questions | Requests about medication dosage, side effects, drug interactions | P2 (Urgent) | Pharmacist Queue | 40-60/day |
-| Insurance Disputes | Billing errors, denied claims, coverage questions requiring review | P2 (Urgent) | Billing Specialist Queue | 80-100/day |
-| HIPAA-Sensitive Requests | Requests to access/modify protected health information, medical records | P2 (Urgent) | Privacy Officer Queue | 15-25/day |
-| Patient Complaints | Dissatisfaction with care quality, provider behavior, facility conditions | P3 (Normal) | Patient Relations Queue | 30-50/day |
-| Complex Scheduling | Multi-provider coordination, surgery scheduling, specialist referrals | P3 (Normal) | Scheduling Coordinator Queue | 60-80/day |
-| Explicit Request | User directly asks for human agent | P3 (Normal) | Patient Support Queue | 100-150/day |
-| Stalled Conversation | >5 turns without resolution or repeated clarification requests | P4 (Low) | Patient Support Queue | 20-30/day |
+| Trigger Type             | Condition                                                                          | Priority       | Routing Rule                 | Estimated Volume |
+| ------------------------ | ---------------------------------------------------------------------------------- | -------------- | ---------------------------- | ---------------- |
+| Medical Emergency        | User mentions chest pain, difficulty breathing, severe bleeding, suicidal ideation | P1 (Immediate) | Emergency Nurse Queue        | 5-10/day         |
+| Prescription Questions   | Requests about medication dosage, side effects, drug interactions                  | P2 (Urgent)    | Pharmacist Queue             | 40-60/day        |
+| Insurance Disputes       | Billing errors, denied claims, coverage questions requiring review                 | P2 (Urgent)    | Billing Specialist Queue     | 80-100/day       |
+| HIPAA-Sensitive Requests | Requests to access/modify protected health information, medical records            | P2 (Urgent)    | Privacy Officer Queue        | 15-25/day        |
+| Patient Complaints       | Dissatisfaction with care quality, provider behavior, facility conditions          | P3 (Normal)    | Patient Relations Queue      | 30-50/day        |
+| Complex Scheduling       | Multi-provider coordination, surgery scheduling, specialist referrals              | P3 (Normal)    | Scheduling Coordinator Queue | 60-80/day        |
+| Explicit Request         | User directly asks for human agent                                                 | P3 (Normal)    | Patient Support Queue        | 100-150/day      |
+| Stalled Conversation     | >5 turns without resolution or repeated clarification requests                     | P4 (Low)       | Patient Support Queue        | 20-30/day        |
 
 ## Context Handoff Specification
 
 ### Trigger: Medical Emergency
 
 **Data to Pass:**
+
 - Patient Name (if authenticated)
 - Callback Phone Number (collected immediately if not in system)
 - Emergency Description (verbatim user input)
@@ -33,6 +35,7 @@
 - Timestamp of escalation
 
 **Conversation Summary:**
+
 ```
 URGENT - MEDICAL EMERGENCY
 Patient: [Name or "Guest User"]
@@ -45,6 +48,7 @@ Immediate action required. Agent advised patient to call 911 if life-threatening
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: URGENT: Medical Emergency - [Emergency Type]
 - `Priority`: Highest
 - `Skill Requirements`: Emergency Triage (Required), Nursing (Required)
@@ -55,6 +59,7 @@ Immediate action required. Agent advised patient to call 911 if life-threatening
 ### Trigger: Prescription Questions
 
 **Data to Pass:**
+
 - Patient Name and MRN (Medical Record Number)
 - Medication Name (if mentioned)
 - Question Type (dosage, side effects, interaction, refill)
@@ -62,6 +67,7 @@ Immediate action required. Agent advised patient to call 911 if life-threatening
 - Prescribing Provider (if known)
 
 **Conversation Summary:**
+
 ```
 PRESCRIPTION INQUIRY
 Patient: [Name] (MRN: [Number])
@@ -72,6 +78,7 @@ Agent Action: Advised patient that licensed pharmacist will respond within 2 hou
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: Rx Question: [Medication] - [Patient Name]
 - `Priority`: High
 - `Skill Requirements`: Pharmacy (Required)
@@ -82,6 +89,7 @@ Agent Action: Advised patient that licensed pharmacist will respond within 2 hou
 ### Trigger: Insurance Disputes
 
 **Data to Pass:**
+
 - Patient Name, DOB, Insurance ID
 - Claim Number or Date of Service
 - Dispute Reason (denied claim, incorrect billing, coverage question)
@@ -89,6 +97,7 @@ Agent Action: Advised patient that licensed pharmacist will respond within 2 hou
 - Previous Correspondence (if any)
 
 **Conversation Summary:**
+
 ```
 INSURANCE DISPUTE
 Patient: [Name] (DOB: [Date], Insurance ID: [ID])
@@ -100,6 +109,7 @@ Agent Action: Escalated to billing specialist. Patient expects callback within 4
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: Insurance Dispute - [Claim Number] - [Patient Name]
 - `Priority`: High
 - `Skill Requirements`: Billing (Expert), Insurance Verification (Required)
@@ -110,12 +120,14 @@ Agent Action: Escalated to billing specialist. Patient expects callback within 4
 ### Trigger: HIPAA-Sensitive Requests
 
 **Data to Pass:**
+
 - Patient Name and DOB (for identity verification)
 - Request Type (access records, amend records, restrict disclosure, accounting of disclosures)
 - Verification Status (authenticated via portal vs. guest)
 - Records Requested (date range, provider, record type)
 
 **Conversation Summary:**
+
 ```
 HIPAA REQUEST - PRIVACY OFFICER REVIEW
 Patient: [Name] (DOB: [Date])
@@ -126,6 +138,7 @@ Agent Action: Informed patient that Privacy Officer will contact within 24 hours
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: HIPAA Request: [Request Type] - [Patient Name]
 - `Priority`: High
 - `Skill Requirements`: Privacy Officer (Required), HIPAA Compliance (Required)
@@ -136,6 +149,7 @@ Agent Action: Informed patient that Privacy Officer will contact within 24 hours
 ### Trigger: Patient Complaints
 
 **Data to Pass:**
+
 - Patient Name and MRN
 - Complaint Category (provider behavior, wait times, facility, care quality)
 - Date/Time of Incident
@@ -143,6 +157,7 @@ Agent Action: Informed patient that Privacy Officer will contact within 24 hours
 - Verbatim Complaint Description
 
 **Conversation Summary:**
+
 ```
 PATIENT COMPLAINT
 Patient: [Name] (MRN: [Number])
@@ -155,6 +170,7 @@ Patient Sentiment: [Frustrated|Angry|Disappointed|Calm]
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: Patient Complaint: [Category] - [Patient Name]
 - `Priority`: Normal
 - `Skill Requirements`: Patient Relations (Required), Conflict Resolution (Preferred)
@@ -165,6 +181,7 @@ Patient Sentiment: [Frustrated|Angry|Disappointed|Calm]
 ### Trigger: Complex Scheduling
 
 **Data to Pass:**
+
 - Patient Name and MRN
 - Scheduling Need (surgery, multi-provider coordination, specialist referral)
 - Preferred Dates/Times (if mentioned)
@@ -172,6 +189,7 @@ Patient Sentiment: [Frustrated|Angry|Disappointed|Calm]
 - Insurance Pre-Authorization Status (if known)
 
 **Conversation Summary:**
+
 ```
 COMPLEX SCHEDULING REQUEST
 Patient: [Name] (MRN: [Number])
@@ -183,6 +201,7 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 ```
 
 **Omni-Channel Work Item Fields:**
+
 - `Subject`: Complex Scheduling: [Type] - [Patient Name]
 - `Priority`: Normal
 - `Skill Requirements`: Advanced Scheduling (Required)
@@ -199,14 +218,17 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 **Routing Model:** Most Available (fastest response)
 
 **Skills Required:**
+
 - Emergency Triage: Expert
 - Nursing: Required
 
 **Service Level Agreement:**
+
 - Target Response Time: <1 minute
 - Escalation Path: If no nurse available in 1 min → Page on-call physician
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: 2 (emergencies require focus)
 - Overflow Queue: On-Call Physician Queue
 
@@ -219,13 +241,16 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 **Routing Model:** Least Active (balance workload among pharmacists)
 
 **Skills Required:**
+
 - Pharmacy: Required
 
 **Service Level Agreement:**
+
 - Target Response Time: <2 hours
 - Escalation Path: If no response in 2 hours → Email pharmacist supervisor
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: 5
 - Overflow Queue: Pharmacy Supervisor Queue
 
@@ -238,14 +263,17 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 **Routing Model:** External Routing (uses round-robin among billing team)
 
 **Skills Required:**
+
 - Billing: Expert
 - Insurance Verification: Required
 
 **Service Level Agreement:**
+
 - Target Response Time: <4 hours during business hours
 - Escalation Path: If >1 business day unresolved → Escalate to Billing Manager
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: 8
 - Overflow Queue: Billing Manager Queue
 
@@ -258,14 +286,17 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 **Routing Model:** Most Available (limited staff, urgent compliance timelines)
 
 **Skills Required:**
+
 - Privacy Officer: Required
 - HIPAA Compliance: Required
 
 **Service Level Agreement:**
+
 - Target Response Time: <24 hours (HIPAA requirement: 30 days for access, but we target faster)
 - Escalation Path: If complex legal issue → Consult with Legal Counsel
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: 3
 - Overflow Queue: Chief Privacy Officer
 
@@ -278,14 +309,17 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 **Routing Model:** Least Active
 
 **Skills Required:**
+
 - Patient Relations: Required
 - Conflict Resolution: Preferred
 
 **Service Level Agreement:**
+
 - Target Response Time: <4 business hours
 - Escalation Path: If formal grievance → Route to Grievance Committee per policy
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: 6
 - Overflow Queue: Patient Experience Manager
 
@@ -298,13 +332,16 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 **Routing Model:** External Routing
 
 **Skills Required:**
+
 - Advanced Scheduling: Required
 
 **Service Level Agreement:**
+
 - Target Response Time: <24 hours
 - Escalation Path: If surgery scheduling → Coordinate with Surgery Scheduler
 
 **Agent Capacity:**
+
 - Max Concurrent Chats: 10
 - Overflow Queue: Scheduling Supervisor Queue
 
@@ -315,16 +352,19 @@ Agent Action: Routed to scheduling coordinator for manual coordination. Patient 
 ### Pre-Escalation (Before Handoff)
 
 **Default Message:**
+
 ```
 I'm going to connect you with a specialist who can help with this right away. You should see them join in just a moment. They'll have all the information from our conversation so you won't need to repeat yourself.
 ```
 
 **Frustrated User Variant:**
+
 ```
 I completely understand your frustration, and I'm sorry for the inconvenience. I'm connecting you with a specialist right now who has the tools to resolve this. They'll be with you shortly and will have full context of your situation.
 ```
 
 **High-Priority Variant (Emergency):**
+
 ```
 I'm immediately connecting you with our emergency nurse. They'll be with you in less than 60 seconds.
 
@@ -334,11 +374,13 @@ IMPORTANT: If you're experiencing a life-threatening emergency, please hang up a
 ### During Handoff (Wait State)
 
 **Initial Wait Message:**
+
 ```
 Your specialist is being notified now. Typical wait time is [X minutes]. I'll stay here with you until they arrive.
 ```
 
 **Extended Wait Message (if >2 minutes for urgent, >5 minutes for normal):**
+
 ```
 I'm sorry for the wait. I'm actively monitoring for your specialist to join. If you'd prefer, I can have them call you at [phone number] instead, or you can continue waiting here. What works better for you?
 ```
@@ -346,11 +388,13 @@ I'm sorry for the wait. I'm actively monitoring for your specialist to join. If 
 ### Post-Escalation (Human Takes Over)
 
 **Human Agent Greeting Template:**
+
 ```
 Hi [Patient Name], this is [Agent Name], [Title]. I've reviewed your conversation with our virtual assistant and I'm here to help with [specific issue]. [Personalized response based on context summary]
 ```
 
 **Context Summary for Human:**
+
 ```
 Agent attempted: [List of actions taken - e.g., "Searched for appointments on 3/15, no availability found"]
 User's goal: [e.g., "Schedule annual physical with Dr. Smith in next 2 weeks"]
@@ -381,11 +425,13 @@ Message: "I apologize—our specialists are all assisting other patients right n
 ### Escalation Metrics
 
 **Success Criteria:**
+
 - First Contact Resolution (FCR) after escalation: >75%
 - Human agent accepts transfer within: SLA time (varies by priority - see queue configs)
 - User satisfaction (CSAT) for escalated conversations: >4.0/5.0
 
 **Monitoring:**
+
 - Daily escalation rate: Target <20% of total conversations
 - Top escalation reasons (weekly review): Insurance (28%), Complex Scheduling (22%), Prescription Qs (18%), Complaints (12%), HIPAA (10%), Emergency (8%), Other (2%)
 - Escalation trend threshold: Alert if rate exceeds 25% for 3 consecutive days
@@ -395,6 +441,7 @@ Message: "I apologize—our specialists are all assisting other patients right n
 ### Before Triggering Escalation
 
 **Attempt:**
+
 1. **Rephrase and clarify intent**: If user request is ambiguous, ask specific questions to understand the need before assuming escalation is required.
 2. **Offer self-service alternative**: "I can send you a link to view your test results in the patient portal—would that work, or do you need to speak with someone?"
 3. **Break complex requests into simple steps**: For multi-part requests, handle what's possible via automation first (e.g., schedule simple appointment, then escalate for complex referral).
@@ -468,17 +515,20 @@ Proceed with escalation, but log the attempted de-escalation strategies for trai
 ## Notes and Assumptions
 
 **Dependencies:**
+
 - Omni-Channel setup complete with all queues configured
 - Skills (Emergency Triage, Pharmacy, Billing, etc.) assigned to appropriate staff in Salesforce
 - Case Management workflow triggers set up for escalation logging
 - After-hours coverage plan confirmed with clinical leadership
 
 **Compliance Considerations:**
+
 - All escalations involving PHI must be logged per HIPAA audit requirements
 - 30-day SLA for HIPAA access requests per 45 CFR § 164.524
 - Controlled substance prescriptions subject to DEA regulations
 
 **Capacity Planning:**
+
 - Emergency Nurse Queue: 2 RNs on duty 24/7 (covers 10-15 emergencies/day)
 - Pharmacist Queue: 3 pharmacists 8am-8pm, 1 on-call 8pm-8am
 - Billing Queue: 6 specialists 8am-6pm weekdays

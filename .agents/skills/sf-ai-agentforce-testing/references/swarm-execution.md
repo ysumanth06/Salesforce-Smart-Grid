@@ -79,11 +79,11 @@ IMPORTANT:
 
 ## Partition Strategies
 
-| Strategy | How It Works | Best For |
-|----------|-------------|----------|
+| Strategy      | How It Works                                               | Best For                      |
+| ------------- | ---------------------------------------------------------- | ----------------------------- |
 | `by_category` | One worker per test pattern (topic_routing, context, etc.) | Most runs — natural isolation |
-| `by_count` | Split N scenarios evenly across W workers | Large scenario counts |
-| `sequential` | Single process, no team | Quick runs, debugging |
+| `by_count`    | Split N scenarios evenly across W workers                  | Large scenario counts         |
+| `sequential`  | Single process, no team                                    | Quick runs, debugging         |
 
 ## Team Lead Aggregation
 
@@ -107,6 +107,7 @@ After all workers report, the team lead:
 When multiple CLI test suites need to be deployed and run simultaneously, use agent teams for parallel execution.
 
 **When to use swarm:**
+
 - 3+ test suites to deploy and run
 - User selects "Swarm: parallel deploy+run" in Step 4
 - Each suite is independent (no shared state)
@@ -114,17 +115,20 @@ When multiple CLI test suites need to be deployed and run simultaneously, use ag
 **Swarm Protocol:**
 
 ☐ **Step 1: Create team**
+
 ```
 TeamCreate(team_name="cli-test-{agent_name}")
 ```
 
 ☐ **Step 2: Create tasks** (one per suite)
+
 ```
 TaskCreate(subject="Deploy+Run {suite_name}", description="sf agent test create + run for {suite}")
 ```
 
 ☐ **Step 3: Spawn workers** (max 3, batch suites if > 3)
 Workers are `fde-qa-engineer` agents. Each worker:
+
 1. Deploys its assigned suite(s) via `sf agent test create --spec`
 2. Runs via `sf agent test run --api-name`
 3. Polls results via `sf agent test results --job-id`

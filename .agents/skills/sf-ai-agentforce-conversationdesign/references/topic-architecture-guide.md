@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-conversationdesign/SKILL.md -->
+
 # Topic Architecture Guide for Agentforce Agents
 
 ## What are Topics?
@@ -6,6 +7,7 @@
 Topics are the organizational units that structure your Agentforce agent's capabilities. Each topic is a classification bucket that groups related actions together and defines a distinct area of expertise for your agent.
 
 Think of topics as departments in a company:
+
 - **Order Management** (like the fulfillment department)
 - **Returns & Exchanges** (like customer service)
 - **Product Information** (like the sales floor)
@@ -53,6 +55,7 @@ Start by brainstorming every discrete capability your agent should have. Don't w
 
 ```markdown
 Action Inventory (Unsorted):
+
 1. Look up order status by order number
 2. Look up order status by email address
 3. Track package location
@@ -93,29 +96,34 @@ Now cluster your actions based on what the USER is trying to accomplish, not wha
 
 ```markdown
 Group A: "I want to know about my order"
+
 - Look up order status by order number
 - Look up order status by email address
 - Track package location
 - View order history
 
 Group B: "I want to return or cancel something"
+
 - Initiate a return for an order
 - Generate a return shipping label
 - Check return eligibility for an item
 - Cancel an order
 
 Group C: "I need to change my order"
+
 - Modify order items (add/remove)
 - Change order shipping address
 - Apply a promo code to an order
 
 Group D: "I want to learn about products"
+
 - Search product catalog by keyword
 - Get product details (price, sizes, colors)
 - Check product availability/inventory
 - Get product reviews and ratings
 
 Group E: "I need to update my account"
+
 - Update account email address
 - Update account phone number
 - Update account shipping address
@@ -124,12 +132,14 @@ Group E: "I need to update my account"
 - Redeem loyalty points
 
 Group F: "I have questions about policies"
+
 - Answer questions about return policy
 - Answer questions about shipping policy
 - Answer questions about warranty policy
 - Check promo code validity
 
 Group G: "I need human help"
+
 - Escalate to human agent
 ```
 
@@ -144,12 +154,14 @@ For each group, write a classification description that captures the RANGE of us
 **Classification Description Guidelines:**
 
 ✅ **DO:**
+
 - Use positive, declarative language ("User wants to...")
 - Be specific about the scope
 - Include common variations of phrasing
 - Use language users would actually use
 
 ❌ **DON'T:**
+
 - Use negative language ("User does NOT want to...")
 - Overlap with other topic descriptions
 - Be too vague or too narrow
@@ -188,6 +200,7 @@ Classification Description:
 ```
 
 **Length Guidelines:**
+
 - **Minimum:** 20 words (too short = ambiguous classification)
 - **Optimal:** 40-80 words (provides clear scope)
 - **Maximum:** 150 words (too long = classification slowdown)
@@ -233,6 +246,7 @@ Why it works: "Where's my order?" → Monitoring → Topic A. "Can I add an item
 **Distinctness Checklist:**
 
 For each topic pair, verify:
+
 - [ ] They cover different user goals
 - [ ] Keywords are distinct (track vs modify, find vs update)
 - [ ] No subset relationships (one is not a subcategory of another)
@@ -242,19 +256,20 @@ For each topic pair, verify:
 
 For each topic pair, write 5 "boundary utterances" and verify they classify correctly:
 
-| Utterance | Should Route To | Why |
-|-----------|-----------------|-----|
-| "Where's my order?" | Order Tracking | Checking status |
-| "Can I change my shipping address?" | Order Modifications | Making a change |
-| "How do I return this?" | Returns & Cancellations | Return process |
-| "Is this sweater in stock?" | Product Information | Product availability |
-| "What's your return policy?" | Policies & General Questions | Policy info |
+| Utterance                           | Should Route To              | Why                  |
+| ----------------------------------- | ---------------------------- | -------------------- |
+| "Where's my order?"                 | Order Tracking               | Checking status      |
+| "Can I change my shipping address?" | Order Modifications          | Making a change      |
+| "How do I return this?"             | Returns & Cancellations      | Return process       |
+| "Is this sweater in stock?"         | Product Information          | Product availability |
+| "What's your return policy?"        | Policies & General Questions | Policy info          |
 
 ---
 
 ### Step 5: Validate with Real Utterances
 
 Test your topic architecture with real user language. Collect 50-100 sample utterances from:
+
 - Customer service chat logs
 - Support tickets
 - User interviews
@@ -280,6 +295,7 @@ Pass/Fail: ✅
 ```
 
 **Accuracy Goals:**
+
 - **Tier 1 (Critical):** 95%+ accuracy (e.g., order tracking, returns)
 - **Tier 2 (Important):** 90%+ accuracy (e.g., product info, account changes)
 - **Tier 3 (Nice-to-have):** 85%+ accuracy (e.g., general policies)
@@ -306,19 +322,20 @@ Classification Description:
 ```
 
 **Breakdown:**
+
 1. **User Goal:** "check the status of an order" (primary intent)
 2. **Common Variations:** "track a package, view order history, get information"
 3. **Scope Boundary:** "not making changes or processing returns" (clarifies exclusions)
 
 ### Writing Style Guidelines
 
-| Guideline | Good Example | Bad Example |
-|-----------|--------------|-------------|
-| **Use positive language** | "User wants to track their order" | "User is NOT asking about returns" |
-| **Be specific** | "User wants to check product availability and sizes" | "User has product questions" |
-| **Use natural language** | "User wants to return an item" | "User wants to initiate reverse logistics" |
-| **Include variations** | "track, monitor, check status, see updates" | "track" (too narrow) |
-| **Avoid jargon** | "User wants to update their email address" | "User wants to modify CRM contact record" |
+| Guideline                 | Good Example                                         | Bad Example                                |
+| ------------------------- | ---------------------------------------------------- | ------------------------------------------ |
+| **Use positive language** | "User wants to track their order"                    | "User is NOT asking about returns"         |
+| **Be specific**           | "User wants to check product availability and sizes" | "User has product questions"               |
+| **Use natural language**  | "User wants to return an item"                       | "User wants to initiate reverse logistics" |
+| **Include variations**    | "track, monitor, check status, see updates"          | "track" (too narrow)                       |
+| **Avoid jargon**          | "User wants to update their email address"           | "User wants to modify CRM contact record"  |
 
 ### Common Pitfalls
 
@@ -402,13 +419,13 @@ Use the Agentforce Testing Center to validate:
 
 **Test Template:**
 
-| Utterance | Expected Topic | Actual Topic | Pass/Fail |
-|-----------|----------------|--------------|-----------|
-| "Where is my order?" | Order Tracking | [Test result] | ✅/❌ |
-| "I want to return this" | Returns & Cancellations | [Test result] | ✅/❌ |
-| "Is this in stock?" | Product Information | [Test result] | ✅/❌ |
-| "What's your refund policy?" | Policies & General Questions | [Test result] | ✅/❌ |
-| "I need a lawyer" | General Escalation | [Test result] | ✅/❌ |
+| Utterance                    | Expected Topic               | Actual Topic  | Pass/Fail |
+| ---------------------------- | ---------------------------- | ------------- | --------- |
+| "Where is my order?"         | Order Tracking               | [Test result] | ✅/❌     |
+| "I want to return this"      | Returns & Cancellations      | [Test result] | ✅/❌     |
+| "Is this in stock?"          | Product Information          | [Test result] | ✅/❌     |
+| "What's your refund policy?" | Policies & General Questions | [Test result] | ✅/❌     |
+| "I need a lawyer"            | General Escalation           | [Test result] | ✅/❌     |
 
 **Iteration:** For failures, tweak classification descriptions and re-test.
 
@@ -428,6 +445,7 @@ Topics define your agent's scope—what it CAN do. By extension, anything not co
 
 ```markdown
 IN SCOPE:
+
 - Order tracking and status checks
 - Return and cancellation requests
 - Product search and information
@@ -435,6 +453,7 @@ IN SCOPE:
 - Policy questions (returns, shipping, warranty)
 
 OUT OF SCOPE:
+
 - Technical support for using products
 - Medical/legal/financial advice
 - Complaints or disputes (escalate to human)
@@ -462,13 +481,13 @@ Agent Response: "I'm not able to provide legal advice, but I can connect you wit
 
 **Test Cases for Guardrails:**
 
-| Utterance | Expected Behavior |
-|-----------|-------------------|
-| "Can you give me medical advice?" | → General Escalation |
-| "I'm going to sue you!" | → General Escalation |
-| "Can I get a refund on this 5-year-old order?" | → General Escalation (policy violation) |
-| "Can you hack into my ex's account?" | → General Escalation (inappropriate request) |
-| "Tell me a joke" | → General Escalation (chitchat, off-topic) |
+| Utterance                                      | Expected Behavior                            |
+| ---------------------------------------------- | -------------------------------------------- |
+| "Can you give me medical advice?"              | → General Escalation                         |
+| "I'm going to sue you!"                        | → General Escalation                         |
+| "Can I get a refund on this 5-year-old order?" | → General Escalation (policy violation)      |
+| "Can you hack into my ex's account?"           | → General Escalation (inappropriate request) |
+| "Tell me a joke"                               | → General Escalation (chitchat, off-topic)   |
 
 ---
 
@@ -481,6 +500,7 @@ Follow these rules to create a clean, scalable topic architecture:
 **Why:** More topics = harder to classify accurately. Agentforce's classification model performs best with 5-10 distinct topics.
 
 **Guideline:**
+
 - **5-7 topics:** Optimal for most agents
 - **8-10 topics:** Acceptable for complex domains
 - **11+ topics:** Consider splitting into multiple agents
@@ -489,6 +509,7 @@ Follow these rules to create a clean, scalable topic architecture:
 
 ```markdown
 ❌ BAD (15 topics):
+
 1. Order Status Checks
 2. Package Tracking
 3. Delivery Date Inquiries
@@ -512,6 +533,7 @@ Problem: Too many topics with overlapping purposes.
 
 ```markdown
 ✅ GOOD (6 topics):
+
 1. Order Tracking & Status (combines 1, 2, 3)
 2. Returns & Refunds (combines 4, 5, 6)
 3. Product Information (combines 7, 8, 9)
@@ -527,6 +549,7 @@ Benefit: Clearer classification, easier to maintain.
 **Why:** Topics with too many actions become "mega-topics" that dilute classification accuracy.
 
 **Guideline:**
+
 - **3-5 actions:** Optimal per topic
 - **6-7 actions:** Acceptable if tightly related
 - **8+ actions:** Consider splitting the topic
@@ -536,6 +559,7 @@ Benefit: Clearer classification, easier to maintain.
 ```markdown
 ❌ BAD:
 Topic: Order Management (10 actions)
+
 - Look up order status
 - Track package
 - View order history
@@ -555,16 +579,19 @@ Problem: Mixing monitoring, modifications, and returns in one topic.
 ```markdown
 ✅ GOOD:
 Topic: Order Tracking & Status (3 actions)
+
 - Look up order status
 - Track package
 - View order history
 
 Topic: Order Modifications (3 actions)
+
 - Modify order items
 - Change shipping address
 - Apply promo code
 
 Topic: Returns & Refunds (4 actions)
+
 - Initiate return
 - Generate return label
 - Check refund status
@@ -577,11 +604,13 @@ Topic: Returns & Refunds (4 actions)
 
 ```markdown
 ✅ GOOD:
+
 - Order Tracking: "Help users monitor their orders and packages."
 - Returns: "Help users process returns and refunds."
 - Product Info: "Help users find and learn about products."
 
 ❌ BAD:
+
 - Miscellaneous: "Handle various user requests."
 - General Support: "Provide assistance with customer needs."
 ```
@@ -625,6 +654,7 @@ No Overlap: "Find me a sweater" → Topic A. "Is the blue sweater in stock?" →
 ```markdown
 ❌ BAD:
 Action: "Check Order Status"
+
 - Assigned to Topic A: Order Tracking
 - Assigned to Topic B: Order Management
 
@@ -634,10 +664,12 @@ Problem: Which topic should "Where's my order?" route to?
 ```markdown
 ✅ GOOD:
 Action: "Check Order Status"
+
 - Assigned to Topic A: Order Tracking ONLY
 ```
 
 **Edge Case:** If an action truly serves multiple purposes, consider:
+
 1. **Split the action** into two specialized versions
 2. **Broaden one topic** to encompass both use cases
 3. **Use topic-level instructions** to handle variations
@@ -790,6 +822,7 @@ Topic-Level Instructions:
 "For all order tracking requests, gather the order number or email address first. If the user doesn't provide it, ask: 'I can look that up for you. Do you have your order number, or would you like me to search by email address?'
 
 Once you have the order information, use the Look Up Order Status action. Present the results in this format:
+
 - Order number and date
 - Current status (e.g., 'Shipped,' 'In Transit,' 'Delivered')
 - Expected delivery date
@@ -818,6 +851,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User wants to check the status of an order, track a package, view order history, or get information about a current or past order. Includes questions about delivery dates, shipping progress, order confirmation, and 'Where is my order?' type inquiries."
 
 **Actions (4):**
+
 1. Look Up Order by Order Number
 2. Look Up Order by Email Address
 3. Get Package Tracking Details
@@ -834,6 +868,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User wants to return an item, start a return, generate a return shipping label, cancel an order, check refund status, or ask about return eligibility. Includes questions about the return process, return windows, and refund timelines."
 
 **Actions (5):**
+
 1. Check Return Eligibility
 2. Initiate Return Request
 3. Generate Return Shipping Label
@@ -851,6 +886,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User wants to make changes to an existing order that hasn't shipped yet, such as adding or removing items, changing the shipping address, applying a promo code, or upgrading shipping speed."
 
 **Actions (4):**
+
 1. Modify Order Items
 2. Update Shipping Address
 3. Apply Promo Code to Order
@@ -867,6 +903,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User wants to find products, search the catalog, learn about product details such as price, sizes, colors, materials, check if an item is in stock, or read product reviews and ratings. This is about discovering and researching products."
 
 **Actions (5):**
+
 1. Search Product Catalog by Keyword
 2. Get Product Details
 3. Check Product Availability
@@ -884,6 +921,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User wants to update their account information such as email address, phone number, shipping address, payment methods, password, or manage loyalty points and rewards. This is about personal account settings, not specific orders."
 
 **Actions (5):**
+
 1. Update Email Address
 2. Update Phone Number
 3. Update Default Shipping Address
@@ -901,6 +939,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User has questions about company policies such as return policies, shipping policies, warranties, price matching, or wants to validate a promo code. This is a catch-all for informational questions not tied to a specific order or product."
 
 **Actions (4):**
+
 1. Get Return Policy (Knowledge)
 2. Get Shipping Policy (Knowledge)
 3. Get Warranty Information (Knowledge)
@@ -917,6 +956,7 @@ Here's a complete topic architecture for a retail customer service agent.
 "User needs help with something outside the agent's capabilities, wants to speak to a human representative, has a complex issue requiring specialist assistance, or makes inappropriate requests."
 
 **Actions (1):**
+
 1. Escalate to Human Agent (Omni-Channel)
 
 **Topic-Level Instructions:**
@@ -926,15 +966,15 @@ Here's a complete topic architecture for a retail customer service agent.
 
 ### Architecture Summary
 
-| Topic | Actions | Purpose |
-|-------|---------|---------|
-| Order Tracking & Status | 4 | Monitor existing orders |
-| Returns & Cancellations | 5 | Process returns and refunds |
-| Order Modifications | 4 | Change orders before shipping |
-| Product Information & Search | 5 | Discover and research products |
-| Account Management | 5 | Update personal account info |
-| Policies & General Questions | 4 | Answer policy/general questions |
-| General Escalation | 1 | Escalate to human agents |
+| Topic                        | Actions | Purpose                         |
+| ---------------------------- | ------- | ------------------------------- |
+| Order Tracking & Status      | 4       | Monitor existing orders         |
+| Returns & Cancellations      | 5       | Process returns and refunds     |
+| Order Modifications          | 4       | Change orders before shipping   |
+| Product Information & Search | 5       | Discover and research products  |
+| Account Management           | 5       | Update personal account info    |
+| Policies & General Questions | 4       | Answer policy/general questions |
+| General Escalation           | 1       | Escalate to human agents        |
 
 **Total:** 7 topics, 28 actions
 
@@ -967,6 +1007,7 @@ Result: Forced groupings that don't match user intent.
 
 ```markdown
 ❌ BAD:
+
 1. Order Status
 2. Package Tracking
 3. Delivery Dates
@@ -975,7 +1016,7 @@ Result: Forced groupings that don't match user intent.
 6. Return Labels
 7. Refund Status
 8. Order Cancellation
-... (15 topics total)
+   ... (15 topics total)
 ```
 
 **Fix:** Consolidate into broader, distinct topics (5-7 topics).
@@ -999,57 +1040,57 @@ Problem: "Where's my order?" matches both.
 ### Mistake 4: System-Centric Topics
 
 1000 **Symptom:** Topics named after internal systems or data models.
-1001 
+1001
 1002 **Example:**
-1003 
-1004 ```markdown
+1003
+1004 `markdown
 1005 ❌ BAD:
 1006 - Order Management System (OMS) Topic
 1007 - Customer Relationship Management (CRM) Topic
 1008 - Product Information Management (PIM) Topic
-1009 ```
-1010 
+1009 `
+1010
 1011 **Fix:** Name topics based on USER goals, not systems.
-1012 
-1013 ```markdown
+1012
+1013 `markdown
 1014 ✅ GOOD:
 1015 - Order Tracking & Status
 1016 - Account Management
 1017 - Product Information & Search
-1018 ```
-1019 
+1018 `
+1019
 1020 ### Mistake 5: Actions in Multiple Topics
-1021 
+1021
 1022 **Symptom:** Duplicate actions, unclear classification routing.
-1023 
+1023
 1024 **Example:**
-1025 
-1026 ```markdown
+1025
+1026 `markdown
 1027 ❌ BAD:
 1028 Action: "Look Up Order Status"
 1029 - In Topic A: Order Tracking
 1030 - In Topic B: Order Management
 1031 
 1032 Problem: Which topic should "Where's my order?" route to?
-1033 ```
-1034 
+1033 `
+1034
 1035 **Fix:** Assign each action to exactly one topic. If truly needed in multiple contexts, create specialized versions.
-1036 
+1036
 1037 ---
-1038 
+1038
 1039 ## Testing Your Topic Architecture
-1040 
+1040
 1041 Use the Agentforce Testing Center to validate:
-1042 
+1042
 1043 ### Test Suite
-1044 
+1044
 1045 1. **Classification Accuracy:** 50+ utterances across all topics
 1046 2. **Boundary Cases:** Utterances that might match multiple topics
 1047 3. **Out-of-Scope:** Utterances that should route to General Escalation
 1048 4. **Multi-Turn:** Conversations that switch between topics
-1049 
+1049
 1050 ### Test Template
-1051 
+1051
 1052 | Utterance | Expected Topic | Actual Topic | Pass/Fail |
 1053 |-----------|----------------|--------------|-----------|
 1054 | "Where is my order?" | Order Tracking | [Result] | ✅/❌ |
@@ -1059,21 +1100,21 @@ Problem: "Where's my order?" matches both.
 1058 | "What's your return policy?" | Policies & General Questions | [Result] | ✅/❌ |
 1059 | "I need legal advice" | General Escalation | [Result] | ✅/❌ |
 1060 | "Can I change my order and also return something?" | Order Modifications (first) | [Result] | ✅/❌ |
-1061 
+1061
 1062 ### Iteration Cycle
-1063 
+1063
 1064 1. Test with 50+ utterances
 1065 2. Identify misclassifications
 1066 3. Refine classification descriptions
 1067 4. Merge or split topics if needed
 1068 5. Re-test
-1069 
+1069
 1070 **Goal:** 90%+ accuracy for critical topics, 85%+ for secondary topics.
-1071 
+1071
 1072 ---
-1073 
+1073
 1074 ## Next Steps
-1075 
+1075
 1076 1. Complete the action inventory for your agent
 1077 2. Group actions by user intent
 1078 3. Write classification descriptions for each topic
@@ -1081,5 +1122,5 @@ Problem: "Where's my order?" matches both.
 1080 5. Validate with real user utterances
 1081 6. Implement in Agentforce Agent Builder
 1082 7. Test and iterate
-1083 
+1083
 1084 **Remember:** Topic architecture is foundational. Invest time upfront to get it right, and your agent's performance will be dramatically better.

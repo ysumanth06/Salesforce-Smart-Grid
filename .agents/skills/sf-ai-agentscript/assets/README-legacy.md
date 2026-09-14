@@ -44,42 +44,42 @@ What do you need?
 
 ### agents/ - Complete Agents
 
-| Template | Complexity | Description |
-|----------|------------|-------------|
-| `hello-world.agent` | Beginner | Minimal viable agent |
-| `simple-qa.agent` | Beginner | Single-topic Q&A |
-| `multi-topic.agent` | Intermediate | Multi-topic routing |
-| `production-faq.agent` | Advanced | Production-ready with escalation |
+| Template               | Complexity   | Description                      |
+| ---------------------- | ------------ | -------------------------------- |
+| `hello-world.agent`    | Beginner     | Minimal viable agent             |
+| `simple-qa.agent`      | Beginner     | Single-topic Q&A                 |
+| `multi-topic.agent`    | Intermediate | Multi-topic routing              |
+| `production-faq.agent` | Advanced     | Production-ready with escalation |
 
 ### components/ - Reusable Parts
 
-| Template | Purpose |
-|----------|---------|
-| `flow-action.agent` | Flow action integration |
-| `apex-action.agent` | Apex action integration |
-| `topic-with-actions.agent` | Topic with actions |
-| `error-handling.agent` | Input validation |
-| `escalation-setup.agent` | Human handoff |
+| Template                   | Purpose                 |
+| -------------------------- | ----------------------- |
+| `flow-action.agent`        | Flow action integration |
+| `apex-action.agent`        | Apex action integration |
+| `topic-with-actions.agent` | Topic with actions      |
+| `error-handling.agent`     | Input validation        |
+| `escalation-setup.agent`   | Human handoff           |
 
 ### patterns/ - Advanced (see patterns/README.md)
 
-| Template | Purpose | Deployment |
-|----------|---------|------------|
-| `lifecycle-events.agent` | before/after reasoning | GenAiPlannerBundle |
-| `action-callbacks.agent` | Deterministic chains | GenAiPlannerBundle |
-| `bidirectional-routing.agent` | Topic routing with return | Both |
-| `system-instruction-overrides.agent` | Topic-level personas | Both |
-| *(6 more patterns)* | | |
+| Template                             | Purpose                   | Deployment         |
+| ------------------------------------ | ------------------------- | ------------------ |
+| `lifecycle-events.agent`             | before/after reasoning    | GenAiPlannerBundle |
+| `action-callbacks.agent`             | Deterministic chains      | GenAiPlannerBundle |
+| `bidirectional-routing.agent`        | Topic routing with return | Both               |
+| `system-instruction-overrides.agent` | Topic-level personas      | Both               |
+| _(6 more patterns)_                  |                           |                    |
 
 ### metadata/ - XML Templates
 
-| Template | Purpose |
-|----------|---------|
-| `bundle-meta.xml` | AiAuthoringBundle metadata |
-| `genai-function-*.xml` | Action metadata |
-| `genai-plugin.xml` | Plugin grouping |
-| `*-prompt-template.xml` | PromptTemplate |
-| `http-callout-flow.xml` | Flow template |
+| Template                | Purpose                    |
+| ----------------------- | -------------------------- |
+| `bundle-meta.xml`       | AiAuthoringBundle metadata |
+| `genai-function-*.xml`  | Action metadata            |
+| `genai-plugin.xml`      | Plugin grouping            |
+| `*-prompt-template.xml` | PromptTemplate             |
+| `http-callout-flow.xml` | Flow template              |
 
 ---
 

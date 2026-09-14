@@ -96,6 +96,7 @@ with client.session(agent_id="0Xx...", variables=variables) as session:
 ```
 
 **Connectivity Test:**
+
 ```bash
 # Verify ECA credentials and API connectivity
 python3 {SKILL_PATH}/hooks/scripts/agent_api_client.py
@@ -106,15 +107,15 @@ python3 {SKILL_PATH}/hooks/scripts/agent_api_client.py
 
 The test runner automatically evaluates each turn against expectations defined in the YAML template:
 
-| # | Check | YAML Key | How Evaluated |
-|---|-------|----------|---------------|
-| 1 | Response non-empty? | `response_not_empty: true` | `messages[0].message` has content |
-| 2 | Correct topic matched? | `topic_contains: "cancel"` | Heuristic: inferred from response text |
-| 3 | Expected actions invoked? | `action_invoked: true` | Checks for `result` array entries |
-| 4 | Response content? | `response_contains: "reschedule"` | Substring match on response |
-| 5 | Context preserved? | `context_retained: true` | Heuristic: checks for prior-turn references |
-| 6 | Guardrail respected? | `guardrail_triggered: true` | Regex patterns for refusal language |
-| 7 | Escalation triggered? | `escalation_triggered: true` | Checks for `Escalation` message type |
-| 8 | Response excludes? | `response_not_contains: "error"` | Substring exclusion check |
+| #   | Check                     | YAML Key                          | How Evaluated                               |
+| --- | ------------------------- | --------------------------------- | ------------------------------------------- |
+| 1   | Response non-empty?       | `response_not_empty: true`        | `messages[0].message` has content           |
+| 2   | Correct topic matched?    | `topic_contains: "cancel"`        | Heuristic: inferred from response text      |
+| 3   | Expected actions invoked? | `action_invoked: true`            | Checks for `result` array entries           |
+| 4   | Response content?         | `response_contains: "reschedule"` | Substring match on response                 |
+| 5   | Context preserved?        | `context_retained: true`          | Heuristic: checks for prior-turn references |
+| 6   | Guardrail respected?      | `guardrail_triggered: true`       | Regex patterns for refusal language         |
+| 7   | Escalation triggered?     | `escalation_triggered: true`      | Checks for `Escalation` message type        |
+| 8   | Response excludes?        | `response_not_contains: "error"`  | Substring exclusion check                   |
 
 See [Agent API Reference](../references/agent-api-reference.md) for complete response format.

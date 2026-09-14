@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-observability/SKILL.md -->
+
 # Analysis Examples
 
 Examples for analyzing extracted STDM data with Polars and the CLI.
@@ -16,6 +17,7 @@ stdm-extract analyze --data-dir ./stdm_data
 ```
 
 **Output:**
+
 ```
 📊 SESSION SUMMARY
 ═══════════════════════════════════════════════════════════
@@ -38,6 +40,7 @@ stdm-extract topics --data-dir ./stdm_data
 ```
 
 **Output:**
+
 ```
 📊 TOPIC ROUTING
 ═══════════════════════════════════════════════════════════
@@ -59,6 +62,7 @@ stdm-extract actions --data-dir ./stdm_data
 ```
 
 **Output:**
+
 ```
 📊 ACTION INVOCATIONS
 ═══════════════════════════════════════════════════════════
@@ -93,6 +97,7 @@ messages = pl.scan_parquet(data_dir / "messages" / "**/*.parquet")
 ### Session Analysis
 
 **Sessions by End Type:**
+
 ```python
 sessions.group_by("ssot__AiAgentSessionEndType__c").agg(
     pl.count().alias("count")
@@ -100,6 +105,7 @@ sessions.group_by("ssot__AiAgentSessionEndType__c").agg(
 ```
 
 **Daily Session Trend:**
+
 ```python
 sessions.with_columns(
     pl.col("ssot__StartTimestamp__c").str.slice(0, 10).alias("date")
@@ -109,6 +115,7 @@ sessions.with_columns(
 ```
 
 **Hourly Distribution:**
+
 ```python
 sessions.with_columns(
     pl.col("ssot__StartTimestamp__c").str.slice(11, 2).alias("hour")
@@ -120,6 +127,7 @@ sessions.with_columns(
 ### Turn Analysis
 
 **Turns Per Session:**
+
 ```python
 turns_per_session = (
     interactions
@@ -135,6 +143,7 @@ turns_per_session.group_by("turns").agg(
 ```
 
 **Multi-Topic Sessions (Topic Switches):**
+
 ```python
 topic_counts = (
     interactions
@@ -150,6 +159,7 @@ topic_counts.filter(pl.col("topics") > 1).collect()
 ### Step Analysis
 
 **LLM vs Action Ratio:**
+
 ```python
 steps.group_by("ssot__AiAgentInteractionStepType__c").agg(
     pl.count().alias("count")
@@ -159,6 +169,7 @@ steps.group_by("ssot__AiAgentInteractionStepType__c").agg(
 ```
 
 **Most Used Actions:**
+
 ```python
 steps.filter(
     pl.col("ssot__AiAgentInteractionStepType__c") == "ACTION_STEP"
@@ -168,6 +179,7 @@ steps.filter(
 ```
 
 **Steps Per Turn:**
+
 ```python
 steps.group_by("ssot__AiAgentInteractionId__c").agg(
     pl.count().alias("steps")
@@ -179,6 +191,7 @@ steps.group_by("ssot__AiAgentInteractionId__c").agg(
 ### Message Analysis
 
 **Average Message Length by Type:**
+
 ```python
 messages.with_columns(
     pl.col("ssot__ContentText__c").str.len_chars().alias("length")
@@ -189,6 +202,7 @@ messages.with_columns(
 ```
 
 **Common User Phrases:**
+
 ```python
 user_msgs = messages.filter(
     pl.col("ssot__AiAgentInteractionMessageType__c") == "INPUT"
@@ -236,17 +250,20 @@ print(failed)
 ## Exporting Results
 
 ### To CSV
+
 ```python
 result = sessions.group_by(...).agg(...).collect()
 result.write_csv("output.csv")
 ```
 
 ### To JSON
+
 ```python
 result.write_json("output.json")
 ```
 
 ### To Parquet (for further analysis)
+
 ```python
 result.write_parquet("output.parquet")
 ```

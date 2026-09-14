@@ -1,4 +1,5 @@
 <!-- Parent: sf-ai-agentforce-testing/SKILL.md -->
+
 # Deep Conversation History Patterns
 
 Testing specific protocol stages in CLI tests using 4-8 turn `conversationHistory`.
@@ -11,13 +12,13 @@ CLI tests are often described as "single-utterance" — but this is only half th
 
 This transforms CLI tests from simple "utterance → topic" checks into precise protocol-stage validators:
 
-| Without History | With Deep History |
-|----------------|-------------------|
-| Tests routing only (utterance → topic) | Tests behavior at any protocol stage |
-| Stochastic routing for ambiguous inputs | Deterministic routing anchored by history |
-| Cannot test mid-protocol actions | Can trigger specific actions at specific steps |
-| Cannot test opt-out or exit paths | Can validate graceful opt-out handling |
-| Cannot test session persistence | Can verify session stays alive after protocol |
+| Without History                         | With Deep History                              |
+| --------------------------------------- | ---------------------------------------------- |
+| Tests routing only (utterance → topic)  | Tests behavior at any protocol stage           |
+| Stochastic routing for ambiguous inputs | Deterministic routing anchored by history      |
+| Cannot test mid-protocol actions        | Can trigger specific actions at specific steps |
+| Cannot test opt-out or exit paths       | Can validate graceful opt-out handling         |
+| Cannot test session persistence         | Can verify session stays alive after protocol  |
 
 ---
 
@@ -149,7 +150,7 @@ testCases:
         message: "I'll process a payment of $150. Should I proceed?"
 ```
 
-> **Note:** Actions fire during CLI test execution for the final utterance — but the *history turns* are simulated (no real actions execute during those turns). Only the test utterance triggers real action execution.
+> **Note:** Actions fire during CLI test execution for the final utterance — but the _history turns_ are simulated (no real actions execute during those turns). Only the test utterance triggers real action execution.
 
 ---
 
@@ -166,7 +167,7 @@ testCases:
   # User declines feedback — agent should NOT invoke feedback action
   - utterance: "No thanks, I'm all set"
     expectedTopic: [feedback_topic]
-    expectedActions: []    # ← DELIBERATE: documents intent that NO action fires
+    expectedActions: [] # ← DELIBERATE: documents intent that NO action fires
     expectedOutcome: "Agent gracefully accepts the opt-out without pushing for feedback"
     conversationHistory:
       - role: user
@@ -183,10 +184,10 @@ testCases:
 
 ### `expectedActions: []` vs Omitted
 
-| Pattern | Meaning | Behavior |
-|---------|---------|----------|
-| `expectedActions:` omitted | "Not testing actions" | PASS regardless of what fires |
-| `expectedActions: []` | "Testing that NO actions fire" | Currently same behavior (PASS regardless), but documents intent |
+| Pattern                    | Meaning                        | Behavior                                                        |
+| -------------------------- | ------------------------------ | --------------------------------------------------------------- |
+| `expectedActions:` omitted | "Not testing actions"          | PASS regardless of what fires                                   |
+| `expectedActions: []`      | "Testing that NO actions fire" | Currently same behavior (PASS regardless), but documents intent |
 
 > **Best practice:** Use `expectedActions: []` explicitly for opt-out tests to document your intent, even though the CLI currently treats it the same as omitted. This makes the test self-documenting and future-proofs against framework changes.
 
@@ -257,14 +258,14 @@ expectedOutcome: "Agent confirms the payment is being processed and provides a c
 
 ## History Length Guide
 
-| Test Goal | Recommended Turns | Pattern |
-|-----------|-------------------|---------|
-| Simple topic anchoring | 2 (1 user + 1 agent) | Basic routing |
-| Protocol activation | 4 (2 user + 2 agent) | Pattern A |
-| Mid-protocol stage | 4-6 | Pattern B |
-| Action invocation | 6 | Pattern C |
-| Opt-out / negative assertion | 4-6 | Pattern D |
-| Session persistence | 8 | Pattern E |
+| Test Goal                    | Recommended Turns    | Pattern       |
+| ---------------------------- | -------------------- | ------------- |
+| Simple topic anchoring       | 2 (1 user + 1 agent) | Basic routing |
+| Protocol activation          | 4 (2 user + 2 agent) | Pattern A     |
+| Mid-protocol stage           | 4-6                  | Pattern B     |
+| Action invocation            | 6                    | Pattern C     |
+| Opt-out / negative assertion | 4-6                  | Pattern D     |
+| Session persistence          | 8                    | Pattern E     |
 
 > **Diminishing returns:** Beyond 8 turns, the history becomes expensive to maintain and may hit token limits. If you need deeper history, consider splitting into separate test cases or using the multi-turn API (Phase A) instead.
 
@@ -272,10 +273,10 @@ expectedOutcome: "Agent confirms the payment is being processed and provides a c
 
 ## Related Documentation
 
-| Resource | Link |
-|----------|------|
-| Test Spec Guide | [test-spec-guide.md](test-spec-guide.md) |
-| Test Spec Reference | [test-spec-reference.md](../references/test-spec-reference.md) |
-| Multi-Turn Testing Guide | [multi-turn-testing-guide.md](multi-turn-testing-guide.md) |
+| Resource                  | Link                                                                 |
+| ------------------------- | -------------------------------------------------------------------- |
+| Test Spec Guide           | [test-spec-guide.md](test-spec-guide.md)                             |
+| Test Spec Reference       | [test-spec-reference.md](../references/test-spec-reference.md)       |
+| Multi-Turn Testing Guide  | [multi-turn-testing-guide.md](multi-turn-testing-guide.md)           |
 | CLI Deep History Template | [cli-deep-history-tests.yaml](../assets/cli-deep-history-tests.yaml) |
-| Topic Name Resolution | [topic-name-resolution.md](topic-name-resolution.md) |
+| Topic Name Resolution     | [topic-name-resolution.md](topic-name-resolution.md)                 |

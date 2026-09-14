@@ -113,5 +113,5 @@ evaluation:
     - TOPIC_RE_MATCHING_FAILURE
     - TOPIC_NOT_MATCHED
   scoring:
-    weight: 15  # Out of 100 total points
+    weight: 15 # Out of 100 total points
     per_scenario: true
