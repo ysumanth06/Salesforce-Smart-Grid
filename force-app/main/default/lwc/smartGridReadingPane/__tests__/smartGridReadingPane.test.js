@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridReadingPane from "c/smartGridReadingPane";
 
 describe("c-smart-grid-reading-pane", () => {

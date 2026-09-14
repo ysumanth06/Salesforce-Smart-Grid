@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridReviewModal from "c/smartGridReviewModal";
 
 describe("c-smart-grid-review-modal", () => {

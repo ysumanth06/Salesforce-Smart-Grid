@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridFieldPicker from "c/smartGridFieldPicker";
 import getObjectFields from "@salesforce/apex/SmartGridController.getObjectFields";
 

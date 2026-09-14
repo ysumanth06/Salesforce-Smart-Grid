@@ -1,21 +1,23 @@
 <template>
   <template lwc:if={hasFilters}>
     <div
-      class="slds-p-horizontal_small slds-p-vertical_xx-small filter-bar-container slds-grid slds-grid_vertical-align-center"
+      class="slds-var-p-horizontal_small slds-var-p-vertical_xx-small filter-bar-container slds-grid slds-grid_vertical-align-center"
       data-testid="filter-bar"
     >
-      <div class="slds-m-right_x-small filter-bar-label">
+      <div
+        class="slds-var-m-right_x-small slds-grid slds-grid_vertical-align-center filter-bar-label"
+      >
         <lightning-icon
           icon-name="utility:filterList"
           size="x-small"
-          class="slds-m-right_xx-small"
+          class="slds-var-m-right_xx-small"
         ></lightning-icon>
         <span class="slds-text-title_bold slds-text-color_weak"
           >Active Filters:</span
         >
       </div>
 
-      <div class="slds-pill_container filter-pills-wrap slds-col">
+      <div class="filter-pills-wrap slds-col slds-grid slds-wrap">
         <ul
           class="slds-listbox slds-listbox_horizontal"
           role="listbox"
@@ -36,6 +38,7 @@
                   type="button"
                   class="slds-button slds-button_icon slds-pill__remove"
                   title={pill.removeTitle}
+                  aria-label={pill.removeTitle}
                   data-id={pill.id}
                   data-source={pill.source}
                   data-field={pill.fieldName}
@@ -45,8 +48,9 @@
                   <lightning-icon
                     icon-name="utility:close"
                     size="xx-small"
-                    alternative-text="Remove filter"
+                    alternative-text={pill.removeTitle}
                   ></lightning-icon>
+                  <span class="slds-assistive-text">{pill.removeTitle}</span>
                 </button>
               </span>
             </li>
@@ -54,7 +58,7 @@
         </ul>
       </div>
 
-      <div class="slds-no-flex slds-m-left_x-small">
+      <div class="slds-no-flex slds-var-m-left_x-small">
         <lightning-button
           variant="base"
           label="Clear All"

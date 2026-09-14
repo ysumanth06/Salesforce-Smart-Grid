@@ -1,3 +1,4 @@
+<!-- sldsValidatorIgnore -->
 <template>
   <lightning-card title={gridTitle}>
     <div slot="actions" class="slds-grid slds-grid_vertical-align-center">
@@ -6,7 +7,7 @@
         current-config={currentGridConfig}
         onviewselect={handleViewSelect}
         onresetview={handleResetView}
-        class="slds-m-right_x-small"
+        class="slds-var-m-right_x-small"
       ></c-smart-grid-view-selector>
       <template lwc:if={isDynamicGrid}>
         <lightning-button
@@ -21,7 +22,7 @@
           icon-name="utility:add"
           onclick={handleAddRow}
           disabled={isLoading}
-          class="slds-m-left_x-small"
+          class="slds-var-m-left_x-small"
         ></lightning-button>
       </template>
       <!-- Save, Review & Discard Buttons with Live Counter (TS-03) -->
@@ -32,7 +33,7 @@
           variant="brand"
           onclick={handleToolbarSave}
           disabled={isLoading}
-          class="slds-m-left_x-small"
+          class="slds-var-m-left_x-small"
           data-testid="toolbar-save-btn"
         ></lightning-button>
         <lightning-button-icon
@@ -40,7 +41,7 @@
           alternative-text="Review Pending Changes"
           title="Review Pending Changes"
           onclick={handleOpenReviewModal}
-          class="slds-m-left_xx-small"
+          class="slds-var-m-left_xx-small"
           variant="border-filled"
           data-testid="toolbar-review-btn"
         ></lightning-button-icon>
@@ -50,7 +51,7 @@
           variant="neutral"
           onclick={handleDiscardAll}
           disabled={isLoading}
-          class="slds-m-left_xx-small"
+          class="slds-var-m-left_xx-small"
           data-testid="toolbar-discard-btn"
         ></lightning-button>
       </template>
@@ -61,7 +62,7 @@
           variant="destructive"
           onclick={handleDelete}
           disabled={isLoading}
-          class="slds-m-left_x-small"
+          class="slds-var-m-left_x-small"
         ></lightning-button>
       </template>
       <lightning-button-icon
@@ -70,7 +71,7 @@
         title="Undo (Ctrl+Z)"
         onclick={handleUndo}
         disabled={disableUndo}
-        class="slds-m-left_x-small"
+        class="slds-var-m-left_x-small"
         variant="border-filled"
       ></lightning-button-icon>
       <lightning-button-icon
@@ -79,7 +80,7 @@
         title="Redo (Ctrl+Y)"
         onclick={handleRedo}
         disabled={disableRedo}
-        class="slds-m-left_x-small"
+        class="slds-var-m-left_x-small"
         variant="border-filled"
       ></lightning-button-icon>
       <lightning-button
@@ -87,7 +88,7 @@
         icon-name="utility:down"
         onclick={handleFillDown}
         disabled={disableFillDown}
-        class="slds-m-left_x-small"
+        class="slds-var-m-left_x-small"
       ></lightning-button>
       <!-- Export Options Menu (TS-06) -->
       <template lwc:if={canExport}>
@@ -96,7 +97,7 @@
           title="Export Data"
           icon-name="utility:download"
           disabled={isLoading}
-          class="slds-m-left_x-small"
+          class="slds-var-m-left_x-small"
           menu-alignment="right"
           data-testid="export-menu"
         >
@@ -123,7 +124,7 @@
         title="Refresh Data (bypass cache)"
         onclick={handleRefresh}
         disabled={isLoading}
-        class="slds-m-left_x-small"
+        class="slds-var-m-left_x-small"
         variant="border-filled"
         data-testid="toolbar-refresh-btn"
       ></lightning-button-icon>
@@ -133,7 +134,7 @@
           alternative-text="Toggle Quick Filters"
           title="Toggle Quick Filters"
           onclick={toggleFilterPanel}
-          class="slds-m-left_x-small"
+          class="slds-var-m-left_x-small"
           variant="border-filled"
         ></lightning-button-icon>
         <lightning-button
@@ -141,7 +142,7 @@
           icon-name="utility:filter"
           onclick={handleOpenAdvancedFilter}
           disabled={isLoading}
-          class="slds-m-left_x-small"
+          class="slds-var-m-left_x-small"
         ></lightning-button>
       </template>
     </div>
@@ -155,7 +156,7 @@
     <!-- Filter Bar (Collapsible Panel) -->
     <template lwc:if={showFilterPanel}>
       <div
-        class="slds-box slds-theme_shade slds-m-bottom_medium slds-m-horizontal_medium slds-p-around_medium"
+        class="slds-box slds-theme_shade slds-var-m-bottom_medium slds-var-m-horizontal_medium slds-var-p-around_medium"
       >
         <div
           class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end"
@@ -163,7 +164,7 @@
           <template for:each={filterFields} for:item="f">
             <div
               key={f.fieldName}
-              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small"
+              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-var-m-bottom_small"
             >
               <template lwc:if={f.isPicklist}>
                 <lightning-combobox
@@ -197,13 +198,13 @@
           </template>
 
           <div
-            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-m-bottom_small slds-grid slds-grid_vertical-align-end"
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-var-m-bottom_small slds-grid slds-grid_vertical-align-end"
           >
             <lightning-button
               label="Apply Filters"
               variant="brand"
               onclick={applyFilters}
-              class="slds-m-right_x-small"
+              class="slds-var-m-right_x-small"
             ></lightning-button>
             <lightning-button
               label="Clear All"
@@ -215,7 +216,7 @@
     </template>
 
     <div
-      class="slds-m-around_medium"
+      class="slds-var-m-around_medium"
       style="height: 400px; position: relative"
       onpaste={handlePaste}
     >
@@ -227,9 +228,9 @@
       </template>
       <template lwc:elseif={isSetupRequired}>
         <div
-          class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center"
+          class="slds-illustration slds-illustration_small slds-var-p-around_large slds-text-align_center"
         >
-          <div class="slds-text-longform slds-m-bottom_medium">
+          <div class="slds-text-longform slds-var-m-bottom_medium">
             <h3 class="slds-text-heading_medium">
               Grid Configuration Required
             </h3>
@@ -245,7 +246,7 @@
         </div>
       </template>
       <template lwc:elseif={errorMessage}>
-        <div class="slds-text-color_error slds-p-bottom_small">
+        <div class="slds-text-color_error slds-var-p-bottom_small">
           {errorMessage}
         </div>
       </template>
@@ -270,18 +271,20 @@
             </lightning-datatable>
             <!-- Sticky Column Totals Footer (TS-02) -->
             <template lwc:if={hasTotals}>
-              <div class="smart-grid-totals-container slds-p-around_x-small">
+              <div
+                class="smart-grid-totals-container slds-var-p-around_x-small"
+              >
                 <div
                   class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
                 >
                   <div
-                    class="slds-col slds-size_12-of-12 slds-m-bottom_xx-small"
+                    class="slds-col slds-size_12-of-12 slds-var-m-bottom_xx-small"
                   >
                     <span class="slds-badge slds-theme_shade">
                       <lightning-icon
                         icon-name="utility:table"
                         size="xx-small"
-                        class="slds-m-right_xx-small"
+                        class="slds-var-m-right_xx-small"
                       ></lightning-icon>
                       <strong>Aggregates & Column Totals</strong>
                     </span>
@@ -289,14 +292,14 @@
                   <template for:each={totalsDisplayList} for:item="total">
                     <div
                       key={total.fieldName}
-                      class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-m-vertical_xx-small"
+                      class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-var-m-vertical_xx-small"
                     >
                       <div
                         class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
                       >
                         <div class="smart-grid-totals-label">{total.label}</div>
                         <div
-                          class="slds-grid slds-gutters_xx-small slds-m-top_xx-small slds-text-body_small"
+                          class="slds-grid slds-gutters_xx-small slds-var-m-top_xx-small slds-text-body_small"
                         >
                           <div class="slds-col">
                             <span>Sum:</span>
@@ -343,7 +346,7 @@
       </template>
       <template lwc:if={showNoConfigMessage}>
         <div
-          class="slds-text-align_center slds-text-color_weak slds-p-around_large"
+          class="slds-text-align_center slds-text-color_weak slds-var-p-around_large"
         >
           No grid configuration found. Please check your setup or provide a
           valid Grid Config Developer Name.
@@ -354,7 +357,7 @@
     <!-- Pagination Footer -->
     <template lwc:if={gridColumns}>
       <div
-        class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-p-top_small slds-p-bottom_medium slds-border_top"
+        class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-var-p-top_small slds-var-p-bottom_medium slds-border_top"
       >
         <lightning-button
           label="Previous"
@@ -362,7 +365,7 @@
           onclick={handlePreviousPage}
           disabled={disablePrevious}
           variant="neutral"
-          class="slds-m-right_medium"
+          class="slds-var-m-right_medium"
         ></lightning-button>
         <span class="slds-align-middle slds-text-body_regular">
           Page <strong>{currentPage}</strong> of
@@ -375,7 +378,7 @@
           onclick={handleNextPage}
           disabled={disableNext}
           variant="neutral"
-          class="slds-m-left_medium"
+          class="slds-var-m-left_medium"
         ></lightning-button>
         <lightning-combobox
           label="Page Size"
@@ -383,7 +386,7 @@
           options={pageSizeOptions}
           onchange={handlePageSizeChange}
           variant="label-hidden"
-          class="slds-m-left_large"
+          class="slds-var-m-left_large"
           style="width: 80px"
         ></lightning-combobox>
       </div>

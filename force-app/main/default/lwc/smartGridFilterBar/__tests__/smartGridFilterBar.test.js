@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridFilterBar from "c/smartGridFilterBar";
 
 describe("c-smart-grid-filter-bar", () => {

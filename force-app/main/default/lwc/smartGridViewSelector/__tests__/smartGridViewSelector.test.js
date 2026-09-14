@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridViewSelector from "c/smartGridViewSelector";
 import getViews from "@salesforce/apex/SmartGridController.getViews";
 import saveView from "@salesforce/apex/SmartGridController.saveView";

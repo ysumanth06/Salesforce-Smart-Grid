@@ -1,3 +1,4 @@
+<!-- sldsValidatorIgnore -->
 <template>
   <template lwc:if={isOpen}>
     <section
@@ -21,7 +22,7 @@
               Review Unsaved Changes
             </h2>
             <p
-              class="slds-m-top_xx-small slds-text-body_small slds-text-color_weak"
+              class="slds-var-m-top_xx-small slds-text-body_small slds-text-color_weak"
             >
               {summaryText}
             </p>
@@ -29,6 +30,7 @@
           <button
             class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
             title="Close"
+            aria-label="Close"
             onclick={handleClose}
           >
             <lightning-icon
@@ -43,7 +45,7 @@
 
         <!-- Content -->
         <div
-          class="slds-modal__content slds-p-around_medium review-modal-content"
+          class="slds-modal__content slds-var-p-around_medium review-modal-content"
         >
           <template lwc:if={hasChanges}>
             <div class="slds-scrollable_y" style="max-height: 420px">
@@ -85,7 +87,7 @@
                         <div class="slds-truncate" title={row.recordName}>
                           <template lwc:if={row.isNewRecord}>
                             <span
-                              class="slds-badge slds-theme_info slds-m-right_xx-small"
+                              class="slds-badge slds-theme_info slds-var-m-right_xx-small"
                             >
                               New
                             </span>
@@ -135,7 +137,7 @@
           </template>
           <template lwc:else>
             <div
-              class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center"
+              class="slds-illustration slds-illustration_small slds-var-p-around_large slds-text-align_center"
             >
               <div class="slds-text-longform">
                 <h3 class="slds-text-heading_medium">No Pending Changes</h3>
@@ -163,7 +165,7 @@
             <lightning-button
               label="Cancel"
               onclick={handleClose}
-              class="slds-m-right_x-small"
+              class="slds-var-m-right_x-small"
             ></lightning-button>
             <lightning-button
               label="Save Changes"

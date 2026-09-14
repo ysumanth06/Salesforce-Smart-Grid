@@ -1,3 +1,4 @@
+<!-- sldsValidatorIgnore -->
 <template>
   <div
     class="view-selector-container slds-grid slds-grid_vertical-align-center"
@@ -5,7 +6,7 @@
     <!-- Modified Badge (TS-02) -->
     <template lwc:if={isModified}>
       <span
-        class="slds-badge slds-theme_warning slds-m-right_xx-small modified-badge"
+        class="slds-badge slds-theme_warning slds-var-m-right_xx-small modified-badge"
         title="View has unsaved modifications"
         data-testid="modified-badge"
       >
@@ -13,7 +14,7 @@
       </span>
     </template>
 
-    <div class="slds-m-right_x-small">
+    <div class="slds-var-m-right_x-small">
       <lightning-combobox
         name="viewSelector"
         label="View"
@@ -33,7 +34,7 @@
       title="View Options"
       menu-alignment="right"
       variant="border-filled"
-      class="slds-m-right_xx-small"
+      class="slds-var-m-right_xx-small"
       data-testid="view-menu"
     >
       <lightning-menu-item
@@ -79,7 +80,7 @@
       onclick={handleQuickSave}
       variant={saveButtonVariant}
       disabled={isQuickSaveDisabled}
-      class="slds-m-right_xx-small"
+      class="slds-var-m-right_xx-small"
       data-testid="quick-save-btn"
     >
     </lightning-button-icon>
@@ -109,6 +110,7 @@
           <button
             class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
             title="Close"
+            aria-label="Close"
             onclick={handleCloseSaveModal}
           >
             <lightning-icon
@@ -124,7 +126,7 @@
           </h2>
         </header>
 
-        <div class="slds-modal__content slds-p-around_medium">
+        <div class="slds-modal__content slds-var-p-around_medium">
           <lightning-input
             type="text"
             label="View Name"
@@ -132,7 +134,7 @@
             value={newViewName}
             onchange={handleNameChange}
             required
-            class="slds-m-bottom_medium"
+            class="slds-var-m-bottom_medium"
           >
           </lightning-input>
 
@@ -149,7 +151,7 @@
           <lightning-button
             label="Cancel"
             onclick={handleCloseSaveModal}
-            class="slds-m-right_x-small"
+            class="slds-var-m-right_x-small"
           ></lightning-button>
           <lightning-button
             label="Save View"

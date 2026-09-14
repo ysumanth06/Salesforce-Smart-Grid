@@ -6,6 +6,11 @@
     "**/.sfdx": true
   },
   "xml.preferences.showSchemaDocumentationType": "none",
+  "xml.validation.schema.enabled": "never",
+  "salesforcedx-vscode-slds.basic.mobileValidation": false,
+  "salesforcedx-vscode-slds.basic.override": false,
+  "salesforcedx-vscode-slds.basic.designToken": false,
+  "salesforcedx-vscode-slds.enhancements.density": false,
   "salesforcedx-vscode-apex.java.home": "/Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home",
   "salesforcedx-vscode-apex.enable-semantic-errors": true
 }

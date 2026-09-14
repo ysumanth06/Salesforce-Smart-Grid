@@ -1502,7 +1502,7 @@ export default class SmartDataGrid extends LightningElement {
 
   get gridContainerClass() {
     return this.showReadingPane
-      ? "slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-p-right_small"
+      ? "slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-var-p-right_small"
       : "slds-col slds-size_1-of-1";
   }
 
