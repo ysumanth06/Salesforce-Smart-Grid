@@ -97,9 +97,8 @@ public with sharing class SmartGridDataQualityService {
     try {
       // 1. Total records evaluated
       Integer totalCount = Database.countQuery(
-        'SELECT COUNT() FROM ' +
-          String.escapeSingleQuotes(objectApiName) +
-          ' WITH USER_MODE'
+        'SELECT COUNT() FROM ' + String.escapeSingleQuotes(objectApiName),
+        AccessLevel.USER_MODE
       );
       result.totalRecordsEvaluated = totalCount;
       if (totalCount == 0) {
@@ -131,9 +130,12 @@ public with sharing class SmartGridDataQualityService {
             String.escapeSingleQuotes(dupField) +
             ' != null GROUP BY ' +
             String.escapeSingleQuotes(dupField) +
-            ' HAVING COUNT(Id) > 1 WITH USER_MODE LIMIT 10';
+            ' HAVING COUNT(Id) > 1 LIMIT 10';
 
-          List<AggregateResult> aggResults = Database.query(aggQuery);
+          List<AggregateResult> aggResults = Database.query(
+            aggQuery,
+            AccessLevel.USER_MODE
+          );
           if (!aggResults.isEmpty()) {
             QualityIssue issue = new QualityIssue();
             issue.issueType = 'DUPLICATE';
@@ -177,8 +179,11 @@ public with sharing class SmartGridDataQualityService {
         String.join(escapedValidFields, ', ') +
         ' FROM ' +
         String.escapeSingleQuotes(objectApiName) +
-        ' WITH USER_MODE LIMIT 200';
-      List<SObject> sampleRows = Database.query(sampleQuery);
+        ' LIMIT 200';
+      List<SObject> sampleRows = Database.query(
+        sampleQuery,
+        AccessLevel.USER_MODE
+      );
       Integer sampleSize = sampleRows.size();
 
       if (sampleSize > 0) {
@@ -247,9 +252,11 @@ public with sharing class SmartGridDataQualityService {
           'SELECT ' +
           String.join(aggClauses, ', ') +
           ' FROM ' +
-          String.escapeSingleQuotes(objectApiName) +
-          ' WITH USER_MODE';
-        List<AggregateResult> outResults = Database.query(outlierQuery);
+          String.escapeSingleQuotes(objectApiName);
+        List<AggregateResult> outResults = Database.query(
+          outlierQuery,
+          AccessLevel.USER_MODE
+        );
         if (!outResults.isEmpty()) {
           AggregateResult ar = outResults[0];
           for (Integer idx = 0; idx < limitCount; idx++) {

@@ -123,14 +123,19 @@ public with sharing class SmartGridNLPDMLHandler {
       preview.explanation = 'Delete selected records from ' + sObjName;
     } else {
       preview.operation = 'UPDATE';
-      // Parse update fields (e.g. "set rating to hot", "set industry to technology")
       Pattern updatePattern = Pattern.compile(
-        '(?i)set\\s+([a-zA-Z0-9_]+)\\s+(?:to|=)\\s*[\'"]?([a-zA-Z0-9_\\s]+)[\'"]?'
+        '(?i)set\\s+([a-zA-Z0-9_]+)\\s+(?:to|=)\\s*[\'"]?([^\'"\r\n]+)[\'"]?'
       );
       Matcher updateMatcher = updatePattern.matcher(prompt);
       while (updateMatcher.find()) {
         String field = updateMatcher.group(1).trim();
         String val = updateMatcher.group(2).trim();
+        val = val.replaceAll(
+            '(?i)\\s+(?:for|on)\\s+(?:selected|these|all).*$',
+            ''
+          )
+          .trim();
+        val = val.replaceAll('^[\'"]|[\'"]$', '');
 
         // Match case-insensitive field on object describe
         Map<String, SObjectField> fieldMap = sType.getDescribe()

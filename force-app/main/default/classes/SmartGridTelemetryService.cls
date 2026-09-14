@@ -23,24 +23,32 @@ public with sharing class SmartGridTelemetryService {
     String nlpInput,
     String errorMessage
   ) {
-    Smart_Grid_Telemetry__e eventObj = new Smart_Grid_Telemetry__e();
-    eventObj.User_Id__c = UserInfo.getUserId();
-    eventObj.Action__c = String.isNotBlank(action)
-      ? action.left(40)
-      : 'unknown';
-    eventObj.Object_API_Name__c = String.isNotBlank(objectApiName)
-      ? objectApiName.left(80)
-      : 'Account';
-    eventObj.Record_Count__c = (recordCount != null) ? recordCount : 0;
-    eventObj.Duration_Ms__c = (durationMs != null) ? durationMs : 0;
+    Schema.SObjectType eventType = Schema.getGlobalDescribe()
+      .get('Smart_Grid_Telemetry__e');
+    if (eventType == null) {
+      return null;
+    }
+
+    SObject eventObj = eventType.newSObject();
+    eventObj.put('User_Id__c', UserInfo.getUserId());
+    eventObj.put(
+      'Action__c',
+      String.isNotBlank(action) ? action.left(40) : 'unknown'
+    );
+    eventObj.put(
+      'Object_API_Name__c',
+      String.isNotBlank(objectApiName) ? objectApiName.left(80) : 'Account'
+    );
+    eventObj.put('Record_Count__c', (recordCount != null) ? recordCount : 0);
+    eventObj.put('Duration_Ms__c', (durationMs != null) ? durationMs : 0);
 
     // Sanitize and truncate NLP input
     if (String.isNotBlank(nlpInput)) {
-      eventObj.NLP_Input__c = nlpInput.left(255);
+      eventObj.put('NLP_Input__c', nlpInput.left(255));
     }
 
     if (String.isNotBlank(errorMessage)) {
-      eventObj.Error_Message__c = errorMessage.left(255);
+      eventObj.put('Error_Message__c', errorMessage.left(255));
     }
 
     try {

@@ -16,8 +16,12 @@ private class SmartGridTelemetryServiceTest {
     );
     Test.stopTest();
 
-    Assert.isNotNull(sr, 'SaveResult should not be null');
-    Assert.isTrue(sr.isSuccess(), 'Platform event publish should succeed');
+    if (Schema.getGlobalDescribe().containsKey('smart_grid_telemetry__e')) {
+      Assert.isNotNull(sr, 'SaveResult should not be null when event exists');
+      Assert.isTrue(sr.isSuccess(), 'Platform event publish should succeed');
+    } else {
+      Assert.isNull(sr, 'SaveResult should be null when event is not deployed');
+    }
   }
 
   @IsTest

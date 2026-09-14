@@ -3,7 +3,7 @@
     <masterLabel>Smart Grid Channel</masterLabel>
     <description
   >Cross-component communication channel for Smart Grid events (select, save, delete, filter).</description>
-    <isExposed>false</isExposed>
+    <isExposed>true</isExposed>
     <lightningMessageFields>
         <fieldName>recordIds</fieldName>
         <description>Comma-separated selected record IDs</description>

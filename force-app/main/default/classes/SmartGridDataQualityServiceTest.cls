@@ -18,7 +18,10 @@ private class SmartGridDataQualityServiceTest {
     );
     Test.stopTest();
 
-    Assert.isTrue(res.isSuccess, 'Analysis should succeed');
+    Assert.isTrue(
+      res.isSuccess,
+      'Analysis should succeed: ' + res.errorMessage
+    );
     Assert.areEqual(
       255,
       res.totalRecordsEvaluated,
@@ -66,7 +69,10 @@ private class SmartGridDataQualityServiceTest {
     );
     Test.stopTest();
 
-    Assert.isTrue(res.isSuccess);
+    Assert.isTrue(
+      res.isSuccess,
+      'Analysis should succeed: ' + res.errorMessage
+    );
     // Ensure CPU time consumed is well under synchronous limit (10000ms)
     Assert.isTrue(
       Limits.getCpuTime() < 3000,
