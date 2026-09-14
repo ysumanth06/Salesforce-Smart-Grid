@@ -72,6 +72,10 @@ public with sharing class GridQueryBuilder {
           FilterExpression.class
         );
       } catch (Exception e) {
+        System.debug(
+          LoggingLevel.FINE,
+          'Invalid filter JSON: ' + e.getMessage()
+        );
       }
     }
     if (expr != null) {
@@ -205,6 +209,10 @@ public with sharing class GridQueryBuilder {
           FilterExpression.class
         );
       } catch (Exception e) {
+        System.debug(
+          LoggingLevel.FINE,
+          'Invalid filter JSON: ' + e.getMessage()
+        );
       }
     }
     if (expr != null) {
@@ -403,6 +411,10 @@ public with sharing class GridQueryBuilder {
           FilterExpression.class
         );
       } catch (Exception e) {
+        System.debug(
+          LoggingLevel.FINE,
+          'Invalid filter JSON: ' + e.getMessage()
+        );
       }
     }
     if (expr != null) {

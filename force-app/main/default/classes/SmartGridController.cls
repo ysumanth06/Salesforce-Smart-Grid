@@ -164,7 +164,10 @@ public with sharing class SmartGridController {
             dto.columns.add(c);
           }
         } catch (Exception e) {
-          // Ignore JSON parsing errors and return an empty column list
+          System.debug(
+            LoggingLevel.FINE,
+            'Failed to parse columns JSON: ' + e.getMessage()
+          );
         }
       }
 
@@ -648,14 +651,14 @@ public with sharing class SmartGridController {
       try {
         req.startDate = Date.valueOf(startDate);
       } catch (Exception e) {
-        // Ignore parse errors
+        System.debug(LoggingLevel.FINE, 'Invalid startDate: ' + e.getMessage());
       }
     }
     if (String.isNotBlank(endDate)) {
       try {
         req.endDate = Date.valueOf(endDate);
       } catch (Exception e) {
-        // Ignore parse errors
+        System.debug(LoggingLevel.FINE, 'Invalid endDate: ' + e.getMessage());
       }
     }
 
@@ -738,7 +741,10 @@ public with sharing class SmartGridController {
     try {
       SmartGridViewService.saveQueryHistory(objectApiName, configJson);
     } catch (Exception e) {
-      // History logging is non-blocking
+      System.debug(
+        LoggingLevel.FINE,
+        'History logging non-blocking: ' + e.getMessage()
+      );
     }
   }
 
