@@ -17,6 +17,12 @@ public with sharing class GridQueryBuilder {
     return results;
   }
 
+  /**
+   * @description Constructs a safe dynamic SOQL query string from the given request by validating
+   * object accessibility, field FLS, sanitizing filter parameters, date ranges, and sorting.
+   * @param req The QueryRequest containing object name, fields, filters, sorting, and limits
+   * @return Validated SOQL query string
+   */
   public static String buildSingleQuery(QueryRequest req) {
     if (String.isBlank(req.objectApiName)) {
       throw new QueryBuilderException(
@@ -224,6 +230,13 @@ public with sharing class GridQueryBuilder {
     return query;
   }
 
+  /**
+   * @description Validates a list of field API names against the object describe, ensuring
+   * each field exists and the current user has Read (FLS) access.
+   * @param sObjType The SObjectType of the target object
+   * @param fields The list of field API names to validate
+   * @return List of accessible, escaped field API names
+   */
   public static List<String> validateFields(
     SObjectType sObjType,
     List<String> fields
@@ -246,6 +259,12 @@ public with sharing class GridQueryBuilder {
     return validFields;
   }
 
+  /**
+   * @description Checks if a specific field exists on the object and is accessible to the current user.
+   * @param sObjType The SObjectType of the target object
+   * @param fieldName The field API name to check
+   * @return Boolean true if the field exists and is readable, false otherwise
+   */
   public static Boolean validateField(SObjectType sObjType, String fieldName) {
     Map<String, SObjectField> fieldMap = sObjType.getDescribe().fields.getMap();
     String lowerField = fieldName.toLowerCase();
@@ -258,6 +277,12 @@ public with sharing class GridQueryBuilder {
     return false;
   }
 
+  /**
+   * @description Determines if a field is valid for use in dynamic filtering.
+   * @param sObjType The SObjectType of the target object
+   * @param filterField The field API name to validate
+   * @return Boolean true if the field is valid and accessible for filtering
+   */
   public static Boolean isValidFilterField(
     SObjectType sObjType,
     String filterField

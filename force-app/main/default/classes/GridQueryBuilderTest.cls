@@ -13,20 +13,20 @@ public class GridQueryBuilderTest {
     String query = GridQueryBuilder.buildSingleQuery(req);
     Test.stopTest();
 
-    System.assert(
+    Assert.isTrue(
       query.contains('SELECT Id, Name, Industry FROM Account'),
       'Query should select specified fields'
     );
-    System.assert(
+    Assert.isTrue(
       !query.contains('WHERE'),
       'Query should NOT contain WHERE clause when filter value is null. Got: ' +
       query
     );
-    System.assert(
+    Assert.isTrue(
       query.contains('ORDER BY Name ASC NULLS LAST'),
       'Query should contain order by clause'
     );
-    System.assert(
+    Assert.isTrue(
       query.contains('LIMIT 100'),
       'Query should contain limit clause'
     );
@@ -45,8 +45,8 @@ public class GridQueryBuilderTest {
     );
     Test.stopTest();
 
-    System.assertEquals(1, results.size(), 'Should return one query');
-    System.assert(
+    Assert.areEqual(1, results.size(), 'Should return one query');
+    Assert.isTrue(
       results[0].contains('FROM Account'),
       'Query should be for Account'
     );
@@ -61,9 +61,9 @@ public class GridQueryBuilderTest {
     Test.startTest();
     try {
       GridQueryBuilder.buildSingleQuery(req);
-      System.assert(false, 'Expected an exception for invalid object');
+      Assert.fail('Expected an exception for invalid object');
     } catch (GridQueryBuilder.QueryBuilderException e) {
-      System.assert(
+      Assert.isTrue(
         e.getMessage().contains('Invalid Object API Name'),
         'Exception message should mention invalid object'
       );
@@ -81,11 +81,11 @@ public class GridQueryBuilderTest {
     String query = GridQueryBuilder.buildSingleQuery(req);
     Test.stopTest();
 
-    System.assert(
+    Assert.isTrue(
       !query.contains('InvalidFieldXYZ__c'),
       'Invalid field should be stripped from query'
     );
-    System.assert(
+    Assert.isTrue(
       query.contains('Name'),
       'Valid field should be present in query'
     );
@@ -102,7 +102,7 @@ public class GridQueryBuilderTest {
     String query = GridQueryBuilder.buildSingleQuery(req);
     Test.stopTest();
 
-    System.assert(
+    Assert.isTrue(
       query.contains('LIMIT 2000'),
       'Limit should be capped at 2000'
     );
@@ -120,7 +120,7 @@ public class GridQueryBuilderTest {
     String query = GridQueryBuilder.buildSingleQuery(req);
     Test.stopTest();
 
-    System.assert(
+    Assert.isTrue(
       query.contains('WHERE Industry = \'Healthcare\''),
       'Query should contain WHERE clause with specific filter value. Got: ' +
       query
@@ -142,11 +142,11 @@ public class GridQueryBuilderTest {
     Test.stopTest();
 
     // The injected SQL should be escaped, not executed as-is
-    System.assert(
+    Assert.isTrue(
       query.contains('Healthcare\\\''),
       'Dangerous quote should be escaped with a backslash. Got: ' + query
     );
-    System.assert(
+    Assert.isTrue(
       query.contains('OR Name'),
       'The injected logic should still be present but escaped. Got: ' + query
     );
@@ -164,7 +164,7 @@ public class GridQueryBuilderTest {
     String query = GridQueryBuilder.buildSingleQuery(req);
     Test.stopTest();
 
-    System.assert(
+    Assert.isTrue(
       !query.contains('WHERE'),
       'Query should NOT contain WHERE clause when filter value is null. Got: ' +
       query
@@ -183,7 +183,7 @@ public class GridQueryBuilderTest {
     String query = GridQueryBuilder.buildSingleQuery(req);
     Test.stopTest();
 
-    System.assert(query.contains('LIMIT 10'), 'Query should contain limit');
-    System.assert(query.contains('OFFSET 20'), 'Query should contain offset');
+    Assert.isTrue(query.contains('LIMIT 10'), 'Query should contain limit');
+    Assert.isTrue(query.contains('OFFSET 20'), 'Query should contain offset');
   }
 }

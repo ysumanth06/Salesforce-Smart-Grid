@@ -2,6 +2,12 @@ public with sharing class SmartGridController {
   @TestVisible
   private static List<Smart_Grid_Config__mdt> mockConfigs;
 
+  /**
+   * @description Fetches the grid configuration custom metadata record by its developer name.
+   * Supports both JSON column definitions and relational Smart_Grid_Column__mdt child records.
+   * @param configDevName The DeveloperName of the Smart_Grid_Config__mdt record
+   * @return GridConfigDTO containing object details, active status, and parsed columns
+   */
   @AuraEnabled(cacheable=true)
   public static GridConfigDTO getGridConfig(String configDevName) {
     if (String.isBlank(configDevName)) {
@@ -129,6 +135,12 @@ public with sharing class SmartGridController {
     return null;
   }
 
+  /**
+   * @description Retrieves accessible fields for an SObject, returning labels, types, and updateability.
+   * Used by the field picker component to allow end-users to select columns dynamically.
+   * @param objectApiName The API name of the target SObject
+   * @return List of ColumnInfo descriptors for accessible fields
+   */
   @AuraEnabled(cacheable=true)
   public static List<ColumnInfo> getObjectFields(String objectApiName) {
     List<ColumnInfo> results = new List<ColumnInfo>();
@@ -157,6 +169,21 @@ public with sharing class SmartGridController {
     return results;
   }
 
+  /**
+   * @description Queries a paged window of records for the given object and fields.
+   * Enforces USER_MODE FLS and performs safe offset pagination with total count querying.
+   * @param objectApiName The API name of the SObject to query
+   * @param fields The list of field API names to retrieve
+   * @param filters Key-value pairs for dynamic filtering
+   * @param dateField API name of date field for range filtering
+   * @param startDate Optional start date boundary
+   * @param endDate Optional end date boundary
+   * @param sortField Field API name to sort by
+   * @param sortDirection Sorting direction ('ASC' or 'DESC')
+   * @param pageSize Number of records per page (default: 50)
+   * @param pageNumber 1-based page index
+   * @return PagedResult containing records, totalSize, pageNumber, and pageSize
+   */
   @AuraEnabled
   public static PagedResult getRecordsPaged(
     String objectApiName,
@@ -279,6 +306,13 @@ public with sharing class SmartGridController {
     return options;
   }
 
+  /**
+   * @description Bulk saves modified or newly created SObjects with partial success support.
+   * Enforces object-level CRUD, strips inaccessible fields, separates inserts from updates,
+   * and maps any DML errors back to individual rows and field names.
+   * @param records List of SObjects to insert or update
+   * @return SaveResult containing overall success status, row-level errors, and table-level errors
+   */
   @AuraEnabled
   public static SaveResult saveRecords(List<SObject> records) {
     SaveResult result = new SaveResult();
@@ -286,6 +320,9 @@ public with sharing class SmartGridController {
       result.isSuccess = true;
       return result;
     }
+
+    // ID Validation Hardening (TS04) - validate Record IDs before stripInaccessible and DML
+    SmartGridIdValidator.validateIds(records);
 
     // CRUD check — ensure user has create/update access to the object
     SObjectType objType = records[0].getSObjectType();
@@ -378,6 +415,12 @@ public with sharing class SmartGridController {
     return result;
   }
 
+  /**
+   * @description Deletes a collection of records in USER_MODE with partial success support.
+   * Enforces object deletable checks and captures row-specific errors on failure.
+   * @param records List of SObjects to delete
+   * @return SaveResult with rowErrors if any deletions failed
+   */
   @AuraEnabled
   public static SaveResult deleteRecords(List<SObject> records) {
     SaveResult result = new SaveResult();
@@ -385,6 +428,9 @@ public with sharing class SmartGridController {
       result.isSuccess = true;
       return result;
     }
+
+    // ID Validation Hardening (TS04) - validate Record IDs before DML
+    SmartGridIdValidator.validateIdsForDelete(records);
 
     SObjectType objType = records[0].getSObjectType();
     if (!objType.getDescribe().isDeletable()) {

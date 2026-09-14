@@ -7,11 +7,7 @@ public class SmartGridControllerTest {
       null
     );
     Test.stopTest();
-    System.assertEquals(
-      null,
-      config,
-      'Config should be null for null dev name'
-    );
+    Assert.isNull(config, 'Config should be null for null dev name');
   }
 
   @isTest
@@ -28,18 +24,18 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assertNotEquals(null, config, 'Config should not be null');
-    System.assertEquals(
+    Assert.isNotNull(config, 'Config should not be null');
+    Assert.areEqual(
       'Test_JSON',
       config.developerName,
       'DeveloperName should match'
     );
-    System.assertEquals(
+    Assert.areEqual(
       1,
       config.columns.size(),
       'Should have 1 column parsed from JSON'
     );
-    System.assertEquals(
+    Assert.areEqual(
       'Name',
       config.columns[0].fieldApiName,
       'Column field should be Name'
@@ -60,18 +56,18 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assertNotEquals(null, config, 'Config should not be null');
-    System.assertEquals(
+    Assert.isNotNull(config, 'Config should not be null');
+    Assert.areEqual(
       'Test_Relational',
       config.developerName,
       'DeveloperName should match'
     );
-    System.assertEquals(
+    Assert.areEqual(
       1,
       config.columns.size(),
       'Should have 1 column from relationship'
     );
-    System.assertEquals(
+    Assert.areEqual(
       'Industry',
       config.columns[0].fieldApiName,
       'Column field should be Industry'
@@ -85,11 +81,7 @@ public class SmartGridControllerTest {
       'Account'
     );
     Test.stopTest();
-    System.assertNotEquals(
-      0,
-      fields.size(),
-      'Should return fields for Account'
-    );
+    Assert.isTrue(fields.size() > 0, 'Should return fields for Account');
   }
 
   @isTest
@@ -99,7 +91,7 @@ public class SmartGridControllerTest {
       'InvalidObjectXYZ123__c'
     );
     Test.stopTest();
-    System.assertEquals(
+    Assert.areEqual(
       0,
       fields.size(),
       'Should return no fields for invalid object'
@@ -126,9 +118,9 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assertEquals(1, result.records.size(), 'Should return 1 record');
-    System.assertEquals(1, result.totalSize, 'Total size should be 1');
-    System.assertEquals(1, result.pageNumber, 'Page number should be 1');
+    Assert.areEqual(1, result.records.size(), 'Should return 1 record');
+    Assert.areEqual(1, result.totalSize, 'Total size should be 1');
+    Assert.areEqual(1, result.pageNumber, 'Page number should be 1');
   }
 
   @isTest
@@ -143,26 +135,21 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assert(sr.isSuccess, 'Save should be successful');
+    Assert.isTrue(sr.isSuccess, 'Save should be successful');
 
     Account updatedAcc = [SELECT Name FROM Account WHERE Id = :target.Id];
-    System.assertEquals(
-      'Updated Acc',
-      updatedAcc.Name,
-      'Name should be updated'
-    );
+    Assert.areEqual('Updated Acc', updatedAcc.Name, 'Name should be updated');
   }
 
   @isTest
   static void testSaveRecords_PartialSuccess() {
     Account goodAcc = new Account(Name = 'Good Acc');
     insert goodAcc;
-    // Invalid account to trigger failure on update
     Account badAcc = new Account(Name = 'Bad Acc');
     insert badAcc;
 
     goodAcc.Name = 'Updated Good Acc';
-    badAcc.Name = null; // Assuming Name is a required field on Account standard layout/DML
+    badAcc.Name = null;
 
     Test.startTest();
     SmartGridController.SaveResult sr = SmartGridController.saveRecords(
@@ -170,25 +157,20 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assertEquals(
-      false,
+    Assert.isFalse(
       sr.isSuccess,
       'Save should return false for partial success'
     );
-    System.assertEquals(1, sr.rowErrors.size(), 'There should be 1 row error');
-    System.assertEquals(
+    Assert.areEqual(1, sr.rowErrors.size(), 'There should be 1 row error');
+    Assert.areEqual(
       badAcc.Id,
       sr.rowErrors[0].id,
       'The error should map to the bad account ID'
     );
-    System.assertEquals(
-      1,
-      sr.tableErrors.size(),
-      'There should be 1 table error'
-    );
+    Assert.areEqual(1, sr.tableErrors.size(), 'There should be 1 table error');
 
     Account updatedGoodAcc = [SELECT Name FROM Account WHERE Id = :goodAcc.Id];
-    System.assertEquals(
+    Assert.areEqual(
       'Updated Good Acc',
       updatedGoodAcc.Name,
       'The good record should have saved successfully'
@@ -198,7 +180,7 @@ public class SmartGridControllerTest {
   @isTest
   static void testSaveRecords_Bulk() {
     List<Account> accounts = new List<Account>();
-    for (Integer i = 0; i < 201; i++) {
+    for (Integer i = 0; i < 251; i++) {
       accounts.add(new Account(Name = 'Bulk Acc ' + i));
     }
     insert accounts;
@@ -213,14 +195,14 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assert(sr.isSuccess, 'Bulk save should be successful');
+    Assert.isTrue(sr.isSuccess, 'Bulk save should be successful');
 
     Integer updatedCount = [
       SELECT COUNT()
       FROM Account
       WHERE Name LIKE '%Updated'
     ];
-    System.assertEquals(201, updatedCount, 'All records should be updated');
+    Assert.areEqual(251, updatedCount, 'All 251 records should be updated');
   }
 
   @isTest
@@ -232,23 +214,13 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assertNotEquals(
-      0,
-      options.size(),
+    Assert.isTrue(
+      options.size() > 0,
       'Should return picklist values for Account.Industry'
     );
-    // Verify structure
     for (SmartGridController.PicklistOption opt : options) {
-      System.assertNotEquals(
-        null,
-        opt.label,
-        'Each option should have a label'
-      );
-      System.assertNotEquals(
-        null,
-        opt.value,
-        'Each option should have a value'
-      );
+      Assert.isNotNull(opt.label, 'Each option should have a label');
+      Assert.isNotNull(opt.value, 'Each option should have a value');
     }
   }
 
@@ -257,9 +229,9 @@ public class SmartGridControllerTest {
     Test.startTest();
     try {
       SmartGridController.getPicklistValues('Account', 'Name');
-      System.assert(false, 'Expected exception for non-picklist field');
+      Assert.fail('Expected exception for non-picklist field');
     } catch (Exception e) {
-      System.assert(
+      Assert.isTrue(
         e instanceof AuraHandledException,
         'Should throw AuraHandledException for non-picklist. Got: ' +
         e.getTypeName()
@@ -277,7 +249,7 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assertEquals(
+    Assert.areEqual(
       0,
       options.size(),
       'Should return empty list for null params'
@@ -304,18 +276,19 @@ public class SmartGridControllerTest {
     );
     Test.stopTest();
 
-    System.assert(
+    Assert.isTrue(
       result.records.size() > 0,
       'Should return at least the Technology record'
     );
     for (SObject r : result.records) {
-      System.assertEquals(
+      Assert.areEqual(
         'Technology',
         (String) r.get('Industry'),
         'All returned records should have Industry = Technology'
       );
     }
   }
+
   @isTest
   static void testDeleteRecords_Valid() {
     Account acc = new Account(Name = 'Delete Test');
@@ -325,8 +298,8 @@ public class SmartGridControllerTest {
       new List<SObject>{ acc }
     );
     Test.stopTest();
-    System.assert(sr.isSuccess, 'Delete should be successful');
-    System.assertEquals(
+    Assert.isTrue(sr.isSuccess, 'Delete should be successful');
+    Assert.areEqual(
       0,
       [SELECT COUNT() FROM Account WHERE Id = :acc.Id],
       'Account should be deleted'
@@ -336,7 +309,7 @@ public class SmartGridControllerTest {
   @isTest
   static void testDeleteRecords_Bulk() {
     List<Account> accounts = new List<Account>();
-    for (Integer i = 0; i < 201; i++) {
+    for (Integer i = 0; i < 251; i++) {
       accounts.add(new Account(Name = 'Bulk Delete ' + i));
     }
     insert accounts;
@@ -345,7 +318,7 @@ public class SmartGridControllerTest {
       accounts
     );
     Test.stopTest();
-    System.assert(sr.isSuccess, 'Bulk delete should be successful');
+    Assert.isTrue(sr.isSuccess, 'Bulk delete should be successful');
   }
 
   @isTest
@@ -353,7 +326,7 @@ public class SmartGridControllerTest {
     Test.startTest();
     SmartGridController.SaveResult sr = SmartGridController.deleteRecords(null);
     Test.stopTest();
-    System.assert(sr.isSuccess, 'Should return success for null');
+    Assert.isTrue(sr.isSuccess, 'Should return success for null');
   }
 
   @isTest
@@ -364,8 +337,8 @@ public class SmartGridControllerTest {
       new List<SObject>{ acc }
     );
     Test.stopTest();
-    System.assert(sr.isSuccess, 'Insert should be successful');
-    System.assertEquals(
+    Assert.isTrue(sr.isSuccess, 'Insert should be successful');
+    Assert.areEqual(
       1,
       [SELECT COUNT() FROM Account WHERE Name = 'New Insert Test'],
       'Account should be inserted'
@@ -381,12 +354,30 @@ public class SmartGridControllerTest {
       new List<SObject>{ acc1, acc2 }
     );
     Test.stopTest();
-    System.assertEquals(false, sr.isSuccess, 'Should be partial success');
-    System.assertEquals(1, sr.rowErrors.size(), 'Should have 1 error');
-    System.assertEquals(
+    Assert.isFalse(sr.isSuccess, 'Should be partial success');
+    Assert.areEqual(1, sr.rowErrors.size(), 'Should have 1 error');
+    Assert.areEqual(
       '1',
       sr.rowErrors[0].id,
       'Error ID should be the original index string'
     );
+  }
+
+  @isTest
+  static void testDeleteRecords_InvalidId_ThrowsException() {
+    Account uninsertedAcc = new Account(Name = 'No Id');
+    Test.startTest();
+    try {
+      SmartGridController.deleteRecords(new List<SObject>{ uninsertedAcc });
+      Assert.fail(
+        'Expected AuraHandledException when deleting record without valid ID'
+      );
+    } catch (Exception e) {
+      Assert.isTrue(
+        e instanceof AuraHandledException,
+        'Should throw AuraHandledException when deleting uninserted record'
+      );
+    }
+    Test.stopTest();
   }
 }
