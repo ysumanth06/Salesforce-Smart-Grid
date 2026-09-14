@@ -269,22 +269,25 @@ export default class SmartDataGrid extends LightningElement {
       const metaMap = {};
       fields.forEach((f) => {
         metaMap[f.fieldApiName] = f.type;
+        metaMap[f.fieldApiName.toLowerCase()] = f.type;
       });
       this._fieldMetadataMap = metaMap;
 
       let filters = [];
       for (let col of this.gridColumns) {
+        const colFieldName =
+          col.fieldName || col.fieldApiName || col.field || "";
         // Skip URL-helper fields for filtering
-        if (col.fieldName.endsWith("_Url")) continue;
+        if (colFieldName.endsWith("_Url")) continue;
 
         const fieldDescribe = fields.find(
-          (f) => f.fieldApiName === col.fieldName
+          (f) => f.fieldApiName.toLowerCase() === colFieldName.toLowerCase()
         );
         if (!fieldDescribe) continue;
 
         let filter = {
-          fieldName: col.fieldName,
-          label: col.label,
+          fieldName: colFieldName,
+          label: col.label || fieldDescribe.label,
           selectedValue: "",
           type: fieldDescribe.type
         };
@@ -294,20 +297,30 @@ export default class SmartDataGrid extends LightningElement {
           fieldDescribe.type === "MULTIPICKLIST"
         ) {
           filter.isPicklist = true;
-          // eslint-disable-next-line no-await-in-loop
-          const values = await getPicklistValues({
-            objectApiName: this.objectApiName,
-            fieldApiName: col.fieldName
-          });
-          const options = [
-            { label: "-- All --", value: "" },
-            ...values.map((v) => ({ label: v.label, value: v.value }))
-          ];
-          filter.options = options;
-          // Store in our direct map for the grid cells (excluding the -- All -- option)
-          this._picklistOptionsMap[col.fieldName.toLowerCase()] = values.map(
-            (v) => ({ label: v.label, value: v.value })
-          );
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            const values = await getPicklistValues({
+              objectApiName: this.objectApiName,
+              fieldApiName: fieldDescribe.fieldApiName
+            });
+            const options = [
+              { label: "-- All --", value: "" },
+              ...values.map((v) => ({ label: v.label, value: v.value }))
+            ];
+            filter.options = options;
+            const pureOptions = values.map((v) => ({
+              label: v.label,
+              value: v.value
+            }));
+            this._picklistOptionsMap[colFieldName.toLowerCase()] = pureOptions;
+            this._picklistOptionsMap[fieldDescribe.fieldApiName.toLowerCase()] =
+              pureOptions;
+          } catch (pErr) {
+            console.warn(
+              `Failed to load picklist options for ${colFieldName}:`,
+              pErr
+            );
+          }
         } else if (
           fieldDescribe.type === "DATE" ||
           fieldDescribe.type === "DATETIME"
@@ -1235,6 +1248,21 @@ export default class SmartDataGrid extends LightningElement {
     });
     this.draftValues = updatedDrafts;
 
+    // Update in-memory gridData rows so custom cell templates display the draft value immediately
+    if (this.gridData && newDrafts.length > 0) {
+      newDrafts.forEach((draft) => {
+        const row = this.gridData.find((r) => r.Id === draft.Id);
+        if (row) {
+          Object.keys(draft).forEach((f) => {
+            if (f !== "Id" && !f.startsWith("_")) {
+              row[f] = draft[f];
+            }
+          });
+        }
+      });
+      this.gridData = [...this.gridData];
+    }
+
     // Recalculate formula columns on cell change (AC-11-4)
     this.gridData = computeFormulaColumns(
       this.gridData,
@@ -1952,6 +1980,8 @@ export default class SmartDataGrid extends LightningElement {
     // Always resolve to the real Salesforce type from metadata
     const sfType = (
       this._fieldMetadataMap[fieldApi] ||
+      this._fieldMetadataMap[fieldApi?.toLowerCase()] ||
+      col.sfType ||
       col.type ||
       ""
     ).toUpperCase();
@@ -1979,12 +2009,15 @@ export default class SmartDataGrid extends LightningElement {
     }
 
     // Custom picklist type support (c-smart-grid-picklist via c-smart-grid-datatable)
-    const isPicklist = sfType === "PICKLIST";
-    const picklistOptions = this._picklistOptionsMap[fieldApi.toLowerCase()];
+    const isPicklist = sfType === "PICKLIST" || col.type === "picklist";
+    const picklistOptions =
+      this._picklistOptionsMap[fieldApi.toLowerCase()] ||
+      (col.typeAttributes && col.typeAttributes.options);
     if (isPicklist && picklistOptions && picklistOptions.length > 0) {
       return {
         label: label,
         fieldName: fieldApi,
+        sfType: "PICKLIST",
         type: "picklist",
         typeAttributes: {
           label: label,
@@ -1998,7 +2031,8 @@ export default class SmartDataGrid extends LightningElement {
           iconName: { fieldName: fieldApi + "_iconName" },
           iconPosition: "left"
         },
-        editable: false,
+        isUpdateable: isEditable,
+        editable: isEditable,
         sortable: isSortable,
         initialWidth: colWidth
       };
@@ -2065,7 +2099,10 @@ export default class SmartDataGrid extends LightningElement {
 
   handlePicklistChange(event) {
     const data = event.detail?.data || {};
-    const recordId = data.context;
+    let recordId = data.context;
+    if (typeof recordId === "object" && recordId !== null) {
+      recordId = recordId.Id || recordId.fieldName || recordId.value;
+    }
     const fieldName = data.fieldName;
     const value = data.value;
 

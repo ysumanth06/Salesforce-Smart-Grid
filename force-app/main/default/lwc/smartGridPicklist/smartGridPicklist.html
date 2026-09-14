@@ -1,29 +1,5 @@
 <template>
-  <div
-    class="slds-p-horizontal_x-small cell-container"
-    onclick={handleCellClick}
-  >
-    <template lwc:if={isEditMode}>
-      <lightning-combobox
-        name="picklist"
-        label={label}
-        value={value}
-        placeholder={placeholder}
-        options={options}
-        onchange={handleChange}
-        onblur={handleBlur}
-        variant="label-hidden"
-        class="combobox-input"
-      >
-      </lightning-combobox>
-    </template>
-    <template lwc:else>
-      <div
-        class="slds-grid slds-grid_vertical-align-center slds-truncate read-mode"
-        onclick={handleEditClick}
-      >
-        <span class="slds-truncate" title={displayValue}>{displayValue}</span>
-      </div>
-    </template>
+  <div class="slds-truncate picklist-cell" title={displayValue}>
+    <span class="slds-truncate">{displayValue}</span>
   </div>
 </template>
