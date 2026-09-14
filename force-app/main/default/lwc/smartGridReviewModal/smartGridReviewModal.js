@@ -64,6 +64,33 @@ export default class SmartGridReviewModal extends LightningElement {
           originalRow[field] !== undefined ? originalRow[field] : "";
         const draftVal = draft[field] !== undefined ? draft[field] : "";
 
+        let displayOrig =
+          origVal !== null && origVal !== undefined && origVal !== ""
+            ? String(origVal)
+            : "(empty)";
+        let displayDraft =
+          draftVal !== null && draftVal !== undefined && draftVal !== ""
+            ? String(draftVal)
+            : "(empty)";
+
+        const targetCol = this.gridColumns?.find((c) => c.fieldName === field);
+        const options = targetCol?.typeAttributes?.options;
+        if (options && Array.isArray(options)) {
+          const origOpt = options.find(
+            (o) =>
+              o.value === origVal ||
+              String(o.value).toLowerCase() === String(origVal).toLowerCase()
+          );
+          if (origOpt) displayOrig = origOpt.label;
+
+          const draftOpt = options.find(
+            (o) =>
+              o.value === draftVal ||
+              String(o.value).toLowerCase() === String(draftVal).toLowerCase()
+          );
+          if (draftOpt) displayDraft = draftOpt.label;
+        }
+
         rows.push({
           id: `${recordId}_${field}`,
           recordId,
@@ -72,14 +99,8 @@ export default class SmartGridReviewModal extends LightningElement {
           fieldLabel,
           originalValue: origVal,
           draftValue: draftVal,
-          displayOriginal:
-            origVal !== null && origVal !== undefined && origVal !== ""
-              ? String(origVal)
-              : "(empty)",
-          displayDraft:
-            draftVal !== null && draftVal !== undefined && draftVal !== ""
-              ? String(draftVal)
-              : "(empty)",
+          displayOriginal: displayOrig,
+          displayDraft: displayDraft,
           isNewRecord
         });
       });

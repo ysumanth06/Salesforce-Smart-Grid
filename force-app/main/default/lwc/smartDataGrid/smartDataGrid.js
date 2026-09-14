@@ -413,7 +413,21 @@ export default class SmartDataGrid extends LightningElement {
       if (!bypassCache && this.pageCache.has(this.currentPage)) {
         response = this.pageCache.get(this.currentPage);
       } else {
-        let fieldsToQuery = this.gridColumns.map((c) => c.fieldName);
+        const queryFieldsSet = new Set();
+        this.gridColumns.forEach((c) => {
+          let f = c.fieldApiName || c.fieldName;
+          if (f) {
+            if (f.endsWith("_Url")) {
+              queryFieldsSet.add(f.replace(/_Url$/, ""));
+            } else {
+              queryFieldsSet.add(f);
+            }
+          }
+          if (c.typeAttributes?.label?.fieldName) {
+            queryFieldsSet.add(c.typeAttributes.label.fieldName);
+          }
+        });
+        let fieldsToQuery = Array.from(queryFieldsSet);
 
         // Build filter map
         let filterMap = {};
@@ -962,11 +976,17 @@ export default class SmartDataGrid extends LightningElement {
 
       // Now that filters (and picklist options) are loaded, format the columns
       this.gridColumns = columns.map((col) => {
+        const colField = (
+          col.fieldApiName ||
+          col.fieldName ||
+          ""
+        ).toLowerCase();
         const meta = fieldMetadata.find(
-          (f) => f.fieldApiName === (col.fieldApiName || col.fieldName)
+          (f) => f.fieldApiName.toLowerCase() === colField
         );
         return this.formatColumn({
           ...col,
+          sfType: meta ? meta.type : col.type,
           type: meta ? meta.type : col.type
         });
       });
