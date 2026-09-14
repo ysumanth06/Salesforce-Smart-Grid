@@ -1,0 +1,64 @@
+<template>
+  <template lwc:if={isVisible}>
+    <section
+      class="related-grid-container slds-card slds-card_boundary slds-m-top_medium"
+    >
+      <!-- Related Grid Header -->
+      <header
+        class="slds-card__header slds-grid slds-grid_vertical-align-center related-header"
+      >
+        <div class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <lightning-icon
+              icon-name="standard:relationship"
+              size="small"
+            ></lightning-icon>
+          </div>
+          <div class="slds-media__body">
+            <h3 class="slds-card__header-title slds-truncate">
+              Related Records (Level {depth})
+            </h3>
+          </div>
+        </div>
+        <div class="slds-no-flex">
+          <lightning-button-icon
+            icon-name="utility:close"
+            alternative-text="Close Related Grid"
+            title="Close"
+            onclick={handleClose}
+            variant="border-filled"
+          >
+          </lightning-button-icon>
+        </div>
+      </header>
+
+      <!-- Tabs if multiple child relationships -->
+      <template lwc:if={hasMultipleTabs}>
+        <lightning-tabset variant="scoped" active-tab-value={activeTab}>
+          <template for:each={relationshipTabs} for:item="tab">
+            <lightning-tab
+              key={tab.id}
+              label={tab.label}
+              value={tab.id}
+              onactive={handleTabActive}
+            >
+            </lightning-tab>
+          </template>
+        </lightning-tabset>
+      </template>
+
+      <!-- Child Grid Content -->
+      <div
+        class="slds-card__body slds-card__body_inner slds-p-around_small child-grid-wrapper"
+      >
+        <c-smart-data-grid
+          object-api-name={activeObjectApiName}
+          parent-record-id={parentRecordId}
+          parent-relationship-field={activeLookupField}
+          depth={nextDepth}
+        >
+        </c-smart-data-grid>
+      </div>
+    </section>
+  </template>
+</template>

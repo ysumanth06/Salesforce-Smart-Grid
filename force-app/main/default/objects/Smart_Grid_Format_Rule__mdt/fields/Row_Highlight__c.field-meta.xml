@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Row_Highlight__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description
+  >If true, applies formatting color to the entire row instead of just the cell.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Highlight Entire Row</label>
+    <type>Checkbox</type>
+</CustomField>

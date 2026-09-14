@@ -1,0 +1,184 @@
+<!-- sldsValidatorIgnore -->
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="review-modal-title"
+      class="slds-modal slds-fade-in-open slds-modal_medium"
+      data-testid="review-modal"
+    >
+      <div class="slds-modal__container">
+        <!-- Header -->
+        <header
+          class="slds-modal__header slds-grid slds-grid_vertical-align-center"
+        >
+          <div class="slds-col">
+            <h2
+              id="review-modal-title"
+              class="slds-modal__title slds-hyphenate slds-text-heading_medium"
+            >
+              Review Unsaved Changes
+            </h2>
+            <p
+              class="slds-var-m-top_xx-small slds-text-body_small slds-text-color_weak"
+            >
+              {summaryText}
+            </p>
+          </div>
+          <button
+            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+            title="Close"
+            aria-label="Close"
+            onclick={handleClose}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              alternative-text="Close"
+              variant="inverse"
+              size="small"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+        </header>
+
+        <!-- Content -->
+        <div
+          class="slds-modal__content slds-var-p-around_medium review-modal-content"
+        >
+          <template lwc:if={hasChanges}>
+            <div class="slds-scrollable_y" style="max-height: 420px">
+              <table
+                class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"
+                aria-label="Pending changes list"
+              >
+                <thead>
+                  <tr class="slds-line-height_reset">
+                    <th scope="col">
+                      <div class="slds-truncate" title="Record">Record</div>
+                    </th>
+                    <th scope="col">
+                      <div class="slds-truncate" title="Field">Field</div>
+                    </th>
+                    <th scope="col">
+                      <div class="slds-truncate" title="Original Value">
+                        Original Value
+                      </div>
+                    </th>
+                    <th scope="col">
+                      <div class="slds-truncate" title="New Value">
+                        New Value
+                      </div>
+                    </th>
+                    <th scope="col" style="width: 4rem">
+                      <div class="slds-truncate" title="Action">Action</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={reviewRows} for:item="row">
+                    <tr
+                      key={row.id}
+                      class="slds-hint-parent"
+                      data-testid="review-row"
+                    >
+                      <td data-label="Record">
+                        <div class="slds-truncate" title={row.recordName}>
+                          <template lwc:if={row.isNewRecord}>
+                            <span
+                              class="slds-badge slds-theme_info slds-var-m-right_xx-small"
+                            >
+                              New
+                            </span>
+                          </template>
+                          <strong>{row.recordName}</strong>
+                        </div>
+                      </td>
+                      <td data-label="Field">
+                        <div class="slds-truncate" title={row.fieldLabel}>
+                          {row.fieldLabel}
+                        </div>
+                      </td>
+                      <td data-label="Original Value">
+                        <div
+                          class="slds-truncate slds-text-color_weak text-strikethrough"
+                          title={row.displayOriginal}
+                        >
+                          {row.displayOriginal}
+                        </div>
+                      </td>
+                      <td data-label="New Value">
+                        <div
+                          class="slds-truncate new-value-highlight"
+                          title={row.displayDraft}
+                        >
+                          {row.displayDraft}
+                        </div>
+                      </td>
+                      <td data-label="Action">
+                        <lightning-button-icon
+                          icon-name="utility:undo"
+                          alternative-text="Revert this field"
+                          title="Revert this field"
+                          size="small"
+                          variant="border-filled"
+                          data-record-id={row.recordId}
+                          data-field-name={row.fieldName}
+                          onclick={handleRevertField}
+                          data-testid="revert-field-btn"
+                        ></lightning-button-icon>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </template>
+          <template lwc:else>
+            <div
+              class="slds-illustration slds-illustration_small slds-var-p-around_large slds-text-align_center"
+            >
+              <div class="slds-text-longform">
+                <h3 class="slds-text-heading_medium">No Pending Changes</h3>
+                <p class="slds-text-body_regular">
+                  All grid cells are currently in sync with the database.
+                </p>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Footer -->
+        <footer class="slds-modal__footer slds-grid slds-grid_align-spread">
+          <div>
+            <lightning-button
+              label="Discard All"
+              variant="destructive-text"
+              icon-name="utility:clear"
+              onclick={handleDiscardAll}
+              disabled={isActionDisabled}
+              data-testid="discard-all-btn"
+            ></lightning-button>
+          </div>
+          <div>
+            <lightning-button
+              label="Cancel"
+              onclick={handleClose}
+              class="slds-var-m-right_x-small"
+            ></lightning-button>
+            <lightning-button
+              label="Save Changes"
+              variant="brand"
+              icon-name="utility:save"
+              onclick={handleSave}
+              disabled={isActionDisabled}
+              data-testid="save-changes-btn"
+            ></lightning-button>
+          </div>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+</template>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>Smart Grid Channel</masterLabel>
+    <description
+  >Cross-component communication channel for Smart Grid events (select, save, delete, filter).</description>
+    <isExposed>true</isExposed>
+    <lightningMessageFields>
+        <fieldName>recordIds</fieldName>
+        <description>Comma-separated selected record IDs</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>objectApiName</fieldName>
+        <description>Object API name context</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>action</fieldName>
+        <description
+    >Event type: selected, saved, deleted, filtered</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>payload</fieldName>
+        <description>Optional JSON payload for additional context</description>
+    </lightningMessageFields>
+</LightningMessageChannel>

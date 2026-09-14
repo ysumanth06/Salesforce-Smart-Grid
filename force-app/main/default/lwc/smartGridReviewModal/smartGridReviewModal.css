@@ -1,0 +1,14 @@
+.text-strikethrough {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.new-value-highlight {
+  font-weight: 600;
+  color: #107c41;
+}
+
+.review-modal-content {
+  max-height: 500px;
+  overflow-y: auto;
+}

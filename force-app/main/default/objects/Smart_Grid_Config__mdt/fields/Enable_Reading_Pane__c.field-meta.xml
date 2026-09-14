@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_Reading_Pane__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description
+  >Toggle reading pane sidebar visibility. Defaults to false.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Enable Reading Pane</label>
+    <type>Checkbox</type>
+</CustomField>

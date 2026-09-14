@@ -1,48 +1,444 @@
+<!-- sldsValidatorIgnore -->
 <template>
-    <lightning-card title={gridTitle}>
-        <!-- Filter Bar -->
-        <template lwc:if={hasFilter}>
-            <div class="slds-p-horizontal_medium slds-p-top_small">
-                <lightning-combobox
-                    name="gridFilter"
-                    label={filterLabel}
-                    value={selectedFilterValue}
-                    options={filterOptions}
-                    onchange={handleFilterChange}
-                    variant="label-inline"
-                ></lightning-combobox>
-            </div>
-        </template>
-
-        <div class="slds-m-around_medium" style="height: 400px; position: relative;">
-            <template lwc:if={isLoading}>
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
-            </template>
-            <template lwc:if={errorMessage}>
-                <div class="slds-text-color_error slds-p-bottom_small">{errorMessage}</div>
-            </template>
-            <template lwc:if={gridColumns}>
-                <lightning-datatable
-                    key-field="Id"
-                    data={gridData}
-                    columns={gridColumns}
-                    onsave={handleSave}
-                    draft-values={draftValues}>
-                </lightning-datatable>
-            </template>
-            <template lwc:if={showNoConfigMessage}>
-                <div class="slds-text-align_center slds-text-color_weak slds-p-around_large">
-                    No grid configuration found. Please check your setup or provide a valid Grid Config Developer Name.
-                </div>
-            </template>
-        </div>
-    </lightning-card>
-
-    <!-- Field Picker Modal (child) -->
-    <c-smart-grid-field-picker
+  <lightning-card title={gridTitle}>
+    <div slot="actions" class="slds-grid slds-grid_vertical-align-center">
+      <c-smart-grid-view-selector
         object-api-name={objectApiName}
-        selected-fields={pickerSelectedFields}
-        onfieldselection={handleFieldSelection}
-        onpickerclosed={handlePickerClosed}
-    ></c-smart-grid-field-picker>
+        current-config={currentGridConfig}
+        onviewselect={handleViewSelect}
+        onresetview={handleResetView}
+        class="slds-var-m-right_x-small"
+      ></c-smart-grid-view-selector>
+      <template lwc:if={isDynamicGrid}>
+        <lightning-button
+          label="Select Fields"
+          icon-name="utility:setup"
+          onclick={openFieldPicker}
+        ></lightning-button>
+      </template>
+      <template lwc:if={canAddRow}>
+        <lightning-button
+          label="Add Row"
+          icon-name="utility:add"
+          onclick={handleAddRow}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+        ></lightning-button>
+      </template>
+      <!-- Save, Review & Discard Buttons with Live Counter (TS-03) -->
+      <template lwc:if={hasDrafts}>
+        <lightning-button
+          label={saveButtonLabel}
+          icon-name="utility:save"
+          variant="brand"
+          onclick={handleToolbarSave}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+          data-testid="toolbar-save-btn"
+        ></lightning-button>
+        <lightning-button-icon
+          icon-name="utility:preview"
+          alternative-text="Review Pending Changes"
+          title="Review Pending Changes"
+          onclick={handleOpenReviewModal}
+          class="slds-var-m-left_xx-small"
+          variant="border-filled"
+          data-testid="toolbar-review-btn"
+        ></lightning-button-icon>
+        <lightning-button
+          label="Discard All"
+          icon-name="utility:clear"
+          variant="neutral"
+          onclick={handleDiscardAll}
+          disabled={isLoading}
+          class="slds-var-m-left_xx-small"
+          data-testid="toolbar-discard-btn"
+        ></lightning-button>
+      </template>
+      <template lwc:if={canDelete}>
+        <lightning-button
+          label="Delete Selected"
+          icon-name="utility:delete"
+          variant="destructive"
+          onclick={handleDelete}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+        ></lightning-button>
+      </template>
+      <lightning-button-icon
+        icon-name="utility:undo"
+        alternative-text="Undo (Ctrl+Z)"
+        title="Undo (Ctrl+Z)"
+        onclick={handleUndo}
+        disabled={disableUndo}
+        class="slds-var-m-left_x-small"
+        variant="border-filled"
+      ></lightning-button-icon>
+      <lightning-button-icon
+        icon-name="utility:redo"
+        alternative-text="Redo (Ctrl+Y)"
+        title="Redo (Ctrl+Y)"
+        onclick={handleRedo}
+        disabled={disableRedo}
+        class="slds-var-m-left_x-small"
+        variant="border-filled"
+      ></lightning-button-icon>
+      <lightning-button
+        label="Fill Down"
+        icon-name="utility:down"
+        onclick={handleFillDown}
+        disabled={disableFillDown}
+        class="slds-var-m-left_x-small"
+      ></lightning-button>
+      <!-- Export Options Menu (TS-06) -->
+      <template lwc:if={canExport}>
+        <lightning-button-menu
+          alternative-text="Export Options"
+          title="Export Data"
+          icon-name="utility:download"
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+          menu-alignment="right"
+          data-testid="export-menu"
+        >
+          <lightning-menu-item
+            value="csv"
+            label="Export as CSV (.csv)"
+            prefix-icon-name="utility:download"
+            onclick={handleExportCSV}
+            data-testid="export-csv-item"
+          ></lightning-menu-item>
+          <lightning-menu-item
+            value="excel"
+            label="Export as Formatted Excel (.xls)"
+            prefix-icon-name="utility:table"
+            onclick={handleExportExcel}
+            data-testid="export-excel-item"
+          ></lightning-menu-item>
+        </lightning-button-menu>
+      </template>
+      <!-- Refresh Grid (bypasses cache) (TS-04) -->
+      <lightning-button-icon
+        icon-name="utility:refresh"
+        alternative-text="Refresh Data"
+        title="Refresh Data (bypass cache)"
+        onclick={handleRefresh}
+        disabled={isLoading}
+        class="slds-var-m-left_x-small"
+        variant="border-filled"
+        data-testid="toolbar-refresh-btn"
+      ></lightning-button-icon>
+      <template lwc:if={canFilter}>
+        <lightning-button-icon
+          icon-name="utility:filterList"
+          alternative-text="Toggle Quick Filters"
+          title="Toggle Quick Filters"
+          onclick={toggleFilterPanel}
+          class="slds-var-m-left_x-small"
+          variant="border-filled"
+        ></lightning-button-icon>
+        <lightning-button
+          label="Advanced Filter"
+          icon-name="utility:filter"
+          onclick={handleOpenAdvancedFilter}
+          disabled={isLoading}
+          class="slds-var-m-left_x-small"
+        ></lightning-button>
+      </template>
+    </div>
+    <!-- Active Filter Pills Bar (TS-01) -->
+    <c-smart-grid-filter-bar
+      filters={activeFilterPills}
+      onremovefilter={handleRemoveFilterPill}
+      onclearall={handleClearAllFilters}
+    ></c-smart-grid-filter-bar>
+
+    <!-- Filter Bar (Collapsible Panel) -->
+    <template lwc:if={showFilterPanel}>
+      <div
+        class="slds-box slds-theme_shade slds-var-m-bottom_medium slds-var-m-horizontal_medium slds-var-p-around_medium"
+      >
+        <div
+          class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end"
+        >
+          <template for:each={filterFields} for:item="f">
+            <div
+              key={f.fieldName}
+              class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-var-m-bottom_small"
+            >
+              <template lwc:if={f.isPicklist}>
+                <lightning-combobox
+                  name={f.fieldName}
+                  label={f.label}
+                  value={f.selectedValue}
+                  options={f.options}
+                  onchange={handleFilterChange}
+                ></lightning-combobox>
+              </template>
+              <template lwc:elseif={f.isDate}>
+                <lightning-input
+                  type="date"
+                  name={f.fieldName}
+                  label={f.label}
+                  value={f.selectedValue}
+                  onchange={handleFilterChange}
+                ></lightning-input>
+              </template>
+              <template lwc:else>
+                <lightning-input
+                  type="text"
+                  name={f.fieldName}
+                  label={f.label}
+                  value={f.selectedValue}
+                  onchange={handleFilterChange}
+                  placeholder="Search..."
+                ></lightning-input>
+              </template>
+            </div>
+          </template>
+
+          <div
+            class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4 slds-var-m-bottom_small slds-grid slds-grid_vertical-align-end"
+          >
+            <lightning-button
+              label="Apply Filters"
+              variant="brand"
+              onclick={applyFilters}
+              class="slds-var-m-right_x-small"
+            ></lightning-button>
+            <lightning-button
+              label="Clear All"
+              onclick={handleClearAllFilters}
+            ></lightning-button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <div
+      class="slds-var-m-around_medium"
+      style="height: 400px; position: relative"
+      onpaste={handlePaste}
+    >
+      <template lwc:if={isLoading}>
+        <lightning-spinner
+          alternative-text="Loading"
+          size="medium"
+        ></lightning-spinner>
+      </template>
+      <template lwc:elseif={isSetupRequired}>
+        <div
+          class="slds-illustration slds-illustration_small slds-var-p-around_large slds-text-align_center"
+        >
+          <div class="slds-text-longform slds-var-m-bottom_medium">
+            <h3 class="slds-text-heading_medium">
+              Grid Configuration Required
+            </h3>
+            <p class="slds-text-body_regular">
+              Select the fields you want to display to get started.
+            </p>
+          </div>
+          <lightning-button
+            variant="brand"
+            label="Select Fields to Display"
+            onclick={openFieldPicker}
+          ></lightning-button>
+        </div>
+      </template>
+      <template lwc:elseif={errorMessage}>
+        <div class="slds-text-color_error slds-var-p-bottom_small">
+          {errorMessage}
+        </div>
+      </template>
+      <template lwc:elseif={gridColumns}>
+        <div class="slds-grid slds-wrap">
+          <div class={gridContainerClass}>
+            <lightning-datatable
+              key-field="Id"
+              data={gridData}
+              columns={gridColumns}
+              onsave={handleSave}
+              draft-values={draftValues}
+              sorted-by={sortedByDisplay}
+              sorted-direction={sortDirection}
+              onsort={handleSort}
+              onresize={handleResize}
+              onrowselection={handleRowSelection}
+              oncellchange={handleCellChange}
+              onheaderaction={handleHeaderAction}
+              ondblclick={handleHeaderDoubleClick}
+            >
+            </lightning-datatable>
+            <!-- Sticky Column Totals Footer (TS-02) -->
+            <template lwc:if={hasTotals}>
+              <div
+                class="smart-grid-totals-container slds-var-p-around_x-small"
+              >
+                <div
+                  class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
+                >
+                  <div
+                    class="slds-col slds-size_12-of-12 slds-var-m-bottom_xx-small"
+                  >
+                    <span class="slds-badge slds-theme_shade">
+                      <lightning-icon
+                        icon-name="utility:table"
+                        size="xx-small"
+                        class="slds-var-m-right_xx-small"
+                      ></lightning-icon>
+                      <strong>Aggregates & Column Totals</strong>
+                    </span>
+                  </div>
+                  <template for:each={totalsDisplayList} for:item="total">
+                    <div
+                      key={total.fieldName}
+                      class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-var-m-vertical_xx-small"
+                    >
+                      <div
+                        class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
+                      >
+                        <div class="smart-grid-totals-label">{total.label}</div>
+                        <div
+                          class="slds-grid slds-gutters_xx-small slds-var-m-top_xx-small slds-text-body_small"
+                        >
+                          <div class="slds-col">
+                            <span>Sum:</span>
+                            <strong>{total.sumFormatted}</strong>
+                          </div>
+                          <div class="slds-col">
+                            <span>Avg:</span>
+                            <strong>{total.avgFormatted}</strong>
+                          </div>
+                        </div>
+                        <div
+                          class="slds-grid slds-gutters_xx-small slds-text-body_small"
+                        >
+                          <div class="slds-col">
+                            <span>Min:</span>
+                            <strong>{total.minFormatted}</strong>
+                          </div>
+                          <div class="slds-col">
+                            <span>Max:</span>
+                            <strong>{total.maxFormatted}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+          <template lwc:if={showReadingPane}>
+            <div
+              class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 reading-pane-container"
+            >
+              <c-smart-grid-reading-pane
+                record-id={selectedRecordForReadingPane}
+                object-api-name={objectApiName}
+                fields={gridColumns}
+                record-title={selectedRecordTitle}
+                onclose={handleCloseReadingPane}
+              ></c-smart-grid-reading-pane>
+            </div>
+          </template>
+        </div>
+      </template>
+      <template lwc:if={showNoConfigMessage}>
+        <div
+          class="slds-text-align_center slds-text-color_weak slds-var-p-around_large"
+        >
+          No grid configuration found. Please check your setup or provide a
+          valid Grid Config Developer Name.
+        </div>
+      </template>
+    </div>
+
+    <!-- Pagination Footer -->
+    <template lwc:if={gridColumns}>
+      <div
+        class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-var-p-top_small slds-var-p-bottom_medium slds-border_top"
+      >
+        <lightning-button
+          label="Previous"
+          icon-name="utility:chevronleft"
+          onclick={handlePreviousPage}
+          disabled={disablePrevious}
+          variant="neutral"
+          class="slds-var-m-right_medium"
+        ></lightning-button>
+        <span class="slds-align-middle slds-text-body_regular">
+          Page <strong>{currentPage}</strong> of
+          <strong>{totalPages}</strong> ({totalRecords} records)
+        </span>
+        <lightning-button
+          label="Next"
+          icon-name="utility:chevronright"
+          icon-position="right"
+          onclick={handleNextPage}
+          disabled={disableNext}
+          variant="neutral"
+          class="slds-var-m-left_medium"
+        ></lightning-button>
+        <lightning-combobox
+          label="Page Size"
+          value={pageSizeString}
+          options={pageSizeOptions}
+          onchange={handlePageSizeChange}
+          variant="label-hidden"
+          class="slds-var-m-left_large"
+          style="width: 80px"
+        ></lightning-combobox>
+      </div>
+    </template>
+    <!-- Related Object Sub-Grid (TS-07) -->
+    <template lwc:if={showRelatedGrid}>
+      <c-smart-grid-related-grid
+        parent-record-id={selectedRowId}
+        parent-object-name={objectApiName}
+        related-objects-string={relatedObjectConfig}
+        depth={depth}
+        onclose={handleCloseRelatedGrid}
+      ></c-smart-grid-related-grid>
+    </template>
+  </lightning-card>
+
+  <!-- Field Picker Modal (child) -->
+  <c-smart-grid-field-picker
+    object-api-name={objectApiName}
+    selected-fields={pickerSelectedFields}
+    onfieldselection={handleFieldSelection}
+    onpickerclosed={handlePickerClosed}
+  ></c-smart-grid-field-picker>
+
+  <!-- Resolution Modal (child) -->
+  <c-smart-grid-resolution-modal
+    object-api-name={objectApiName}
+    columns={gridColumns}
+    onrecordsolved={handleRecordSolved}
+    oncomplete={handleResolutionComplete}
+    onclose={handleResolutionClose}
+  ></c-smart-grid-resolution-modal>
+
+  <!-- Advanced Filter Builder Modal (TS-06) -->
+  <template lwc:if={showAdvancedFilterModal}>
+    <c-smart-grid-filter-builder
+      columns={gridColumns}
+      filter-expression={activeFilterExpression}
+      onapplyfilter={handleApplyAdvancedFilter}
+      onclose={handleCloseAdvancedFilter}
+    ></c-smart-grid-filter-builder>
+  </template>
+
+  <!-- Review Unsaved Changes Modal (TS-03) -->
+  <c-smart-grid-review-modal
+    is-open={showReviewModal}
+    draft-values={draftValues}
+    grid-data={gridData}
+    grid-columns={gridColumns}
+    onclose={handleCloseReviewModal}
+    onrevertfield={handleRevertField}
+    ondiscardall={handleDiscardAll}
+    onsave={handleReviewSave}
+  ></c-smart-grid-review-modal>
 </template>

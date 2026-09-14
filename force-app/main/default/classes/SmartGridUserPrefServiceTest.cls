@@ -1,0 +1,114 @@
+@IsTest
+public class SmartGridUserPrefServiceTest {
+  @TestSetup
+  static void setupTestData() {
+    // Create user prefs
+    Smart_Grid_User_Pref__c pref = new Smart_Grid_User_Pref__c(
+      Object_API_Name__c = 'Account',
+      Preferences_JSON__c = '{"columns":[{"label":"Name","fieldName":"Name"}]}',
+      User__c = UserInfo.getUserId()
+    );
+    insert pref;
+  }
+
+  @IsTest
+  static void testGetPrefs_Success() {
+    Test.startTest();
+    String result = SmartGridUserPrefService.getPrefs('Account');
+    Test.stopTest();
+
+    Assert.isNotNull(result, 'Preferences should be returned');
+    Assert.isTrue(
+      result.contains('Name'),
+      'Preferences JSON should contain Name'
+    );
+  }
+
+  @IsTest
+  static void testGetPrefs_NotFound() {
+    Test.startTest();
+    String result = SmartGridUserPrefService.getPrefs('Contact');
+    Test.stopTest();
+
+    Assert.isNull(
+      result,
+      'Preferences should be null for an object without preferences'
+    );
+  }
+
+  @IsTest
+  static void testSavePrefs_InsertNew() {
+    Test.startTest();
+    SmartGridUserPrefService.savePrefs(
+      'Contact',
+      '{"columns":[{"label":"LastName","fieldName":"LastName"}]}'
+    );
+    Test.stopTest();
+
+    List<Smart_Grid_User_Pref__c> prefs = [
+      SELECT Preferences_JSON__c
+      FROM Smart_Grid_User_Pref__c
+      WHERE Object_API_Name__c = 'Contact' AND User__c = :UserInfo.getUserId()
+    ];
+    Assert.areEqual(1, prefs.size(), 'One preference record should be created');
+    Assert.isTrue(
+      prefs[0].Preferences_JSON__c.contains('LastName'),
+      'The correct JSON should be saved'
+    );
+  }
+
+  @IsTest
+  static void testSavePrefs_UpdateExisting() {
+    Test.startTest();
+    SmartGridUserPrefService.savePrefs(
+      'Account',
+      '{"columns":[{"label":"Industry","fieldName":"Industry"}]}'
+    );
+    Test.stopTest();
+
+    List<Smart_Grid_User_Pref__c> prefs = [
+      SELECT Preferences_JSON__c
+      FROM Smart_Grid_User_Pref__c
+      WHERE Object_API_Name__c = 'Account' AND User__c = :UserInfo.getUserId()
+    ];
+    Assert.areEqual(
+      1,
+      prefs.size(),
+      'Still only one preference record should exist for Account'
+    );
+    Assert.isTrue(
+      prefs[0].Preferences_JSON__c.contains('Industry'),
+      'The JSON should be updated'
+    );
+  }
+
+  @IsTest
+  static void testSavePrefs_ExceedsLengthLimit() {
+    String longJson = 'x'.repeat(32001);
+    Test.startTest();
+    try {
+      SmartGridUserPrefService.savePrefs('Account', longJson);
+      Assert.fail('Expected exception for oversized JSON payload');
+    } catch (Exception e) {
+      Assert.isTrue(
+        e instanceof AuraHandledException,
+        'Should throw AuraHandledException for payload exceeding 32k'
+      );
+    }
+    Test.stopTest();
+  }
+
+  @IsTest
+  static void testResetPrefs() {
+    Test.startTest();
+    SmartGridUserPrefService.resetPrefs('Account');
+    Test.stopTest();
+
+    List<Smart_Grid_User_Pref__c> prefs = [
+      SELECT Id
+      FROM Smart_Grid_User_Pref__c
+      WHERE Object_API_Name__c = 'Account' AND User__c = :UserInfo.getUserId()
+    ];
+    Assert.areEqual(0, prefs.size(), 'Preference record should be deleted');
+  }
+}

@@ -1,0 +1,55 @@
+.filter-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  background-color: #f8fafc;
+}
+
+.filter-group-card {
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.root-group {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.child-group {
+  background-color: #f1f5f9;
+  border-left: 4px solid #0176d3;
+  border-top: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  margin-left: 20px;
+}
+
+.group-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.group-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #0176d3;
+  color: #ffffff;
+  margin-right: 12px;
+}
+
+.child-badge {
+  background-color: #475569;
+}
+
+.condition-row {
+  padding: 6px 0;
+  transition: background-color 0.15s ease;
+}
+
+.condition-row:hover {
+  background-color: #f8fafc;
+}

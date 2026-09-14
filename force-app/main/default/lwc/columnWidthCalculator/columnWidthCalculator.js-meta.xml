@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Column Width Calculator</masterLabel>
+    <description
+  >Calculates optimal column width based on content length and font measurement</description>
+</LightningComponentBundle>

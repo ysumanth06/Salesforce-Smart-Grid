@@ -1,0 +1,83 @@
+<template>
+  <aside
+    class="reading-pane-card slds-card slds-card_boundary"
+    aria-label="Record Details Reading Pane"
+  >
+    <!-- Header -->
+    <div
+      class="slds-card__header slds-grid slds-grid_vertical-align-center pane-header"
+    >
+      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+        <div class="slds-media__figure">
+          <lightning-icon
+            icon-name="standard:record"
+            size="small"
+          ></lightning-icon>
+        </div>
+        <div class="slds-media__body">
+          <h2 class="slds-card__header-title">
+            <span class="slds-truncate" title={displayTitle}
+              >{displayTitle}</span
+            >
+          </h2>
+          <p class="slds-text-body_small slds-text-color_weak slds-truncate">
+            {objectApiName}
+          </p>
+        </div>
+        <div class="slds-no-flex">
+          <lightning-button-icon
+            icon-name="utility:close"
+            alternative-text="Close Reading Pane"
+            title="Close"
+            onclick={handleClose}
+            variant="border-filled"
+          >
+          </lightning-button-icon>
+        </div>
+      </header>
+    </div>
+
+    <!-- Body -->
+    <div class="slds-card__body slds-card__body_inner pane-body">
+      <template lwc:if={hasError}>
+        <div
+          class="slds-notify slds-notify_alert slds-alert_error"
+          role="alert"
+        >
+          <span class="slds-assistive-text">Error</span>
+          <h2>{errorMessage}</h2>
+        </div>
+      </template>
+
+      <template lwc:else>
+        <template lwc:if={recordId}>
+          <lightning-record-view-form
+            record-id={recordId}
+            object-api-name={objectApiName}
+            onerror={handleError}
+          >
+            <div class="slds-grid slds-wrap slds-gutters_direct-small">
+              <template for:each={accessibleFields} for:item="f">
+                <div
+                  key={f.fieldName}
+                  class="slds-col slds-size_1-of-1 slds-m-bottom_x-small field-container"
+                >
+                  <lightning-output-field
+                    field-name={f.fieldName}
+                  ></lightning-output-field>
+                </div>
+              </template>
+            </div>
+          </lightning-record-view-form>
+        </template>
+        <template lwc:else>
+          <div
+            class="slds-text-align_center slds-m-top_large slds-text-color_weak"
+          >
+            <p>Select a row to preview record details.</p>
+          </div>
+        </template>
+      </template>
+    </div>
+  </aside>
+</template>

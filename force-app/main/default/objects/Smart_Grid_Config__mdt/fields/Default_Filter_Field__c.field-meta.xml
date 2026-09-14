@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Default_Filter_Field__c</fullName>
-    <description>API name of the field driving the dynamic filter picklist.</description>
+    <description
+  >API name of the field driving the dynamic filter picklist.</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <label>Default Filter Field</label>

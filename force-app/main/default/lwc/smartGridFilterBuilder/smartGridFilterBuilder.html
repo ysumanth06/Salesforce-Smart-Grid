@@ -1,0 +1,248 @@
+<template>
+  <section
+    role="dialog"
+    tabindex="-1"
+    aria-modal="true"
+    class="slds-modal slds-fade-in-open slds-modal_medium"
+  >
+    <div class="slds-modal__container">
+      <!-- Modal Header -->
+      <header class="slds-modal__header slds-theme_default">
+        <button
+          class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+          title="Close"
+          onclick={handleClose}
+        >
+          <lightning-icon
+            icon-name="utility:close"
+            alternative-text="Close"
+            variant="inverse"
+            size="small"
+          ></lightning-icon>
+          <span class="slds-assistive-text">Close</span>
+        </button>
+        <h2 class="slds-modal__title slds-hyphenate slds-text-heading_medium">
+          <lightning-icon
+            icon-name="utility:filterList"
+            size="small"
+            class="slds-m-right_x-small"
+          ></lightning-icon>
+          Advanced Filter Builder
+        </h2>
+        <p class="slds-m-top_x-small slds-text-body_small slds-text-color_weak">
+          Construct complex nested AND / OR filter criteria to query records
+          precisely.
+        </p>
+      </header>
+
+      <!-- Modal Body -->
+      <div class="slds-modal__content slds-p-around_medium filter-body">
+        <!-- Root Group Card -->
+        <div class="filter-group-card root-group">
+          <div
+            class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small group-header"
+          >
+            <div class="slds-col slds-grow">
+              <span class="group-badge">Root Group</span>
+              <lightning-radio-group
+                name="rootLogic"
+                label="Match Logic"
+                options={logicOptions}
+                value={rootGroup.logic}
+                type="button"
+                onchange={handleRootLogicChange}
+                class="inline-radio-group"
+              >
+              </lightning-radio-group>
+            </div>
+            <div class="slds-col slds-no-flex">
+              <lightning-button
+                label="Add Condition"
+                icon-name="utility:add"
+                onclick={handleAddCondition}
+                variant="neutral"
+                class="slds-m-right_x-small"
+              >
+              </lightning-button>
+              <lightning-button
+                label="Add Sub-Group"
+                icon-name="utility:new_window"
+                onclick={handleAddGroup}
+                variant="neutral"
+              >
+              </lightning-button>
+            </div>
+          </div>
+
+          <!-- Root Conditions List -->
+          <template for:each={rootGroup.conditions} for:item="cond">
+            <div
+              key={cond.id}
+              class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-bottom_x-small condition-row"
+            >
+              <div class="slds-col slds-size_4-of-12">
+                <lightning-combobox
+                  name="field"
+                  label="Field"
+                  value={cond.field}
+                  placeholder="Select Field"
+                  options={fieldOptions}
+                  data-id={cond.id}
+                  data-field="field"
+                  onchange={handleConditionChange}
+                  variant="label-hidden"
+                >
+                </lightning-combobox>
+              </div>
+              <div class="slds-col slds-size_3-of-12">
+                <lightning-combobox
+                  name="operator"
+                  label="Operator"
+                  value={cond.operator}
+                  options={logicOptions}
+                  data-id={cond.id}
+                  data-field="operator"
+                  onchange={handleConditionChange}
+                  variant="label-hidden"
+                >
+                </lightning-combobox>
+              </div>
+              <div class="slds-col slds-size_4-of-12">
+                <lightning-input
+                  name="value"
+                  label="Value"
+                  value={cond.value}
+                  placeholder="Value"
+                  data-id={cond.id}
+                  data-field="value"
+                  onchange={handleConditionChange}
+                  variant="label-hidden"
+                >
+                </lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-12 slds-text-align_right">
+                <lightning-button-icon
+                  icon-name="utility:delete"
+                  alternative-text="Remove condition"
+                  data-id={cond.id}
+                  onclick={handleRemoveCondition}
+                  variant="border-filled"
+                >
+                </lightning-button-icon>
+              </div>
+            </div>
+          </template>
+
+          <!-- Nested Child Groups -->
+          <template for:each={rootGroup.groups} for:item="childGroup">
+            <div
+              key={childGroup.id}
+              class="filter-group-card child-group slds-m-top_small"
+            >
+              <div
+                class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small group-header"
+              >
+                <div class="slds-col slds-grow">
+                  <span class="group-badge child-badge"
+                    >Sub-Group ({childGroup.logic})</span
+                  >
+                </div>
+                <div class="slds-col slds-no-flex">
+                  <lightning-button-icon
+                    icon-name="utility:close"
+                    alternative-text="Remove Group"
+                    data-id={childGroup.id}
+                    onclick={handleRemoveGroup}
+                    variant="border-filled"
+                  >
+                  </lightning-button-icon>
+                </div>
+              </div>
+
+              <!-- Child Group Conditions -->
+              <template for:each={childGroup.conditions} for:item="cCond">
+                <div
+                  key={cCond.id}
+                  class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-bottom_x-small condition-row"
+                >
+                  <div class="slds-col slds-size_4-of-12">
+                    <lightning-combobox
+                      name="childField"
+                      label="Field"
+                      value={cCond.field}
+                      placeholder="Select Field"
+                      options={fieldOptions}
+                      data-id={cCond.id}
+                      data-field="field"
+                      onchange={handleConditionChange}
+                      variant="label-hidden"
+                    >
+                    </lightning-combobox>
+                  </div>
+                  <div class="slds-col slds-size_3-of-12">
+                    <lightning-combobox
+                      name="childOperator"
+                      label="Operator"
+                      value={cCond.operator}
+                      options={logicOptions}
+                      data-id={cCond.id}
+                      data-field="operator"
+                      onchange={handleConditionChange}
+                      variant="label-hidden"
+                    >
+                    </lightning-combobox>
+                  </div>
+                  <div class="slds-col slds-size_4-of-12">
+                    <lightning-input
+                      name="childValue"
+                      label="Value"
+                      value={cCond.value}
+                      placeholder="Value"
+                      data-id={cCond.id}
+                      data-field="value"
+                      onchange={handleConditionChange}
+                      variant="label-hidden"
+                    >
+                    </lightning-input>
+                  </div>
+                  <div class="slds-col slds-size_1-of-12 slds-text-align_right">
+                    <lightning-button-icon
+                      icon-name="utility:delete"
+                      alternative-text="Remove condition"
+                      data-id={cCond.id}
+                      onclick={handleRemoveCondition}
+                      variant="border-filled"
+                    >
+                    </lightning-button-icon>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <footer class="slds-modal__footer slds-grid slds-grid_align-spread">
+        <lightning-button
+          label="Clear All"
+          onclick={handleClearAll}
+          variant="neutral"
+        ></lightning-button>
+        <div>
+          <lightning-button
+            label="Cancel"
+            onclick={handleClose}
+            class="slds-m-right_x-small"
+          ></lightning-button>
+          <lightning-button
+            label="Apply Filter"
+            onclick={handleApply}
+            variant="brand"
+          ></lightning-button>
+        </div>
+      </footer>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
