@@ -1,7 +1,7 @@
 # Task Story 08: LMS Cross-Component Communication [US-P2-08]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P2 — High
-**Status**: READY | **Branch**: `feature/003-ts08-lms-integration`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,7 +15,7 @@ Integrate Lightning Message Service (LMS) into `smartDataGrid` to publish grid e
 
 | Layer        | Skill  | File Path                                                           | Status |
 | ------------ | ------ | ------------------------------------------------------------------- | ------ |
-| LWC (modify) | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — LMS publish/subscribe | ⬜     |
+| LWC (modify) | sf-lwc | `force-app/main/default/lwc/smartDataGrid/` — LMS publish/subscribe | ✅     |
 
 ---
 

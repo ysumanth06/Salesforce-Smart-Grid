@@ -1,4 +1,4 @@
-import { LightningElement, api, track } from "lwc";
+import { LightningElement, api, track, wire } from "lwc";
 import getGridConfig from "@salesforce/apex/SmartGridController.getGridConfig";
 import getRecordsPaged from "@salesforce/apex/SmartGridController.getRecordsPaged";
 import saveRecords from "@salesforce/apex/SmartGridController.saveRecords";
@@ -11,6 +11,13 @@ import getPrefs from "@salesforce/apex/SmartGridUserPrefService.getPrefs";
 import savePrefs from "@salesforce/apex/SmartGridUserPrefService.savePrefs";
 import { exportToCSV } from "c/csvHelper";
 import { reduceErrors } from "c/errorUtils";
+import {
+  publish,
+  subscribe,
+  unsubscribe,
+  MessageContext
+} from "lightning/messageService";
+import SMART_GRID_CHANNEL from "@salesforce/messageChannel/SmartGridChannel__c";
 
 export default class SmartDataGrid extends LightningElement {
   @api gridConfigName;
@@ -38,16 +45,21 @@ export default class SmartDataGrid extends LightningElement {
   @track totalRecords = 0;
   @track pageSize = 50;
 
+  @wire(MessageContext)
+  messageContext;
+
   config;
   _showFieldPicker = false;
   pickerSelectedFields = [];
   _fieldMetadataMap = {}; // Maps fieldApiName → Salesforce schema type
   _picklistOptionsMap = {}; // Maps fieldApiName → List of {label, value} options
   _boundKeyDown; // Stored reference for proper event listener cleanup
+  _subscription = null;
 
   async connectedCallback() {
     this._boundKeyDown = this.handleKeyDown.bind(this);
     window.addEventListener("keydown", this._boundKeyDown);
+    this.subscribeToMessageChannel();
 
     if (this.gridConfigName) {
       this.fetchConfig();
@@ -69,6 +81,7 @@ export default class SmartDataGrid extends LightningElement {
 
   disconnectedCallback() {
     window.removeEventListener("keydown", this._boundKeyDown);
+    this.unsubscribeFromMessageChannel();
   }
 
   handleKeyDown(event) {
@@ -226,6 +239,7 @@ export default class SmartDataGrid extends LightningElement {
   async applyFilters() {
     this.isFilterPanelOpen = false;
     this.updateActivePills();
+    this.publishLmsEvent("filtered", []);
     await this.fetchData();
   }
 
@@ -408,6 +422,8 @@ export default class SmartDataGrid extends LightningElement {
         }));
         const deleteResult = await deleteRecords({ records: recordsToDelete });
         if (deleteResult && deleteResult.isSuccess) {
+          const deletedIds = recordsToDelete.map((r) => r.Id);
+          this.publishLmsEvent("deleted", deletedIds);
           this.dispatchEvent(
             new ShowToastEvent({
               title: "Success",
@@ -463,6 +479,10 @@ export default class SmartDataGrid extends LightningElement {
       let result = await saveRecords({ records: recordsToSave });
 
       if (result && result.isSuccess) {
+        const savedIds = recordsToSave
+          .map((r) => r.Id)
+          .filter((id) => id && !id.startsWith("new-"));
+        this.publishLmsEvent("saved", savedIds);
         this.dispatchEvent(
           new ShowToastEvent({
             title: "Success",
@@ -718,12 +738,118 @@ export default class SmartDataGrid extends LightningElement {
     );
   }
 
+  // ─── LMS Cross-Component Communication ───
+
+  subscribeToMessageChannel() {
+    if (this._subscription || !this.messageContext) {
+      return;
+    }
+    this._subscription = subscribe(
+      this.messageContext,
+      SMART_GRID_CHANNEL,
+      (message) => this.handleLmsMessage(message)
+    );
+  }
+
+  unsubscribeFromMessageChannel() {
+    if (this._subscription) {
+      unsubscribe(this._subscription);
+      this._subscription = null;
+    }
+  }
+
+  handleLmsMessage(message) {
+    if (!message) return;
+    // If objectApiName is specified and doesn't match ours, ignore
+    if (
+      message.objectApiName &&
+      this.objectApiName &&
+      message.objectApiName !== this.objectApiName
+    ) {
+      return;
+    }
+
+    if (message.action === "refresh") {
+      this.fetchData();
+    } else if (message.action === "filter" && message.payload) {
+      try {
+        const filterPayload =
+          typeof message.payload === "string"
+            ? JSON.parse(message.payload)
+            : message.payload;
+        if (this.filterFields && filterPayload) {
+          let updated = false;
+          Object.keys(filterPayload).forEach((k) => {
+            const f = this.filterFields.find((fld) => fld.fieldName === k);
+            if (f) {
+              f.selectedValue = filterPayload[k];
+              updated = true;
+            }
+          });
+          if (updated) {
+            this.applyFilters();
+          }
+        }
+      } catch (e) {
+        console.warn("Malformed LMS filter payload:", e);
+      }
+    }
+  }
+
+  publishLmsEvent(action, recordIds = [], payload = null) {
+    if (!this.messageContext) return;
+    const idsString = Array.isArray(recordIds)
+      ? recordIds.join(",")
+      : recordIds || "";
+    const message = {
+      recordIds: idsString,
+      objectApiName: this.objectApiName || "",
+      action: action,
+      payload: payload
+        ? typeof payload === "string"
+          ? payload
+          : JSON.stringify(payload)
+        : ""
+    };
+    publish(this.messageContext, SMART_GRID_CHANNEL, message);
+  }
+
+  handleRowSelection(event) {
+    const selectedRows = event.detail.selectedRows || [];
+    const ids = selectedRows
+      .map((r) => r.Id)
+      .filter((id) => id && !id.startsWith("new-"));
+    this.publishLmsEvent("selected", ids);
+  }
+
+  // ─── Feature Security Toggles (TS-12) ───
+
+  get canAddRow() {
+    return this.config ? this.config.enableAddRow !== false : true;
+  }
+
+  get canDelete() {
+    return this.config ? this.config.enableDelete !== false : true;
+  }
+
+  get canExport() {
+    return this.config ? this.config.enableExport !== false : true;
+  }
+
+  get canFilter() {
+    return this.config ? this.config.enableFilters !== false : true;
+  }
+
+  get canReadingPane() {
+    return this.config ? this.config.enableReadingPane === true : false;
+  }
+
   get hasFilters() {
     return this.filterFields && this.filterFields.length > 0;
   }
 
   get showFilterPanel() {
-    return this.hasFilters && this.isFilterPanelOpen;
+    return this.canFilter && this.hasFilters && this.isFilterPanelOpen;
   }
 
   get hasActiveFilters() {

@@ -8,6 +8,6 @@
     <referenceTo>User</referenceTo>
     <relationshipLabel>Smart Grid Views</relationshipLabel>
     <relationshipName>Smart_Grid_Views</relationshipName>
-    <required>true</required>
+    <required>false</required>
     <type>Lookup</type>
 </CustomField>

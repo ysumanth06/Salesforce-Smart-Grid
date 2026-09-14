@@ -1,7 +1,7 @@
 # Task Story 12: Feature Security Toggles [US-P2-12]
 
 **Feature**: 003-smartgrid-phase2 | **Story Type**: FULL | **Priority**: P3 — Nice-to-Have
-**Status**: READY | **Branch**: `feature/003-ts12-feature-toggles`
+**Status**: IMPLEMENTED | **Branch**: `feature/003-smartgrid-phase2`
 
 ---
 
@@ -15,9 +15,9 @@ Read the `Enable_*` checkbox fields from `Smart_Grid_Config__mdt` and conditiona
 
 | Layer                    | Skill      | File Path                                                                                             | Status |
 | ------------------------ | ---------- | ----------------------------------------------------------------------------------------------------- | ------ |
-| Controller (modify)      | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — include toggle fields in `getGridConfig()` | ⬜     |
-| Controller Test (modify) | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                                          | ⬜     |
-| LWC (modify)             | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — conditional rendering with `lwc:if`                     | ⬜     |
+| Controller (modify)      | sf-apex    | `force-app/main/default/classes/SmartGridController.cls` — include toggle fields in `getGridConfig()` | ✅     |
+| Controller Test (modify) | sf-testing | `force-app/main/default/classes/SmartGridControllerTest.cls`                                          | ✅     |
+| LWC (modify)             | sf-lwc     | `force-app/main/default/lwc/smartDataGrid/` — conditional rendering with `lwc:if`                     | ✅     |
 
 ---
 

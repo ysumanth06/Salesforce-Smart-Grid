@@ -31,6 +31,13 @@ public with sharing class SmartGridController {
           Is_Active__c,
           Allow_Personalization__c,
           Use_Advanced_Config__c,
+          Enable_Add_Row__c,
+          Enable_Delete__c,
+          Enable_Export__c,
+          Enable_Filters__c,
+          Enable_Reading_Pane__c,
+          Totals_Fields_JSON__c,
+          Related_Object__c,
           (
             SELECT
               Id,
@@ -62,6 +69,37 @@ public with sharing class SmartGridController {
       dto.isActive = conf.Is_Active__c;
       dto.allowPersonalization = conf.Allow_Personalization__c;
       dto.useAdvancedConfig = conf.Use_Advanced_Config__c;
+      dto.enableAddRow = (conf.isSet(
+          Smart_Grid_Config__mdt.Enable_Add_Row__c
+        ) && conf.get('Enable_Add_Row__c') != null)
+        ? (Boolean) conf.get('Enable_Add_Row__c')
+        : true;
+      dto.enableDelete = (conf.isSet(Smart_Grid_Config__mdt.Enable_Delete__c) &&
+        conf.get('Enable_Delete__c') != null)
+        ? (Boolean) conf.get('Enable_Delete__c')
+        : true;
+      dto.enableExport = (conf.isSet(Smart_Grid_Config__mdt.Enable_Export__c) &&
+        conf.get('Enable_Export__c') != null)
+        ? (Boolean) conf.get('Enable_Export__c')
+        : true;
+      dto.enableFilters = (conf.isSet(
+          Smart_Grid_Config__mdt.Enable_Filters__c
+        ) && conf.get('Enable_Filters__c') != null)
+        ? (Boolean) conf.get('Enable_Filters__c')
+        : true;
+      dto.enableReadingPane = (conf.isSet(
+          Smart_Grid_Config__mdt.Enable_Reading_Pane__c
+        ) && conf.get('Enable_Reading_Pane__c') != null)
+        ? (Boolean) conf.get('Enable_Reading_Pane__c')
+        : false;
+      dto.totalsFieldsJson = conf.isSet(
+          Smart_Grid_Config__mdt.Totals_Fields_JSON__c
+        )
+        ? conf.Totals_Fields_JSON__c
+        : null;
+      dto.relatedObject = conf.isSet(Smart_Grid_Config__mdt.Related_Object__c)
+        ? conf.Related_Object__c
+        : null;
       dto.columns = new List<ColumnDTO>();
 
       if (conf.Use_Advanced_Config__c == true) {
@@ -546,6 +584,20 @@ public with sharing class SmartGridController {
     public Boolean allowPersonalization;
     @AuraEnabled
     public Boolean useAdvancedConfig;
+    @AuraEnabled
+    public Boolean enableAddRow;
+    @AuraEnabled
+    public Boolean enableDelete;
+    @AuraEnabled
+    public Boolean enableExport;
+    @AuraEnabled
+    public Boolean enableFilters;
+    @AuraEnabled
+    public Boolean enableReadingPane;
+    @AuraEnabled
+    public String totalsFieldsJson;
+    @AuraEnabled
+    public String relatedObject;
     @AuraEnabled
     public List<ColumnDTO> columns;
   }

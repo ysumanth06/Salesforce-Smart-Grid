@@ -8,36 +8,44 @@
           onclick={openFieldPicker}
         ></lightning-button>
       </template>
-      <lightning-button
-        label="Add Row"
-        icon-name="utility:add"
-        onclick={handleAddRow}
-        disabled={isLoading}
-        class="slds-m-left_x-small"
-      ></lightning-button>
-      <lightning-button
-        label="Delete Selected"
-        icon-name="utility:delete"
-        variant="destructive"
-        onclick={handleDelete}
-        disabled={isLoading}
-        class="slds-m-left_x-small"
-      ></lightning-button>
-      <lightning-button
-        label="Export CSV"
-        icon-name="utility:download"
-        onclick={handleExportCSV}
-        disabled={isLoading}
-        class="slds-m-left_x-small"
-      ></lightning-button>
-      <lightning-button-icon
-        icon-name="utility:filterList"
-        alternative-text="Toggle Filters"
-        title="Toggle Filters"
-        onclick={toggleFilterPanel}
-        class="slds-m-left_x-small"
-        variant="border-filled"
-      ></lightning-button-icon>
+      <template lwc:if={canAddRow}>
+        <lightning-button
+          label="Add Row"
+          icon-name="utility:add"
+          onclick={handleAddRow}
+          disabled={isLoading}
+          class="slds-m-left_x-small"
+        ></lightning-button>
+      </template>
+      <template lwc:if={canDelete}>
+        <lightning-button
+          label="Delete Selected"
+          icon-name="utility:delete"
+          variant="destructive"
+          onclick={handleDelete}
+          disabled={isLoading}
+          class="slds-m-left_x-small"
+        ></lightning-button>
+      </template>
+      <template lwc:if={canExport}>
+        <lightning-button
+          label="Export CSV"
+          icon-name="utility:download"
+          onclick={handleExportCSV}
+          disabled={isLoading}
+          class="slds-m-left_x-small"
+        ></lightning-button>
+      </template>
+      <template lwc:if={canFilter}>
+        <lightning-button-icon
+          icon-name="utility:filterList"
+          alternative-text="Toggle Filters"
+          title="Toggle Filters"
+          onclick={toggleFilterPanel}
+          class="slds-m-left_x-small"
+          variant="border-filled"
+        ></lightning-button-icon>
+      </template>
     </div>
     <!-- Active Filter Pills -->
     <template lwc:if={hasActiveFilters}>
@@ -158,6 +166,7 @@
           sorted-direction={sortDirection}
           onsort={handleSort}
           onresize={handleResize}
+          onrowselection={handleRowSelection}
         >
         </lightning-datatable>
       </template>

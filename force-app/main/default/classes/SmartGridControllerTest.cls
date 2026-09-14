@@ -75,6 +75,63 @@ public class SmartGridControllerTest {
   }
 
   @isTest
+  static void testGetGridConfig_DefaultToggles() {
+    String jsonStr = '[{"Id":"m00000000000003", "DeveloperName":"Test_Defaults", "Is_Active__c":true, "Columns_JSON__c":"[{\\"field\\":\\"Name\\"}]"}]';
+    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
+      jsonStr,
+      List<Smart_Grid_Config__mdt>.class
+    );
+
+    Test.startTest();
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(
+      'Test_Defaults'
+    );
+    Test.stopTest();
+
+    Assert.isNotNull(config, 'Config should not be null');
+    Assert.isTrue(config.enableAddRow, 'enableAddRow should default to true');
+    Assert.isTrue(config.enableDelete, 'enableDelete should default to true');
+    Assert.isTrue(config.enableExport, 'enableExport should default to true');
+    Assert.isTrue(config.enableFilters, 'enableFilters should default to true');
+    Assert.isFalse(
+      config.enableReadingPane,
+      'enableReadingPane should default to false'
+    );
+  }
+
+  @isTest
+  static void testGetGridConfig_FeatureToggles() {
+    String jsonStr = '[{"Id":"m00000000000004", "DeveloperName":"Test_Toggles", "Is_Active__c":true, "Enable_Add_Row__c":false, "Enable_Delete__c":false, "Enable_Export__c":false, "Enable_Filters__c":false, "Enable_Reading_Pane__c":true, "Totals_Fields_JSON__c":"[\\"AnnualRevenue\\"]", "Related_Object__c":"Contact", "Columns_JSON__c":"[{\\"field\\":\\"Name\\"}]"}]';
+    SmartGridController.mockConfigs = (List<Smart_Grid_Config__mdt>) JSON.deserialize(
+      jsonStr,
+      List<Smart_Grid_Config__mdt>.class
+    );
+
+    Test.startTest();
+    SmartGridController.GridConfigDTO config = SmartGridController.getGridConfig(
+      'Test_Toggles'
+    );
+    Test.stopTest();
+
+    Assert.isNotNull(config, 'Config should not be null');
+    Assert.isFalse(config.enableAddRow, 'enableAddRow should be false');
+    Assert.isFalse(config.enableDelete, 'enableDelete should be false');
+    Assert.isFalse(config.enableExport, 'enableExport should be false');
+    Assert.isFalse(config.enableFilters, 'enableFilters should be false');
+    Assert.isTrue(config.enableReadingPane, 'enableReadingPane should be true');
+    Assert.areEqual(
+      '["AnnualRevenue"]',
+      config.totalsFieldsJson,
+      'totalsFieldsJson should match'
+    );
+    Assert.areEqual(
+      'Contact',
+      config.relatedObject,
+      'relatedObject should match'
+    );
+  }
+
+  @isTest
   static void testGetObjectFields_Valid() {
     Test.startTest();
     List<SmartGridController.ColumnInfo> fields = SmartGridController.getObjectFields(

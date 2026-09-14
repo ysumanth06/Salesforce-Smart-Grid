@@ -33,16 +33,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Smart_Grid_View__c.Object_API_Name__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Smart_Grid_View__c.View_Name__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Smart_Grid_View__c.View_Config_JSON__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -85,14 +75,6 @@
     <classAccesses>
         <enabled>true</enabled>
         <apexClass>SmartGridUserPrefService</apexClass>
-    </classAccesses>
-    <classAccesses>
-        <enabled>true</enabled>
-        <apexClass>SmartGridFormatEngine</apexClass>
-    </classAccesses>
-    <classAccesses>
-        <enabled>true</enabled>
-        <apexClass>SmartGridViewService</apexClass>
     </classAccesses>
     <classAccesses>
         <enabled>true</enabled>
