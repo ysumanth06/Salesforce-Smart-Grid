@@ -955,6 +955,11 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   openFieldPicker() {
+    if (this.gridColumns && this.gridColumns.length > 0) {
+      this.pickerSelectedFields = this.gridColumns
+        .map((c) => c.fieldName || c.fieldApiName)
+        .filter(Boolean);
+    }
     this._showFieldPicker = true;
     Promise.resolve().then(() => {
       const picker = this.template.querySelector("c-smart-grid-field-picker");
@@ -1108,6 +1113,13 @@ export default class SmartDataGrid extends LightningElement {
 
   get isDynamicGrid() {
     return !this.gridConfigName && this.objectApiName;
+  }
+
+  get canSelectFields() {
+    return (
+      this.isDynamicGrid ||
+      (this.config && this.config.allowPersonalization !== false)
+    );
   }
 
   get showNoConfigMessage() {
@@ -2183,7 +2195,9 @@ export default class SmartDataGrid extends LightningElement {
         this.activeFilterJson = null;
       }
       if (Array.isArray(config.columns) && config.columns.length > 0) {
-        this.pickerSelectedFields = config.columns;
+        this.pickerSelectedFields = config.columns.map(
+          (c) => (typeof c === "string" ? c : c.fieldApiName || c.fieldName || c)
+        );
         this.refreshColumns();
       }
       if (config.pinnedColumn !== undefined) {

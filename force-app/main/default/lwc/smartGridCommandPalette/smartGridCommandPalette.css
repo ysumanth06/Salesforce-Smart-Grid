@@ -11,6 +11,7 @@
 .palette-container {
   max-width: 44rem;
   margin-top: 5vh;
+  padding: 0 !important;
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);

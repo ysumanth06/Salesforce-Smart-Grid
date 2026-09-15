@@ -9,7 +9,7 @@
         onresetview={handleResetView}
         class="slds-var-m-right_x-small"
       ></c-smart-grid-view-selector>
-      <template lwc:if={isDynamicGrid}>
+      <template lwc:if={canSelectFields}>
         <lightning-button
           label="Select Fields"
           icon-name="utility:setup"

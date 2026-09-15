@@ -13,9 +13,12 @@
     <values>
         <field>Columns_JSON__c</field>
         <value xsi:type="xsd:string">[
-  {"field": "Name", "order": 1, "editable": true, "width": 200},
+  {"field": "Name", "order": 1, "editable": true, "width": 220},
   {"field": "Industry", "order": 2, "editable": true},
-  {"field": "Phone", "order": 3, "editable": false}
+  {"field": "Type", "order": 3, "editable": true},
+  {"field": "Rating", "order": 4, "editable": true},
+  {"field": "AnnualRevenue", "order": 5, "editable": true},
+  {"field": "Phone", "order": 6, "editable": false}
 ]</value>
     </values>
     <values>
@@ -41,5 +44,29 @@
     <values>
         <field>Use_Advanced_Config__c</field>
         <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Enable_Add_Row__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Enable_Delete__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Enable_Export__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Enable_Filters__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Enable_Reading_Pane__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Totals_Fields_JSON__c</field>
+        <value xsi:type="xsd:string">["AnnualRevenue"]</value>
     </values>
 </CustomMetadata>

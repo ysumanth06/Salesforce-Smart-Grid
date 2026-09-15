@@ -18,7 +18,15 @@ export default class SmartGridFieldPicker extends LightningElement {
     return this._selectedFields;
   }
   set selectedFields(value) {
-    this._selectedFields = value ? [...value] : [];
+    if (Array.isArray(value)) {
+      this._selectedFields = value
+        .map((f) =>
+          (typeof f === "string" ? f : f.fieldApiName || f.fieldName || f.value || "")
+        )
+        .filter(Boolean);
+    } else {
+      this._selectedFields = [];
+    }
     this._currentSelection = [...this._selectedFields];
   }
 

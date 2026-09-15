@@ -10,19 +10,14 @@
       <div class="slds-modal__container">
         <!-- Header -->
         <div class="slds-modal__header">
-          <button
-            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-            title="Close"
+          <lightning-button-icon
+            icon-name="utility:close"
+            alternative-text="Close"
+            variant="bare-inverse"
+            class="slds-modal__close"
             onclick={handleCancel}
-          >
-            <lightning-icon
-              icon-name="utility:close"
-              alternative-text="Close"
-              size="small"
-              variant="inverse"
-            ></lightning-icon>
-            <span class="slds-assistive-text">Close</span>
-          </button>
+            size="large"
+          ></lightning-button-icon>
           <h1 class="slds-modal__title slds-hyphenate">{modalTitle}</h1>
         </div>
 
