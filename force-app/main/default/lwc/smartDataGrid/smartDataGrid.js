@@ -175,6 +175,11 @@ export default class SmartDataGrid extends LightningElement {
     } else if (key === "d") {
       event.preventDefault();
       this.handleFillDown();
+    } else if (key === "k") {
+      event.preventDefault();
+      if (this.canUseCommandPalette) {
+        this.handleOpenCommandPalette();
+      }
     }
   }
 
