@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridAdminStudio from "c/smartGridAdminStudio";
 import getObjectFields from "@salesforce/apex/SmartGridController.getObjectFields";
 import deployGridConfig from "@salesforce/apex/SmartGridMetadataDeployer.deployGridConfig";

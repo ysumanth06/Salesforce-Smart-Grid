@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridCellDependentPicklist from "c/smartGridCellDependentPicklist";
 
 describe("c-smart-grid-cell-dependent-picklist", () => {

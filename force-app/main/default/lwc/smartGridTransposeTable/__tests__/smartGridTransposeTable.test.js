@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridTransposeTable from "c/smartGridTransposeTable";
 
 describe("c-smart-grid-transpose-table", () => {

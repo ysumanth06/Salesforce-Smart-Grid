@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridCellOwner from "c/smartGridCellOwner";
 import searchLookupRecords from "@salesforce/apex/SmartGridController.searchLookupRecords";
 

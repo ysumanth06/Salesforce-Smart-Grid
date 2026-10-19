@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridPicklist from "c/smartGridPicklist";
 
 describe("c-smart-grid-picklist", () => {

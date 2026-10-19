@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridImportModal from "c/smartGridImportModal";
 import executeImport from "@salesforce/apex/SmartGridImportService.executeImport";
 import executeRollback from "@salesforce/apex/SmartGridImportService.executeRollback";

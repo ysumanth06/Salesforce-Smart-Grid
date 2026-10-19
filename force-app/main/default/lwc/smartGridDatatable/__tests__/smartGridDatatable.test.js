@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridDatatable from "c/smartGridDatatable";
 
 describe("c-smart-grid-datatable", () => {

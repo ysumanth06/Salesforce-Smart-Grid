@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridCellDateTime from "c/smartGridCellDateTime";
 
 describe("c-smart-grid-cell-date-time", () => {

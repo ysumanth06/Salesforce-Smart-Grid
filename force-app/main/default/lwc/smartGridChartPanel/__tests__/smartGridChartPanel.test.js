@@ -1,4 +1,4 @@
-import { createElement } from "lwc";
+import { createElement } from "@lwc/engine-dom";
 import SmartGridChartPanel from "c/smartGridChartPanel";
 
 describe("c-smart-grid-chart-panel", () => {
