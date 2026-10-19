@@ -327,7 +327,14 @@ public with sharing class SmartGridDataQualityService {
             penaltyPoints += 15;
           }
         } catch (Exception ex) {
-          // Field combination may vary by object
+          SmartGridTelemetryService.publishTelemetry(
+            'data_quality_audit',
+            objectApiName,
+            0,
+            0,
+            null,
+            'Date hygiene check skipped: ' + ex.getMessage()
+          );
         }
       }
 
@@ -356,7 +363,14 @@ public with sharing class SmartGridDataQualityService {
             penaltyPoints += 10;
           }
         } catch (Exception ex) {
-          // Owner relationship may not be User
+          SmartGridTelemetryService.publishTelemetry(
+            'data_quality_audit',
+            objectApiName,
+            0,
+            0,
+            null,
+            'Inactive owner check skipped: ' + ex.getMessage()
+          );
         }
       }
 

@@ -211,7 +211,14 @@ public with sharing class SmartGridExternalAIProvider implements ISmartGridAIPro
             );
           }
         } catch (Exception parseEx) {
-          // Ignore invalid history JSON format
+          SmartGridTelemetryService.publishTelemetry(
+            'ai_history_parse',
+            'ConversationHistory',
+            0,
+            0,
+            null,
+            'Ignored invalid history JSON format: ' + parseEx.getMessage()
+          );
         }
       }
 

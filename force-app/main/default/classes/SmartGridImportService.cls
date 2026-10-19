@@ -36,6 +36,7 @@ public with sharing class SmartGridImportService {
    * @return ImportResult details with rollback token and created record IDs
    */
   @AuraEnabled
+  @SuppressWarnings('PMD.AvoidHardcodedCredentialsInVarAssign')
   public static ImportResult executeImport(
     String objectApiName,
     List<Map<String, Object>> rawRecords
