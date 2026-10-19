@@ -8,7 +8,7 @@
       class="slds-modal slds-fade-in-open dml-modal"
       data-testid="dml-confirm-modal"
     >
-      <div class="slds-modal__container dml-container">
+      <div class="slds-modal__container dml-container slds-scrollable_none">
         <!-- Header -->
         <header class="slds-modal__header dml-header">
           <button
@@ -45,7 +45,9 @@
         <!-- Body: Metrics & Visual Diff Table -->
         <div class="slds-modal__content slds-var-p-around_medium dml-body">
           <template lwc:if={isLoading}>
-            <div class="spinner-holder">
+            <div
+              class="spinner-holder slds-grid slds-grid_align-center slds-grid_vertical-align-center"
+            >
               <lightning-spinner
                 alternative-text="Applying changes..."
                 size="medium"
@@ -59,19 +61,31 @@
             <div
               class="slds-grid slds-wrap slds-var-m-bottom_medium metric-bar"
             >
-              <div class="metric-badge slds-var-m-right_small">
-                <span class="metric-label">Affected Records:</span>
+              <div
+                class="metric-badge slds-var-m-right_small slds-grid slds-grid_vertical-align-center"
+              >
+                <span class="metric-label slds-text-body_small"
+                  >Affected Records:</span
+                >
                 <span class="metric-val" data-testid="affected-count"
                   >{affectedCount}</span
                 >
               </div>
-              <div class="metric-badge slds-var-m-right_small">
-                <span class="metric-label">Operation:</span>
+              <div
+                class="metric-badge slds-var-m-right_small slds-grid slds-grid_vertical-align-center"
+              >
+                <span class="metric-label slds-text-body_small"
+                  >Operation:</span
+                >
                 <span class="metric-val">{operationType}</span>
               </div>
               <template lwc:if={hasFields}>
-                <div class="metric-badge">
-                  <span class="metric-label">Fields Modified:</span>
+                <div
+                  class="metric-badge slds-grid slds-grid_vertical-align-center"
+                >
+                  <span class="metric-label slds-text-body_small"
+                    >Fields Modified:</span
+                  >
                   <span class="metric-val">{affectedFieldsList}</span>
                 </div>
               </template>
@@ -81,7 +95,7 @@
             <h3 class="slds-text-title_bold slds-var-m-bottom_x-small">
               Preview of Changes (First 5 Rows):
             </h3>
-            <div class="diff-table-container">
+            <div class="diff-table-container slds-scrollable_none">
               <table
                 class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered diff-table"
                 aria-label="Bulk modification preview"
@@ -103,7 +117,9 @@
                         >
                       </td>
                       <td class="field-name-col">
-                        <span class="field-badge">{row.fieldName}</span>
+                        <span class="field-badge slds-text-body_small"
+                          >{row.fieldName}</span
+                        >
                       </td>
                       <td class="old-val-col">
                         <span class="old-val-badge">{row.oldValue}</span>
