@@ -1,333 +1,317 @@
-# Salesforce Smart Grid — Getting Started & User Guide
+# Salesforce Smart Grid — End-User & Power-User Guide
 
-Welcome to the **Salesforce Smart Grid** user guide. This guide explains how to use the interactive data grid, customize columns, manage views, and leverage built-in AI intelligence to streamline your Salesforce workflow.
+Welcome to the **Salesforce Smart Grid** user guide. This document explains how to use the interactive data workspace, leverage spreadsheet productivity shortcuts, compare records in transposed matrix view, review bulk changes with visual diff safety, and utilize built-in AI copilot capabilities.
 
 ---
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
-2. [Prerequisites & Access](#2-prerequisites--access)
-3. [Using the Grid (Standard Mode — Without AI)](#3-using-the-grid-standard-mode--without-ai)
-   - [Inline Editing](#inline-editing)
-   - [Reviewing & Saving Pending Changes](#reviewing--saving-pending-changes)
-   - [Adding and Deleting Rows](#adding-and-deleting-rows)
-   - [Fill Down & Active Column Copy](#fill-down--active-column-copy)
-   - [Undo & Redo](#undo--redo)
-   - [Sorting & Column Resizing](#sorting--column-resizing)
-   - [Pagination & Page Size](#pagination--page-size)
-   - [Column Totals & Aggregates](#column-totals--aggregates)
-   - [Reading Pane](#reading-pane)
-   - [Related Sub-Grids](#related-sub-grids)
-   - [Exporting to CSV](#exporting-to-csv)
-4. [Customizing Columns & Personalization](#4-customizing-columns--personalization)
-   - [Field Picker](#field-picker)
-   - [Supported Field Types & Limitations](#supported-field-types--limitations)
-5. [Filtering & Saved Views](#5-filtering--saved-views)
-   - [Quick Filter Bar](#quick-filter-bar)
-   - [Advanced Filter Builder](#advanced-filter-builder)
-   - [Managing Saved Views & Preferences](#managing-saved-views--preferences)
-6. [AI-Powered Capabilities (AI Premium Mode)](#6-ai-powered-capabilities-ai-premium-mode)
-   - [Feature 1: NLP Command Palette (Cmd+K / Ctrl+K)](#feature-1-nlp-command-palette-cmdk--ctrlk)
-   - [Feature 2: Data Quality & Health Inspection Drawer](#feature-2-data-quality--health-inspection-drawer)
-   - [Feature 3: Conversational Smart Grid Assistant](#feature-3-conversational-smart-grid-assistant)
-   - [Feature 4: Guided Onboarding Tour](#feature-4-guided-onboarding-tour)
-7. [Comparison: Using the Grid With vs Without AI](#7-comparison-using-the-grid-with-vs-without-ai)
-8. [Keyboard Shortcuts Cheat Sheet](#8-keyboard-shortcuts-cheat-sheet)
+1. [Product Overview](#1-product-overview)
+2. [User Personas & Permissions](#2-user-personas--permissions)
+3. [Spreadsheet-Speed Inline Editing & Ergonomics](#3-spreadsheet-speed-inline-editing--ergonomics)
+   - [Inline Cell Editing](#inline-cell-editing)
+   - [2D Rectangular Range Selection](#2d-rectangular-range-selection)
+   - [Fill Down (Cmd+D / Ctrl+D)](#fill-down-cmdd--ctrld)
+   - [Bidirectional Excel & Google Sheets Copy/Paste](#bidirectional-excel--google-sheets-copypaste)
+   - [Multi-Level Undo & Redo (Cmd+Z / Cmd+Shift+Z)](#multi-level-undo--redo-cmdz--cmdshiftz)
+   - [Adding & Deleting Rows](#adding--deleting-rows)
+4. [Specialized In-Cell Editors](#4-specialized-in-cell-editors)
+   - [Lookup & Master-Detail with "+ New Record"](#lookup--master-detail-with--new-record)
+   - [User vs. Queue Owner Selector](#user-vs-queue-owner-selector)
+   - [Multi-Select Picklist with Search Filter](#multi-select-picklist-with-search-filter)
+   - [Cascading Dependent Picklists](#cascading-dependent-picklists)
+   - [Combined Date & Time Picker](#combined-date--time-picker)
+5. [Transposed Grid View (Matrix Comparison Mode)](#5-transposed-grid-view-matrix-comparison-mode)
+   - [Pivoting Fields as Rows, Records as Columns](#pivoting-fields-as-rows-records-as-columns)
+   - [Highlighting & Filtering "Differences Only"](#highlighting--filtering-differences-only)
+   - [In-Matrix Editing & Staging](#in-matrix-editing--staging)
+6. [Finding, Filtering & Custom Views](#6-finding-filtering--custom-views)
+   - [Quick Filter Bar & Active Filter Pills](#quick-filter-bar--active-filter-pills)
+   - [Advanced Filter Builder (AND/OR Logic)](#advanced-filter-builder-andor-logic)
+   - [Field Picker & Column Ordering](#field-picker--column-ordering)
+   - [Saving & Sharing Personal Views](#saving--sharing-personal-views)
+7. [Grouping & In-Grid Analytics Charts](#7-grouping--in-grid-analytics-charts)
+   - [3-Level Hierarchical Grouping](#3-level-hierarchical-grouping)
+   - [Server-Side Rollup Aggregates (Sum, Avg, Min, Max)](#server-side-rollup-aggregates)
+   - [Docked SVG Chart Drawer (Donut, Bar, Funnel)](#docked-svg-chart-drawer-donut-bar-funnel)
+   - [Conditional Formatting & Data Bars](#conditional-formatting--data-bars)
+8. [Data Mobility, Safety & Change Auditing](#8-data-mobility-safety--change-auditing)
+   - [Pre-Flight Bulk DML Visual Diff Confirmation Modal](#pre-flight-bulk-dml-visual-diff-confirmation-modal)
+   - [Bulk CSV Import with Transactional Rollback ("Undo Import")](#bulk-csv-import-with-transactional-rollback-undo-import)
+   - [Formula Shield (Neutralizing Formula Injections)](#formula-shield-neutralizing-formula-injections)
+   - [Field-Level Change Audit History](#field-level-change-audit-history)
+9. [AI Copilot & Natural Language Features](#9-ai-copilot--natural-language-features)
+   - [NLP Command Palette (Cmd+K / Ctrl+K)](#nlp-command-palette-cmdk--ctrlk)
+   - [Data Quality & Health Score Drawer](#data-quality--health-score-drawer)
+   - [Conversational Smart Grid Assistant](#conversational-smart-grid-assistant)
+   - [Interactive Onboarding Tour](#interactive-onboarding-tour)
+10. [Master Keyboard Shortcuts Cheat Sheet](#10-master-keyboard-shortcuts-cheat-sheet)
 
 ---
 
-## 1. Introduction
+## 1. Product Overview
 
-Salesforce Smart Grid transforms traditional record list views into a high-performance, spreadsheet-like workspace. Whether you are managing Accounts, Contacts, Opportunities, Cases, or custom objects, Smart Grid enables:
+Salesforce Smart Grid turns any standard or custom object into an interactive, high-performance spreadsheet workspace embedded directly into Salesforce Lightning Experience.
 
-- **Mass inline editing** with live draft tracking and review.
-- **Dynamic personalization** to add, hide, and reorder fields on the fly.
-- **Enterprise data hygiene** with automated duplicate and outlier detection.
-- **AI-driven command palette and assistant** to query, filter, and analyze data in natural language.
+Key advantages over standard list views:
 
----
-
-## 2. Prerequisites & Access
-
-To use Smart Grid, your Salesforce Administrator must assign you one or both of the following Permission Sets:
-
-| Permission Set                                     | What It Enables                                                                                                      | Who Needs It                                   |
-| :------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------- |
-| **SmartGrid User** (`SmartGrid_User`)              | Access to core grid rendering, inline editing, field picker, personal views, export, and related grids.              | All regular users and analysts.                |
-| **SmartGrid AI Premium** (`Smart_Grid_AI_Premium`) | Unlocks the NLP Command Palette (`Cmd+K`), Data Quality Drawer, Conversational Assistant, and automated suggestions. | Power users, sales leaders, and data stewards. |
-
-### Accessing the Grid
-
-- **App Launcher**: Click the **App Launcher** (9 dots) in Salesforce and search for **Smart Grid** or **Smart Grid Explorer**.
-- **Record & App Pages**: If placed by your administrator, the grid may appear directly on your Home Page, App Page, or as a tab on Record Detail pages.
+- **Zero Page Context Switching**: Edit dozens of records and fields simultaneously without clicking through multiple record pages.
+- **True Spreadsheet Productivity**: 2D range selection, linear fill down, multi-cell paste from Excel, and infinite undo/redo.
+- **Enterprise Safety**: Every bulk change displays a visual diff pre-flight preview showing before/after values before committing to the database.
+- **Transposed Matrix Mode**: Compare multiple records side by side with differences highlighted automatically.
+- **100% On-Platform Security**: Executes strictly within your Salesforce org under your profile's security, sharing, and Field-Level Security rules.
 
 ---
 
-## 3. Using the Grid (Standard Mode — Without AI)
+## 2. User Personas & Permissions
 
-You do **not** need AI licenses to use Smart Grid. All core spreadsheet functions operate entirely client-side and via secure standard Apex controllers.
+Your Salesforce Administrator controls feature availability through Permission Sets:
 
-### Inline Editing
-
-1. Double-click or click into any editable cell (indicated by a pencil icon on hover).
-2. Type your changes:
-   - **Text / Number / Currency / Date**: Type directly into the cell.
-   - **Picklists**: Select from the custom picklist dropdown.
-3. Edited cells immediately highlight with a yellow indicator, and a live unsaved changes badge appears in the toolbar: **"Save (X)"**.
-
-### Reviewing & Saving Pending Changes
-
-- **Save Immediately**: Click **Save (X)** on the toolbar. The grid executes bulk DML under user security.
-- **Review Modal**: Click the **Preview / Eye** icon next to Save to open the **Review Pending Changes** modal. This displays a side-by-side diff comparing the original database value with your draft value.
-- **Reverting**: Revert individual fields in the Review modal or click **Discard All** to discard all unsaved drafts.
-- **Partial Success Safety**: If some rows violate validation rules (e.g., missing required fields), successful rows save cleanly while failing rows highlight in red with exact error tooltips.
-
-### Adding and Deleting Rows
-
-- **Add Row**: Click **Add Row** in the toolbar. A new row (`new-1...`) appears at the top of the grid with empty fields ready for entry.
-- **Delete Rows**: Select one or more rows using the row checkboxes and click **Delete Selected**.
-  - If the row is a newly added unsaved draft, it is discarded immediately client-side.
-  - If the row exists in Salesforce, a confirmation dialog appears before performing secure deletion.
-
-### Fill Down & Active Column Copy
-
-To quickly copy a value across multiple consecutive rows:
-
-1. Select the rows you want to update using the checkboxes.
-2. Edit the active cell on the first selected row.
-3. Use the **Fill Down** action from the header menu. The value in the active column propagates across all selected rows instantly as draft changes.
-
-### Undo & Redo
-
-- Click the **Undo** button (or press `Ctrl+Z` / `Cmd+Z`) to revert your last edit.
-- Click the **Redo** button (or press `Ctrl+Y` / `Cmd+Shift+Z`) to re-apply reverted edits.
-- The grid maintains a multi-step history stack for peace of mind.
-
-### Sorting & Column Resizing
-
-- **Sort**: Click any column header to sort ascending. Click again to sort descending. An arrow indicator shows the active sort order.
-- **Resize**: Drag the right border of any column header to resize.
-- **Auto-Fit**: Double-click the column header divider to auto-fit the column to the longest value.
-
-### Pagination & Page Size
-
-- The pagination toolbar is anchored cleanly at the bottom of the card.
-- Use **Previous** and **Next** buttons to navigate through pages.
-- Use the **Page Size** combobox to switch between **10**, **25**, **50**, or **100** records per page.
-- When page size exceeds the screen height, the table container scrolls vertically with sticky header columns.
-
-### Column Totals & Aggregates
-
-If configured on numeric or currency fields, the grid displays a sticky **Aggregates & Column Totals** card below the table showing:
-
-- **Sum**: Total sum of values on the current view.
-- **Avg**: Mathematical mean.
-- **Min & Max**: Lowest and highest recorded values.
-
-### Reading Pane
-
-Click the **Reading Pane** icon on any row to open a side-by-side detail drawer. This allows you to inspect related fields and record details without navigating away from your active grid.
-
-### Related Sub-Grids
-
-For hierarchical data (e.g. viewing Contacts or Opportunities related to an Account):
-
-1. Click the expand arrow on a parent record row.
-2. A nested sub-grid opens inline with independent columns, editing, and pagination for child records.
-
-### Exporting to CSV
-
-Click the **Export** button in the toolbar. The grid generates an RFC 4180-compliant `.csv` file including all visible fields, column headers, and active filter criteria, instantly downloaded to your browser.
+| Permission Set              | Target Persona                         | Key Capabilities                                                                                                                              |
+| :-------------------------- | :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`SmartGrid_User`**        | All Standard Users & Sales Reps        | Standard grid navigation, inline cell editing, quick filters, CSV export, column resizing, field picker, personal saved views.                |
+| **`SmartGrid_Power_User`**  | Team Leads, Sales Ops, Analysts        | Unlocks Transpose Matrix editing, 2D range fill down, Excel range copy/paste, bulk CSV import with rollback tokens, and private view sharing. |
+| **`Smart_Grid_AI_Premium`** | Power Users, Executives, Data Stewards | Unlocks the `Cmd+K` NLP Command Palette, Dataset Health & Duplicate Inspector, and Conversational Assistant drawer.                           |
+| **`SmartGrid_Admin`**       | Salesforce Administrators              | Full access including Visual Admin Studio, programmatic metadata deployment, and global grid overrides.                                       |
 
 ---
 
-## 4. Customizing Columns & Personalization
+## 3. Spreadsheet-Speed Inline Editing & Ergonomics
 
-### Field Picker
+### Inline Cell Editing
 
-If you want to customize which columns appear in your grid:
+- Click on any editable cell (or press `Enter` / start typing) to open its dedicated inline editor.
+- Modified cells immediately turn **light yellow**, indicating staged unsaved changes.
+- The **Save Bar** at the bottom tracks the exact count of pending modifications (e.g., _"4 unsaved changes"_).
 
-1. Click the **Select Fields** (gear) button in the toolbar.
-2. The **Field Picker Modal** opens with a dual-listbox:
-   - **Available Fields**: All fields on the object that your user profile has permission to view.
-   - **Selected Fields**: The fields currently rendered on your grid.
-3. Select fields and use the right/left arrows to add or remove them.
-4. Use the up/down arrows on the right listbox to reorder columns from left to right.
-5. Click **Apply Changes**. The grid refreshes immediately with your customized column layout.
+### 2D Rectangular Range Selection
 
-### Supported Field Types & Limitations
+- **Mouse Drag**: Click a starting cell and drag your mouse across adjacent rows and columns to create a bounding box.
+- **Keyboard Selection**: Hold `Shift` and use the `Arrow Keys` to expand or contract your selection marquee.
+- Once selected, apply batch commands across the entire range (Copy, Fill Down, or Clear).
 
-Smart Grid supports all common Salesforce standard and custom field types with proper input formatting:
+### Fill Down (`Cmd + D` / `Ctrl + D`)
 
-| Supported Field Types       | Formatting & Behavior                                       |
-| :-------------------------- | :---------------------------------------------------------- |
-| **Text, String, Text Area** | Standard inline text input with character limit validation. |
-| **Picklist**                | Custom dropdown template with active picklist options.      |
-| **Currency & Number**       | Formatted currency/numeric input with decimal precision.    |
-| **Date & DateTime**         | Datepicker calendar popup with timezone awareness.          |
-| **Checkbox (Boolean)**      | Toggle checkbox switch.                                     |
-| **Email, Phone, URL**       | Clickable links with type-specific validation.              |
-| **Lookup / Reference Id**   | Displays linked record name with hover preview.             |
+- Select a range where the top row contains values you wish to replicate across rows below.
+- Press `Cmd + D` (Mac) or `Ctrl + D` (Windows).
+- The values from the topmost cells propagate downward across all selected rows, with each change staged for review.
 
-#### Field Limitations to Keep in Mind:
+### Bidirectional Excel & Google Sheets Copy/Paste
 
-1. **Compound Fields**: Standard compound fields like `BillingAddress` or `MailingAddress` cannot be directly edited in datatables. Instead, select their component fields (`BillingStreet`, `BillingCity`, `BillingState`, `BillingPostalCode`).
-2. **Long Text Area (> 32,000 characters)**: Displayed as truncated text with a click-to-expand popover. Inline editing of massive long text areas is restricted to prevent viewstate bloat.
-3. **Rich Text / HTML Fields**: Stripped of dangerous HTML scripts; displayed in reading pane for formatted viewing.
-4. **Binary / Blob Fields (Base64)**: Document attachments and file binaries cannot be rendered as table columns.
-5. **Recommended Column Limit**: While there is no hard restriction, displaying between **5 to 20 columns** yields optimal performance and readability. Having more than 50 columns simultaneously may degrade browser scrolling speed.
+- **Copying to Excel**: Select any range of cells in Smart Grid and press `Cmd + C` (`Ctrl + C`). Paste directly into Microsoft Excel or Google Sheets. Tab-separated values and line breaks are formatted automatically.
+- **Pasting from Excel**: Highlight a cell range in Excel, copy it, click the top-left destination cell in Smart Grid, and press `Cmd + V` (`Ctrl + V`). Smart Grid maps the clipboard data into the grid's columns and rows.
+- **Formula Injection Shield**: Any values starting with `=,+,-,@` are safely sanitized during copy and restored transparently on paste to prevent malicious formula execution in external spreadsheet applications.
+
+### Multi-Level Undo & Redo (`Cmd + Z` / `Cmd + Shift + Z`)
+
+- Made a mistake or pasted incorrect values? Press `Cmd + Z` (`Ctrl + Z`) to revert the last action step by step.
+- Press `Cmd + Shift + Z` (`Ctrl + Y`) to redo the reverted changes.
+- You can undo actions all the way back to the initial pristine state before saving.
+
+### Adding & Deleting Rows
+
+- **Add Row**: Click **"Add Row"** in the grid toolbar. A new row appears at the top with a green accent bar. Populate the required fields and save.
+- **Delete Row**: Select one or more rows, click the row action menu (`▼`), and choose **"Delete"**. Rows staged for deletion display in light red with strike-through formatting until confirmed.
 
 ---
 
-## 5. Filtering & Saved Views
+## 4. Specialized In-Cell Editors
 
-### Quick Filter Bar
+Salesforce Smart Grid provides customized inline editors for complex Salesforce field types that standard datatables cannot edit:
 
-- When a `Default_Filter_Field__c` is configured (e.g., `Industry` on Account or `StageName` on Opportunity), a combobox appears above the grid.
-- Select any value to immediately filter rows. Select `-- All --` to clear the filter.
+### Lookup & Master-Detail with "+ New Record"
+
+- Click a lookup cell (e.g., _Account Name_, _Parent Opportunity_, _Contact_).
+- A search input opens with 300ms debounced typeahead. Matching records appear with secondary descriptive fields (e.g., _Email_, _Account Industry_).
+- Need to reference a record that doesn't exist yet? Click **"+ New Record"** directly inside the dropdown to launch an in-grid creation modal without losing your unsaved work.
+
+### User vs. Queue Owner Selector
+
+- Changing the record owner displays a polymorphic selector that distinguishes between active **Users** and **Queues**.
+- Includes avatar initials and active status badges.
+
+### Multi-Select Picklist with Search Filter
+
+- Clicking a multi-select picklist opens a dropdown combobox with individual checkboxes and a quick-filter search box.
+- Use **"Select All"** or **"Clear All"** shortcuts for rapid tag assignment. Selected items render as compact pills.
+
+### Cascading Dependent Picklists
+
+- When editing dependent picklists (e.g., _Country & State_, _Category & Subcategory_), changing the controlling field immediately recalculates valid options for the dependent field based on Salesforce metadata rules.
+
+### Combined Date & Time Picker
+
+- Date/Time fields render a dual picker: an intuitive calendar datepicker coupled with a 15-minute interval time dropdown.
+- Automatically adjusts and displays in your personal Salesforce user profile timezone.
+
+---
+
+## 5. Transposed Grid View (Matrix Comparison Mode)
+
+When comparing multiple accounts, opportunities, or custom records, standard horizontal tables require constant side-to-side scrolling. Smart Grid's **Transpose View** flips the orientation: **Fields become Rows, and Records become Columns**.
+
+```
+┌───────────────────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┐
+│ Field Name (Sticky)   │ Opportunity A            │ Opportunity B            │ Opportunity C            │
+├───────────────────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┤
+│ Stage                 │ Closed Won               │ Negotiation/Review       │ Negotiation/Review       │
+│ Amount                │ $120,000.00              │ $45,000.00               │ $45,000.00               │
+│ Close Date            │ 10/15/2026               │ 10/28/2026               │ 11/04/2026               │
+│ Primary Contact       │ Sarah Jenkins            │ Michael Chang            │ Lisa Ray                 │
+└───────────────────────┴──────────────────────────┴──────────────────────────┴──────────────────────────┘
+```
+
+### Key Matrix Capabilities:
+
+1. **Sticky Field Column**: The leftmost column containing Field Labels stays locked in place while you scroll horizontally across dozens of records.
+2. **"Differences Only" Filter**: Click the **"Differences Only"** toggle in the toolbar. Smart Grid instantly collapses all rows where the records share identical values, displaying only fields with discrepancies (ideal for deduplication and contract reviews).
+3. **In-Matrix Editing**: Edit values directly inside the matrix cells. Changes link back to the underlying record and stage in the global Save Bar.
+
+---
+
+## 6. Finding, Filtering & Custom Views
+
+### Quick Filter Bar & Active Filter Pills
+
+- Type in the **Search This List** input for instant client-side filtering across all loaded text columns.
+- Applied filters appear as dismissible filter pills below the toolbar (e.g., `[Stage: Closed Won ✕] [Amount > $50,000 ✕]`). Click the `✕` to clear individual filters.
 
 ### Advanced Filter Builder
 
-Click the **Filter** button in the toolbar to launch the **Advanced Filter Builder**:
+- Click **"Filter Builder"** to build complex queries with nested **AND / OR** logic:
+  - Supports string matching (`equals`, `contains`, `starts with`), numerical operators (`>`, `<`, `between`), and picklist sets (`in`, `not in`).
+  - Evaluates on server-side SOQL for deep dataset querying.
 
-1. Add one or more condition rows.
-2. Choose the **Field**, **Comparison Operator**, and **Value**:
-   - **Text Fields**: `equals`, `not_equal_to`, `contains`, `starts_with`, `is_null`
-   - **Numeric / Date Fields**: `=`, `!=`, `>`, `<`, `>=`, `<=`, `is_null`
-   - **Picklist Fields**: `equals`, `not_equal_to`, `in`
-3. Choose the Logical Operator: **AND** (all conditions must match) or **OR** (any condition can match).
-4. Click **Apply Filter**.
+### Field Picker & Column Ordering
 
-### Managing Saved Views & Preferences
+- Click **"Select Columns"** (gear icon) to open the dual-listbox manager.
+- Move fields between _Available_ and _Selected_, or drag items up and down to adjust display order.
 
-- **Save Current View**: Click the view selector dropdown at the top-left and select **Save As New View**. Give it a descriptive name (e.g. _"West Coast Enterprise Prospects"_).
-- **Default View**: Check the "Set as my default view" box so this view loads automatically whenever you visit the page.
-- **Switching Views**: Use the dropdown selector to toggle between your personal saved views and the system default view.
-- **Reset View**: Click **Reset View** to discard temporary column or filter changes and return to the baseline metadata configuration.
+### Saving & Sharing Personal Views
+
+- Click the View Selector dropdown next to the grid title.
+- Choose **"Save Current View As..."** to name your custom combination of columns, active filters, and sort orders.
+- Mark your view as **Private** (visible only to you) or **Public** (shared with all users with grid access).
 
 ---
 
-## 6. AI-Powered Capabilities (AI Premium Mode)
+## 7. Grouping & In-Grid Analytics Charts
 
-When assigned the **SmartGrid AI Premium** permission set, an additional suite of intelligence tools becomes active on your toolbar.
+### 3-Level Hierarchical Grouping
 
----
+- Drag column headers or use the **"Group By"** menu to organize rows by up to three simultaneous dimensions (e.g., _Industry &rarr; Stage &rarr; Lead Source_).
+- Picklists group in their configured Salesforce administrative order rather than alphabetical order.
+- Expand (`▶`) or collapse (`▼`) individual groups.
 
-### Feature 1: NLP Command Palette (`Cmd+K` / `Ctrl+K`)
+### Server-Side Rollup Aggregates
 
-The **Command Palette** allows you to talk to your data in plain English. Press `Cmd+K` (Mac) or `Ctrl+K` (Windows) anywhere on the grid to open the modal.
+- Group header rows display server-calculated rollups:
+  - **Count**: Number of records in the branch.
+  - **Sum**: Total currency or numeric amounts.
+  - **Average**: Mean values for percentages and quantities.
+  - **Min / Max**: Boundary values (e.g., earliest Close Date, highest Amount).
 
-#### How It Works:
+### Docked SVG Chart Drawer
 
-Type a natural language request. The AI engine parses your prompt into verified SOQL filters, sort orders, and field selections without requiring you to build manual queries.
+- Click the **Charts** icon in the toolbar to slide out the real-time visual analytics panel:
+  - **Donut Chart**: Distribution breakdown across stages or categories.
+  - **Horizontal Bar Chart**: Ranked volume or revenue per account executive.
+  - **Funnel Chart**: Pipeline conversion across qualification phases.
+- Charts react instantly as you apply filters or change values in the grid.
 
-#### Concrete Examples:
+### Conditional Formatting & Data Bars
 
-##### Example 1: Targeted Segment Filtering
-
-- **User Prompt**: `"Show me all healthcare and technology accounts with revenue greater than 1 million"`
-- **AI Action**: Translates to:
-  - `Industry IN ('Healthcare', 'Technology')`
-  - `AnnualRevenue > 1000000`
-- **Result**: The grid updates in real time to show only high-value accounts in those two verticals.
-
-##### Example 2: Missing Data Auditing
-
-- **User Prompt**: `"Find hot accounts that don't have a phone number"`
-- **AI Action**: Translates to:
-  - `Rating = 'Hot'`
-  - `Phone = null`
-- **Result**: Filters the grid to high-priority accounts needing telephone contact information.
-
-##### Example 3: Natural Language Sorting & Limits
-
-- **User Prompt**: `"Sort by highest revenue and show top 25"`
-- **AI Action**: Sets sort order to `AnnualRevenue DESC` and page size to `25`.
+- Color-code critical thresholds:
+  - _Red highlight_: Overdue close dates or negative profit margins.
+  - _Green highlight_: Deals exceeding $100,000 or accounts marked "Hot".
+  - _Inline Data Bars_: Horizontal proportional bars representing revenue magnitude directly inside cells.
 
 ---
 
-### Feature 2: Data Quality & Health Inspection Drawer
+## 8. Data Mobility, Safety & Change Auditing
 
-Click the **Data Health** (heartbeat) button in the toolbar to open the **Data Quality Drawer**.
+### Pre-Flight Bulk DML Visual Diff Confirmation Modal
 
-#### What It Analyzes:
+Whenever you click **"Save All"**, Smart Grid presents a safety pre-flight review modal:
 
-The service scans all loaded records and computes a **Health Score (0 to 100)** based on four hygiene factors:
+1. **Summary Badges**: Displays total records affected, operation type (Update, Insert, Delete), and modified fields.
+2. **Visual Diff Table**: Displays a side-by-side comparison of every changed field:
+   - Current Value: Shown in red strike-through (`$50,000`).
+   - New Value: Shown in bold green (`$75,000`).
+3. **Per-Field Revert**: Revert unintended individual field edits directly from the modal before applying changes.
 
-1. **Missing Data**: Mandatory or critical fields left blank (e.g. unassigned Industry, blank Phone).
-2. **Duplicate Candidates**: Records sharing identical names, domains, or phone numbers.
-3. **Outliers**: Extreme values that skew metrics (e.g. an account with revenue 4x above the segment mean).
-4. **Anomalies**: Inconsistent status or rating combinations.
+### Bulk CSV Import with Transactional Rollback ("Undo Import")
 
-#### Concrete Example:
+- Click **"Import Data"** &rarr; **"Upload CSV"**.
+- The importer automatically detects column headers and maps them to Salesforce fields.
+- Preview the first 10 rows and verify data types.
+- Upon completion, Smart Grid generates an **Audit Rollback Token**. If you discover that the CSV contained incorrect data, click **"Undo Import"** to purge the newly created batch in one transaction.
 
-- **Health Score**: `74 / 100 (Needs Attention)`
-- **Detected Issues**:
-  - _Outlier_: Account `"MegaGlobal Corp"` has `AnnualRevenue = $850,000,000` (Mean is $12,000,000).
-  - _Missing Data_: 6 Accounts have `Type = null`.
-  - _Duplicate_: `"Precision Labs"` appears twice with the same website domain.
-- **Benefit**: Pinpoints dirty data instantly before exporting or running sales campaigns.
+### Formula Shield
 
----
+- Automatically protects against CSV and Excel formula injection (CVE-2014-3524).
+- Neutralizes dangerous formulas (`=CMD|...`, `+SUM(...)`) during CSV exports and clipboard copies without altering your raw Salesforce records.
 
-### Feature 3: Conversational Smart Grid Assistant
+### Field-Level Change Audit History
 
-Click the **AI Assistant** (Einstein sparkle) button in the toolbar to slide out the **Smart Grid Assistant** drawer.
-
-#### What It Does:
-
-The Assistant is a conversational copilot that understands the **exact dataset and active filters** currently displayed on your screen.
-
-#### Concrete Examples:
-
-##### Example 1: Instant Metric Calculations
-
-- **User Question**: _"What is the total and average revenue of the accounts currently shown?"_
-- **Assistant Response**: _"Based on your active filter (Industry = Technology, 24 records), total revenue is **$42.5M** with an average revenue of **$1.77M** per account. 3 accounts currently do not report revenue."_
-
-##### Example 2: Pipeline Strategy Suggestions
-
-- **User Question**: _"Which of these accounts should our reps prioritize first?"_
-- **Assistant Response**: _"I recommend prioritizing the 4 accounts marked with Rating = 'Hot' that have over $5M in Annual Revenue: Acme Corp, Apex Systems, Sterling Cloud, and DataFlow Inc."_
+- Every edit saved through Smart Grid creates an audit entry in `Smart_Grid_Edit_Log__c`.
+- View who changed what field, the exact timestamp, the prior value, and the new value directly in the row action audit history viewer.
 
 ---
 
-### Feature 4: Guided Onboarding Tour
+## 9. AI Copilot & Natural Language Features
 
-Click the **Help / Onboarding** icon (`?`) in the toolbar to open the interactive onboarding modal.
+_(Requires `Smart_Grid_AI_Premium` Permission Set)_
 
-- Walks new team members through editing, filtering, personalizing columns, and saving views step by step.
-- Self-paced slides with visual cues ensure zero training downtime.
+### NLP Command Palette (`Cmd + K` / `Ctrl + K`)
+
+Press `Cmd + K` (Mac) or `Ctrl + K` (Windows) from anywhere inside the grid to open the global command palette:
+
+- **Natural Language Filtering**: Type _"Show high-priority cases from last week"_ &rarr; Applies the corresponding date and priority filters automatically.
+- **Workflow Shortcuts**: Type _"Transpose"_ &rarr; Swings into Matrix comparison mode.
+- **Analytical Actions**: Type _"Group by Stage and show chart"_ &rarr; Groups rows and opens the pipeline chart drawer.
+
+### Data Quality & Health Score Drawer
+
+Click the **Heartbeat** icon in the toolbar to inspect dataset hygiene:
+
+- **Overall Health Score (0 - 100)**: Evaluates missing critical fields, anomalous outliers, and potential duplicates.
+- **Duplicate Candidates**: Identifies accounts or contacts sharing identical email domains, phone numbers, or normalized names.
+- **Outlier Detection**: Highlights numeric values that deviate significantly from segment averages (e.g., an Opportunity amount 5x above average).
+
+### Conversational Smart Grid Assistant
+
+Click the **Sparkle** icon in the toolbar to slide out the conversational assistant:
+
+- Understands the exact records and filtered subset currently on your screen.
+- Ask questions like:
+  - _"What is our total pipeline in the Negotiation stage?"_
+  - _"Which accounts in California have no open activities?"_
+- Receive structured summaries and actionable recommendations with clickable record chips.
+
+### Interactive Onboarding Tour
+
+- Click the **Help** (`?`) icon in the toolbar to trigger the interactive walkthrough.
+- Guides new team members through editing, keyboard navigation, view personalization, and matrix comparisons.
 
 ---
 
-## 7. Comparison: Using the Grid With vs Without AI
+## 10. Master Keyboard Shortcuts Cheat Sheet
 
-| Capability                           |      Standard Mode (No AI)      |              AI Premium Mode               |
-| :----------------------------------- | :-----------------------------: | :----------------------------------------: |
-| **Required Permission Set**          |        `SmartGrid_User`         | `SmartGrid_User` + `Smart_Grid_AI_Premium` |
-| **Mass Inline Editing**              | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **Bulk Save & Partial Success**      | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **Field Picker & Personal Views**    | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **Filter Builder (Operators/Logic)** | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **Column Totals & Aggregates**       | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **Reading Pane & Related Grids**     | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **CSV Export**                       | :white_check_mark: Full Support |      :white_check_mark: Full Support       |
-| **NLP Command Palette (`Cmd+K`)**    |      :x: Hidden / Inactive      |         :white_check_mark: Active          |
-| **Data Quality & Health Score**      |      :x: Hidden / Inactive      |         :white_check_mark: Active          |
-| **Conversational Assistant Drawer**  |      :x: Hidden / Inactive      |         :white_check_mark: Active          |
-
----
-
-## 8. Keyboard Shortcuts Cheat Sheet
-
-| Action                              | Mac Shortcut          | Windows / Linux Shortcut          |
-| :---------------------------------- | :-------------------- | :-------------------------------- |
-| **Open Command Palette**            | `Cmd + K`             | `Ctrl + K`                        |
-| **Close Open Modal / Drawer**       | `Escape`              | `Escape`                          |
-| **Undo Last Edit**                  | `Cmd + Z`             | `Ctrl + Z`                        |
-| **Redo Last Edit**                  | `Cmd + Shift + Z`     | `Ctrl + Y`                        |
-| **Navigate Grid Cells**             | `Tab` / `Shift + Tab` | `Tab` / `Shift + Tab`             |
-| **Submit Natural Language Prompt**  | `Enter`               | `Enter`                           |
-| **Hard Refresh Grid (Clear Cache)** | `Cmd + Shift + R`     | `Ctrl + Shift + R` or `Ctrl + F5` |
+| Category          | Action                                | Mac Shortcut            | Windows / Linux Shortcut          |
+| :---------------- | :------------------------------------ | :---------------------- | :-------------------------------- |
+| **Global**        | Open NLP Command Palette              | `Cmd + K`               | `Ctrl + K`                        |
+|                   | Close Modal / Drawer                  | `Escape`                | `Escape`                          |
+|                   | Hard Refresh & Clear Grid Cache       | `Cmd + Shift + R`       | `Ctrl + Shift + R` or `Ctrl + F5` |
+| **Editing**       | Enter Cell Edit Mode                  | `Enter` or start typing | `Enter` or start typing           |
+|                   | Confirm Cell Edit & Move Down         | `Enter`                 | `Enter`                           |
+|                   | Cancel Cell Edit                      | `Escape`                | `Escape`                          |
+|                   | Navigate Between Cells                | `Tab` / `Shift + Tab`   | `Tab` / `Shift + Tab`             |
+|                   | Directional Navigation                | `Arrow Keys`            | `Arrow Keys`                      |
+| **Range & Batch** | Expand Range Selection Marquee        | `Shift + Arrow Keys`    | `Shift + Arrow Keys`              |
+|                   | Linear Fill Down Active Selection     | `Cmd + D`               | `Ctrl + D`                        |
+|                   | Copy Selected Range (TSV Format)      | `Cmd + C`               | `Ctrl + C`                        |
+|                   | Paste Spreadsheet Data from Clipboard | `Cmd + V`               | `Ctrl + V`                        |
+|                   | Clear Selected Cell Values            | `Delete` or `Backspace` | `Delete` or `Backspace`           |
+| **History**       | Undo Last Edit                        | `Cmd + Z`               | `Ctrl + Z`                        |
+|                   | Redo Last Reverted Edit               | `Cmd + Shift + Z`       | `Ctrl + Y`                        |

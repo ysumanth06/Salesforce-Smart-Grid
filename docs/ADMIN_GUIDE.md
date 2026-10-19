@@ -1127,3 +1127,59 @@ trigger SmartGridAuditTrigger on Smart_Grid_Telemetry__e(after insert) {
 ### Q: Why does the NLP Command Palette say "AI features not licensed"?
 
 **A**: Ensure the user has the `Smart_Grid_AI_Premium` permission set, and verify that `NLP_COMMAND_PALETTE` in **Custom Metadata Types → Smart Grid License** has `Is_Enabled__c = true`.
+
+---
+
+## 21. NextGen Visual Administration Studio & Metadata Deployment
+
+### 21.1 In-App Visual Grid Designer (`smartGridAdminStudio`)
+
+The **Smart Grid Admin Studio** provides a drag-and-drop visual interface for configuring grids without manually editing Custom Metadata records:
+
+- **Target Object Selection**: Choose any standard or custom object from an active schema dropdown.
+- **Dual-Listbox Column Selector**: Pick fields, set custom display labels, configure widths, and toggle inline editability.
+- **Default Filters & Sorting**: Define base SOQL conditions and sort orders.
+- **Live Interactive Preview**: Test the grid layout with real sandbox data before deploying.
+
+### 21.2 Programmatic Apex Metadata API Deployment (`SmartGridMetadataDeployer.cls`)
+
+When an administrator clicks **"Deploy Grid Configuration"** in Admin Studio, Smart Grid constructs and enqueues standard Salesforce Metadata deployment containers:
+
+- Uses `Metadata.Operations.enqueueDeployment` to generate `Smart_Grid_Config__mdt` and `Smart_Grid_Column__mdt` records natively.
+- Implements `Metadata.DeployCallback` to track deployment status and notify the administrator upon completion.
+- Eliminates manual XML file authoring and Change Set overhead.
+
+---
+
+## 22. Enterprise Governance, Cursors & Change Auditing
+
+### 22.1 Global Governance Settings (`Smart_Grid_Admin_Setting__mdt`)
+
+Configure org-wide defaults and enterprise guardrails in **Custom Metadata Types → Smart Grid Admin Setting**:
+
+- `Enable_Transpose_Mode__c`: Globally enables or disables the Transposed Matrix view.
+- `Max_Export_Rows__c`: Caps maximum CSV export rows (default: 50,000).
+- `Enable_Formula_Shield__c`: Enforces RFC-4180 formula injection neutralization across exports and clipboard actions.
+- `Enable_Field_Audit_Log__c`: Toggles transactional before/after field edit logging in `Smart_Grid_Edit_Log__c`.
+
+### 22.2 High-Volume Keyset SOQL Cursor Service (`SmartGridCursorService.cls`)
+
+For datasets exceeding 2,000 records, standard SOQL `OFFSET` queries degrade or throw runtime governor exceptions. Smart Grid uses indexed keyset pagination:
+
+- Queries order by indexed keys (e.g. `Id` or created date) and stream batches via `WHERE Id > :lastSeenId`.
+- Enables smooth navigation across 100,000+ records within standard CPU and heap limits.
+
+### 22.3 Multi-Currency Corporate Normalization (`SmartGridCurrencyService.cls`)
+
+In multi-currency Salesforce orgs:
+
+- Automatically detects active multi-currency state via Schema describe.
+- Queries and caches active `CurrencyType` conversion rates.
+- Normalizes group subtotals and footer aggregates to corporate currency so multi-currency rollups are mathematically accurate.
+
+### 22.4 Field-Level Change Audit Logging (`Smart_Grid_Edit_Log__c`)
+
+When `Enable_Field_Audit_Log__c` is enabled:
+
+- Every save transaction records the User, SObject, Record ID, Field API Name, Old Value, New Value, and Timestamp into `Smart_Grid_Edit_Log__c`.
+- Audit logs are accessible via `SmartGridAuditService.getRecordAuditLogs(recordId)` and displayed in the row action history drawer.
