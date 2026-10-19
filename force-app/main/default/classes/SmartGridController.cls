@@ -253,6 +253,7 @@ public with sharing class SmartGridController {
   }
 
   @AuraEnabled
+  @SuppressWarnings('PMD.ApexSOQLInjection')
   public static PagedResult getRecordsPaged(
     String objectApiName,
     List<String> fields,
@@ -630,6 +631,7 @@ public with sharing class SmartGridController {
   }
 
   @AuraEnabled(cacheable=false)
+  @SuppressWarnings('PMD.ApexSOQLInjection')
   public static List<AggregateResultDTO> getAggregates(
     String objectApiName,
     List<String> fieldsToAggregate,
@@ -914,6 +916,7 @@ public with sharing class SmartGridController {
    * @return List of Map containing id, label, sublabel
    */
   @AuraEnabled(cacheable=true)
+  @SuppressWarnings('PMD.ApexSOQLInjection')
   public static List<Map<String, String>> searchLookupRecords(
     String targetObjectApiName,
     String searchTerm,

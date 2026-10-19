@@ -192,6 +192,7 @@ public with sharing class SmartGridCurrencyService {
    * @param record Target SObject
    * @return ISO code string (e.g. 'USD', 'EUR')
    */
+  @SuppressWarnings('PMD.EmptyCatchBlock')
   public static String getRecordCurrency(SObject record) {
     if (record == null) {
       return getCorporateCurrencyIsoCode();

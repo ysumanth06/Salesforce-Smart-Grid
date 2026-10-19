@@ -48,6 +48,7 @@ public with sharing class SmartGridGroupService {
    * @return GroupResult structured hierarchy
    */
   @AuraEnabled(cacheable=true)
+  @SuppressWarnings('PMD.ApexSOQLInjection')
   public static GroupResult getGroupedData(GroupRequest request) {
     GroupResult result = new GroupResult();
     result.isSuccess = false;

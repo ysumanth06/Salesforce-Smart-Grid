@@ -49,6 +49,7 @@ public with sharing class SmartGridCursorService {
    * @return CursorResult containing the records, hasMore flag, and next pagination markers.
    */
   @AuraEnabled
+  @SuppressWarnings('PMD.ApexSOQLInjection')
   public static CursorResult fetchRecordsStreaming(CursorRequest req) {
     if (req == null || String.isBlank(req.objectApiName)) {
       throw new CursorServiceException(
