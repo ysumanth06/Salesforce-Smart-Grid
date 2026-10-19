@@ -2,7 +2,7 @@
 
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v65.0-blue.svg)](https://developer.salesforce.com)
 [![Apex Tests](https://img.shields.io/badge/Apex%20Tests-100%25%20Passing-success.svg)]()
-[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-206%2F206%20Passing%20(37%20Suites)-success.svg>)]()
+[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-208%2F208%20Passing%20(37%20Suites)-success.svg>)]()
 [![Static Analysis](https://img.shields.io/badge/PMD%20Code%20Analyzer-0%20High%20Violations-brightgreen.svg)]()
 [![Security](https://img.shields.io/badge/Security-USER__MODE%20%7C%20stripInaccessible%20%7C%20FormulaShield-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)]()
@@ -25,7 +25,7 @@
 | :------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- |
 | 📖 **[User Guide](docs/USER_GUIDE.md)**           | In-cell editing, 2D range selection, fill down (`Cmd+D`), bidirectional clipboard, Transposed matrix view, and ⌘K NLP command palette. | Sales Ops, RevOps, Analysts   |
 | 🛠️ **[Administrator Guide](docs/ADMIN_GUIDE.md)** | Metadata architecture (`__mdt`), Visual Admin Studio, permission sets, App Builder deployment, keyset cursors, and org governance.     | Salesforce Admins, Architects |
-| 🧪 **[QA Audit & Test Report](docs/QA_AUDIT.md)** | Full verification matrix, 37 Jest suites (206 unit tests), PMD static analysis, and multi-persona `System.runAs` security validation.  | QA Engineers, Tech Leads      |
+| 🧪 **[QA Audit & Test Report](docs/QA_AUDIT.md)** | Full verification matrix, 37 Jest suites (208 unit tests), PMD static analysis, and multi-persona `System.runAs` security validation.  | QA Engineers, Tech Leads      |
 | 📋 **[Architecture Plan & Changelog](change.md)** | Engineering sprint logs, component specifications, and roadmap evolution.                                                              | Developers, Solution Leads    |
 
 ---
@@ -109,12 +109,14 @@ Standard Salesforce datatables restrict complex field types to read-only views. 
 - **Visual Conditional Formatting Rule Builder**: Configure cell color highlights, text badges, bold/italic font styling, and horizontal data bars based on threshold criteria.
 - **Programmatic Metadata Deployment**: Leverages the Apex Metadata API (`Metadata.Operations.enqueueDeployment`) to save configurations directly to Custom Metadata (`__mdt`) without requiring external CLI tools, VS Code, or manual XML editing.
 
-### 10. AI Copilot & Natural Language Interface
+### 10. AI Copilot, Command Palette & Agentforce Interface
 
-- **⌘K NLP Command Palette (`smartGridCommandPalette`)**: Press `Cmd + K` or `Ctrl + K` to filter, sort, group, or transpose datasets using natural language queries (e.g., _"Show open opportunities over 100k closing this quarter"_).
-- **Automated Dataset Health & Quality Score (`smartGridDataQuality`, `SmartGridDataQualityService`)**: Computes a 0–100 dataset hygiene rating, flagging missing mandatory fields, format irregularities (email, phone), duplicate candidates via fuzzy matching, and statistical outliers.
-- **Context-Aware AI Assistant Drawer (`smartGridAssistant`)**: A side-docked conversational copilot capable of answering analytical questions and generating summaries based on the active grid dataset.
-- **Pluggable AI Architecture (`ISmartGridAIProvider`)**: Extensible interface supporting Salesforce Einstein 1 Platform Models, external LLMs via Named Credentials (`SmartGridExternalAIProvider`), and local deterministic heuristics (`SmartGridMockAIProvider`).
+- **Universal Object-Agnostic & Filter-Aware Intelligence**: Dynamic schema inspection for any standard or custom object. Numeric rollups, picklist distributions, and statistical heuristics automatically adapt to the target object's metadata schema and respect active grid filter clauses with `WITH USER_MODE` security.
+- **Action-Oriented Conversational Copilot (`smartGridAssistant`)**: A side-docked conversational copilot featuring multi-turn conversation memory (`historyJson`). Assistant responses return interactive action chips (`filter`, `group`, `transpose`, `chart`) that execute actions directly in the parent grid with a single click.
+- **Natural Language Bulk DML via ⌘K (`smartGridCommandPalette`, `SmartGridNLPDMLHandler`)**: Execute natural language data updates and deletions (e.g., _"set rating to Hot"_, _"delete selected records"_) complete with pre-flight visual diff confirmation modals, before/after strikethroughs, and atomic chunked DML execution.
+- **Autonomous Agentforce Invocable Actions**: Standard invocable Apex actions for Salesforce Agentforce agents — `SmartGridAgentSummaryService` (automated dataset executive summaries), `SmartGridAgentHealthService` (automated data hygiene audits), and `SmartGridAgentQueryService` (natural language query conversion).
+- **Comprehensive Data Quality & Hygiene Engine (`smartGridDataQuality`, `SmartGridDataQualityService`)**: Computes a 0–100 dataset hygiene rating with one-click grid filtering. Audits missing values, invalid formats, statistical outliers, fuzzy duplicates, date hygiene violations (`CloseDate < TODAY`), and inactive record owners (`Owner.IsActive = false`).
+- **Pluggable Multi-Provider AI Architecture (`ISmartGridAIProvider`)**: Extensible provider interface supporting Salesforce Einstein 1 Platform Models, external LLMs via Named Credentials (with native formatting for OpenAI, Anthropic Claude, and Google Gemini API schemas), and zero-egress deterministic on-platform heuristics (`SmartGridMockAIProvider`).
 
 ### 11. Master-Detail Reading Pane & Linked Child Grids (`smartGridReadingPane`, `smartGridRelatedGrid`)
 
@@ -247,8 +249,9 @@ When licensing commercial grid products, software expenditures scale linearly wi
 │  ├── SmartGridAuditService.cls (Field edit audit logging & change history persistence)          │
 │  ├── SmartGridCurrencyService.cls (Multi-Currency ISO rates & corporate rollup conversion)      │
 │  ├── SmartGridDataQualityService.cls (Dataset hygiene evaluation & duplicate detection)         │
-│  ├── SmartGridNLPEngine.cls & SmartGridNLPDMLHandler.cls (Natural language intent parser)       │
+│  ├── SmartGridNLPEngine.cls & SmartGridNLPDMLHandler.cls (Natural language intent & bulk DML)   │
 │  ├── ISmartGridAIProvider.cls (EinsteinAIProvider, ExternalAIProvider, MockAIProvider)         │
+│  ├── SmartGridAgentSummaryService.cls & SmartGridAgentHealthService.cls (Agentforce Invocables) │
 │  └── SmartGridViewService.cls & SmartGridUserPrefService.cls (Custom views & layout state)      │
 ├─────────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                     DATA & METADATA LAYER                                       │
@@ -279,14 +282,14 @@ When licensing commercial grid products, software expenditures scale linearly wi
 Smart Grid is maintained with comprehensive automated test coverage and static analysis verification:
 
 ```bash
-# Execute the complete LWC Jest unit test suite (37 test suites, 206 tests, 100% pass rate)
+# Execute the complete LWC Jest unit test suite (37 test suites, 208 tests, 100% pass rate)
 npm run test:unit
 
 # Execute ESLint static code analysis
 npx eslint force-app/main/default/lwc/**/*.js
 ```
 
-- **LWC Test Coverage**: 37 comprehensive test suites covering all 39 components with 206 passing unit tests (100% pass rate).
+- **LWC Test Coverage**: 37 comprehensive test suites covering all 39 components with 208 passing unit tests (100% pass rate).
 - **Apex Test Coverage**: All backend Apex domain services maintain code coverage exceeding 90%.
 - **Multi-Persona Security Verification**: `SmartGridPersonaSecurityTest.cls` and `SmartGridNonAdminPersonaTest.cls` validate access privileges across Standard User, Power User, AI Premium, and Administrator personas using `System.runAs`.
 - **Static Analysis Compliance**: Verified 0 High/Critical violations using Salesforce Code Analyzer (PMD).

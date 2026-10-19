@@ -601,6 +601,35 @@ Create a proprietary AI routing provider:
 
 ---
 
+### Option 5: Agentforce & Autonomous AI Agent Invocable Actions
+
+Smart Grid provides standard Salesforce Invocable Actions allowing autonomous **Agentforce Agents** (Sales Agents, Service Agents, RevOps Agents) and Flow automations to interact directly with grid datasets with strict FLS and security:
+
+1. **`SmartGridAgentService.cls` (`Smart Grid: Query Records`)**:
+   - Queries records dynamically for any SObject with FLS enforcement.
+   - Input: `objectApiName`, `fields` (comma-separated), `sortField`, `sortDirection`, `recordLimit`.
+   - Output: `recordCount`, `recordsJson`, `executedSoql`.
+
+2. **`SmartGridAgentSummaryService.cls` (`Smart Grid: Summarize Dataset`)**:
+   - Calculates record totals, numeric sums, averages, and narrative analytical summaries on demand for Agentforce conversations.
+   - Input: `objectApiName`, `numericField`, `groupField`, `filterJson`.
+   - Output: `recordCount`, `totalNumericSum`, `averageNumericValue`, `summaryNarrative`.
+
+3. **`SmartGridAgentHealthService.cls` (`Smart Grid: Audit Data Quality`)**:
+   - Audits data quality, duplicate groups, date hygiene, and missing required values on demand.
+   - Input: `objectApiName`, `fields` (comma-separated).
+   - Output: `healthScore` (0-100), `duplicateCount`, `missingDataCount`, `healthNarrative`.
+
+#### Adding Smart Grid Actions to Agentforce Builder:
+
+1. Navigate to **Setup → Agents → Agentforce Builder**.
+2. Select your Target Agent (e.g. _Service Agent_ or _Sales Rep Assistant_).
+3. Under **Topics → Actions**, click **Add Action** &rarr; Search for **`Smart Grid`**.
+4. Select `Smart Grid: Summarize Dataset` or `Smart Grid: Query Records`.
+5. Enter instructions: _"Use this action when the user asks for dataset metrics, totals, or data health on any Salesforce object."_
+
+---
+
 ### Customizing Heuristic Phrases & Metrics in Apex
 
 To add business-specific metrics to the heuristic engine:

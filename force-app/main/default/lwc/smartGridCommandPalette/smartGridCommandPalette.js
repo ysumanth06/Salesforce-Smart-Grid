@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from "lwc";
 import processPrompt from "@salesforce/apex/SmartGridNLPEngine.processPrompt";
+import previewDML from "@salesforce/apex/SmartGridNLPDMLHandler.previewDML";
 
 const RECENT_STORAGE_KEY = "smartgrid_recent_prompts";
 
@@ -7,6 +8,8 @@ export default class SmartGridCommandPalette extends LightningElement {
   @api objectApiName = "Account";
   @api availableFields = [];
   @api configDevName = "";
+  @api selectedRecordIds = [];
+  @api activeFilters = "";
   _isOpen = false;
 
   @api
@@ -21,6 +24,7 @@ export default class SmartGridCommandPalette extends LightningElement {
   @track isLoading = false;
   @track errorMessage = "";
   @track translationResult = null;
+  @track dmlPreviewResult = null;
   @track recentPrompts = [];
 
   _boundGlobalKeyHandler = null;
@@ -50,6 +54,7 @@ export default class SmartGridCommandPalette extends LightningElement {
     this._isOpen = true;
     this.errorMessage = "";
     this.translationResult = null;
+    this.dmlPreviewResult = null;
     this.loadRecentPrompts();
   }
 
@@ -59,11 +64,12 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.promptText = "";
     this.errorMessage = "";
     this.translationResult = null;
+    this.dmlPreviewResult = null;
     this.dispatchEvent(new CustomEvent("close"));
   }
 
   get computedPlaceholder() {
-    return `Ask AI anything (e.g., "Show high revenue accounts in CA" or "Sort by Rating")...`;
+    return `Ask AI anything (e.g., "Show high revenue accounts in CA" or "Set Rating to Hot")...`;
   }
 
   get hasResult() {
@@ -90,6 +96,44 @@ export default class SmartGridCommandPalette extends LightningElement {
 
   get hasResultFilters() {
     return this.resultFilters.length > 0;
+  }
+
+  get hasDmlPreview() {
+    return Boolean(this.dmlPreviewResult && this.dmlPreviewResult.isSuccess);
+  }
+
+  get dmlExplanation() {
+    return this.dmlPreviewResult ? this.dmlPreviewResult.explanation : "";
+  }
+
+  get dmlOperation() {
+    return this.dmlPreviewResult ? this.dmlPreviewResult.operation : "UPDATE";
+  }
+
+  get dmlBadgeClass() {
+    return this.dmlOperation === "DELETE"
+      ? "slds-badge slds-theme_error"
+      : "slds-badge slds-theme_brand";
+  }
+
+  get dmlTargetObject() {
+    return this.dmlPreviewResult
+      ? this.dmlPreviewResult.targetObject
+      : this.objectApiName;
+  }
+
+  get dmlTotalAffected() {
+    return this.dmlPreviewResult
+      ? this.dmlPreviewResult.totalAffectedRecords
+      : 0;
+  }
+
+  get dmlPreviewRows() {
+    return (this.dmlPreviewResult && this.dmlPreviewResult.previewRows) || [];
+  }
+
+  get hasDmlDiffs() {
+    return this.dmlPreviewRows.length > 0;
   }
 
   get suggestedPrompts() {
@@ -149,6 +193,7 @@ export default class SmartGridCommandPalette extends LightningElement {
 
   handleClearResult() {
     this.translationResult = null;
+    this.dmlPreviewResult = null;
     this.promptText = "";
   }
 
@@ -161,6 +206,7 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.isLoading = true;
     this.errorMessage = "";
     this.translationResult = null;
+    this.dmlPreviewResult = null;
 
     // Direct Workflow Command Matchers
     if (/\btranspose\b/i.test(text)) {
@@ -202,6 +248,33 @@ export default class SmartGridCommandPalette extends LightningElement {
       return;
     }
 
+    // Natural Language DML Updates & Deletes
+    const isDml = /^(set|update|mark|change|delete|remove)\b/i.test(text);
+    if (isDml) {
+      try {
+        const dmlRes = await previewDML({
+          prompt: text,
+          objectApiName: this.objectApiName || "Account",
+          selectedRecordIds: this.selectedRecordIds || [],
+          activeFilterJson: this.activeFilters || ""
+        });
+        if (dmlRes && dmlRes.isSuccess) {
+          this.dmlPreviewResult = dmlRes;
+          this.saveRecentPrompt(text);
+        } else {
+          this.errorMessage =
+            (dmlRes && dmlRes.errorMessage) ||
+            "Could not process DML instruction. Please specify field and value.";
+        }
+      } catch (err) {
+        this.errorMessage =
+          err?.body?.message || err?.message || "Failed to preview DML.";
+      } finally {
+        this.isLoading = false;
+      }
+      return;
+    }
+
     try {
       const result = await processPrompt({
         prompt: text,
@@ -227,6 +300,18 @@ export default class SmartGridCommandPalette extends LightningElement {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  handleApplyDml() {
+    if (!this.hasDmlPreview) return;
+    this.dispatchEvent(
+      new CustomEvent("applydml", {
+        detail: {
+          ...this.dmlPreviewResult
+        }
+      })
+    );
+    this.closeModal();
   }
 
   handleApplyResult() {

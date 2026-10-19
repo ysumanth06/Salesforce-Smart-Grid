@@ -121,6 +121,76 @@
             </div>
           </template>
 
+          <!-- DML Action Preview Banner -->
+          <template lwc:if={hasDmlPreview}>
+            <div
+              class="result-card dml-card slds-var-p-around_small slds-var-m-bottom_small"
+            >
+              <div
+                class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-var-m-bottom_x-small"
+              >
+                <div class="slds-grid slds-grid_vertical-align-center">
+                  <lightning-icon
+                    icon-name="utility:change_record_type"
+                    size="x-small"
+                    class="slds-var-m-right_xx-small"
+                  ></lightning-icon>
+                  <span class="result-title slds-text-title_bold"
+                    >{dmlExplanation}</span
+                  >
+                </div>
+                <span class={dmlBadgeClass}>{dmlOperation}</span>
+              </div>
+
+              <div
+                class="dml-summary-text slds-text-body_small slds-var-m-bottom_x-small"
+              >
+                Target: <strong>{dmlTargetObject}</strong> &bull; Total
+                Affected: <strong>{dmlTotalAffected} records</strong>
+              </div>
+
+              <!-- Visual Diffs Table -->
+              <template lwc:if={hasDmlDiffs}>
+                <div class="dml-diff-table slds-var-m-bottom_x-small">
+                  <template for:each={dmlPreviewRows} for:item="diffRow">
+                    <div
+                      key={diffRow.recordId}
+                      class="diff-row slds-grid slds-grid_vertical-align-center slds-var-p-vertical_xxx-small"
+                    >
+                      <span class="diff-record-name slds-truncate slds-grow"
+                        >{diffRow.recordName}</span
+                      >
+                      <template for:each={diffRow.changes} for:item="chg">
+                        <span key={chg.fieldName} class="diff-change-badge">
+                          <span class="diff-field">{chg.fieldName}: </span>
+                          <span class="diff-old">{chg.oldValue}</span>
+                          <span class="diff-arrow">&rarr;</span>
+                          <span class="diff-new">{chg.newValue}</span>
+                        </span>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
+              <div class="slds-grid slds-grid_align-end slds-var-m-top_small">
+                <button
+                  class="slds-button slds-button_neutral slds-var-m-right_x-small"
+                  onclick={handleClearResult}
+                >
+                  Cancel
+                </button>
+                <button
+                  class="slds-button slds-button_brand"
+                  onclick={handleApplyDml}
+                  data-testid="apply-ai-dml-btn"
+                >
+                  Confirm &amp; Apply Changes
+                </button>
+              </div>
+            </div>
+          </template>
+
           <!-- Error Alert -->
           <template lwc:if={errorMessage}>
             <div

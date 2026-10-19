@@ -121,4 +121,52 @@ describe("c-smart-grid-assistant", () => {
     expect(closeHandler).toHaveBeenCalled();
     expect(element.isOpen).toBe(false);
   });
+
+  it("renders action chips and dispatches assistantaction event when clicked", async () => {
+    askAssistant.mockResolvedValue({
+      isSuccess: true,
+      answer: "Total revenue is $5M.",
+      actions: [
+        { label: "Group by Industry", actionType: "group", payload: "Industry" }
+      ]
+    });
+
+    const element = createElement("c-smart-grid-assistant", {
+      is: SmartGridAssistant
+    });
+    element.isOpen = true;
+    document.body.appendChild(element);
+
+    const actionHandler = jest.fn();
+    element.addEventListener("assistantaction", actionHandler);
+
+    const input = element.shadowRoot.querySelector(
+      '[data-testid="assistant-input"]'
+    );
+    input.value = "Show total revenue";
+    input.dispatchEvent(new CustomEvent("input"));
+
+    await Promise.resolve();
+
+    const sendBtn = element.shadowRoot.querySelector(
+      '[data-testid="assistant-send-btn"]'
+    );
+    sendBtn.click();
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const actionChip = element.shadowRoot.querySelector(
+      '[data-testid="assistant-action-chip"]'
+    );
+    expect(actionChip).not.toBeNull();
+    actionChip.click();
+
+    expect(actionHandler).toHaveBeenCalled();
+    expect(actionHandler.mock.calls[0][0].detail).toEqual({
+      actionType: "group",
+      payload: "Industry",
+      label: "Group by Industry"
+    });
+  });
 });

@@ -298,6 +298,68 @@ public with sharing class SmartGridDataQualityService {
         }
       }
 
+      // 5. Date Hygiene Check (Overdue Open Dates)
+      if (
+        fieldMap.containsKey('closedate') && fieldMap.containsKey('isclosed')
+      ) {
+        try {
+          String overdueQuery =
+            'SELECT COUNT() FROM ' +
+            String.escapeSingleQuotes(objectApiName) +
+            ' WHERE CloseDate < TODAY AND IsClosed = false';
+          Integer overdueCount = Database.countQuery(
+            overdueQuery,
+            AccessLevel.USER_MODE
+          );
+          if (overdueCount > 0) {
+            QualityIssue issue = new QualityIssue();
+            issue.issueType = 'DATE_HYGIENE';
+            issue.fieldName = 'CloseDate';
+            issue.fieldLabel = fieldMap.get('closedate')
+              .getDescribe()
+              .getLabel();
+            issue.severity = 'HIGH';
+            issue.description =
+              overdueCount +
+              ' open records have expired / overdue target dates.';
+            issue.affectedCount = overdueCount;
+            result.issues.add(issue);
+            penaltyPoints += 15;
+          }
+        } catch (Exception ex) {
+          // Field combination may vary by object
+        }
+      }
+
+      // 6. Inactive Owner Check
+      if (fieldMap.containsKey('ownerid')) {
+        try {
+          String ownerQuery =
+            'SELECT COUNT() FROM ' +
+            String.escapeSingleQuotes(objectApiName) +
+            ' WHERE Owner.IsActive = false';
+          Integer inactiveCount = Database.countQuery(
+            ownerQuery,
+            AccessLevel.USER_MODE
+          );
+          if (inactiveCount > 0) {
+            QualityIssue issue = new QualityIssue();
+            issue.issueType = 'INACTIVE_OWNER';
+            issue.fieldName = 'OwnerId';
+            issue.fieldLabel = 'Record Owner';
+            issue.severity = 'HIGH';
+            issue.description =
+              inactiveCount +
+              ' records are assigned to inactive user accounts.';
+            issue.affectedCount = inactiveCount;
+            result.issues.add(issue);
+            penaltyPoints += 10;
+          }
+        } catch (Exception ex) {
+          // Owner relationship may not be User
+        }
+      }
+
       result.healthScore = Math.max(0, 100 - penaltyPoints);
       result.isSuccess = true;
     } catch (Exception ex) {

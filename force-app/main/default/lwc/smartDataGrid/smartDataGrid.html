@@ -543,7 +543,10 @@
     object-api-name={objectApiName}
     available-fields={visibleFieldNames}
     config-dev-name={gridConfigName}
+    selected-record-ids={selectedRowIds}
+    active-filters={activeFilterJson}
     onapplyfilters={handleApplyAIFilters}
+    onapplydml={handleApplyAIDml}
     onclose={handleCloseCommandPalette}
   ></c-smart-grid-command-palette>
 
@@ -554,6 +557,7 @@
     active-filters={activeFilterJson}
     visible-fields={visibleFieldNames}
     config-dev-name={gridConfigName}
+    onassistantaction={handleAssistantAction}
     onclose={handleCloseAssistant}
   ></c-smart-grid-assistant>
 
@@ -562,6 +566,7 @@
     is-open={showDataQuality}
     object-api-name={objectApiName}
     available-fields={visibleFieldNames}
+    onfilterissue={handleFilterIssue}
     onclose={handleCloseDataQuality}
   ></c-smart-grid-data-quality>
 

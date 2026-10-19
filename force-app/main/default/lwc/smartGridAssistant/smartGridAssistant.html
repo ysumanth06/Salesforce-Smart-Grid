@@ -108,6 +108,30 @@
                   <span class="msg-sender">Smart Grid AI</span>
                 </div>
                 <div class="msg-content">{msg.text}</div>
+                <template lwc:if={msg.hasActions}>
+                  <div
+                    class="msg-actions slds-grid slds-wrap slds-var-m-top_x-small"
+                  >
+                    <template for:each={msg.actions} for:item="act">
+                      <button
+                        key={act.label}
+                        class="action-chip slds-button slds-button_neutral slds-var-m-right_xx-small slds-var-m-bottom_xx-small"
+                        data-action-type={act.actionType}
+                        data-payload={act.payload}
+                        data-label={act.label}
+                        onclick={handleActionClick}
+                        data-testid="assistant-action-chip"
+                      >
+                        <lightning-icon
+                          icon-name="utility:sparkles"
+                          size="xx-small"
+                          class="slds-var-m-right_xxx-small"
+                        ></lightning-icon>
+                        {act.label}
+                      </button>
+                    </template>
+                  </div>
+                </template>
               </div>
             </template>
             <template lwc:else>

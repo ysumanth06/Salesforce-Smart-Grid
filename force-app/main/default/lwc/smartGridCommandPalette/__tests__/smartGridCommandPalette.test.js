@@ -1,9 +1,18 @@
 import { createElement } from "@lwc/engine-dom";
 import SmartGridCommandPalette from "c/smartGridCommandPalette";
 import processPrompt from "@salesforce/apex/SmartGridNLPEngine.processPrompt";
+import previewDML from "@salesforce/apex/SmartGridNLPDMLHandler.previewDML";
 
 jest.mock(
   "@salesforce/apex/SmartGridNLPEngine.processPrompt",
+  () => ({
+    default: jest.fn()
+  }),
+  { virtual: true }
+);
+
+jest.mock(
+  "@salesforce/apex/SmartGridNLPDMLHandler.previewDML",
   () => ({
     default: jest.fn()
   }),
@@ -199,5 +208,57 @@ describe("c-smart-grid-command-palette", () => {
     const eventDetail = applyHandler.mock.calls[0][0].detail;
     expect(eventDetail.action).toBe("group");
     expect(eventDetail.groupFields).toEqual(["Industry", "Type"]);
+  });
+
+  it("handles DML update command and dispatches applydml event", async () => {
+    previewDML.mockResolvedValue({
+      isSuccess: true,
+      operation: "UPDATE",
+      explanation: "Set Rating to Hot",
+      targetObject: "Account",
+      totalAffectedRecords: 2,
+      previewRows: [
+        {
+          recordId: "001xx000003DHPxAAO",
+          recordName: "Acme Corp",
+          changes: [{ fieldName: "Rating", oldValue: "Cold", newValue: "Hot" }]
+        }
+      ]
+    });
+
+    const element = createElement("c-smart-grid-command-palette", {
+      is: SmartGridCommandPalette
+    });
+    element.isOpen = true;
+    element.selectedRecordIds = ["001xx000003DHPxAAO"];
+    document.body.appendChild(element);
+
+    const applyDmlHandler = jest.fn();
+    element.addEventListener("applydml", applyDmlHandler);
+
+    const input = element.shadowRoot.querySelector(
+      '[data-testid="palette-input"]'
+    );
+    input.value = "Set Rating to Hot";
+    input.dispatchEvent(new CustomEvent("input"));
+
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Enter"
+      })
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(previewDML).toHaveBeenCalled();
+    const applyDmlBtn = element.shadowRoot.querySelector(
+      '[data-testid="apply-ai-dml-btn"]'
+    );
+    expect(applyDmlBtn).not.toBeNull();
+    applyDmlBtn.click();
+
+    expect(applyDmlHandler).toHaveBeenCalled();
+    expect(applyDmlHandler.mock.calls[0][0].detail.operation).toBe("UPDATE");
   });
 });

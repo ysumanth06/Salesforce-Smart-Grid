@@ -268,6 +268,7 @@ _(Requires `Smart_Grid_AI_Premium` Permission Set)_
 Press `Cmd + K` (Mac) or `Ctrl + K` (Windows) from anywhere inside the grid to open the global command palette:
 
 - **Natural Language Filtering**: Type _"Show high-priority cases from last week"_ &rarr; Applies the corresponding date and priority filters automatically.
+- **Natural Language Bulk DML**: Type _"Set Rating to Hot for selected rows"_ or _"Update Status to Closed"_ &rarr; Smart Grid generates a pre-flight visual diff showing previous values with red strike-through and new values in green before committing changes safely via `WITH USER_MODE`.
 - **Workflow Shortcuts**: Type _"Transpose"_ &rarr; Swings into Matrix comparison mode.
 - **Analytical Actions**: Type _"Group by Stage and show chart"_ &rarr; Groups rows and opens the pipeline chart drawer.
 
@@ -275,19 +276,23 @@ Press `Cmd + K` (Mac) or `Ctrl + K` (Windows) from anywhere inside the grid to o
 
 Click the **Heartbeat** icon in the toolbar to inspect dataset hygiene:
 
-- **Overall Health Score (0 - 100)**: Evaluates missing critical fields, anomalous outliers, and potential duplicates.
-- **Duplicate Candidates**: Identifies accounts or contacts sharing identical email domains, phone numbers, or normalized names.
-- **Outlier Detection**: Highlights numeric values that deviate significantly from segment averages (e.g., an Opportunity amount 5x above average).
+- **Overall Health Score (0 - 100)**: Evaluates missing critical fields, anomalous outliers, date hygiene, and potential duplicates.
+- **One-Click "Filter Grid to Review"**: Click the action button on any detected issue card to immediately filter the grid to affected records (e.g. isolate rows missing phone numbers, or review accounts with overdue close dates).
+- **Duplicate Candidates**: Identifies records sharing identical email domains, phone numbers, or normalized names.
+- **Date Hygiene & Inactive Owners**: Flags open records with expired target dates or records assigned to inactive user accounts.
+- **Outlier Detection**: Highlights numeric values that deviate significantly from segment averages (e.g., an Opportunity amount 4x above average).
 
-### Conversational Smart Grid Assistant
+### Action-Oriented Conversational Copilot
 
 Click the **Sparkle** icon in the toolbar to slide out the conversational assistant:
 
-- Understands the exact records and filtered subset currently on your screen.
-- Ask questions like:
-  - _"What is our total pipeline in the Negotiation stage?"_
-  - _"Which accounts in California have no open activities?"_
-- Receive structured summaries and actionable recommendations with clickable record chips.
+- **Context-Aware Analytics**: Understands the exact records and filtered subset currently on your screen across any standard or custom object.
+- **Interactive Action Chips**: In addition to natural language narrative answers, the Copilot provides one-click action buttons inside the chat thread:
+  - `[🔍 Filter Records > Avg]` &rarr; Filters grid to high-value items in one click.
+  - `[📊 Group by Category]` &rarr; Groups active rows in the Analytics drawer.
+  - `[📑 Switch to Transpose View]` &rarr; Pivots the dataset into matrix comparison mode.
+  - `[📈 Open Analytics Charts]` &rarr; Opens real-time vector SVG charts.
+- **Multi-Turn Conversational Memory**: The Copilot remembers recent questions in your session, allowing you to ask follow-up questions naturally (e.g. _"What is our total pipeline?"_ followed by _"How many of those are in California?"_).
 
 ### Interactive Onboarding Tour
 

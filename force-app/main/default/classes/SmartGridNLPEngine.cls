@@ -66,6 +66,27 @@ public with sharing class SmartGridNLPEngine {
   }
 
   /**
+   * @description DTO representing an executable action suggestion from the conversational assistant
+   */
+  public class AssistantAction {
+    @AuraEnabled
+    public String label { get; set; }
+    @AuraEnabled
+    public String actionType { get; set; } // filter, group, transpose, chart
+    @AuraEnabled
+    public String payload { get; set; }
+
+    public AssistantAction() {
+    }
+
+    public AssistantAction(String label, String actionType, String payload) {
+      this.label = label;
+      this.actionType = actionType;
+      this.payload = payload;
+    }
+  }
+
+  /**
    * @description DTO representing a conversational assistant inquiry
    */
   public class AssistantRequest {
@@ -79,6 +100,8 @@ public with sharing class SmartGridNLPEngine {
     public List<String> visibleFields { get; set; }
     @AuraEnabled
     public String configDevName { get; set; }
+    @AuraEnabled
+    public String historyJson { get; set; }
 
     public AssistantRequest() {
       this.visibleFields = new List<String>();
@@ -96,10 +119,13 @@ public with sharing class SmartGridNLPEngine {
     @AuraEnabled
     public String computedValue { get; set; }
     @AuraEnabled
+    public List<AssistantAction> actions { get; set; }
+    @AuraEnabled
     public String errorMessage { get; set; }
 
     public AssistantResult() {
       this.isSuccess = false;
+      this.actions = new List<AssistantAction>();
     }
   }
 
@@ -183,13 +209,24 @@ public with sharing class SmartGridNLPEngine {
    * @param configDevName Configuration name
    * @return AssistantResult containing the analytical answer
    */
+  /**
+   * @description Main entry point for conversational analytics assistant with conversation history
+   * @param question Natural language analytical question
+   * @param objectApiName SObject API name
+   * @param activeFilters Currently active filter expression or JSON
+   * @param visibleFields List of visible column field names
+   * @param configDevName Configuration name
+   * @param historyJson JSON-serialized recent chat messages
+   * @return AssistantResult containing the analytical answer and actionable chips
+   */
   @AuraEnabled
   public static AssistantResult askAssistant(
     String question,
     String objectApiName,
     String activeFilters,
     List<String> visibleFields,
-    String configDevName
+    String configDevName,
+    String historyJson
   ) {
     if (String.isBlank(question)) {
       AssistantResult err = new AssistantResult();
@@ -207,9 +244,30 @@ public with sharing class SmartGridNLPEngine {
       ? visibleFields
       : new List<String>();
     req.configDevName = configDevName;
+    req.historyJson = historyJson;
 
     ISmartGridAIProvider provider = getProvider(configDevName);
     return provider.answerQuestion(req);
+  }
+
+  /**
+   * @description Overload for Apex callers providing 5 arguments without history
+   */
+  public static AssistantResult askAssistant(
+    String question,
+    String objectApiName,
+    String activeFilters,
+    List<String> visibleFields,
+    String configDevName
+  ) {
+    return askAssistant(
+      question,
+      objectApiName,
+      activeFilters,
+      visibleFields,
+      configDevName,
+      null
+    );
   }
 
   /**

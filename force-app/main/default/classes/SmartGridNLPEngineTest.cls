@@ -275,4 +275,23 @@ private class SmartGridNLPEngineTest {
       'Should return matching test accounts'
     );
   }
+
+  @IsTest
+  static void testAskAssistant_WithActionChipsAndHistory() {
+    Test.startTest();
+    String historyJson = '[{"isAssistant":false,"text":"What is the total revenue?"},{"isAssistant":true,"text":"Total revenue is $1,000,000"}]';
+    SmartGridNLPEngine.AssistantResult res = SmartGridNLPEngine.askAssistant(
+      'Summarize current view',
+      'Account',
+      null,
+      new List<String>{ 'Id', 'Name', 'AnnualRevenue', 'Industry' },
+      null,
+      historyJson
+    );
+    Test.stopTest();
+
+    Assert.isTrue(res.isSuccess);
+    Assert.isNotNull(res.actions, 'Action chips list should be initialized');
+    Assert.isFalse(res.actions.isEmpty(), 'Action chips should be generated');
+  }
 }

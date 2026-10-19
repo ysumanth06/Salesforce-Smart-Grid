@@ -80,6 +80,11 @@ export default class SmartGridAssistant extends LightningElement {
     if (!q || this.isThinking) return;
 
     const userMsgId = `msg-user-${Date.now()}`;
+    const recentHistory = this.messages.slice(-4).map((m) => ({
+      isAssistant: m.isAssistant,
+      text: m.text
+    }));
+
     this.messages = [
       ...this.messages,
       {
@@ -102,7 +107,8 @@ export default class SmartGridAssistant extends LightningElement {
           this.visibleFields && this.visibleFields.length > 0
             ? this.visibleFields
             : ["Id", "Name", "AnnualRevenue"],
-        configDevName: this.configDevName || ""
+        configDevName: this.configDevName || "",
+        historyJson: JSON.stringify(recentHistory)
       });
 
       const assistantText =
@@ -110,12 +116,16 @@ export default class SmartGridAssistant extends LightningElement {
           ? res.answer
           : res?.errorMessage || "I encountered an issue computing the answer.";
 
+      const actions = (res && res.actions) || [];
+
       this.messages = [
         ...this.messages,
         {
           id: `msg-ai-${Date.now()}`,
           text: assistantText,
           isAssistant: true,
+          actions: actions,
+          hasActions: actions.length > 0,
           containerClass: "msg-row assistant-row"
         }
       ];
@@ -129,6 +139,8 @@ export default class SmartGridAssistant extends LightningElement {
             err?.message ||
             "Unable to connect to AI assistant.",
           isAssistant: true,
+          actions: [],
+          hasActions: false,
           containerClass: "msg-row assistant-row"
         }
       ];
@@ -136,6 +148,22 @@ export default class SmartGridAssistant extends LightningElement {
       this.isThinking = false;
       this.scrollToBottom();
     }
+  }
+
+  handleActionClick(event) {
+    const actionType = event.currentTarget.dataset.actionType;
+    const payload = event.currentTarget.dataset.payload;
+    const label = event.currentTarget.dataset.label;
+
+    this.dispatchEvent(
+      new CustomEvent("assistantaction", {
+        detail: {
+          actionType,
+          payload,
+          label
+        }
+      })
+    );
   }
 
   scrollToBottom() {

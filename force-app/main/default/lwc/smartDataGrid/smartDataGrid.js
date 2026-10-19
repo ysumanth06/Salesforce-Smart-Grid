@@ -5,6 +5,7 @@ import saveRecords from "@salesforce/apex/SmartGridController.saveRecords";
 import getPicklistValues from "@salesforce/apex/SmartGridController.getPicklistValues";
 import getObjectFields from "@salesforce/apex/SmartGridController.getObjectFields";
 import deleteRecords from "@salesforce/apex/SmartGridController.deleteRecords";
+import executeDML from "@salesforce/apex/SmartGridNLPDMLHandler.executeDML";
 import LightningConfirm from "lightning/confirm";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getPrefs from "@salesforce/apex/SmartGridUserPrefService.getPrefs";
@@ -2020,6 +2021,217 @@ export default class SmartDataGrid extends LightningElement {
     this.currentPage = 1;
     this.updateActivePills();
     await this.fetchData(true);
+  }
+
+  get selectedRowIds() {
+    return (this.selectedRowsList || []).map((r) => r.Id).filter(Boolean);
+  }
+
+  async handleAssistantAction(event) {
+    const detail = event.detail || {};
+    const { actionType, payload, label } = detail;
+
+    if (actionType === "chart") {
+      this.showChartPanel = true;
+      return;
+    }
+
+    if (actionType === "transpose") {
+      this.handleOpenTranspose();
+      return;
+    }
+
+    if (actionType === "group" && payload) {
+      this.chartGroupByField = payload;
+      this.showChartPanel = true;
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "AI Action Applied",
+          message: `Grouped data by ${payload} in Analytics Panel`,
+          variant: "info"
+        })
+      );
+      return;
+    }
+
+    if (actionType === "filter") {
+      let field = payload;
+      let operator = "!=";
+      let val = null;
+
+      if (typeof payload === "string" && payload.startsWith("{")) {
+        try {
+          const parsed = JSON.parse(payload);
+          field = parsed.field;
+          operator = parsed.operator || "=";
+          val = parsed.value;
+        } catch {
+          field = payload;
+        }
+      }
+
+      const newPill = {
+        id: `ai_action_${Date.now()}`,
+        fieldName: field,
+        fieldLabel: field,
+        value: val !== null ? val : "Active",
+        displayLabel: `AI: ${label || field}`,
+        source: "ai",
+        operator: operator
+      };
+
+      this.aiFilterPills = [newPill];
+      const expr = {
+        logic: "AND",
+        conditions: [
+          {
+            field: field,
+            operator: operator,
+            value: val
+          }
+        ],
+        groups: []
+      };
+      this.activeFilterJson = JSON.stringify(expr);
+      this.pageCache.clear();
+      this.currentPage = 1;
+      this.updateActivePills();
+      await this.fetchData(true);
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "AI Filter Applied",
+          message: `Grid filtered to ${label || field}`,
+          variant: "success"
+        })
+      );
+    }
+  }
+
+  async handleFilterIssue(event) {
+    const detail = event.detail || {};
+    const { fieldName, issueType } = detail;
+    if (!fieldName) return;
+
+    let op = "=";
+    let val = null;
+    let label = `Missing ${fieldName}`;
+
+    if (issueType === "MISSING_DATA") {
+      op = "=";
+      val = "";
+      label = `Missing ${fieldName}`;
+    } else if (issueType === "DUPLICATE") {
+      op = "!=";
+      val = "";
+      label = `Review Duplicates: ${fieldName}`;
+    } else if (issueType === "OUTLIER") {
+      op = ">";
+      val = "0";
+      label = `Outlier Review: ${fieldName}`;
+    } else if (issueType === "DATE_HYGIENE") {
+      op = "<";
+      val = "TODAY";
+      label = `Overdue: ${fieldName}`;
+    } else if (issueType === "INACTIVE_OWNER") {
+      op = "!=";
+      val = "";
+      label = `Inactive Owner Review`;
+    }
+
+    const pill = {
+      id: `quality_${Date.now()}`,
+      fieldName: fieldName,
+      fieldLabel: fieldName,
+      value: val || "null",
+      displayLabel: label,
+      source: "data_quality",
+      operator: op
+    };
+
+    this.aiFilterPills = [pill];
+    const expr = {
+      logic: "AND",
+      conditions: [
+        {
+          field: fieldName,
+          operator: op,
+          value: val
+        }
+      ],
+      groups: []
+    };
+    this.activeFilterJson = JSON.stringify(expr);
+    this.pageCache.clear();
+    this.currentPage = 1;
+    this.updateActivePills();
+    await this.fetchData(true);
+
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title: "Quality Filter Active",
+        message: `Grid filtered to inspect ${label}`,
+        variant: "info"
+      })
+    );
+  }
+
+  async handleApplyAIDml(event) {
+    const detail = event.detail || {};
+    const { operation, recordIds, fieldUpdatesJson, explanation } = detail;
+    if (!recordIds || recordIds.length === 0) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "No Records Selected",
+          message:
+            "Please select records in the grid before executing bulk updates.",
+          variant: "warning"
+        })
+      );
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      const result = await executeDML({
+        operation: operation || "UPDATE",
+        recordIds: recordIds,
+        fieldUpdatesJson: fieldUpdatesJson || "{}"
+      });
+
+      if (result && result.isSuccess) {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "DML Execution Succeeded",
+            message: `Successfully updated ${result.successCount} record(s). ${explanation || ""}`,
+            variant: "success"
+          })
+        );
+        this.pageCache.clear();
+        await this.fetchData(true);
+      } else {
+        const errors =
+          (result && result.errorMessages && result.errorMessages.join("; ")) ||
+          "Execution failed.";
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "DML Partially Failed",
+            message: errors,
+            variant: "error"
+          })
+        );
+      }
+    } catch (err) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Execution Error",
+          message:
+            err?.body?.message || err?.message || "Failed to execute DML.",
+          variant: "error"
+        })
+      );
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   // ─── Utilities ───
