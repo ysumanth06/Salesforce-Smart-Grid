@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Smart Grid Cell Multi-Picklist</masterLabel>
+    <description
+  >Enterprise multi-checkbox combobox with search and bulk selection controls.</description>
+</LightningComponentBundle>

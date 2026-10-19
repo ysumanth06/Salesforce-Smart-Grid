@@ -1,0 +1,70 @@
+.owner-cell-container {
+  position: relative;
+  width: 100%;
+}
+
+.owner-display-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: cell;
+  padding: 2px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.owner-display-wrapper:hover {
+  background-color: #f3f3f3;
+  border-radius: 2px;
+}
+
+.owner-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 260px;
+  max-height: 250px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.owner-type-toggle {
+  display: flex;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dddbda;
+}
+
+.owner-type-tab {
+  flex: 1;
+  text-align: center;
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.owner-type-tab.is-active {
+  border-bottom: 2px solid #0176d3;
+  color: #0176d3;
+  background-color: #ffffff;
+}
+
+.owner-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.owner-item:hover {
+  background-color: #f4f6fe;
+}

@@ -13,6 +13,7 @@ import getFormatRules from "@salesforce/apex/SmartGridController.getFormatRules"
 import getAggregates from "@salesforce/apex/SmartGridController.getAggregates";
 import logQueryHistory from "@salesforce/apex/SmartGridController.logQueryHistory";
 import checkFeatureEntitlements from "@salesforce/apex/SmartGridLicenseService.checkFeatureEntitlements";
+import getGridUserEntitlements from "@salesforce/apex/SmartGridLicenseService.getGridUserEntitlements";
 import { exportToCSV } from "c/csvHelper";
 import { exportToExcel } from "c/spreadsheetExporter";
 import { reduceErrors } from "c/errorUtils";
@@ -76,6 +77,9 @@ export default class SmartDataGrid extends LightningElement {
   @track showAssistant = false;
   @track showDataQuality = false;
   @track showOnboarding = false;
+  @track showChartPanel = false;
+  @track chartGroupByField = "Industry";
+  @track chartAggregateField = "AnnualRevenue";
   @track entitlements = {
     CORE_GRID: true,
     NLP_COMMAND_PALETTE: true,
@@ -92,6 +96,43 @@ export default class SmartDataGrid extends LightningElement {
   }
   get canUseDataQuality() {
     return this.entitlements?.AI_SUGGESTIONS !== false;
+  }
+
+  @track isTransposeActive = false;
+  @track gridEntitlements = {
+    CAN_TRANSPOSE: true,
+    CAN_USE_AI: true,
+    IS_ADMIN: false,
+    MAX_TRANSPOSE_COUNT: 20,
+    DEFAULT_COLUMN_WIDTH: 140
+  };
+
+  get canTranspose() {
+    return this.gridEntitlements?.CAN_TRANSPOSE !== false;
+  }
+
+  get disableTranspose() {
+    return (
+      !this.selectedRowsList ||
+      this.selectedRowsList.length < 2 ||
+      this.isLoading
+    );
+  }
+
+  get maxTransposeLimit() {
+    return this.gridEntitlements?.MAX_TRANSPOSE_COUNT || 20;
+  }
+
+  get selectedRecordsForTranspose() {
+    if (!this.selectedRowsList || this.selectedRowsList.length === 0) {
+      return [];
+    }
+    const selectedIds = new Set(this.selectedRowsList);
+    return (this.gridData || []).filter((rec) => selectedIds.has(rec.Id));
+  }
+
+  get showPaginationFooter() {
+    return !!this.gridColumns && !this.isTransposeActive;
   }
 
   get visibleFieldNames() {
@@ -1910,7 +1951,38 @@ export default class SmartDataGrid extends LightningElement {
 
   async handleApplyAIFilters(event) {
     const detail = event.detail || {};
-    const { filters, sortField, sortDirection } = detail;
+    const { action, groupFields, filters, sortField, sortDirection } = detail;
+
+    if (action === "transpose") {
+      if (
+        this.selectedRecordsForTranspose.length < 2 &&
+        this.tableData.length >= 2
+      ) {
+        this.selectedRows = this.tableData
+          .slice(0, Math.min(this.maxTransposeLimit, 3))
+          .map((r) => r.Id);
+      }
+      this.handleOpenTranspose();
+      return;
+    }
+
+    if (action === "chart") {
+      this.showChartPanel = true;
+      return;
+    }
+
+    if (action === "group" && groupFields && groupFields.length > 0) {
+      this.chartGroupByField = groupFields[0];
+      this.showChartPanel = true;
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Grouping Applied",
+          message: `Aggregated data by ${groupFields.join(", ")} in Analytics Panel`,
+          variant: "info"
+        })
+      );
+      return;
+    }
 
     if (filters && Array.isArray(filters)) {
       this.aiFilterPills = filters.map((f, idx) => ({
@@ -2111,9 +2183,48 @@ export default class SmartDataGrid extends LightningElement {
       if (res) {
         this.entitlements = { ...this.entitlements, ...res };
       }
+      const gridRes = await getGridUserEntitlements({
+        gridConfigName: this.gridConfigName || ""
+      });
+      if (gridRes) {
+        this.gridEntitlements = { ...this.gridEntitlements, ...gridRes };
+      }
     } catch (e) {
       console.warn("Could not load feature entitlements:", e);
     }
+  }
+
+  handleOpenTranspose() {
+    if (this.selectedRecordsForTranspose.length < 2) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Transpose Selection",
+          message: "Please select at least 2 records to transpose.",
+          variant: "info"
+        })
+      );
+      return;
+    }
+    this.isTransposeActive = true;
+  }
+
+  handleCloseTranspose() {
+    this.isTransposeActive = false;
+  }
+
+  handleTransposeCellChange(event) {
+    const { recordId, fieldName, value } = event.detail;
+    if (!recordId || !fieldName) return;
+    this.handleCellChange({
+      detail: {
+        draftValues: [
+          {
+            Id: recordId,
+            [fieldName]: value
+          }
+        ]
+      }
+    });
   }
 
   handleOpenAssistant() {
@@ -2138,6 +2249,14 @@ export default class SmartDataGrid extends LightningElement {
 
   handleCloseOnboarding() {
     this.showOnboarding = false;
+  }
+
+  handleOpenChartPanel() {
+    this.showChartPanel = true;
+  }
+
+  handleCloseChartPanel() {
+    this.showChartPanel = false;
   }
 
   handlePicklistChange(event) {
@@ -2195,8 +2314,8 @@ export default class SmartDataGrid extends LightningElement {
         this.activeFilterJson = null;
       }
       if (Array.isArray(config.columns) && config.columns.length > 0) {
-        this.pickerSelectedFields = config.columns.map(
-          (c) => (typeof c === "string" ? c : c.fieldApiName || c.fieldName || c)
+        this.pickerSelectedFields = config.columns.map((c) =>
+          typeof c === "string" ? c : c.fieldApiName || c.fieldName || c
         );
         this.refreshColumns();
       }

@@ -94,12 +94,14 @@
               </template>
 
               <!-- Collapsible Debug SOQL -->
-              <details class="soql-debug">
-                <summary class="slds-text-body_small slds-text-color_weak">
-                  View Generated SOQL Query
-                </summary>
-                <pre class="soql-code">{resultSoql}</pre>
-              </details>
+              <template lwc:if={resultSoql}>
+                <details class="soql-debug">
+                  <summary class="slds-text-body_small slds-text-color_weak">
+                    View Generated SOQL Query
+                  </summary>
+                  <pre class="soql-code">{resultSoql}</pre>
+                </details>
+              </template>
 
               <div class="slds-grid slds-grid_align-end slds-var-m-top_small">
                 <button

@@ -61,7 +61,7 @@ public with sharing class SmartGridDataQualityService {
    * @param fieldsToAnalyze List of field API names to evaluate
    * @return QualityAnalysisResult containing health score and detected issues
    */
-  @AuraEnabled(cacheable=true)
+  @AuraEnabled
   @SuppressWarnings('PMD.ApexSOQLInjection')
   public static QualityAnalysisResult analyzeDataQuality(
     String objectApiName,
@@ -83,9 +83,12 @@ public with sharing class SmartGridDataQualityService {
     List<String> validFields = new List<String>();
     if (fieldsToAnalyze != null && !fieldsToAnalyze.isEmpty()) {
       for (String f : fieldsToAnalyze) {
-        if (fieldMap.containsKey(f.toLowerCase())) {
+        String cleanF = f.endsWithIgnoreCase('Url')
+          ? f.substring(0, f.length() - 3)
+          : f;
+        if (fieldMap.containsKey(cleanF.toLowerCase())) {
           validFields.add(
-            fieldMap.get(f.toLowerCase()).getDescribe().getName()
+            fieldMap.get(cleanF.toLowerCase()).getDescribe().getName()
           );
         }
       }

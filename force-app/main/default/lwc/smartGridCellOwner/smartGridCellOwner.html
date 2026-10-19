@@ -1,0 +1,105 @@
+<template>
+  <div class="owner-cell-container">
+    <template lwc:if={isEditing}>
+      <div class="slds-combobox_container">
+        <div
+          class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open"
+        >
+          <div
+            class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+          >
+            <input
+              type="text"
+              class="slds-input cell-inline-input"
+              value={searchKey}
+              placeholder={placeholderText}
+              oninput={handleSearchInput}
+              onkeydown={handleKeyDown}
+              data-testid="owner-search-input"
+            />
+            <button
+              class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+              title="Close"
+              onclick={handleCloseDropdown}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="xx-small"
+              ></lightning-icon>
+            </button>
+          </div>
+
+          <!-- Dropdown with User vs Queue Switcher -->
+          <div class="owner-dropdown" role="listbox">
+            <div class="owner-type-toggle">
+              <div
+                class={userTabClass}
+                onclick={handleSelectUserTab}
+                data-testid="owner-tab-users"
+              >
+                Users
+              </div>
+              <div
+                class={queueTabClass}
+                onclick={handleSelectQueueTab}
+                data-testid="owner-tab-queues"
+              >
+                Queues
+              </div>
+            </div>
+
+            <template lwc:if={isLoading}>
+              <div class="slds-p-around_small slds-text-align_center">
+                <lightning-spinner
+                  alternative-text="Searching"
+                  size="small"
+                ></lightning-spinner>
+              </div>
+            </template>
+            <template lwc:else>
+              <template for:each={filteredResults} for:item="res">
+                <div
+                  key={res.id}
+                  class="owner-item"
+                  data-id={res.id}
+                  data-label={res.label}
+                  data-type={res.type}
+                  onclick={handleSelectOwner}
+                  role="option"
+                >
+                  <lightning-icon
+                    icon-name={res.iconName}
+                    size="small"
+                  ></lightning-icon>
+                  <div class="slds-truncate">
+                    <div class="slds-text-body_regular slds-truncate">
+                      {res.label}
+                    </div>
+                    <div
+                      class="slds-text-body_small slds-text-color_weak slds-truncate"
+                    >
+                      {res.sublabel}
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template lwc:else>
+      <div
+        class="owner-display-wrapper"
+        ondblclick={handleStartEdit}
+        title={computedDisplayValue}
+      >
+        <lightning-icon
+          icon-name={ownerIconName}
+          size="x-small"
+        ></lightning-icon>
+        <span class="slds-truncate">{computedDisplayValue}</span>
+      </div>
+    </template>
+  </div>
+</template>

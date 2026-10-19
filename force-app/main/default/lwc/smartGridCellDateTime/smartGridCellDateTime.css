@@ -1,0 +1,60 @@
+.datetime-cell-container {
+  position: relative;
+  width: 100%;
+}
+
+.datetime-display-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: cell;
+  padding: 2px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datetime-display-wrapper:hover {
+  background-color: #f3f3f3;
+  border-radius: 2px;
+}
+
+.datetime-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 290px;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 2px;
+  padding: 12px;
+}
+
+.datetime-inputs-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.datetime-date-input {
+  flex: 3;
+}
+
+.datetime-time-select {
+  flex: 2;
+  height: 32px;
+  border: 1px solid #dddbda;
+  border-radius: 4px;
+  padding: 2px 6px;
+  background: #ffffff;
+}
+
+.datetime-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}

@@ -1,0 +1,121 @@
+<template>
+  <div class="lookup-cell-container">
+    <template lwc:if={isEditing}>
+      <div class="slds-combobox_container">
+        <div
+          class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open"
+        >
+          <div
+            class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+          >
+            <input
+              type="text"
+              class="slds-input cell-inline-input"
+              value={searchKey}
+              placeholder={computedPlaceholder}
+              oninput={handleSearchInput}
+              onkeydown={handleKeyDown}
+              data-testid="lookup-search-input"
+            />
+            <button
+              class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+              title="Close"
+              onclick={handleCloseDropdown}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="xx-small"
+              ></lightning-icon>
+            </button>
+          </div>
+
+          <!-- Typeahead Results Dropdown -->
+          <div class="lookup-dropdown" role="listbox">
+            <template lwc:if={isLoading}>
+              <div class="slds-p-around_small slds-text-align_center">
+                <lightning-spinner
+                  alternative-text="Searching"
+                  size="small"
+                ></lightning-spinner>
+              </div>
+            </template>
+            <template lwc:else>
+              <template for:each={searchResults} for:item="res">
+                <div
+                  key={res.id}
+                  class="lookup-item"
+                  data-id={res.id}
+                  data-label={res.label}
+                  onclick={handleSelectRecord}
+                  role="option"
+                >
+                  <lightning-icon
+                    icon-name="standard:record"
+                    size="small"
+                  ></lightning-icon>
+                  <div class="slds-truncate">
+                    <div class="slds-text-body_regular slds-truncate">
+                      {res.label}
+                    </div>
+                    <div
+                      class="slds-text-body_small slds-text-color_weak slds-truncate"
+                    >
+                      {res.sublabel}
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!-- "+ New Record" Action Button -->
+              <div
+                class="lookup-new-btn"
+                onclick={handleOpenNewRecordModal}
+                role="button"
+                data-testid="lookup-new-btn"
+              >
+                <lightning-icon
+                  icon-name="utility:add"
+                  size="xx-small"
+                ></lightning-icon>
+                <span>+ New {targetObjectApiName}</span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template lwc:else>
+      <div
+        class="lookup-display-wrapper"
+        ondblclick={handleStartEdit}
+        title={computedDisplayValue}
+      >
+        <span class="slds-truncate">{computedDisplayValue}</span>
+      </div>
+    </template>
+
+    <!-- Inline "+ New Record" Creation Modal -->
+    <template lwc:if={showNewRecordModal}>
+      <section
+        role="dialog"
+        tabindex="-1"
+        class="slds-modal slds-fade-in-open slds-modal_small"
+      >
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <h2 class="slds-text-heading_medium">New {targetObjectApiName}</h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium">
+            <lightning-record-form
+              object-api-name={targetObjectApiName}
+              layout-type="Compact"
+              onsuccess={handleNewRecordSuccess}
+              oncancel={handleCloseNewRecordModal}
+            ></lightning-record-form>
+          </div>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+  </div>
+</template>

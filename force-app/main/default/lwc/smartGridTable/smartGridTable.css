@@ -1,0 +1,103 @@
+.smart-grid-table-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: #ffffff;
+}
+
+.smart-grid-viewport {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+}
+
+/* Fixed Header styling */
+.smart-grid-table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #f3f3f3;
+  border-bottom: 1px solid #c9c9c9;
+  font-weight: 700;
+  user-select: none;
+  cursor: pointer;
+}
+
+/* Selection and Row Index Column Widths */
+.th-selection-col {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  z-index: 25 !important;
+}
+
+.th-row-num-col {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  text-align: center;
+}
+
+.td-row-index {
+  font-size: 0.75rem;
+  text-align: center;
+  background-color: #fafaf9;
+}
+
+/* Virtual Spacers */
+.virtual-spacer-row {
+  border: none !important;
+}
+
+.virtual-spacer-row td {
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Selected Row Highlight */
+tr.is-selected {
+  background-color: #f0f8ff !important;
+}
+
+tr.is-selected:hover {
+  background-color: #e5f2ff !important;
+}
+
+/* Cell Edit & Dirty State */
+.dirty-dot {
+  color: #0176d3;
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-left: 4px;
+}
+
+.cell-inline-input {
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 2px 6px !important;
+  font-size: 0.8125rem !important;
+}
+
+/* Cell Selection / Focus outline */
+td[role="gridcell"] {
+  height: 36px;
+  max-height: 36px;
+  padding: 4px 8px;
+  overflow: hidden;
+}
+
+td[role="gridcell"]:focus-within {
+  outline: 2px solid #0176d3;
+  outline-offset: -2px;
+}
+
+/* 2D Range Selection Styling */
+td.in-range-cell {
+  background-color: #d8edff !important;
+}
+
+td.in-range-origin {
+  outline: 2px solid #0176d3 !important;
+  outline-offset: -2px;
+}

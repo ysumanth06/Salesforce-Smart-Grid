@@ -1,0 +1,173 @@
+<template>
+  <div class="transpose-container">
+    <!-- Action & Navigation Toolbar -->
+    <div class="transpose-toolbar">
+      <div class="transpose-toolbar-left">
+        <lightning-button
+          data-action="exit-transpose"
+          label="Exit Transpose View"
+          icon-name="utility:back"
+          variant="neutral"
+          onclick={handleClose}
+        ></lightning-button>
+
+        <!-- View Filter Mode Buttons -->
+        <lightning-button-group>
+          <lightning-button
+            label={allFieldsButtonLabel}
+            variant={allFilterVariant}
+            onclick={handleFilterAll}
+          ></lightning-button>
+          <lightning-button
+            label={diffFieldsButtonLabel}
+            variant={diffFilterVariant}
+            onclick={handleFilterDiff}
+          ></lightning-button>
+          <lightning-button
+            label="Populated Only"
+            variant={populatedFilterVariant}
+            onclick={handleFilterPopulated}
+          ></lightning-button>
+        </lightning-button-group>
+      </div>
+
+      <div class="transpose-toolbar-right">
+        <span
+          class="slds-text-body_small slds-text-color_weak slds-m-right_small"
+        >
+          {summaryText}
+        </span>
+        <lightning-button-icon
+          icon-name="utility:chevronleft"
+          alternative-text="Scroll Left"
+          title="Scroll Left"
+          variant="border-filled"
+          onclick={handleScrollLeft}
+        ></lightning-button-icon>
+        <lightning-button-icon
+          icon-name="utility:chevronright"
+          alternative-text="Scroll Right"
+          title="Scroll Right"
+          variant="border-filled"
+          onclick={handleScrollRight}
+        ></lightning-button-icon>
+      </div>
+    </div>
+
+    <!-- Admin Safety Ceiling Banner -->
+    <template lwc:if={isOverLimit}>
+      <div class="transpose-limit-banner">
+        <lightning-icon
+          icon-name="utility:warning"
+          size="x-small"
+          class="slds-m-right_x-small"
+        ></lightning-icon>
+        <span>
+          Viewing first {effectiveRecordCount} of {records.length} records
+          (Admin safety limit: {maxTransposeLimit}).
+        </span>
+      </div>
+    </template>
+
+    <!-- Transposed Grid Scroll Workspace -->
+    <div class="transpose-scroll-area">
+      <table
+        class="transpose-table slds-table slds-table_bordered"
+        role="grid"
+        aria-label="Transposed Grid"
+      >
+        <thead>
+          <tr class="slds-line-height_reset">
+            <!-- Pinned Field Column Header -->
+            <th class="pinned-field-col slds-text-title_caps" scope="col">
+              <span class="slds-truncate">Field Name</span>
+            </th>
+
+            <!-- Record Columns Headers -->
+            <template for:each={recordColumns} for:item="col">
+              <th
+                key={col.recordId}
+                class="transpose-record-header slds-text-title_caps"
+                scope="col"
+                style={recordColumnStyle}
+                title={col.label}
+              >
+                <div class="slds-truncate">{col.label}</div>
+              </th>
+            </template>
+
+            <!-- Discrepancy Status Header -->
+            <th class="status-col slds-text-title_caps" scope="col">
+              <span class="slds-truncate">Status</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <template for:each={transposedRows} for:item="row">
+            <tr key={row.id} class={row.rowClass}>
+              <!-- Sticky Field Label Cell -->
+              <td class="pinned-field-cell" scope="row">
+                <div class="slds-grid slds-grid_vertical">
+                  <span
+                    class="slds-truncate slds-text-body_regular"
+                    title={row.fieldLabel}
+                  >
+                    {row.fieldLabel}
+                  </span>
+                  <span
+                    class="slds-text-body_small slds-text-color_weak slds-truncate"
+                    title={row.fieldApiName}
+                  >
+                    {row.fieldApiName}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Record Cells -->
+              <template for:each={row.cells} for:item="cell">
+                <td
+                  key={cell.key}
+                  class={cell.cellClass}
+                  style={recordColumnStyle}
+                  data-record-id={cell.recordId}
+                  data-field={cell.fieldName}
+                  ondblclick={handleCellDblClick}
+                >
+                  <template lwc:if={cell.isEditing}>
+                    <input
+                      type={cell.inputType}
+                      class="slds-input cell-inline-input"
+                      value={cell.displayValue}
+                      data-record-id={cell.recordId}
+                      data-field={cell.fieldName}
+                      onblur={handleCellEditBlur}
+                      onkeydown={handleCellEditKeyDown}
+                    />
+                  </template>
+                  <template lwc:else>
+                    <div
+                      class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate"
+                    >
+                      <span class="slds-truncate" title={cell.displayValue}>
+                        {cell.displayValue}
+                      </span>
+                      <template lwc:if={cell.isDraft}>
+                        <span class="dirty-dot" title="Unsaved change">•</span>
+                      </template>
+                    </div>
+                  </template>
+                </td>
+              </template>
+
+              <!-- Discrepancy Status Badge -->
+              <td class="status-cell">
+                <span class={row.badgeClass}>{row.badgeLabel}</span>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>

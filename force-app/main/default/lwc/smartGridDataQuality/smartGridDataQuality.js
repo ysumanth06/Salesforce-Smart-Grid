@@ -44,7 +44,7 @@ export default class SmartGridDataQuality extends LightningElement {
         objectApiName: this.objectApiName || "Account",
         fieldsToAnalyze:
           this.availableFields && this.availableFields.length > 0
-            ? this.availableFields
+            ? Array.from(this.availableFields)
             : ["Name", "BillingState", "AnnualRevenue", "Rating"]
       });
 

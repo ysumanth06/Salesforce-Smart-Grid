@@ -498,6 +498,40 @@ public with sharing class SmartGridController {
   }
 
   /**
+   * @description Bulk saves modified records and atomically logs field edits to Smart_Grid_Edit_Log__c
+   * @param records List of modified or new SObjects
+   * @param gridName DeveloperName of the grid
+   * @param editChanges List of field changes with recordId, fieldName, oldValue, newValue
+   * @return SaveResult
+   */
+  @AuraEnabled
+  public static SaveResult saveRecordsWithAudit(
+    List<SObject> records,
+    String gridName,
+    List<Map<String, Object>> editChanges
+  ) {
+    SaveResult result = saveRecords(records);
+    if (result.isSuccess && editChanges != null && !editChanges.isEmpty()) {
+      SmartGridAuditService.logEdits(gridName, editChanges);
+    }
+    return result;
+  }
+
+  /**
+   * @description Retrieves field edit history for a specific record
+   * @param recordId Salesforce ID of the target record
+   * @param maxRecords Max number of entries to return
+   * @return List of AuditLogEntry
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<SmartGridAuditService.AuditLogEntry> getRecordAuditLogs(
+    String recordId,
+    Integer maxRecords
+  ) {
+    return SmartGridAuditService.getEditLogs(recordId, maxRecords);
+  }
+
+  /**
    * @description Deletes a collection of records in USER_MODE with partial success support.
    * Enforces object deletable checks and captures row-specific errors on failure.
    * @param records List of SObjects to delete
@@ -870,6 +904,89 @@ public with sharing class SmartGridController {
     public String relatedObject;
     @AuraEnabled
     public List<ColumnDTO> columns;
+  }
+
+  /**
+   * @description Searches target SObject records for typeahead lookup editor with security checks
+   * @param targetObjectApiName SObject API name to query (e.g. Account, Contact)
+   * @param searchTerm Search keyword
+   * @param maxResults Maximum results (default 10)
+   * @return List of Map containing id, label, sublabel
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<Map<String, String>> searchLookupRecords(
+    String targetObjectApiName,
+    String searchTerm,
+    Integer maxResults
+  ) {
+    List<Map<String, String>> results = new List<Map<String, String>>();
+    if (String.isBlank(targetObjectApiName)) {
+      return results;
+    }
+
+    Schema.SObjectType sObjType = Schema.getGlobalDescribe()
+      .get(targetObjectApiName);
+    if (sObjType == null || !sObjType.getDescribe().isAccessible()) {
+      return results;
+    }
+
+    Integer limitCount = (maxResults != null &&
+      maxResults > 0)
+      ? Math.min(maxResults, 50)
+      : 10;
+    String sanitizedTerm = String.isNotBlank(searchTerm)
+      ? String.escapeSingleQuotes(searchTerm.trim())
+      : '';
+
+    String nameField = 'Name';
+    Map<String, Schema.SObjectField> fieldsMap = sObjType.getDescribe()
+      .fields.getMap();
+    if (targetObjectApiName.equalsIgnoreCase('Case')) {
+      nameField = 'CaseNumber';
+    } else if (
+      !fieldsMap.containsKey('name') && !fieldsMap.containsKey('Name')
+    ) {
+      for (Schema.SObjectField f : fieldsMap.values()) {
+        if (f.getDescribe().getType() == Schema.DisplayType.STRING) {
+          nameField = f.getDescribe().getName();
+          break;
+        }
+      }
+    }
+
+    String query =
+      'SELECT Id, ' +
+      nameField +
+      ' FROM ' +
+      String.escapeSingleQuotes(targetObjectApiName);
+    if (String.isNotBlank(sanitizedTerm)) {
+      query += ' WHERE ' + nameField + ' LIKE \'%' + sanitizedTerm + '%\'';
+    }
+    query +=
+      ' WITH USER_MODE ORDER BY ' +
+      nameField +
+      ' ASC LIMIT ' +
+      limitCount;
+
+    try {
+      List<SObject> records = Database.query(query);
+      for (SObject rec : records) {
+        String label = (String) rec.get(nameField);
+        results.add(
+          new Map<String, String>{
+            'id' => (String) rec.get('Id'),
+            'label' => String.isNotBlank(label)
+              ? label
+              : (String) rec.get('Id'),
+            'sublabel' => targetObjectApiName
+          }
+        );
+      }
+    } catch (Exception e) {
+      System.debug(LoggingLevel.WARN, 'Lookup search error: ' + e.getMessage());
+    }
+
+    return results;
   }
 
   public class ColumnDTO {

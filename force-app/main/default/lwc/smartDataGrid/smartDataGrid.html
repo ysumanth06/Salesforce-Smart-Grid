@@ -90,6 +90,17 @@
         disabled={disableFillDown}
         class="slds-var-m-left_x-small"
       ></lightning-button>
+      <!-- Transpose Grid View Button -->
+      <template lwc:if={canTranspose}>
+        <lightning-button
+          label="Transpose"
+          icon-name="utility:table"
+          onclick={handleOpenTranspose}
+          disabled={disableTranspose}
+          class="slds-var-m-left_x-small"
+          data-testid="toolbar-transpose-btn"
+        ></lightning-button>
+      </template>
       <!-- Export Options Menu (TS-06) -->
       <template lwc:if={canExport}>
         <lightning-button-menu
@@ -184,6 +195,17 @@
           data-testid="toolbar-assistant-btn"
         ></lightning-button-icon>
       </template>
+      <!-- Analytics Charts Panel Trigger -->
+      <lightning-button-icon
+        icon-name="utility:chart"
+        alternative-text="Analytics Charts Panel"
+        title="Analytics Charts Panel"
+        onclick={handleOpenChartPanel}
+        disabled={isLoading}
+        class="slds-var-m-left_x-small"
+        variant="border-filled"
+        data-testid="toolbar-chart-btn"
+      ></lightning-button-icon>
       <!-- Grid Guide & Walkthrough Trigger -->
       <lightning-button-icon
         icon-name="utility:help"
@@ -301,101 +323,120 @@
         </div>
       </template>
       <template lwc:elseif={gridColumns}>
-        <div class="slds-grid slds-wrap">
-          <div class={gridContainerClass}>
-            <div class="smart-grid-table-container">
-              <c-smart-grid-datatable
-                key-field="Id"
-                data={gridData}
-                columns={gridColumns}
-                onsave={handleSave}
-                draft-values={draftValues}
-                sorted-by={sortedByDisplay}
-                sorted-direction={sortDirection}
-                onsort={handleSort}
-                onresize={handleResize}
-                onrowselection={handleRowSelection}
-                oncellchange={handleCellChange}
-                onpicklistchange={handlePicklistChange}
-                onheaderaction={handleHeaderAction}
-                ondblclick={handleHeaderDoubleClick}
-              >
-              </c-smart-grid-datatable>
-            </div>
-            <!-- Sticky Column Totals Footer (TS-02) -->
-            <template lwc:if={hasTotals}>
-              <div
-                class="smart-grid-totals-container slds-var-p-around_x-small"
-              >
+        <template lwc:if={isTransposeActive}>
+          <div
+            class="slds-size_1-of-1 slds-var-m-bottom_small"
+            style="min-height: 450px"
+          >
+            <c-smart-grid-transpose-table
+              records={selectedRecordsForTranspose}
+              columns={gridColumns}
+              draft-values={draftValues}
+              max-transpose-limit={maxTransposeLimit}
+              oncellchange={handleTransposeCellChange}
+              onclose={handleCloseTranspose}
+            ></c-smart-grid-transpose-table>
+          </div>
+        </template>
+        <template lwc:else>
+          <div class="slds-grid slds-wrap">
+            <div class={gridContainerClass}>
+              <div class="smart-grid-table-container">
+                <c-smart-grid-datatable
+                  key-field="Id"
+                  data={gridData}
+                  columns={gridColumns}
+                  onsave={handleSave}
+                  draft-values={draftValues}
+                  sorted-by={sortedByDisplay}
+                  sorted-direction={sortDirection}
+                  onsort={handleSort}
+                  onresize={handleResize}
+                  onrowselection={handleRowSelection}
+                  oncellchange={handleCellChange}
+                  onpicklistchange={handlePicklistChange}
+                  onheaderaction={handleHeaderAction}
+                  ondblclick={handleHeaderDoubleClick}
+                >
+                </c-smart-grid-datatable>
+              </div>
+              <!-- Sticky Column Totals Footer (TS-02) -->
+              <template lwc:if={hasTotals}>
                 <div
-                  class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
+                  class="smart-grid-totals-container slds-var-p-around_x-small"
                 >
                   <div
-                    class="slds-col slds-size_12-of-12 slds-var-m-bottom_xx-small"
+                    class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
                   >
-                    <span class="slds-badge slds-theme_shade">
-                      <lightning-icon
-                        icon-name="utility:table"
-                        size="xx-small"
-                        class="slds-var-m-right_xx-small"
-                      ></lightning-icon>
-                      <strong>Aggregates & Column Totals</strong>
-                    </span>
-                  </div>
-                  <template for:each={totalsDisplayList} for:item="total">
                     <div
-                      key={total.fieldName}
-                      class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-var-m-vertical_xx-small"
+                      class="slds-col slds-size_12-of-12 slds-var-m-bottom_xx-small"
                     >
+                      <span class="slds-badge slds-theme_shade">
+                        <lightning-icon
+                          icon-name="utility:table"
+                          size="xx-small"
+                          class="slds-var-m-right_xx-small"
+                        ></lightning-icon>
+                        <strong>Aggregates & Column Totals</strong>
+                      </span>
+                    </div>
+                    <template for:each={totalsDisplayList} for:item="total">
                       <div
-                        class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
+                        key={total.fieldName}
+                        class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-var-m-vertical_xx-small"
                       >
-                        <div class="smart-grid-totals-label">{total.label}</div>
                         <div
-                          class="slds-grid slds-gutters_xx-small slds-var-m-top_xx-small slds-text-body_small"
+                          class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
                         >
-                          <div class="slds-col">
-                            <span>Sum:</span>
-                            <strong>{total.sumFormatted}</strong>
+                          <div class="smart-grid-totals-label">
+                            {total.label}
                           </div>
-                          <div class="slds-col">
-                            <span>Avg:</span>
-                            <strong>{total.avgFormatted}</strong>
+                          <div
+                            class="slds-grid slds-gutters_xx-small slds-var-m-top_xx-small slds-text-body_small"
+                          >
+                            <div class="slds-col">
+                              <span>Sum:</span>
+                              <strong>{total.sumFormatted}</strong>
+                            </div>
+                            <div class="slds-col">
+                              <span>Avg:</span>
+                              <strong>{total.avgFormatted}</strong>
+                            </div>
                           </div>
-                        </div>
-                        <div
-                          class="slds-grid slds-gutters_xx-small slds-text-body_small"
-                        >
-                          <div class="slds-col">
-                            <span>Min:</span>
-                            <strong>{total.minFormatted}</strong>
-                          </div>
-                          <div class="slds-col">
-                            <span>Max:</span>
-                            <strong>{total.maxFormatted}</strong>
+                          <div
+                            class="slds-grid slds-gutters_xx-small slds-text-body_small"
+                          >
+                            <div class="slds-col">
+                              <span>Min:</span>
+                              <strong>{total.minFormatted}</strong>
+                            </div>
+                            <div class="slds-col">
+                              <span>Max:</span>
+                              <strong>{total.maxFormatted}</strong>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </template>
+                    </template>
+                  </div>
                 </div>
+              </template>
+            </div>
+            <template lwc:if={showReadingPane}>
+              <div
+                class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 reading-pane-container"
+              >
+                <c-smart-grid-reading-pane
+                  record-id={selectedRecordForReadingPane}
+                  object-api-name={objectApiName}
+                  fields={gridColumns}
+                  record-title={selectedRecordTitle}
+                  onclose={handleCloseReadingPane}
+                ></c-smart-grid-reading-pane>
               </div>
             </template>
           </div>
-          <template lwc:if={showReadingPane}>
-            <div
-              class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 reading-pane-container"
-            >
-              <c-smart-grid-reading-pane
-                record-id={selectedRecordForReadingPane}
-                object-api-name={objectApiName}
-                fields={gridColumns}
-                record-title={selectedRecordTitle}
-                onclose={handleCloseReadingPane}
-              ></c-smart-grid-reading-pane>
-            </div>
-          </template>
-        </div>
+        </template>
       </template>
       <template lwc:if={showNoConfigMessage}>
         <div
@@ -408,7 +449,7 @@
     </div>
 
     <!-- Pagination Footer -->
-    <template lwc:if={gridColumns}>
+    <template lwc:if={showPaginationFooter}>
       <div
         slot="footer"
         class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-var-p-vertical_x-small"
@@ -529,4 +570,13 @@
     is-open={showOnboarding}
     onclose={handleCloseOnboarding}
   ></c-smart-grid-onboarding>
+
+  <!-- Analytics Chart Panel Drawer -->
+  <c-smart-grid-chart-panel
+    is-open={showChartPanel}
+    data={tableData}
+    group-by-field={chartGroupByField}
+    aggregate-field={chartAggregateField}
+    onclose={handleCloseChartPanel}
+  ></c-smart-grid-chart-panel>
 </template>

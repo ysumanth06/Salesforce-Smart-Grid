@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >Grants power-user access to Smart Grid Transpose View, Advanced 2D Clipboard, and Grouping.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>SmartGrid Power User</label>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_Config__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_Column__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_Format_Rule__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_Admin_Setting__mdt</name>
+    </customMetadataTypeAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridLicenseService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridCursorService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridCurrencyService</apexClass>
+    </classAccesses>
+    <classAccesses>
+        <enabled>true</enabled>
+        <apexClass>SmartGridGroupService</apexClass>
+    </classAccesses>
+</PermissionSet>

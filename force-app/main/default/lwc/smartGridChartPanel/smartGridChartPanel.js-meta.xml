@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Smart Grid Chart Panel</masterLabel>
+    <description
+  >Docked visual analytics panel with native SVG Donut, Bar, and Funnel charts.</description>
+</LightningComponentBundle>

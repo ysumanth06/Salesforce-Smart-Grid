@@ -1,0 +1,92 @@
+<template>
+  <div class="multi-cell-container">
+    <template lwc:if={isEditing}>
+      <div
+        class="multi-dropdown"
+        role="dialog"
+        aria-label="Multi-Select Options"
+      >
+        <!-- Search and Quick Bulk Actions -->
+        <div class="multi-header-controls">
+          <input
+            type="text"
+            class="slds-input cell-inline-input"
+            placeholder="Filter options..."
+            value={filterText}
+            oninput={handleFilterInput}
+            data-testid="multi-filter-input"
+          />
+          <lightning-button-group>
+            <lightning-button
+              label="All"
+              variant="neutral"
+              onclick={handleSelectAll}
+              title="Select All"
+            ></lightning-button>
+            <lightning-button
+              label="Clear"
+              variant="neutral"
+              onclick={handleClearAll}
+              title="Clear All"
+            ></lightning-button>
+          </lightning-button-group>
+        </div>
+
+        <!-- Scrollable Options List -->
+        <div class="multi-options-list">
+          <template for:each={filteredOptions} for:item="opt">
+            <div
+              key={opt.value}
+              class="multi-option-item"
+              data-value={opt.value}
+              onclick={handleToggleOption}
+            >
+              <div class="slds-checkbox">
+                <input
+                  type="checkbox"
+                  id={opt.checkboxId}
+                  checked={opt.isSelected}
+                  data-value={opt.value}
+                  tabindex="-1"
+                />
+                <label class="slds-checkbox__label" for={opt.checkboxId}>
+                  <span class="slds-checkbox_faux"></span>
+                  <span class="slds-form-element__label">{opt.label}</span>
+                </label>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Footer Apply and Cancel -->
+        <div class="multi-footer">
+          <lightning-button
+            label="Cancel"
+            variant="neutral"
+            onclick={handleCancel}
+          ></lightning-button>
+          <lightning-button
+            label="Apply"
+            variant="brand"
+            onclick={handleApply}
+            data-testid="multi-apply-btn"
+          ></lightning-button>
+        </div>
+      </div>
+    </template>
+    <template lwc:else>
+      <div
+        class="multi-display-wrapper"
+        ondblclick={handleStartEdit}
+        title={computedDisplayValue}
+      >
+        <span class="slds-truncate">{computedDisplayValue}</span>
+        <template lwc:if={selectedCountBadge}>
+          <span class="slds-badge slds-badge_lightest slds-m-left_xx-small">
+            {selectedCountBadge}
+          </span>
+        </template>
+      </div>
+    </template>
+  </div>
+</template>

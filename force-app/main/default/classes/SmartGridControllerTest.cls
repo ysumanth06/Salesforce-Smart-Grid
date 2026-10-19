@@ -571,4 +571,40 @@ public class SmartGridControllerTest {
       Assert.areNotEqual(saved.Id, v.Id, 'Deleted view should not exist');
     }
   }
+
+  @IsTest
+  static void testSaveRecordsWithAudit() {
+    Account acc = [SELECT Id, Name, Industry FROM Account LIMIT 1];
+    acc.Industry = 'Healthcare';
+
+    List<Map<String, Object>> changes = new List<Map<String, Object>>{
+      new Map<String, Object>{
+        'recordId' => acc.Id,
+        'fieldName' => 'Industry',
+        'oldValue' => 'Technology',
+        'newValue' => 'Healthcare'
+      }
+    };
+
+    Test.startTest();
+    SmartGridController.SaveResult sr = SmartGridController.saveRecordsWithAudit(
+      new List<SObject>{ acc },
+      'Account_Grid',
+      changes
+    );
+    List<SmartGridAuditService.AuditLogEntry> logs = SmartGridController.getRecordAuditLogs(
+      acc.Id,
+      10
+    );
+    Test.stopTest();
+
+    Assert.isTrue(sr.isSuccess, 'Save with audit should succeed');
+    Assert.isNotNull(logs, 'Audit logs should be returned');
+    Assert.isTrue(logs.size() >= 1, 'Should find at least 1 audit entry');
+    Assert.areEqual(
+      'Industry',
+      logs[0].fieldName,
+      'Audit entry field should match'
+    );
+  }
 }

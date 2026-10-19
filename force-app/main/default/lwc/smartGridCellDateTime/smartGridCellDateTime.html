@@ -1,0 +1,62 @@
+<template>
+  <div class="datetime-cell-container">
+    <template lwc:if={isEditing}>
+      <div
+        class="datetime-popover"
+        role="dialog"
+        aria-label="Date and Time Picker"
+      >
+        <div class="datetime-inputs-row">
+          <!-- Native Date Input -->
+          <input
+            type="date"
+            class="slds-input datetime-date-input"
+            value={editDate}
+            onchange={handleDateChange}
+            data-testid="datetime-date-input"
+          />
+
+          <!-- 15-Minute Interval Time Select -->
+          <select
+            class="datetime-time-select"
+            onchange={handleTimeChange}
+            data-testid="datetime-time-select"
+          >
+            <template for:each={timeOptions} for:item="t">
+              <option key={t.value} value={t.value} selected={t.isSelected}>
+                {t.label}
+              </option>
+            </template>
+          </select>
+        </div>
+
+        <div class="datetime-footer">
+          <lightning-button
+            label="Cancel"
+            variant="neutral"
+            onclick={handleCancel}
+          ></lightning-button>
+          <lightning-button
+            label="Apply"
+            variant="brand"
+            onclick={handleApply}
+            data-testid="datetime-apply-btn"
+          ></lightning-button>
+        </div>
+      </div>
+    </template>
+    <template lwc:else>
+      <div
+        class="datetime-display-wrapper"
+        ondblclick={handleStartEdit}
+        title={computedDisplayValue}
+      >
+        <lightning-icon
+          icon-name="utility:event"
+          size="x-small"
+        ></lightning-icon>
+        <span class="slds-truncate">{computedDisplayValue}</span>
+      </div>
+    </template>
+  </div>
+</template>

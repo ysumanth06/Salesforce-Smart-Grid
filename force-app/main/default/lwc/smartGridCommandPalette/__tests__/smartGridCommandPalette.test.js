@@ -127,4 +127,77 @@ describe("c-smart-grid-command-palette", () => {
     expect(closeHandler).toHaveBeenCalled();
     expect(element.isOpen).toBe(false);
   });
+
+  it("handles direct transpose command workflow without Apex call", async () => {
+    const element = createElement("c-smart-grid-command-palette", {
+      is: SmartGridCommandPalette
+    });
+    element.isOpen = true;
+    document.body.appendChild(element);
+
+    const input = element.shadowRoot.querySelector(
+      '[data-testid="palette-input"]'
+    );
+    input.value = "transpose records";
+    input.dispatchEvent(new CustomEvent("input"));
+
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Enter"
+      })
+    );
+
+    await Promise.resolve();
+
+    expect(processPrompt).not.toHaveBeenCalled();
+
+    const applyBtn = element.shadowRoot.querySelector(
+      '[data-testid="apply-ai-filters-btn"]'
+    );
+    expect(applyBtn).not.toBeNull();
+
+    const applyHandler = jest.fn();
+    element.addEventListener("applyfilters", applyHandler);
+    applyBtn.click();
+
+    expect(applyHandler).toHaveBeenCalled();
+    const eventDetail = applyHandler.mock.calls[0][0].detail;
+    expect(eventDetail.action).toBe("transpose");
+  });
+
+  it("handles direct group by command workflow", async () => {
+    const element = createElement("c-smart-grid-command-palette", {
+      is: SmartGridCommandPalette
+    });
+    element.isOpen = true;
+    document.body.appendChild(element);
+
+    const input = element.shadowRoot.querySelector(
+      '[data-testid="palette-input"]'
+    );
+    input.value = "group by Industry and Type";
+    input.dispatchEvent(new CustomEvent("input"));
+
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Enter"
+      })
+    );
+
+    await Promise.resolve();
+
+    expect(processPrompt).not.toHaveBeenCalled();
+
+    const applyBtn = element.shadowRoot.querySelector(
+      '[data-testid="apply-ai-filters-btn"]'
+    );
+    const applyHandler = jest.fn();
+    element.addEventListener("applyfilters", applyHandler);
+    applyBtn.click();
+
+    expect(applyHandler).toHaveBeenCalled();
+    const eventDetail = applyHandler.mock.calls[0][0].detail;
+    expect(eventDetail.action).toBe("group");
+    expect(eventDetail.groupFields).toEqual(["Industry", "Type"]);
+  });
 });

@@ -1,0 +1,189 @@
+<template>
+  <section
+    role="dialog"
+    tabindex="-1"
+    class="slds-modal slds-fade-in-open slds-modal_medium"
+    aria-label="Import Data"
+  >
+    <div class="slds-modal__container">
+      <!-- Modal Header -->
+      <header class="slds-modal__header">
+        <button
+          class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+          title="Close"
+          onclick={handleClose}
+        >
+          <lightning-icon
+            icon-name="utility:close"
+            size="small"
+          ></lightning-icon>
+        </button>
+        <h2 class="slds-text-heading_medium">
+          Import Data into {objectApiName}
+        </h2>
+      </header>
+
+      <!-- Modal Body -->
+      <div class="slds-modal__content slds-p-around_medium">
+        <!-- Spinner -->
+        <template lwc:if={isLoading}>
+          <div class="slds-p-around_large slds-text-align_center">
+            <lightning-spinner
+              alternative-text="Processing import..."
+              size="medium"
+            ></lightning-spinner>
+          </div>
+        </template>
+
+        <!-- Step 1: Upload CSV -->
+        <template lwc:if={isUploadStep}>
+          <div class="import-dropzone" onclick={handleTriggerFileInput}>
+            <lightning-icon
+              icon-name="utility:upload"
+              size="large"
+              class="slds-m-bottom_small"
+            ></lightning-icon>
+            <div class="slds-text-heading_small">
+              Choose a CSV file or drag & drop here
+            </div>
+            <div
+              class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small"
+            >
+              UTF-8 encoded .csv files up to 5MB
+            </div>
+            <input
+              type="file"
+              accept=".csv"
+              class="slds-hide"
+              data-testid="file-upload-input"
+              onchange={handleFileSelect}
+            />
+          </div>
+        </template>
+
+        <!-- Step 2: Field Mapping & Preview -->
+        <template lwc:if={isMappingStep}>
+          <div class="import-step-header">
+            Map CSV Columns to {objectApiName} Fields
+          </div>
+          <div class="slds-m-bottom_medium">
+            <table class="slds-table slds-table_bordered mapping-table">
+              <thead>
+                <tr>
+                  <th>CSV Column Header</th>
+                  <th>Sample Data</th>
+                  <th>Target Salesforce Field</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={columnMappings} for:item="map">
+                  <tr key={map.csvHeader}>
+                    <td><strong>{map.csvHeader}</strong></td>
+                    <td class="slds-truncate" style="max-width: 180px">
+                      {map.sampleValue}
+                    </td>
+                    <td>
+                      <select
+                        class="slds-select"
+                        data-header={map.csvHeader}
+                        onchange={handleMappingChange}
+                      >
+                        <option value="">-- Ignore Column --</option>
+                        <template for:each={fieldOptions} for:item="f">
+                          <option
+                            key={f.value}
+                            value={f.value}
+                            selected={f.isSelected}
+                          >
+                            {f.label} ({f.value})
+                          </option>
+                        </template>
+                      </select>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Preview Table -->
+          <div class="import-step-header">Data Preview (First 5 Rows)</div>
+          <div class="preview-container">
+            <table
+              class="slds-table slds-table_bordered slds-table_cell-buffer"
+            >
+              <thead>
+                <tr>
+                  <template for:each={csvHeaders} for:item="h">
+                    <th key={h}>{h}</th>
+                  </template>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={previewRows} for:item="row">
+                  <tr key={row.id}>
+                    <template for:each={row.cells} for:item="c">
+                      <td key={c.key} class="slds-truncate">{c.val}</td>
+                    </template>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <!-- Step 3: Results & Rollback -->
+        <template lwc:if={isResultStep}>
+          <div class="import-success-banner slds-m-bottom_medium">
+            <div>
+              <div class="slds-text-heading_small slds-text-color_success">
+                ✓ Import Completed
+              </div>
+              <div class="slds-text-body_regular slds-m-top_xx-small">
+                Successfully inserted
+                <strong>{importResult.totalInserted}</strong> records.
+                <template lwc:if={importResult.totalFailed}>
+                  ({importResult.totalFailed} failed)
+                </template>
+              </div>
+            </div>
+            <!-- Undo Rollback Button -->
+            <lightning-button
+              label="Undo Import (Rollback)"
+              icon-name="utility:undo"
+              variant="destructive"
+              onclick={handleRollback}
+              data-testid="rollback-btn"
+            ></lightning-button>
+          </div>
+        </template>
+      </div>
+
+      <!-- Modal Footer -->
+      <footer class="slds-modal__footer">
+        <template lwc:if={isMappingStep}>
+          <lightning-button
+            label="Cancel"
+            variant="neutral"
+            onclick={handleClose}
+            class="slds-m-right_x-small"
+          ></lightning-button>
+          <lightning-button
+            label="Import Records"
+            variant="brand"
+            onclick={handleExecuteImport}
+            data-testid="execute-import-btn"
+          ></lightning-button>
+        </template>
+        <template lwc:if={isResultStep}>
+          <lightning-button
+            label="Done"
+            variant="brand"
+            onclick={handleClose}
+          ></lightning-button>
+        </template>
+      </footer>
+    </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

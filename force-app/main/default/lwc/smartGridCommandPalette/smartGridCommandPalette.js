@@ -94,10 +94,12 @@ export default class SmartGridCommandPalette extends LightningElement {
 
   get suggestedPrompts() {
     return [
+      "Transpose selected records",
+      "Group by Industry",
+      "Show analytics chart",
       "Rating is Hot in California",
       "Accounts with revenue > 1M",
-      "Order by AnnualRevenue desc top 15",
-      "In Technology industry"
+      "Order by AnnualRevenue desc top 15"
     ];
   }
 
@@ -160,6 +162,46 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.errorMessage = "";
     this.translationResult = null;
 
+    // Direct Workflow Command Matchers
+    if (/\btranspose\b/i.test(text)) {
+      this.translationResult = {
+        isSuccess: true,
+        action: "transpose",
+        explanation: "Switch grid to Transpose Matrix view"
+      };
+      this.saveRecentPrompt(text);
+      this.isLoading = false;
+      return;
+    }
+
+    const groupMatch = text.match(/\bgroup\s+by\s+(.+)/i);
+    if (groupMatch) {
+      const rawFields = groupMatch[1]
+        .split(/,| and /i)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      this.translationResult = {
+        isSuccess: true,
+        action: "group",
+        groupFields: rawFields,
+        explanation: `Group records by ${rawFields.join(", ")}`
+      };
+      this.saveRecentPrompt(text);
+      this.isLoading = false;
+      return;
+    }
+
+    if (/\b(show\s+chart|open\s+chart|chart\s+panel|analytics)\b/i.test(text)) {
+      this.translationResult = {
+        isSuccess: true,
+        action: "chart",
+        explanation: "Open Analytics and Chart Drawer"
+      };
+      this.saveRecentPrompt(text);
+      this.isLoading = false;
+      return;
+    }
+
     try {
       const result = await processPrompt({
         prompt: text,
@@ -195,6 +237,8 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.dispatchEvent(
       new CustomEvent("applyfilters", {
         detail: {
+          action: this.translationResult.action || null,
+          groupFields: this.translationResult.groupFields || null,
           filters: this.translationResult.filters || [],
           explanation: this.translationResult.explanation || "",
           sortField: this.translationResult.sortField || null,

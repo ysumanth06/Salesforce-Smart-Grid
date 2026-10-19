@@ -1,0 +1,166 @@
+<template>
+  <div class="chart-panel-container">
+    <!-- Header with Chart Type Switcher & Close Button -->
+    <div class="chart-header">
+      <div class="slds-grid slds-grid_vertical-align-center">
+        <lightning-icon
+          icon-name="utility:chart"
+          size="small"
+          class="slds-m-right_x-small"
+        ></lightning-icon>
+        <h2 class="slds-text-heading_small slds-truncate">Analytics Panel</h2>
+      </div>
+
+      <div class="slds-grid slds-grid_vertical-align-center">
+        <!-- Chart Type Switcher -->
+        <lightning-button-group class="slds-m-right_x-small">
+          <lightning-button
+            label="Donut"
+            variant={donutVariant}
+            onclick={handleSelectDonut}
+            title="Donut Chart"
+          ></lightning-button>
+          <lightning-button
+            label="Bar"
+            variant={barVariant}
+            onclick={handleSelectBar}
+            title="Bar Chart"
+          ></lightning-button>
+          <lightning-button
+            label="Funnel"
+            variant={funnelVariant}
+            onclick={handleSelectFunnel}
+            title="Funnel Chart"
+          ></lightning-button>
+        </lightning-button-group>
+
+        <lightning-button-icon
+          icon-name="utility:close"
+          variant="border-filled"
+          alternative-text="Close Analytics Panel"
+          title="Close Analytics"
+          onclick={handleClose}
+          data-testid="chart-close-btn"
+        ></lightning-button-icon>
+      </div>
+    </div>
+
+    <!-- KPI Metric Cards -->
+    <div class="chart-kpi-row">
+      <div class="chart-kpi-card">
+        <div class="chart-kpi-val">{totalRecordCount}</div>
+        <div class="chart-kpi-label">Records</div>
+      </div>
+      <div class="chart-kpi-card">
+        <div class="chart-kpi-val">{formattedTotalSum}</div>
+        <div class="chart-kpi-label">Total Volume</div>
+      </div>
+      <div class="chart-kpi-card">
+        <div class="chart-kpi-val">{groupCount}</div>
+        <div class="chart-kpi-label">Groups</div>
+      </div>
+    </div>
+
+    <!-- Chart Visual Canvas -->
+    <div class="chart-body">
+      <!-- Donut Chart View -->
+      <template lwc:if={isDonut}>
+        <div class="chart-svg-container">
+          <svg viewBox="0 0 200 200" width="200" height="200">
+            <template for:each={donutSlices} for:item="slice">
+              <path
+                key={slice.label}
+                d={slice.pathData}
+                fill={slice.color}
+                stroke="#ffffff"
+                stroke-width="2"
+              >
+                <title>
+                  {slice.label}: {slice.formattedValue} ({slice.percentage}%)
+                </title>
+              </path>
+            </template>
+            <!-- Center Donut Hole & Summary -->
+            <circle cx="100" cy="100" r="45" fill="#ffffff" />
+            <text
+              x="100"
+              y="96"
+              text-anchor="middle"
+              font-size="12"
+              fill="#706e6b"
+            >
+              Total
+            </text>
+            <text
+              x="100"
+              y="114"
+              text-anchor="middle"
+              font-size="14"
+              font-weight="bold"
+              fill="#080707"
+            >
+              {totalRecordCount}
+            </text>
+          </svg>
+        </div>
+      </template>
+
+      <!-- Horizontal Bar Chart View -->
+      <template lwc:if={isBar}>
+        <div class="chart-svg-container" style="display: block">
+          <template for:each={chartData} for:item="item">
+            <div key={item.label} class="hbar-item">
+              <div class="hbar-header">
+                <span class="slds-truncate" title={item.label}
+                  >{item.label}</span
+                >
+                <span class="slds-text-color_weak"
+                  >{item.formattedValue} ({item.percentage}%)</span
+                >
+              </div>
+              <div class="hbar-track">
+                <div class="hbar-fill" style={item.barFillStyle}></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- Funnel Chart View -->
+      <template lwc:if={isFunnel}>
+        <div class="chart-svg-container">
+          <svg viewBox="0 0 240 180" width="240" height="180">
+            <template for:each={funnelTrapezoids} for:item="trap">
+              <polygon
+                key={trap.label}
+                points={trap.points}
+                fill={trap.color}
+                stroke="#ffffff"
+                stroke-width="1.5"
+              >
+                <title>{trap.label}: {trap.formattedValue}</title>
+              </polygon>
+            </template>
+          </svg>
+        </div>
+      </template>
+
+      <!-- Interactive Data Legend -->
+      <div class="chart-legend">
+        <template for:each={chartData} for:item="item">
+          <div key={item.label} class="legend-item">
+            <div
+              class="slds-grid slds-grid_vertical-align-center slds-truncate"
+            >
+              <span class="legend-color-dot" style={item.dotStyle}></span>
+              <span class="slds-truncate" title={item.label}>{item.label}</span>
+            </div>
+            <div class="slds-text-body_small slds-text-color_weak">
+              <strong>{item.count}</strong> ({item.percentage}%)
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>

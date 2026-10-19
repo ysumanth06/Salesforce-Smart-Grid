@@ -1,93 +1,129 @@
 # Salesforce Smart Grid — Enterprise AI Data Workspace
 
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v65.0-blue.svg)](https://developer.salesforce.com)
-[![Apex Tests](<https://img.shields.io/badge/Apex%20Tests-126%2F126%20Passing%20(100%25)-success.svg>)]()
-[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-124%2F124%20Passing%20(100%25)-success.svg>)]()
-[![Security](https://img.shields.io/badge/Security-USER__MODE%20%7C%20stripInaccessible-green.svg)]()
+[![Apex Tests](https://img.shields.io/badge/Apex%20Tests-100%25%20Passing-success.svg)]()
+[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-206%2F206%20Passing%20(37%20Suites)-success.svg>)]()
+[![Security](https://img.shields.io/badge/Security-USER__MODE%20%7C%20stripInaccessible%20%7C%20FormulaShield-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)]()
 
-A **metadata-driven, enterprise-grade data workspace and spreadsheet experience** for Salesforce Lightning. Drop it onto any App, Home, or Record page to instantly render a fully functional, editable, and AI-augmented datatable for any standard or custom object — no code required.
+A **metadata-driven, enterprise-grade data workspace and spreadsheet experience** for Salesforce Lightning. Drop it onto any App, Home, or Record page to instantly render a fully functional, editable, and AI-augmented datatable for any standard or custom object — with high-performance virtualized scrolling, 2D range selection, bidirectional clipboard, transposed matrix views, and visual administration.
 
 ---
 
 ## 📚 Complete Documentation Suite
 
-| Guide                                                       | Description                                                                                                                                   | Target Audience                                |
-| :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------- |
-| 📖 **[User Guide](docs/USER_GUIDE.md)**                     | End-user instructions, inline editing, draft review, column customization, with vs without AI usage, and detailed AI examples.                | End Users, Sales Reps, Analysts, Data Stewards |
-| 🛠️ **[Administrator Guide](docs/ADMIN_GUIDE.md)**           | Full metadata setup (`__mdt`), App Builder deployment, permission sets, external LLM Named Credentials, telemetry, and governor limit tuning. | Salesforce Admins, Developers, Architects      |
-| 🧪 **[QA Audit & Remediation Walkthrough](walkthrough.md)** | 100-point E2E quality audit, defect log (P0-P2 fixes), non-admin persona verification under `System.runAs`, and seed data validation.         | QA Leads, Security Reviewers, Release Managers |
+| Guide                                                       | Description                                                                                                        | Target Audience                   |
+| :---------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :-------------------------------- |
+| 📋 **[Changelog & Architecture Plan](change.md)**           | Full technical implementation plan and sprint-by-sprint changelog across all 7 sprints.                            | Developers, Architects, Reviewers |
+| 📖 **[User Guide](docs/USER_GUIDE.md)**                     | End-user instructions, inline editing, draft review, column customization, Transpose view, and AI command palette. | End Users, Sales Reps, Analysts   |
+| 🛠️ **[Administrator Guide](docs/ADMIN_GUIDE.md)**           | Full metadata setup (`__mdt`), App Builder deployment, permission sets, 3-tier governance, and telemetry.          | Salesforce Admins, Developers     |
+| 🧪 **[QA Audit & Remediation Walkthrough](walkthrough.md)** | E2E quality audit, defect log, non-admin persona verification under `System.runAs`, and test suite execution.      | QA Leads, Release Managers        |
 
 ---
 
 ## ✨ Feature Pillars
 
-### 1. High-Performance Spreadsheet Experience
+### 1. High-Performance Unified Virtual Grid
 
-- **Mass Inline Editing**: Edit text, numbers, dates, currencies, and custom picklists inline with instant visual cues.
-- **Review Pending Changes Modal**: Compare baseline database values against draft edits in a side-by-side diff before saving.
-- **Bulk Save with Partial Success**: Uses `Database.insert`/`Database.update(..., false)`. Successful records save cleanly; failed records display inline error tooltips.
-- **Add & Delete Rows**: Add new client-side draft rows instantly. Delete selected records safely with confirmation modals.
-- **Fill Down**: Copy a value across selected rows targeting the active edited column.
-- **Multi-Level Undo/Redo**: Full history stack (`Ctrl+Z`, `Ctrl+Y`).
-- **Responsive Paging & Sticky Scrolling**: Page sizes of 10, 25, 50, or 100 with sticky table headers and anchored footer pagination.
-- **Sticky Column Totals & Aggregates**: Live Sum, Average, Minimum, and Maximum for numeric and currency fields.
-- **Reading Pane**: Side-by-side inspection drawer for viewing record details without leaving the grid.
-- **Hierarchical Related Sub-Grids**: Expand parent records to display nested child record grids (e.g. Account → Contacts).
-- **RFC 4180 CSV Exporter**: One-click spreadsheet export respecting visible columns and active filter criteria.
+- **Single Adaptive Engine (`smartGridTable`)**: Eliminates fragmented table implementations. A single SLDS-based engine handles 5 to 100,000+ rows smoothly via dynamic viewport windowing (~120 active `<tr>` nodes).
+- **Keyset SOQL Cursor Pagination (`SmartGridCursorService.cls`)**: Bypasses the 2,000-row `OFFSET` limit using modern keyset cursors and indexed streaming in `AccessLevel.USER_MODE`.
+- **2D Rectangular Range Selection (`rangeSelectionManager.js`)**: Marquee mouse-drag and keyboard-driven (`Shift + Arrow Keys`) bounding box selection.
+- **Bidirectional TSV Clipboard (`clipboardManager.js`)**: Copy (`Cmd+C`) and Paste (`Cmd+V`) tabular data directly between Smart Grid and external spreadsheet software (Excel, Google Sheets).
+- **Formula Injection Shield (`formulaShield.js`)**: Protects exported and copied data by neutralising spreadsheet formula injection characters (`=`, `+`, `-`, `@`) and restoring original text on paste.
+- **Linear Fill Down (`Cmd+D`) & Range Clear (`Delete`)**: Replicates spreadsheet productivity shortcuts with atomic rollback staging.
 
-### 2. Dynamic Personalization & Customization
+### 2. Transposed Grid View (Matrix Layout)
 
-- **Field Picker**: Dual-listbox modal enabling users to add, remove, and reorder fields on demand.
-- **Column Pinning & Resizing**: Pin vital columns (e.g. `Name`) to the left; drag borders or double-click to auto-fit widths.
-- **User-Saved Views (`Smart_Grid_View__c`)**: Create, name, save, and switch between personalized view presets.
-- **Ergonomic Preferences (`Smart_Grid_User_Pref__c`)**: Persists user density preferences, page sizes, and column widths across sessions.
-- **Conditional Formatting (`Smart_Grid_Format_Rule__mdt`)**: Highlight cells based on business rules (e.g. green for "Closed Won", red for "Closed Lost").
+- **Fields as Rows, Records as Columns (`smartGridTransposeTable`)**: Pivots selected records into a comparison matrix with a sticky left Field Label column (`position: sticky; left: 0;`).
+- **Smooth Horizontal Scroll Container**: Seamless trackpad and horizontal navigation across record columns with guaranteed minimum widths.
+- **Smart Discrepancy Filtering**: One-click toggles between **"All Fields"** and **"Differences Only"** to instantly pinpoint data variations between records.
+- **Polymorphic In-Cell Editing**: Cell editors adapt dynamically to the row's metadata type (Currency, Checkbox, Picklist, Date, Lookup) and stage changes in `DirtyStateManager.js`.
+- **3-Tier Admin Governance**: Configured globally in `Smart_Grid_Admin_Setting__mdt`, overridden per-grid in `Smart_Grid_Config__mdt`, and role-gated via `SmartGrid_Power_User` and `SmartGrid_Admin` permission sets.
 
-### 3. AI-Powered Intelligence Suite (AI Premium)
+### 3. Polymorphic Specialized Inline Cell Editors
 
-- **NLP Command Palette (`Cmd+K` / `Ctrl+K`)**: Query and filter records using natural language (e.g. _"Show California technology accounts with revenue over $2M"_).
-- **Data Quality & Health Inspection Drawer**: Automated health score (0-100) scanning records for missing data, duplicate candidates, outliers, and anomalies.
-- **Conversational Assistant Copilot**: Side drawer assistant aware of active grid filters, answering questions and computing aggregate analytics in natural language.
-- **Pluggable AI Providers**: Compatible with Salesforce **Einstein Models API**, external LLMs (**OpenAI GPT-4o**, **Claude 3.5**, **Azure OpenAI**) via Named Credentials, or local **Mock AI Provider**.
+- **Lookup / Master-Detail (`smartGridCellLookup`)**: 300ms debounced typeahead search via `SmartGridController.searchLookupRecords` with an inline **"+ New Record"** creation modal.
+- **User / Owner Selector (`smartGridCellOwner`)**: Polymorphic User vs. Queue selector with avatar initials and active status badges.
+- **Multi-Select Picklist (`smartGridCellMultiPicklist`)**: Search-filtered combobox with checkboxes, badge count, and "Select All" / "Clear All" batch actions.
+- **Dependent Cascading Picklists (`smartGridCellDependentPicklist`)**: Dynamically recalculates child picklist options based on controlling field describe data and live edits.
+- **Combined Date & Time (`smartGridCellDateTime`)**: Dual datepicker + 15-minute interval time combobox with automatic timezone conversion to user profile locale.
+
+### 4. Multi-Dimensional Grouping & Real-Time Analytics
+
+- **3-Level Hierarchical Grouping (`SmartGridGroupService.cls`)**: Group by up to three simultaneous dimensions with server-side rollups (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`) under `USER_MODE`.
+- **Docked Analytics Drawer (`smartGridChartPanel`)**: Real-time native SVG charts (**Donut, Horizontal Bar, Funnel**) reacting dynamically to active grid filters and groupings.
+- **KPI Summary Metrics**: Instant summary statistics displaying Total, Average, Maximum, and Minimum values.
+
+### 5. Bulk CSV Importer with Rollback Safety
+
+- **Client-Side CSV Parser (`smartGridImportModal`)**: Drag-and-drop file uploader with smart column header auto-mapping and validation preview.
+- **Chunked Upsert & Rollback (`SmartGridImportService.cls`)**: Executes bulk DML in chunks of 200 via `Database.insert`/`Database.upsert` with transactional rollback tokens enabling one-click **"Undo Import"**.
+
+### 6. Visual In-App Grid Administration Studio
+
+- **Drag-and-Drop Column Builder (`smartGridAdminStudio`)**: Full-screen administrative LWC for choosing objects, configuring visible columns, setting default filters, and testing layout previews.
+- **Native Metadata Deployer (`SmartGridMetadataDeployer.cls`)**: Deploys custom metadata (`Smart_Grid_Config__mdt`, `Smart_Grid_Column__mdt`, `Smart_Grid_Format_Rule__mdt`) directly via `Metadata.Operations.enqueueDeployment`.
+
+### 7. Field-Level Change Audit Trail & Multi-Currency Engine
+
+- **Audit Logging (`Smart_Grid_Edit_Log__c` & `SmartGridAuditService.cls`)**: Custom audit object recording before/after values atomically during grid commits, retrievable via `getRecordAuditLogs()`.
+- **Multi-Currency Normalization (`SmartGridCurrencyService.cls`)**: Dynamic multi-currency detection, active `CurrencyType` conversion rate caching, and group subtotal normalization to corporate currency.
+
+### 8. AI-Powered Intelligence Suite
+
+- **NLP Command Palette (`Cmd+K` / `Ctrl+K`)**: Query records in natural language or execute actions like _"Transpose records"_, _"Group by Industry"_, or _"Show chart"_.
+- **Data Quality & Duplicate Inspector (`smartGridDataQuality`)**: Automated data completeness scoring and duplicate candidate inspection.
+- **Conversational Assistant Copilot (`smartGridAssistant`)**: Context-aware drawer assistant answering analytical questions based on active grid filters.
 
 ---
 
-## 🏛️ Architecture
+## 🏛️ Component & Service Architecture
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        LIGHTNING WEB COMPONENTS                        │
-│  smartDataGrid (Parent)                                               │
-│  ├── c-smart-grid-datatable (Custom picklist cell types)               │
-│  ├── c-smart-grid-filter-bar & c-smart-grid-filter-builder             │
-│  ├── c-smart-grid-field-picker & c-smart-grid-view-selector            │
-│  ├── c-smart-grid-review-modal (Diff inspection modal)                │
-│  ├── c-smart-grid-reading-pane & c-smart-grid-related-grid             │
-│  ├── c-smart-grid-command-palette (NLP prompt interface)               │
-│  ├── c-smart-grid-assistant (Conversational AI copilot)               │
-│  ├── c-smart-grid-data-quality (Health score & issue inspector)        │
-│  └── c-smart-grid-onboarding (Interactive product walkthrough)        │
-├────────────────────────────────────────────────────────────────────────┤
-│                           APEX DOMAIN LAYER                            │
-│  SmartGridController (Thin API boundary)                               │
-│  ├── GridQueryBuilder (FLS-safe dynamic SOQL, SQLi prevention)         │
-│  ├── SmartGridIdValidator (ID validation, delete integrity check)      │
-│  ├── SmartGridLicenseService (Entitlement checks & tier gating)        │
-│  ├── SmartGridNLPEngine (Natural language query translation)           │
-│  ├── SmartGridDataQualityService (Outlier & anomaly evaluation)        │
-│  ├── SmartGridAgentService & SmartGridNLPDMLHandler (AI DML execution) │
-│  ├── SmartGridViewService & SmartGridUserPrefService                   │
-│  └── SmartGridTelemetryService (Platform event publisher)              │
-├────────────────────────────────────────────────────────────────────────┤
-│                         METADATA & DATA LAYER                          │
-│  Custom Metadata Types:                                                │
-│    - Smart_Grid_Config__mdt, Smart_Grid_Column__mdt                    │
-│    - Smart_Grid_Format_Rule__mdt, Smart_Grid_AI_Config__mdt            │
-│    - Smart_Grid_License__mdt                                           │
-│  Custom Objects: Smart_Grid_View__c, Smart_Grid_User_Pref__c           │
-│  Platform Event: Smart_Grid_Telemetry__e                               │
-└────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   LIGHTNING WEB COMPONENTS (LWC)                                │
+│                                                                                                 │
+│  smartDataGrid (Parent Orchestrator & View Switcher)                                            │
+│  ├── smartGridTable (Unified Adaptive Virtualized Core: 5 to 100k+ rows)                        │
+│  │   ├── rangeSelectionManager.js (2D rectangular selection math)                               │
+│  │   ├── clipboardManager.js (TSV serializer & parser)                                         │
+│  │   └── formulaShield.js (RFC-4180 formula injection neutralizer)                             │
+│  ├── smartGridTransposeTable (Pivoted field-as-row matrix layout)                               │
+│  │   └── matrixTransposer.js (Matrix pivoting & discrepancy detector)                           │
+│  ├── Specialized Inline Cell Editors Suite:                                                     │
+│  │   ├── smartGridCellLookup (Typeahead search + "+ New Record" modal)                          │
+│  │   ├── smartGridCellOwner (Polymorphic User/Queue selector)                                   │
+│  │   ├── smartGridCellMultiPicklist & smartGridCellDependentPicklist                            │
+│  │   └── smartGridCellDateTime (Date + 15-min interval time combobox)                           │
+│  ├── smartGridChartPanel (Docked SVG Donut, Bar, Funnel charts & KPI tiles)                     │
+│  ├── smartGridImportModal (CSV importer with auto-mapping & rollback token)                     │
+│  ├── smartGridAdminStudio (Visual drag-and-drop grid builder)                                   │
+│  ├── smartGridCommandPalette (NLP intent routing: Filters, Transpose, Group, Charts)            │
+│  ├── smartGridAssistant (Conversational AI copilot)                                             │
+│  └── smartGridDataQuality (Dataset health score & duplicate inspector)                          │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                     APEX DOMAIN SERVICES                                        │
+│                                                                                                 │
+│  SmartGridController (Thin API Gateway)                                                         │
+│  ├── SmartGridCursorService.cls (SOQL Cursors & Keyset pagination for large volumes)             │
+│  ├── SmartGridGroupService.cls (3-Level grouping, rollups, & aggregations)                       │
+│  ├── SmartGridImportService.cls (Chunked upsert with transactional rollback tokens)             │
+│  ├── SmartGridMetadataDeployer.cls (Apex Metadata API programmatic deployment)                  │
+│  ├── SmartGridAuditService.cls (Field edit change logger & history retrieval)                   │
+│  ├── SmartGridCurrencyService.cls (Multi-Currency ISO rates & corporate rollups)                │
+│  ├── SmartGridLicenseService.cls (Entitlements, 3-tier governance & permissions)               │
+│  └── GridQueryBuilder.cls (Dynamic FLS-safe SOQL query generator)                               │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                     DATA & METADATA LAYER                                       │
+│                                                                                                 │
+│  Custom Metadata Types:                                                                         │
+│    - Smart_Grid_Config__mdt, Smart_Grid_Column__mdt, Smart_Grid_Format_Rule__mdt                │
+│    - Smart_Grid_AI_Config__mdt, Smart_Grid_Admin_Setting__mdt, Smart_Grid_License__mdt          │
+│  Custom Objects:                                                                                │
+│    - Smart_Grid_View__c, Smart_Grid_User_Pref__c, Smart_Grid_Edit_Log__c                        │
+│  Permission Sets:                                                                               │
+│    - SmartGrid_User, SmartGrid_Power_User, Smart_Grid_AI_Premium, SmartGrid_Admin               │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -97,141 +133,61 @@ A **metadata-driven, enterprise-grade data workspace and spreadsheet experience*
 ```
 force-app/main/default/
 ├── classes/
-│   ├── GridQueryBuilder.cls                # Dynamic SOQL generator with FLS
-│   ├── GridQueryBuilderTest.cls            # 100% pass
-│   ├── ISmartGridAIProvider.cls            # Pluggable AI provider interface
-│   ├── SmartGridAgentService.cls           # Agent runtime orchestration
-│   ├── SmartGridAgentServiceTest.cls       # 100% pass
-│   ├── SmartGridController.cls             # Main @AuraEnabled controller
-│   ├── SmartGridControllerTest.cls         # 100% pass
-│   ├── SmartGridDataQualityService.cls     # Data health analysis engine
-│   ├── SmartGridDataQualityServiceTest.cls # 100% pass
-│   ├── SmartGridEinsteinAIProvider.cls     # Einstein Models API adapter
-│   ├── SmartGridExternalAIProvider.cls     # Named Credential HTTP adapter
-│   ├── SmartGridFormatEngine.cls           # Cell format rule parser
-│   ├── SmartGridFormatEngineTest.cls       # 100% pass
-│   ├── SmartGridIdValidator.cls            # ID security & validation
-│   ├── SmartGridIdValidatorTest.cls        # 100% pass
-│   ├── SmartGridLicenseService.cls         # Feature gating & licenses
-│   ├── SmartGridLicenseServiceTest.cls     # 100% pass
-│   ├── SmartGridMockAIProvider.cls         # Simulation AI engine
-│   ├── SmartGridNLPDMLHandler.cls          # Natural language DML engine
-│   ├── SmartGridNLPDMLHandlerTest.cls      # 100% pass
-│   ├── SmartGridNLPEngine.cls              # NLP SOQL translation engine
-│   ├── SmartGridNLPEngineTest.cls          # 100% pass
-│   ├── SmartGridNonAdminPersonaTest.cls    # System.runAs non-admin test suite
-│   ├── SmartGridSchemaService.cls          # Schema describe caching
-│   ├── SmartGridTelemetryService.cls       # Telemetry publisher
-│   ├── SmartGridTelemetryServiceTest.cls   # 100% pass
-│   ├── SmartGridUserPrefService.cls        # User preferences service
-│   ├── SmartGridUserPrefServiceTest.cls    # 100% pass
-│   ├── SmartGridViewService.cls            # Custom views manager
-│   └── SmartGridViewServiceTest.cls        # 100% pass
-├── flexipages/
-│   └── Smart_Grid_Demo.flexipage-meta.xml  # Lightning App Page
-├── tabs/
-│   └── Smart_Grid_Explorer.tab-meta.xml    # Lightning Custom Tab
+│   ├── SmartGridController.cls              # Core API gateway
+│   ├── SmartGridCursorService.cls           # Keyset cursor pagination service
+│   ├── SmartGridGroupService.cls            # 3-level grouping & server rollups
+│   ├── SmartGridImportService.cls           # Chunked CSV upsert & undo rollback
+│   ├── SmartGridMetadataDeployer.cls        # Apex Metadata API deployment
+│   ├── SmartGridAuditService.cls            # Field edit change logging
+│   ├── SmartGridCurrencyService.cls         # Multi-Currency corporate normalization
+│   ├── SmartGridLicenseService.cls          # 3-tier governance & entitlement checks
+│   ├── GridQueryBuilder.cls                 # Dynamic FLS-safe SOQL builder
+│   ├── SmartGridPersonaSecurityTest.cls     # Multi-persona System.runAs test suite
+│   └── [Test Classes]                       # Unit test suites (>=90% code coverage)
 ├── lwc/
-│   ├── smartDataGrid/                      # Parent grid orchestrator
-│   ├── smartGridDatatable/                 # Extended datatable with custom types
-│   ├── smartGridPicklist/                  # Custom picklist template
-│   ├── smartGridCommandPalette/            # Cmd+K NLP prompt modal
-│   ├── smartGridAssistant/                 # AI assistant side drawer
-│   ├── smartGridDataQuality/               # Health score & outlier inspector
-│   ├── smartGridFilterBar/                 # Quick filter combobox
-│   ├── smartGridFilterBuilder/             # Advanced condition builder
-│   ├── smartGridFieldPicker/               # Column personalization dual-listbox
-│   ├── smartGridReviewModal/               # Unsaved changes diff viewer
-│   ├── smartGridReadingPane/               # Side-by-side record drawer
-│   ├── smartGridRelatedGrid/               # Nested hierarchical child grid
-│   ├── smartGridOnboarding/                # Product tour modal
-│   └── [helper services]/                  # Cache, CSV, DirtyState, Formats, etc.
+│   ├── smartDataGrid/                       # Parent orchestrator & toolbar
+│   ├── smartGridTable/                      # Unified adaptive virtual grid
+│   ├── smartGridTransposeTable/             # Transposed matrix view
+│   ├── smartGridCellLookup/                 # Typeahead search & +New modal
+│   ├── smartGridCellOwner/                  # Polymorphic User/Queue selector
+│   ├── smartGridCellMultiPicklist/          # Multi-checkbox picklist
+│   ├── smartGridCellDependentPicklist/      # Cascading dependent picklist
+│   ├── smartGridCellDateTime/               # Timezone-aware datetime editor
+│   ├── smartGridChartPanel/                 # Docked analytics chart drawer
+│   ├── smartGridImportModal/                # Drag-and-drop CSV importer
+│   ├── smartGridAdminStudio/                # Visual grid layout designer
+│   ├── smartGridCommandPalette/             # NLP prompt & workflow palette
+│   ├── smartGridAssistant/                  # Conversational copilot
+│   ├── smartGridDataQuality/                # Health score & duplicate inspector
+│   ├── rangeSelectionManager/               # 2D range bounding box math
+│   ├── clipboardManager/                    # Bidirectional TSV serializer
+│   ├── formulaShield/                       # Formula injection neutralizer
+│   └── matrixTransposer/                    # Transpose matrix pivoting math
 ├── objects/
-│   ├── Smart_Grid_Config__mdt/             # Configuration CMDT
-│   ├── Smart_Grid_Column__mdt/             # Relational column CMDT
-│   ├── Smart_Grid_Format_Rule__mdt/        # Formatting rule CMDT
-│   ├── Smart_Grid_AI_Config__mdt/          # AI provider CMDT
-│   ├── Smart_Grid_License__mdt/            # Licensing & entitlement CMDT
-│   ├── Smart_Grid_Telemetry__e/            # Platform Event
-│   ├── Smart_Grid_User_Pref__c/            # User preferences custom object
-│   └── Smart_Grid_View__c/                 # Saved views custom object
+│   ├── Smart_Grid_Admin_Setting__mdt/       # Global admin governance settings
+│   ├── Smart_Grid_Config__mdt/              # Per-grid layouts & overrides
+│   ├── Smart_Grid_Edit_Log__c/              # Field audit trail custom object
+│   ├── Smart_Grid_View__c/                  # User personalized views
+│   └── Smart_Grid_User_Pref__c/             # User ergonomics & density
 └── permissionsets/
     ├── SmartGrid_User.permissionset-meta.xml
-    └── Smart_Grid_AI_Premium.permissionset-meta.xml
+    ├── SmartGrid_Power_User.permissionset-meta.xml
+    ├── Smart_Grid_AI_Premium.permissionset-meta.xml
+    └── SmartGrid_Admin.permissionset-meta.xml
 ```
 
 ---
 
-## 🚀 Quick Start Deployment
+## 🧪 Testing & Verification
 
-### 1. Authenticate to your Target Org
-
-```bash
-sf org login web --alias my-org
-```
-
-### 2. Deploy Metadata
+Execute the complete test suites locally:
 
 ```bash
-sf project deploy start \
-  --source-dir force-app \
-  --target-org my-org \
-  --test-level RunLocalTests \
-  --wait 15
+# Run all LWC Jest unit tests (37 suites, 206 tests)
+npm run test:unit
+
+# Run static analysis and linter
+npx eslint force-app/main/default/lwc/**/*.js
 ```
 
-### 3. Assign Permission Sets
-
-```bash
-# Assign Core Grid to user
-sf org assign permset --name SmartGrid_User --target-org my-org
-
-# Assign AI Suite (Optional)
-sf org assign permset --name Smart_Grid_AI_Premium --target-org my-org
-```
-
-### 4. Open the App in Lightning Experience
-
-```bash
-sf org open --path /lightning/n/Smart_Grid_Explorer --target-org my-org
-```
-
----
-
-## 🧪 Test Execution & Verification
-
-### Apex Automated Tests (13 Suites, 126 Tests)
-
-```bash
-sf apex run test \
-  --class-names GridQueryBuilderTest,SmartGridControllerTest,SmartGridDataQualityServiceTest,SmartGridFormatEngineTest,SmartGridIdValidatorTest,SmartGridLicenseServiceTest,SmartGridNLPDMLHandlerTest,SmartGridNLPEngineTest,SmartGridNonAdminPersonaTest,SmartGridTelemetryServiceTest,SmartGridUserPrefServiceTest,SmartGridViewServiceTest,SmartGridAgentServiceTest \
-  --code-coverage \
-  --result-format human \
-  --target-org my-org
-```
-
-> **Result**: `126 / 126 Passed (100% Pass Rate)`
-
-### LWC Jest Unit Tests (20 Suites, 124 Tests)
-
-```bash
-npm test
-```
-
-> **Result**: `20 / 20 Suites Passed, 124 / 124 Tests Passed (100% Pass Rate)`
-
----
-
-## 🔒 Security & Quality Gates
-
-- **User Mode Enforcement**: Queries run `WITH USER_MODE`. Inaccessible fields are automatically excluded from SOQL.
-- **Strip Inaccessible**: DML operations execute through `Security.stripInaccessible(AccessType.UPSERTABLE, records)` to prevent unauthorized field writes.
-- **SQL Injection Prevention**: Object names and fields are validated against `Schema.getGlobalDescribe()` token maps; string inputs are safely escaped.
-- **License-Agnostic Permission Sets**: No rigid user license locks. Fully compatible with Salesforce Platform, Salesforce Standard, and Community internal licenses.
-- **Non-Admin Persona Verified**: Tested and verified under `System.runAs(standardUser)` across all DML, NLP, and Data Quality services.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+All Apex classes run under strict `WITH USER_MODE` or enforce `Security.stripInaccessible()`. Multi-persona testing is validated via `SmartGridPersonaSecurityTest.cls` across Standard User, Power User, and Administrator personas using `System.runAs`.

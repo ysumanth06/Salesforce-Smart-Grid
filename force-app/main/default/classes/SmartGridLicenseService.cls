@@ -6,6 +6,124 @@ public with sharing class SmartGridLicenseService {
   @TestVisible
   public static Map<String, Boolean> mockEntitlements;
 
+  @TestVisible
+  public static Map<String, Object> mockGridEntitlements;
+
+  /**
+   * @description Retrieves 3-tier user governance entitlements for grid operations (Transpose, AI, Admin)
+   * @param gridConfigName DeveloperName of the active Smart_Grid_Config__mdt
+   * @return Map of entitlement keys to boolean/numeric values
+   */
+  @AuraEnabled(cacheable=true)
+  public static Map<String, Object> getGridUserEntitlements(
+    String gridConfigName
+  ) {
+    if (mockGridEntitlements != null) {
+      return mockGridEntitlements;
+    }
+
+    Map<String, Object> result = new Map<String, Object>();
+    Id userId = UserInfo.getUserId();
+
+    Set<String> assignedPermSets = new Set<String>();
+    for (PermissionSetAssignment psa : [
+      SELECT PermissionSet.Name
+      FROM PermissionSetAssignment
+      WHERE AssigneeId = :userId
+      WITH SYSTEM_MODE
+    ]) {
+      assignedPermSets.add(psa.PermissionSet.Name);
+    }
+
+    Boolean hasPowerUser =
+      assignedPermSets.contains('SmartGrid_Power_User') ||
+      assignedPermSets.contains('SmartGrid_Admin');
+    Boolean hasAiPremium = assignedPermSets.contains('Smart_Grid_AI_Premium');
+    Boolean hasAdmin = assignedPermSets.contains('SmartGrid_Admin');
+
+    // Query global settings from Smart_Grid_Admin_Setting__mdt
+    Boolean globalTransposeEnabled = true;
+    Boolean globalAiEnabled = true;
+    Decimal maxTransposeLimit = 20;
+    Decimal defaultColumnWidth = 140;
+
+    List<Smart_Grid_Admin_Setting__mdt> adminSettings = [
+      SELECT
+        Enable_AI_Suite__c,
+        Enable_Transpose__c,
+        Max_Transpose_Limit__c,
+        Default_Record_Column_Width__c
+      FROM Smart_Grid_Admin_Setting__mdt
+      WITH USER_MODE
+      LIMIT 1
+    ];
+
+    if (!adminSettings.isEmpty()) {
+      Smart_Grid_Admin_Setting__mdt adminSetting = adminSettings[0];
+      if (adminSetting.Enable_Transpose__c != null) {
+        globalTransposeEnabled = adminSetting.Enable_Transpose__c;
+      }
+      if (adminSetting.Enable_AI_Suite__c != null) {
+        globalAiEnabled = adminSetting.Enable_AI_Suite__c;
+      }
+      if (adminSetting.Max_Transpose_Limit__c != null) {
+        maxTransposeLimit = adminSetting.Max_Transpose_Limit__c;
+      }
+      if (adminSetting.Default_Record_Column_Width__c != null) {
+        defaultColumnWidth = adminSetting.Default_Record_Column_Width__c;
+      }
+    }
+
+    // Query per-grid override from Smart_Grid_Config__mdt
+    Boolean gridTransposeAllowed = true;
+    if (String.isNotBlank(gridConfigName)) {
+      List<Smart_Grid_Config__mdt> gridConfigs = [
+        SELECT Enable_Transpose__c, Max_Transpose_Records__c
+        FROM Smart_Grid_Config__mdt
+        WHERE DeveloperName = :gridConfigName
+        WITH USER_MODE
+        LIMIT 1
+      ];
+      if (!gridConfigs.isEmpty()) {
+        Smart_Grid_Config__mdt config = gridConfigs[0];
+        if (config.Enable_Transpose__c != null) {
+          gridTransposeAllowed = config.Enable_Transpose__c;
+        }
+        if (config.Max_Transpose_Records__c != null) {
+          maxTransposeLimit = config.Max_Transpose_Records__c;
+        }
+      }
+    }
+
+    // Check if System Administrator in dev/scratch org
+    Boolean isSysAdmin = false;
+    List<Profile> profList = [
+      SELECT Name
+      FROM Profile
+      WHERE Id = :UserInfo.getProfileId()
+      WITH USER_MODE
+      LIMIT 1
+    ];
+    if (!profList.isEmpty() && profList[0].Name == 'System Administrator') {
+      isSysAdmin = true;
+    }
+
+    Boolean canTranspose =
+      (hasPowerUser || isSysAdmin) &&
+      globalTransposeEnabled &&
+      gridTransposeAllowed;
+    Boolean canUseAi = (hasAiPremium || isSysAdmin) && globalAiEnabled;
+    Boolean isAdmin = hasAdmin || isSysAdmin;
+
+    result.put('CAN_TRANSPOSE', canTranspose);
+    result.put('CAN_USE_AI', canUseAi);
+    result.put('IS_ADMIN', isAdmin);
+    result.put('MAX_TRANSPOSE_COUNT', maxTransposeLimit);
+    result.put('DEFAULT_COLUMN_WIDTH', defaultColumnWidth);
+
+    return result;
+  }
+
   /**
    * @description Checks feature entitlements for the current running user
    * @return Map of feature name to Boolean indicating access grant

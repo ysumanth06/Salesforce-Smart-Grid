@@ -1,0 +1,66 @@
+<template>
+  <div class="dependent-cell-container">
+    <template lwc:if={isEditing}>
+      <div class="slds-combobox_container">
+        <div
+          class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open"
+        >
+          <div
+            class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+          >
+            <input
+              type="text"
+              class="slds-input cell-inline-input"
+              value={searchFilter}
+              placeholder={computedPlaceholder}
+              oninput={handleFilterInput}
+              onkeydown={handleKeyDown}
+              data-testid="dependent-filter-input"
+            />
+            <button
+              class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+              title="Close"
+              onclick={handleCloseDropdown}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="xx-small"
+              ></lightning-icon>
+            </button>
+          </div>
+
+          <div class="dependent-dropdown" role="listbox">
+            <template lwc:if={hasAvailableOptions}>
+              <template for:each={filteredOptions} for:item="opt">
+                <div
+                  key={opt.value}
+                  class="dependent-option-item"
+                  data-value={opt.value}
+                  data-label={opt.label}
+                  onclick={handleSelectOption}
+                  role="option"
+                >
+                  <span class="slds-truncate">{opt.label}</span>
+                </div>
+              </template>
+            </template>
+            <template lwc:else>
+              <div class="dependent-empty-state">
+                No options available for controlling value "{controllingValue}"
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template lwc:else>
+      <div
+        class="dependent-display-wrapper"
+        ondblclick={handleStartEdit}
+        title={computedDisplayValue}
+      >
+        <span class="slds-truncate">{computedDisplayValue}</span>
+      </div>
+    </template>
+  </div>
+</template>

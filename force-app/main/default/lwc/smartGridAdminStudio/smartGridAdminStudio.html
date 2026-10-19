@@ -1,0 +1,147 @@
+<template>
+  <div class="studio-container slds-card">
+    <!-- Header -->
+    <div class="studio-header">
+      <div class="slds-grid slds-grid_vertical-align-center">
+        <lightning-icon
+          icon-name="standard:service_setup"
+          size="medium"
+          class="slds-m-right_small"
+        ></lightning-icon>
+        <div>
+          <h1 class="slds-text-heading_medium">Smart Grid Admin Studio</h1>
+          <p class="slds-text-body_small slds-text-color_weak">
+            Visually configure, preview, and deploy custom Smart Grids to
+            metadata.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <lightning-button
+          label="Deploy Grid Metadata"
+          icon-name="utility:upload"
+          variant="brand"
+          onclick={handleDeploy}
+          disabled={disableDeploy}
+          data-testid="deploy-grid-btn"
+        ></lightning-button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="studio-body">
+      <!-- Loading Spinner -->
+      <template lwc:if={isLoading}>
+        <div class="slds-p-around_large slds-text-align_center">
+          <lightning-spinner
+            alternative-text="Deploying..."
+            size="medium"
+          ></lightning-spinner>
+        </div>
+      </template>
+
+      <!-- Section 1: Target SObject & Naming -->
+      <div class="studio-card">
+        <div class="studio-card-title">
+          <lightning-icon
+            icon-name="utility:settings"
+            size="x-small"
+          ></lightning-icon>
+          <span>1. General Configuration</span>
+        </div>
+        <div class="slds-grid slds-gutters">
+          <div class="slds-col slds-size_1-of-3">
+            <lightning-combobox
+              label="Select SObject"
+              value={selectedObject}
+              options={objectOptions}
+              onchange={handleObjectChange}
+              data-testid="object-selector"
+            ></lightning-combobox>
+          </div>
+          <div class="slds-col slds-size_1-of-3">
+            <lightning-input
+              label="Grid Developer Name"
+              value={gridDevName}
+              onchange={handleDevNameChange}
+              required
+            ></lightning-input>
+          </div>
+          <div class="slds-col slds-size_1-of-3">
+            <lightning-input
+              label="Display Label"
+              value={gridLabel}
+              onchange={handleLabelChange}
+              required
+            ></lightning-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Columns Dual Listbox -->
+      <div class="studio-card">
+        <div class="studio-card-title">
+          <lightning-icon
+            icon-name="utility:table"
+            size="x-small"
+          ></lightning-icon>
+          <span>2. Select & Order Columns</span>
+        </div>
+        <lightning-dual-listbox
+          name="columns"
+          label="Available vs. Displayed Columns"
+          source-label="Available Fields"
+          selected-label="Selected Columns"
+          options={fieldOptions}
+          value={selectedFields}
+          onchange={handleColumnsChange}
+          size="6"
+        ></lightning-dual-listbox>
+      </div>
+
+      <!-- Section 3: Feature Toggles -->
+      <div class="studio-card">
+        <div class="studio-card-title">
+          <lightning-icon
+            icon-name="utility:unlock"
+            size="x-small"
+          ></lightning-icon>
+          <span>3. Feature Gating & Permissions</span>
+        </div>
+        <div class="toggles-grid">
+          <lightning-input
+            type="toggle"
+            label="Enable Add Row"
+            checked={enableAddRow}
+            onchange={handleToggleAddRow}
+          ></lightning-input>
+          <lightning-input
+            type="toggle"
+            label="Enable Delete"
+            checked={enableDelete}
+            onchange={handleToggleDelete}
+          ></lightning-input>
+          <lightning-input
+            type="toggle"
+            label="Enable Export (CSV/Excel)"
+            checked={enableExport}
+            onchange={handleToggleExport}
+          ></lightning-input>
+          <lightning-input
+            type="toggle"
+            label="Enable Filters"
+            checked={enableFilters}
+            onchange={handleToggleFilters}
+          ></lightning-input>
+          <lightning-input
+            type="toggle"
+            label="Enable Transpose Grid View"
+            checked={enableTranspose}
+            onchange={handleToggleTranspose}
+          ></lightning-input>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

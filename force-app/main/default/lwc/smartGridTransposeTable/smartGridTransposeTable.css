@@ -1,0 +1,143 @@
+.transpose-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Toolbar */
+.transpose-toolbar {
+  padding: 10px 16px;
+  background-color: #f8f9fb;
+  border-bottom: 1px solid #dddbda;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.transpose-toolbar-left,
+.transpose-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transpose-limit-banner {
+  padding: 6px 16px;
+  background-color: #fff3cd;
+  color: #856404;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid #ffeeba;
+  display: flex;
+  align-items: center;
+}
+
+/* Table Scroll Area */
+.transpose-scroll-area {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  scroll-behavior: smooth;
+}
+
+/* Fixed Header and Pinned Left Column */
+.transpose-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.transpose-table th,
+.transpose-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e5e5;
+  border-right: 1px solid #f0f0f0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Sticky Headers */
+.transpose-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background-color: #f3f3f3;
+  font-weight: 700;
+  border-bottom: 2px solid #d8dde6;
+}
+
+/* Pinned Left Field Column */
+.transpose-table th.pinned-field-col,
+.transpose-table td.pinned-field-cell {
+  position: sticky;
+  left: 0;
+  background-color: #f8f9fa;
+  font-weight: 600;
+  z-index: 10;
+  border-right: 2px solid #d8dde6;
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+
+/* Corner Intersection: Top-Left Header */
+.transpose-table thead th.pinned-field-col {
+  z-index: 25;
+  background-color: #eef1f6;
+}
+
+/* Status Column */
+.transpose-table th.status-col,
+.transpose-table td.status-cell {
+  width: 110px;
+  min-width: 110px;
+  text-align: center;
+}
+
+/* Record Columns */
+.transpose-record-header {
+  font-weight: 700;
+  color: #080707;
+}
+
+/* Differing Row Highlighting */
+tr.is-differing-row td.pinned-field-cell {
+  background-color: #fff8e6;
+  color: #7d4e00;
+}
+
+tr.is-differing-row {
+  background-color: #fffefb;
+}
+
+/* Editable Cell States */
+.transpose-cell-editable {
+  cursor: cell;
+}
+
+.transpose-cell-editable:hover {
+  background-color: #f4f6fe;
+}
+
+.dirty-dot {
+  color: #0176d3;
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-left: 4px;
+}
+
+.cell-inline-input {
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 2px 6px !important;
+  font-size: 0.8125rem !important;
+  width: 100%;
+}

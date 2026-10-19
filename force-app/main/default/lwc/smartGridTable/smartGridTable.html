@@ -1,0 +1,182 @@
+<template>
+  <div
+    class="smart-grid-table-container slds-table_header-fixed_container"
+    tabindex="0"
+    onscroll={handleScroll}
+    onkeydown={handleKeyDown}
+    onmouseup={handleMouseUp}
+    onpaste={handlePaste}
+  >
+    <!-- Loading Spinner -->
+    <template lwc:if={isLoading}>
+      <lightning-spinner
+        alternative-text="Loading data"
+        size="medium"
+      ></lightning-spinner>
+    </template>
+
+    <div class="slds-scrollable_y smart-grid-viewport" style={viewportStyle}>
+      <table
+        class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols slds-table_header-fixed"
+        role="grid"
+        aria-label="Smart Grid Table"
+      >
+        <thead>
+          <tr class="slds-line-height_reset">
+            <!-- Row Selection Column Header -->
+            <th
+              class="slds-text-align_right slds-cell_action-mode th-selection-col"
+              scope="col"
+            >
+              <div class="slds-th__action slds-th__action_form">
+                <div class="slds-checkbox">
+                  <input
+                    type="checkbox"
+                    name="select-all"
+                    id="select-all-checkbox"
+                    checked={isAllSelected}
+                    onchange={handleSelectAll}
+                  />
+                  <label class="slds-checkbox__label" for="select-all-checkbox">
+                    <span class="slds-checkbox_faux"></span>
+                    <span class="slds-form-element__label slds-assistive-text"
+                      >Select All</span
+                    >
+                  </label>
+                </div>
+              </div>
+            </th>
+
+            <!-- Row Number Column Header -->
+            <th class="th-row-num-col" scope="col">
+              <span class="slds-truncate slds-assistive-text">Row Number</span>
+            </th>
+
+            <!-- Data Column Headers -->
+            <template for:each={computedColumns} for:item="col">
+              <th
+                key={col.fieldName}
+                class={col.headerClass}
+                scope="col"
+                style={col.style}
+                data-field={col.fieldName}
+                onclick={handleHeaderClick}
+              >
+                <div
+                  class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate"
+                >
+                  <span class="slds-truncate" title={col.label}
+                    >{col.label}</span
+                  >
+                  <template lwc:if={col.isSorted}>
+                    <lightning-icon
+                      icon-name={col.sortIconName}
+                      size="xx-small"
+                      class="slds-m-left_xx-small"
+                    ></lightning-icon>
+                  </template>
+                </div>
+              </th>
+            </template>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- Top Virtual Spacer -->
+          <template lwc:if={showTopSpacer}>
+            <tr
+              class="virtual-spacer-row"
+              style={topSpacerStyle}
+              aria-hidden="true"
+            >
+              <td colspan={totalColCount}></td>
+            </tr>
+          </template>
+
+          <!-- Rendered Visible Virtual Rows -->
+          <template for:each={visibleRows} for:item="row">
+            <tr key={row.id} class={row.rowClass} data-id={row.id}>
+              <!-- Row Selection Checkbox -->
+              <td
+                class="slds-text-align_right slds-cell_action-mode"
+                role="gridcell"
+              >
+                <div class="slds-checkbox">
+                  <input
+                    type="checkbox"
+                    id={row.checkboxId}
+                    data-id={row.id}
+                    checked={row.isSelected}
+                    onchange={handleRowCheckboxChange}
+                  />
+                  <label class="slds-checkbox__label" for={row.checkboxId}>
+                    <span class="slds-checkbox_faux"></span>
+                    <span class="slds-form-element__label slds-assistive-text"
+                      >Select Row</span
+                    >
+                  </label>
+                </div>
+              </td>
+
+              <!-- Row Index Indicator -->
+              <td class="td-row-index slds-text-color_weak" role="gridcell">
+                <span>{row.displayIndex}</span>
+              </td>
+
+              <!-- Data Cells -->
+              <template for:each={row.cells} for:item="cell">
+                <td
+                  key={cell.key}
+                  class={cell.cellClass}
+                  data-field={cell.fieldName}
+                  data-id={row.id}
+                  data-row-index={cell.rowIndex}
+                  data-col-index={cell.colIndex}
+                  role="gridcell"
+                  onmousedown={handleCellMouseDown}
+                  onmouseenter={handleCellMouseEnter}
+                  ondblclick={handleCellDblClick}
+                >
+                  <template lwc:if={cell.isEditing}>
+                    <input
+                      type={cell.inputType}
+                      class="slds-input cell-inline-input"
+                      value={cell.displayValue}
+                      data-field={cell.fieldName}
+                      data-id={row.id}
+                      onblur={handleCellEditBlur}
+                      onkeydown={handleCellEditKeyDown}
+                    />
+                  </template>
+                  <template lwc:else>
+                    <div
+                      class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate"
+                    >
+                      <span class="slds-truncate" title={cell.displayValue}>
+                        {cell.displayValue}
+                      </span>
+                      <template lwc:if={cell.isDraft}>
+                        <span class="dirty-dot" title="Unsaved change">•</span>
+                      </template>
+                    </div>
+                  </template>
+                </td>
+              </template>
+            </tr>
+          </template>
+
+          <!-- Bottom Virtual Spacer -->
+          <template lwc:if={showBottomSpacer}>
+            <tr
+              class="virtual-spacer-row"
+              style={bottomSpacerStyle}
+              aria-hidden="true"
+            >
+              <td colspan={totalColCount}></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>

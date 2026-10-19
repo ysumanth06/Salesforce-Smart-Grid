@@ -1,0 +1,49 @@
+.dependent-cell-container {
+  position: relative;
+  width: 100%;
+}
+
+.dependent-display-wrapper {
+  cursor: cell;
+  padding: 2px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dependent-display-wrapper:hover {
+  background-color: #f3f3f3;
+  border-radius: 2px;
+}
+
+.dependent-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 240px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.dependent-option-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.dependent-option-item:hover {
+  background-color: #f4f6fe;
+}
+
+.dependent-empty-state {
+  padding: 12px;
+  color: #747474;
+  font-size: 0.8125rem;
+  text-align: center;
+}

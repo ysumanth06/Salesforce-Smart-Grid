@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_Transpose__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description
+  >Enables or disables Transposed Grid View for this specific grid configuration.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Enable Transpose</label>
+    <type>Checkbox</type>
+</CustomField>

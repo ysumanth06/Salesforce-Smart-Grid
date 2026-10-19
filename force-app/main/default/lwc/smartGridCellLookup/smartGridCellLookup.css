@@ -1,0 +1,62 @@
+.lookup-cell-container {
+  position: relative;
+  width: 100%;
+}
+
+.lookup-display-wrapper {
+  cursor: cell;
+  padding: 2px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lookup-display-wrapper:hover {
+  background-color: #f3f3f3;
+  border-radius: 2px;
+}
+
+.lookup-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 260px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.lookup-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.lookup-item:hover {
+  background-color: #f4f6fe;
+}
+
+.lookup-new-btn {
+  width: 100%;
+  padding: 8px 12px;
+  color: #0176d3;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #fafaf9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid #dddbda;
+}
+
+.lookup-new-btn:hover {
+  background-color: #edf5fc;
+}
