@@ -14,6 +14,7 @@
           <button
             class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
             title="Close"
+            aria-label="Close"
             onclick={handleCancel}
           >
             <lightning-icon
@@ -123,6 +124,7 @@
           <button
             class="slds-button slds-button_neutral"
             onclick={handleCancel}
+            aria-label="Cancel"
             disabled={isLoading}
             data-testid="dml-cancel-btn"
           >
@@ -131,6 +133,7 @@
           <button
             class="slds-button slds-button_brand"
             onclick={handleConfirm}
+            aria-label="Confirm &amp; Apply Changes"
             disabled={isLoading}
             data-testid="dml-confirm-btn"
           >

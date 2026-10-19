@@ -17,6 +17,7 @@
         <button
           class="slds-button slds-button_icon slds-button_icon-inverse"
           title="Close Panel"
+          aria-label="Close Panel"
           onclick={handleClose}
           data-testid="close-drawer-btn"
         >
@@ -140,6 +141,7 @@
                         class="slds-button slds-button_neutral slds-button_stretch fix-filter-btn"
                         data-field={issue.fieldName}
                         data-type={issue.issueType}
+                        aria-label="Filter Grid to Review"
                         onclick={handleFilterIssue}
                         data-testid="filter-issue-btn"
                       >
