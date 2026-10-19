@@ -2314,9 +2314,9 @@ export default class SmartDataGrid extends LightningElement {
         this.activeFilterJson = null;
       }
       if (Array.isArray(config.columns) && config.columns.length > 0) {
-        this.pickerSelectedFields = config.columns.map((c) =>
-          typeof c === "string" ? c : c.fieldApiName || c.fieldName || c
-        );
+        this.pickerSelectedFields = config.columns.map((c) => {
+          return typeof c === "string" ? c : c.fieldApiName || c.fieldName || c;
+        });
         this.refreshColumns();
       }
       if (config.pinnedColumn !== undefined) {
