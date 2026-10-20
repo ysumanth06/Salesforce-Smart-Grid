@@ -155,8 +155,8 @@ public with sharing class SmartGridGroupService {
       query += ' WHERE ' + String.join(whereConditions, ' AND ');
     }
 
-    query += ' GROUP BY ' + String.join(validGroupFields, ', ');
     query += ' WITH USER_MODE';
+    query += ' GROUP BY ' + String.join(validGroupFields, ', ');
 
     Integer queryLimit = (request.limitSize != null &&
       request.limitSize > 0)
@@ -212,10 +212,40 @@ public with sharing class SmartGridGroupService {
 
       // Extract rollups
       for (String af : aggFields) {
-        rootNode.aggregates.put('sum_' + af, ar.get('sum_' + af));
-        rootNode.aggregates.put('avg_' + af, ar.get('avg_' + af));
-        rootNode.aggregates.put('min_' + af, ar.get('min_' + af));
-        rootNode.aggregates.put('max_' + af, ar.get('max_' + af));
+        Object sumVal = ar.get('sum_' + af);
+        if (sumVal != null) {
+          Decimal currentSum = (Decimal) rootNode.aggregates.get('sum_' + af);
+          Decimal addedSum = (Decimal) sumVal;
+          rootNode.aggregates.put(
+            'sum_' + af,
+            (currentSum != null ? currentSum : 0) + addedSum
+          );
+        }
+        Object minVal = ar.get('min_' + af);
+        if (minVal != null) {
+          Decimal currentMin = (Decimal) rootNode.aggregates.get('min_' + af);
+          Decimal newMin = (Decimal) minVal;
+          rootNode.aggregates.put(
+            'min_' + af,
+            currentMin != null ? Math.min(currentMin, newMin) : newMin
+          );
+        }
+        Object maxVal = ar.get('max_' + af);
+        if (maxVal != null) {
+          Decimal currentMax = (Decimal) rootNode.aggregates.get('max_' + af);
+          Decimal newMax = (Decimal) maxVal;
+          rootNode.aggregates.put(
+            'max_' + af,
+            currentMax != null ? Math.max(currentMax, newMax) : newMax
+          );
+        }
+        if (
+          rootNode.recordCount > 0 &&
+          rootNode.aggregates.containsKey('sum_' + af)
+        ) {
+          Decimal totalSum = (Decimal) rootNode.aggregates.get('sum_' + af);
+          rootNode.aggregates.put('avg_' + af, totalSum / rootNode.recordCount);
+        }
       }
 
       // Check level 2 if present

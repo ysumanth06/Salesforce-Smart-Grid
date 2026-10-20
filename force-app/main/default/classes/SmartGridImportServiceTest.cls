@@ -15,7 +15,7 @@ private class SmartGridImportServiceTest {
       new Map<String, Object>{
         'Name' => 'Imported Account B',
         'AnnualRevenue' => '$250,000',
-        'Industry' => 'Finance'
+        'Industry' => 'Consulting'
       }
     };
 
@@ -43,6 +43,7 @@ private class SmartGridImportServiceTest {
       SELECT Id, Name, AnnualRevenue
       FROM Account
       WHERE Id IN :importRes.createdRecordIds
+      ORDER BY Name ASC
     ];
     Assert.areEqual(2, insertedAccounts.size());
     Assert.areEqual(
@@ -52,12 +53,10 @@ private class SmartGridImportServiceTest {
     );
 
     // Test Rollback
-    Test.startTest();
     SmartGridImportService.RollbackResult rollbackRes = SmartGridImportService.executeRollback(
       importRes.rollbackToken,
       importRes.createdRecordIds
     );
-    Test.stopTest();
 
     Assert.isTrue(rollbackRes.isSuccess, 'Rollback should succeed');
     Assert.areEqual(

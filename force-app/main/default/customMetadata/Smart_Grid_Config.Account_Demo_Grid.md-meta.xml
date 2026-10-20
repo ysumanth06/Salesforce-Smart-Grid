@@ -69,4 +69,12 @@
         <field>Totals_Fields_JSON__c</field>
         <value xsi:type="xsd:string">["AnnualRevenue"]</value>
     </values>
+    <values>
+        <field>Enable_Transpose__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Max_Transpose_Records__c</field>
+        <value xsi:type="xsd:double">20</value>
+    </values>
 </CustomMetadata>

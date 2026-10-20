@@ -11,7 +11,11 @@ export default class SmartGridDataQuality extends LightningElement {
     return this._isOpen;
   }
   set isOpen(val) {
+    const wasOpen = this._isOpen;
     this._isOpen = Boolean(val);
+    if (this._isOpen && !wasOpen) {
+      this.loadAnalysis();
+    }
   }
 
   @track isLoading = false;
@@ -129,6 +133,10 @@ export default class SmartGridDataQuality extends LightningElement {
 
   handleClose() {
     this.closeDrawer();
+  }
+
+  handleRefresh() {
+    this.loadAnalysis();
   }
 
   handleFilterIssue(event) {

@@ -1,5 +1,10 @@
 .command-palette-modal {
   z-index: 9999;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: 8vh !important;
+  padding-bottom: 2rem !important;
 }
 
 .palette-backdrop {
@@ -9,14 +14,32 @@
 }
 
 .palette-container {
-  max-width: 44rem;
-  margin-top: 5vh;
-  padding: var(--lwc-spacingNone, 0) !important;
+  max-width: 46rem;
+  width: 90%;
+  height: auto !important;
+  max-height: 82vh !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
   border-radius: var(--lwc-borderRadiusLarge, 0.75rem);
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
   background: var(--lwc-colorBackgroundAlt, #ffffff);
-  border: var(--lwc-borderWidthThin, 1px) solid #e2e8f0;
+  border: var(--lwc-borderWidthThin, 1px) solid #cbd5e1;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  animation: paletteSlideDown 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes paletteSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .palette-header {
@@ -34,7 +57,7 @@
   background: transparent;
   border: none;
   color: var(--lwc-colorTextInverse, #ffffff);
-  font-size: var(--lwc-fontSize6, 1.125rem);
+  font-size: 1.125rem;
   font-weight: 500;
   outline: none;
 }
@@ -93,7 +116,7 @@
 
 .soql-code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: var(--lwc-fontSize2, 0.75rem);
+  font-size: 0.75rem;
   background: #0f172a;
   color: #38bdf8;
   padding: var(--lwc-spacingXSmall, 0.5rem);
@@ -103,7 +126,7 @@
 }
 
 .section-heading {
-  font-size: var(--lwc-fontSize2, 0.75rem);
+  font-size: 0.75rem;
   font-weight: var(--lwc-fontWeightBold, 700);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -116,7 +139,7 @@
   font-size: 0.8rem;
   padding: 0.35rem 0.65rem;
   margin: var(--lwc-spacingXxSmall, 0.25rem) var(--lwc-spacingXxSmall, 0.25rem)
-    var(--lwc-spacingXxSmall, 0.25rem) var(--lwc-spacingNone, 0);
+    var(--lwc-spacingXxSmall, 0.25rem) 0;
   background: var(--lwc-colorBackgroundAlt, #ffffff);
   color: #334155;
   border: var(--lwc-borderWidthThin, 1px) solid #e2e8f0;
@@ -138,8 +161,8 @@
 
 .recent-list {
   list-style: none;
-  padding: var(--lwc-spacingNone, 0);
-  margin: var(--lwc-spacingNone, 0);
+  padding: 0;
+  margin: 0;
 }
 
 .recent-btn {
@@ -161,7 +184,7 @@
 
 .field-tag {
   display: inline-block;
-  font-size: var(--lwc-fontSize2, 0.75rem);
+  font-size: 0.75rem;
   font-family: monospace;
   padding: 0.15rem 0.4rem;
   margin: 0.15rem;

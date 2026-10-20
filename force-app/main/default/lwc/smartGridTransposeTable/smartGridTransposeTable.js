@@ -10,6 +10,18 @@ export default class SmartGridTransposeTable extends LightningElement {
 
   @track filterMode = "ALL"; // 'ALL' | 'DIFFERENCES_ONLY' | 'POPULATED_ONLY'
   @track activeEditingCell = null; // { recordId, fieldName }
+  _needsInputFocus = false;
+
+  renderedCallback() {
+    if (this._needsInputFocus) {
+      this._needsInputFocus = false;
+      const input = this.template.querySelector(".cell-inline-input");
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+  }
 
   get boundedRecords() {
     if (!this.records || this.records.length === 0) {
@@ -125,6 +137,18 @@ export default class SmartGridTransposeTable extends LightningElement {
     return `Comparing ${this.effectiveRecordCount} records across ${this.transposedRows.length} fields (${this.differingCount} differing)`;
   }
 
+  get hasDraftValues() {
+    return Array.isArray(this.draftValues) && this.draftValues.length > 0;
+  }
+
+  get draftCount() {
+    return this.hasDraftValues ? this.draftValues.length : 0;
+  }
+
+  get draftCountBadgeLabel() {
+    return `${this.draftCount} unsaved`;
+  }
+
   handleFilterAll() {
     this.filterMode = "ALL";
   }
@@ -144,28 +168,56 @@ export default class SmartGridTransposeTable extends LightningElement {
   handleScrollLeft() {
     const container = this.template.querySelector(".transpose-scroll-area");
     if (container) {
-      container.scrollBy({ left: -300, behavior: "smooth" });
+      if (typeof container.scrollBy === "function") {
+        try {
+          container.scrollBy({ left: -300, behavior: "smooth" });
+          return;
+        } catch {
+          // fallback
+        }
+      }
+      container.scrollLeft -= 300;
     }
   }
 
   handleScrollRight() {
     const container = this.template.querySelector(".transpose-scroll-area");
     if (container) {
-      container.scrollBy({ left: 300, behavior: "smooth" });
+      if (typeof container.scrollBy === "function") {
+        try {
+          container.scrollBy({ left: 300, behavior: "smooth" });
+          return;
+        } catch {
+          // fallback
+        }
+      }
+      container.scrollLeft += 300;
     }
+  }
+
+  handleEditIconClick(event) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const recordId = btn.dataset.recordId;
+    const fieldName = btn.dataset.field;
+    this.startEditing(recordId, fieldName);
   }
 
   handleCellDblClick(event) {
     const cell = event.currentTarget;
     const recordId = cell.dataset.recordId;
     const fieldName = cell.dataset.field;
+    this.startEditing(recordId, fieldName);
+  }
 
+  startEditing(recordId, fieldName) {
     const col = (this.columns || []).find((c) => c.fieldName === fieldName);
     if (!col || col.editable === false) {
       return;
     }
 
     this.activeEditingCell = { recordId, fieldName };
+    this._needsInputFocus = true;
   }
 
   handleCellEditBlur(event) {
@@ -202,5 +254,14 @@ export default class SmartGridTransposeTable extends LightningElement {
     } else if (event.key === "Escape") {
       this.activeEditingCell = null;
     }
+  }
+
+  handleSave() {
+    this.dispatchEvent(new CustomEvent("save"));
+  }
+
+  handleCancel() {
+    this.activeEditingCell = null;
+    this.dispatchEvent(new CustomEvent("cancel"));
   }
 }

@@ -14,20 +14,37 @@
             <p class="drawer-subtitle">{objectApiName} Health Inspection</p>
           </div>
         </div>
-        <button
-          class="slds-button slds-button_icon slds-button_icon-inverse"
-          title="Close Panel"
-          aria-label="Close Panel"
-          onclick={handleClose}
-          data-testid="close-drawer-btn"
-        >
-          <lightning-icon
-            icon-name="utility:close"
-            size="x-small"
-            variant="inverse"
-          ></lightning-icon>
-          <span class="slds-assistive-text">Close</span>
-        </button>
+        <div class="slds-grid slds-grid_vertical-align-center">
+          <button
+            class="slds-button slds-button_icon slds-button_icon-inverse slds-var-m-right_xx-small"
+            title="Re-scan Dataset"
+            aria-label="Re-scan Dataset"
+            onclick={handleRefresh}
+            disabled={isLoading}
+            data-testid="rescan-quality-btn"
+          >
+            <lightning-icon
+              icon-name="utility:refresh"
+              size="x-small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Re-scan Dataset</span>
+          </button>
+          <button
+            class="slds-button slds-button_icon slds-button_icon-inverse"
+            title="Close Panel"
+            aria-label="Close Panel"
+            onclick={handleClose}
+            data-testid="close-drawer-btn"
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              size="x-small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+        </div>
       </div>
 
       <!-- Drawer Content -->

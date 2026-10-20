@@ -56,6 +56,26 @@
         <enabled>true</enabled>
         <apexClass>SmartGridGroupService</apexClass>
     </classAccesses>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Smart_Grid_Edit_Log__c.Changed_By__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Smart_Grid_Edit_Log__c.Grid_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Smart_Grid_Edit_Log__c.New_Value__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Smart_Grid_Edit_Log__c.Old_Value__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>

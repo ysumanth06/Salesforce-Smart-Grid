@@ -4,7 +4,7 @@
  * with strict FLS, object accessibility validation, and AccessLevel.USER_MODE enforcement.
  */
 public with sharing class SmartGridCursorService {
-  public class CursorRequest {
+  public virtual class CursorRequest {
     @AuraEnabled
     public String objectApiName;
     @AuraEnabled
@@ -27,7 +27,19 @@ public with sharing class SmartGridCursorService {
     public Map<String, Object> filters;
   }
 
-  public class CursorResult {
+  public class CursorPageRequest extends CursorRequest {
+    @AuraEnabled
+    public Integer pageSize {
+      get {
+        return chunkSize;
+      }
+      set {
+        chunkSize = value;
+      }
+    }
+  }
+
+  public virtual class CursorResult {
     @AuraEnabled
     public List<SObject> records;
     @AuraEnabled
@@ -40,7 +52,22 @@ public with sharing class SmartGridCursorService {
     public Integer totalCount;
   }
 
+  public class CursorPageResult extends CursorResult {
+  }
+
   public class CursorServiceException extends Exception {
+  }
+
+  @AuraEnabled
+  public static CursorPageResult fetchCursorPage(CursorPageRequest req) {
+    CursorResult res = fetchRecordsStreaming(req);
+    CursorPageResult pageRes = new CursorPageResult();
+    pageRes.records = res.records;
+    pageRes.hasMore = res.hasMore;
+    pageRes.lastSortValue = res.lastSortValue;
+    pageRes.lastId = res.lastId;
+    pageRes.totalCount = res.totalCount;
+    return pageRes;
   }
 
   /**
@@ -114,8 +141,18 @@ public with sharing class SmartGridCursorService {
     qReq.objectApiName = req.objectApiName;
     qReq.fields = validFields;
     qReq.filters = req.filters;
-    qReq.filterJson = req.filterJson;
-    qReq.filterExpression = req.filterExpression;
+    qReq.filterJson = String.isNotBlank(req.filterJson)
+      ? req.filterJson
+      : req.filterExpression;
+    if (String.isNotBlank(req.filterExpression)) {
+      try {
+        qReq.filterExpression = (GridQueryBuilder.FilterExpression) JSON.deserialize(
+          req.filterExpression,
+          GridQueryBuilder.FilterExpression.class
+        );
+      } catch (Exception ignored) {
+      }
+    }
 
     // Build base count and base filters
     Integer totalCount = 0;

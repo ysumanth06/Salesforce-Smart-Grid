@@ -15,10 +15,27 @@ describe("c-smart-grid-chart-panel", () => {
     { Id: "001C", Industry: "Finance", AnnualRevenue: 200000 }
   ];
 
-  it("renders KPI metrics and donut chart SVG by default", async () => {
+  it("does not render drawer when isOpen is false", async () => {
     const element = createElement("c-smart-grid-chart-panel", {
       is: SmartGridChartPanel
     });
+    element.isOpen = false;
+    element.data = MOCK_DATA;
+    document.body.appendChild(element);
+
+    await Promise.resolve();
+
+    const container = element.shadowRoot.querySelector(
+      ".chart-panel-container"
+    );
+    expect(container).toBeNull();
+  });
+
+  it("renders KPI metrics and donut chart SVG by default when open", async () => {
+    const element = createElement("c-smart-grid-chart-panel", {
+      is: SmartGridChartPanel
+    });
+    element.isOpen = true;
     element.data = MOCK_DATA;
     element.groupByField = "Industry";
     element.aggregateField = "AnnualRevenue";
@@ -41,6 +58,7 @@ describe("c-smart-grid-chart-panel", () => {
     const element = createElement("c-smart-grid-chart-panel", {
       is: SmartGridChartPanel
     });
+    element.isOpen = true;
     element.data = MOCK_DATA;
     document.body.appendChild(element);
 
@@ -60,6 +78,7 @@ describe("c-smart-grid-chart-panel", () => {
     const element = createElement("c-smart-grid-chart-panel", {
       is: SmartGridChartPanel
     });
+    element.isOpen = true;
     element.data = MOCK_DATA;
     document.body.appendChild(element);
 
@@ -79,6 +98,7 @@ describe("c-smart-grid-chart-panel", () => {
     const element = createElement("c-smart-grid-chart-panel", {
       is: SmartGridChartPanel
     });
+    element.isOpen = true;
     element.data = MOCK_DATA;
     document.body.appendChild(element);
 

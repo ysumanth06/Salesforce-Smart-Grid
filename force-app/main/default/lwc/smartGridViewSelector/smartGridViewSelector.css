@@ -5,7 +5,7 @@
 
 .view-combobox {
   min-width: 180px;
-  max-width: var(--lwc-sizeSmall, 240px);
+  max-width: 240px;
 }
 
 .modified-badge {

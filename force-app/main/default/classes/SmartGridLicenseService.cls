@@ -47,51 +47,59 @@ public with sharing class SmartGridLicenseService {
     Decimal maxTransposeLimit = 20;
     Decimal defaultColumnWidth = 140;
 
-    List<Smart_Grid_Admin_Setting__mdt> adminSettings = [
-      SELECT
-        Enable_AI_Suite__c,
-        Enable_Transpose__c,
-        Max_Transpose_Limit__c,
-        Default_Record_Column_Width__c
-      FROM Smart_Grid_Admin_Setting__mdt
-      WITH USER_MODE
-      LIMIT 1
-    ];
+    try {
+      List<Smart_Grid_Admin_Setting__mdt> adminSettings = [
+        SELECT
+          Enable_AI_Suite__c,
+          Enable_Transpose__c,
+          Max_Transpose_Limit__c,
+          Default_Record_Column_Width__c
+        FROM Smart_Grid_Admin_Setting__mdt
+        WITH USER_MODE
+        LIMIT 1
+      ];
 
-    if (!adminSettings.isEmpty()) {
-      Smart_Grid_Admin_Setting__mdt adminSetting = adminSettings[0];
-      if (adminSetting.Enable_Transpose__c != null) {
-        globalTransposeEnabled = adminSetting.Enable_Transpose__c;
+      if (!adminSettings.isEmpty()) {
+        Smart_Grid_Admin_Setting__mdt adminSetting = adminSettings[0];
+        if (adminSetting.Enable_Transpose__c != null) {
+          globalTransposeEnabled = adminSetting.Enable_Transpose__c;
+        }
+        if (adminSetting.Enable_AI_Suite__c != null) {
+          globalAiEnabled = adminSetting.Enable_AI_Suite__c;
+        }
+        if (adminSetting.Max_Transpose_Limit__c != null) {
+          maxTransposeLimit = adminSetting.Max_Transpose_Limit__c;
+        }
+        if (adminSetting.Default_Record_Column_Width__c != null) {
+          defaultColumnWidth = adminSetting.Default_Record_Column_Width__c;
+        }
       }
-      if (adminSetting.Enable_AI_Suite__c != null) {
-        globalAiEnabled = adminSetting.Enable_AI_Suite__c;
-      }
-      if (adminSetting.Max_Transpose_Limit__c != null) {
-        maxTransposeLimit = adminSetting.Max_Transpose_Limit__c;
-      }
-      if (adminSetting.Default_Record_Column_Width__c != null) {
-        defaultColumnWidth = adminSetting.Default_Record_Column_Width__c;
-      }
+    } catch (Exception e) {
+      // Gracefully fall back to defaults if user has no FLS/access to admin metadata
     }
 
     // Query per-grid override from Smart_Grid_Config__mdt
     Boolean gridTransposeAllowed = true;
     if (String.isNotBlank(gridConfigName)) {
-      List<Smart_Grid_Config__mdt> gridConfigs = [
-        SELECT Enable_Transpose__c, Max_Transpose_Records__c
-        FROM Smart_Grid_Config__mdt
-        WHERE DeveloperName = :gridConfigName
-        WITH USER_MODE
-        LIMIT 1
-      ];
-      if (!gridConfigs.isEmpty()) {
-        Smart_Grid_Config__mdt config = gridConfigs[0];
-        if (config.Enable_Transpose__c != null) {
-          gridTransposeAllowed = config.Enable_Transpose__c;
+      try {
+        List<Smart_Grid_Config__mdt> gridConfigs = [
+          SELECT Enable_Transpose__c, Max_Transpose_Records__c
+          FROM Smart_Grid_Config__mdt
+          WHERE DeveloperName = :gridConfigName
+          WITH USER_MODE
+          LIMIT 1
+        ];
+        if (!gridConfigs.isEmpty()) {
+          Smart_Grid_Config__mdt config = gridConfigs[0];
+          if (config.Enable_Transpose__c != null) {
+            gridTransposeAllowed = config.Enable_Transpose__c;
+          }
+          if (config.Max_Transpose_Records__c != null) {
+            maxTransposeLimit = config.Max_Transpose_Records__c;
+          }
         }
-        if (config.Max_Transpose_Records__c != null) {
-          maxTransposeLimit = config.Max_Transpose_Records__c;
-        }
+      } catch (Exception e) {
+        // Fall back to default grid settings
       }
     }
 

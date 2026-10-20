@@ -62,9 +62,11 @@ This guide is designed for Salesforce System Administrators, Technical Architect
    - [Type-Specific Operators Reference](#type-specific-operators-reference)
    - [Active Filter Pills Bar](#active-filter-pills-bar)
    - [Relative SOQL Date Literals](#relative-soql-date-literals)
-10. [Aggregates & Sticky Column Totals Footer](#10-aggregates--sticky-column-totals-footer)
-    - [Configuring Footer Aggregates](#configuring-footer-aggregates)
-    - [Live Mathematical Calculations (Sum, Avg, Min, Max)](#live-mathematical-calculations)
+10. [In-Grid Analytics Panel & Dataset Visualizations](#10-in-grid-analytics-panel--dataset-visualizations)
+    - [Architecture & Placement](#architecture--placement)
+    - [Supported Visualizations (Donut, Bar, Funnel)](#supported-visualizations)
+    - [Real-Time Metric Tiles & Category Legend](#real-time-metric-tiles--category-legend)
+    - [Dual Dismissal Mechanics (Cancel & ✕)](#dual-dismissal-mechanics)
 11. [Client-Side Virtual Formula Evaluator](#11-client-side-virtual-formula-evaluator)
     - [Formula Engine Architecture (Shunting-Yard / RPN)](#formula-engine-architecture)
     - [Real-Time Reactive Recalculation on Draft Edits](#real-time-reactive-recalculation)
@@ -95,6 +97,9 @@ This guide is designed for Salesforce System Administrators, Technical Architect
     - [Audit Logging Implementation (Flow & Apex)](#audit-logging-implementation)
 19. [Keyboard Shortcuts Cheat Sheet](#19-keyboard-shortcuts-cheat-sheet)
 20. [Troubleshooting & FAQs](#20-troubleshooting--faqs)
+21. [NextGen Visual Administration Studio & Metadata Deployment](#21-nextgen-visual-administration-studio--metadata-deployment)
+22. [Enterprise Governance, Cursors & Change Auditing](#22-enterprise-governance-cursors--change-auditing)
+23. [Automated End-to-End Testing & Playwright Verification](#23-automated-end-to-end-testing--playwright-verification)
 
 ---
 
@@ -894,22 +899,46 @@ Applied filters appear as interactive pills in `c-smart-grid-filter-bar`:
 
 ---
 
-## 10. Aggregates & Sticky Column Totals Footer
+## 10. In-Grid Analytics Panel & Dataset Visualizations
 
-Smart Grid includes a sticky footer card displaying live column aggregates configured in `Totals_Fields_JSON__c`:
+In modern enterprise workspaces, fixed bottom aggregate rows waste valuable vertical screen height and disrupt high-volume data scrolling. Smart Grid replaces intrusive static footers with a docked, **Full-Width Bottom Analytics Panel (`c-smart-grid-chart-panel`)** that activates on demand with zero layout shift.
 
-```json
-["AnnualRevenue", "NumberOfEmployees"]
-```
+### Architecture & Placement
 
-For every configured field, the footer automatically displays:
+- **Bottom Docked Container**: Positioned directly beneath the virtualized datatable and above the pagination footer.
+- **Smooth Auto-Scroll**: When users click the **Analytics** button in the toolbar, the grid automatically scrolls the analytics section smoothly into the viewport.
+- **No Dimming Backdrops**: Unlike modal drawers that blur the background, the bottom panel allows users to view their active grid records and analytical charts concurrently.
 
-- **Sum**: Formatted currency or number total.
-- **Avg**: Average value across current records.
-- **Min**: Minimum value in the dataset.
-- **Max**: Maximum value in the dataset.
+### Supported Visualizations
 
-Aggregates update dynamically in real time as records are edited, filtered, or paginated.
+1. **Donut Chart**:
+   - Rendered using native vector SVG `<path>` arcs calculated via client-side trigonometry.
+   - Displays up to 10 top segments with an aggregated "Other" slice.
+   - Shows total record volume in the center donut badge.
+2. **Horizontal Bar Chart**:
+   - Proportional SVG rectangles comparing volume across categories.
+   - Displays category labels, counts, and interactive hover highlights.
+3. **Funnel Chart**:
+   - Tapered SVG polygon stages illustrating stage conversion and fallout.
+
+### Real-Time Metric Tiles & Category Legend
+
+- **Summary KPI Cards**:
+  - **Total Records**: Active record count in the loaded view.
+  - **Total Volume**: Aggregated numeric or currency volume count.
+  - **Distinct Groups**: Unique category count for the selected "Group By" field.
+- **Interactive Breakdown Legend**:
+  - Color-coded indicator dots matching the SVG chart slices.
+  - Exact record counts and percentage distribution per category.
+
+### Dual Dismissal Mechanics
+
+Users can close the analytics workspace at any time via:
+
+1. **"Cancel" Button** (`data-testid="chart-cancel-btn"`): Explicit button in the panel header.
+2. **"✕" Close Button** (`data-testid="chart-close-btn"`): Standard top-right dismiss icon.
+
+Both buttons immediately dispatch a `close` event to `c-smart-data-grid`, resetting `showChartPanel = false` and restoring maximum vertical space for datatable rows.
 
 ---
 
@@ -1212,3 +1241,36 @@ When `Enable_Field_Audit_Log__c` is enabled:
 
 - Every save transaction records the User, SObject, Record ID, Field API Name, Old Value, New Value, and Timestamp into `Smart_Grid_Edit_Log__c`.
 - Audit logs are accessible via `SmartGridAuditService.getRecordAuditLogs(recordId)` and displayed in the row action history drawer.
+
+---
+
+## 23. Automated End-to-End Testing & Playwright Verification
+
+Smart Grid features a comprehensive automated browser testing suite powered by [Playwright](https://playwright.dev) to validate complex user workflows against live Salesforce sandboxes and scratch orgs without manual intervention.
+
+### 23.1 Test Scripts Architecture (`e2e-tests/`)
+
+The repository includes pre-built end-to-end verification scripts that generate frontdoor session URLs via `sf org open` and run headless browser automation:
+
+| Script Name                  | Target Scenarios & Verified Assertions                                                                                                                                                                                                                      |
+| :--------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-bottom-analytics.js` | Validates complete removal of sticky column totals footer, opening of full-width bottom analytics panel, SVG Donut/Bar/Funnel rendering with live data, and dual dismissal via **Cancel** and **✕** buttons.                                                |
+| `verify-user-fixes.js`       | Validates the ergonomic 2-row toolbar alignment, multi-record selection without side drawer intrusion, in-place inline editing in Transpose View (hover pencil, click-to-edit, draft badge, and sticky save dock), and conversational AI assistant replies. |
+| `verify-chart-panel.js`      | Deep visual validation of all chart rendering states, legend color matching, and metric calculations across different record counts.                                                                                                                        |
+
+### 23.2 Running the Playwright Test Suite
+
+```bash
+# Authenticate your target org first
+sf org login web -a sandbox-org
+
+# Run complete Playwright end-to-end test suite
+npx playwright test
+
+# Or execute specific headless scenario scripts directly
+node e2e-tests/verify-bottom-analytics.js
+node e2e-tests/verify-user-fixes.js
+node e2e-tests/verify-chart-panel.js
+```
+
+Each run captures automated screenshot artifacts in the test directory for audit compliance and visual regression detection.

@@ -7,6 +7,7 @@
   border: 1px solid #c9c9c9;
   border-radius: 4px;
   overflow: hidden;
+  position: relative;
 }
 
 /* Toolbar */
@@ -120,11 +121,43 @@ tr.is-differing-row {
 
 /* Editable Cell States */
 .transpose-cell-editable {
-  cursor: cell;
+  cursor: pointer;
 }
 
 .transpose-cell-editable:hover {
   background-color: #f4f6fe;
+}
+
+.cell-wrapper {
+  width: 100%;
+  min-height: 24px;
+}
+
+.cell-value {
+  flex: 1;
+}
+
+.cell-edit-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.transpose-cell-editable:hover .cell-edit-btn {
+  opacity: 0.85;
+}
+
+.cell-edit-btn:hover {
+  opacity: 1;
+  background: #eef4fe;
+}
+
+.cell-edit-icon {
+  --slds-c-icon-color-foreground-default: #706e6b;
 }
 
 .dirty-dot {
@@ -132,6 +165,7 @@ tr.is-differing-row {
   font-weight: bold;
   font-size: 1.25rem;
   margin-left: 4px;
+  margin-right: 2px;
 }
 
 .cell-inline-input {
@@ -140,4 +174,19 @@ tr.is-differing-row {
   padding: 2px 6px !important;
   font-size: 0.8125rem !important;
   width: 100%;
+}
+
+/* Sticky Save Footer Dock */
+.transpose-footer-dock {
+  padding: 12px 24px;
+  background: #ffffff;
+  border-top: 2px solid #0176d3;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+}
+
+.font-semibold {
+  font-weight: 600;
 }

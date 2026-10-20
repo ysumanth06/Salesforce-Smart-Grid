@@ -189,4 +189,57 @@ describe("c-smart-grid-transpose-table", () => {
       "New Acme Name"
     );
   });
+
+  it("activates edit mode when edit pencil icon is clicked", async () => {
+    const element = createElement("c-smart-grid-transpose-table", {
+      is: SmartGridTransposeTable
+    });
+    element.columns = MOCK_COLUMNS;
+    element.records = MOCK_RECORDS;
+    document.body.appendChild(element);
+
+    await Promise.resolve();
+
+    const editBtn = element.shadowRoot.querySelector(
+      '.cell-edit-btn[data-record-id="001A"][data-field="Name"]'
+    );
+    expect(editBtn).not.toBeNull();
+    editBtn.click();
+
+    await Promise.resolve();
+
+    const input = element.shadowRoot.querySelector(".cell-inline-input");
+    expect(input).not.toBeNull();
+  });
+
+  it("renders Save/Cancel actions and dispatches save and cancel events", async () => {
+    const element = createElement("c-smart-grid-transpose-table", {
+      is: SmartGridTransposeTable
+    });
+    element.columns = MOCK_COLUMNS;
+    element.records = MOCK_RECORDS;
+    element.draftValues = [{ Id: "001A", Name: "Modified Acme" }];
+    document.body.appendChild(element);
+
+    const saveHandler = jest.fn();
+    const cancelHandler = jest.fn();
+    element.addEventListener("save", saveHandler);
+    element.addEventListener("cancel", cancelHandler);
+
+    await Promise.resolve();
+
+    const saveBtn = element.shadowRoot.querySelector(
+      '[data-testid="transpose-save-btn"]'
+    );
+    expect(saveBtn).not.toBeNull();
+    saveBtn.click();
+    expect(saveHandler).toHaveBeenCalledTimes(1);
+
+    const cancelBtn = element.shadowRoot.querySelector(
+      '[data-testid="transpose-cancel-btn"]'
+    );
+    expect(cancelBtn).not.toBeNull();
+    cancelBtn.click();
+    expect(cancelHandler).toHaveBeenCalledTimes(1);
+  });
 });

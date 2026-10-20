@@ -2,7 +2,8 @@
 
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v65.0-blue.svg)](https://developer.salesforce.com)
 [![Apex Tests](https://img.shields.io/badge/Apex%20Tests-100%25%20Passing-success.svg)]()
-[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-208%2F208%20Passing%20(37%20Suites)-success.svg>)]()
+[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-211%2F211%20Passing%20(37%20Suites)-success.svg>)]()
+[![E2E Playwright](https://img.shields.io/badge/E2E%20Playwright-Automated%20Browser%20Tests-success.svg)]()
 [![Static Analysis](https://img.shields.io/badge/PMD%20Code%20Analyzer-0%20High%20Violations-brightgreen.svg)]()
 [![Security](https://img.shields.io/badge/Security-USER__MODE%20%7C%20stripInaccessible%20%7C%20FormulaShield-green.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)]()
@@ -25,7 +26,7 @@
 | :------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- |
 | 📖 **[User Guide](docs/USER_GUIDE.md)**           | In-cell editing, 2D range selection, fill down (`Cmd+D`), bidirectional clipboard, Transposed matrix view, and ⌘K NLP command palette. | Sales Ops, RevOps, Analysts   |
 | 🛠️ **[Administrator Guide](docs/ADMIN_GUIDE.md)** | Metadata architecture (`__mdt`), Visual Admin Studio, permission sets, App Builder deployment, keyset cursors, and org governance.     | Salesforce Admins, Architects |
-| 🧪 **[QA Audit & Test Report](docs/QA_AUDIT.md)** | Full verification matrix, 37 Jest suites (208 unit tests), PMD static analysis, and multi-persona `System.runAs` security validation.  | QA Engineers, Tech Leads      |
+| 🧪 **[QA Audit & Test Report](docs/QA_AUDIT.md)** | Full verification matrix, 37 Jest suites (211 unit tests), Playwright E2E suites, PMD analysis, and multi-persona security.            | QA Engineers, Tech Leads      |
 | 📋 **[Architecture Plan & Changelog](change.md)** | Engineering sprint logs, component specifications, and roadmap evolution.                                                              | Developers, Solution Leads    |
 
 ---
@@ -53,6 +54,7 @@ Salesforce Smart Grid combines 39 specialized Lightning Web Components and 14 ba
 - **Bidirectional Clipboard Integration (`clipboardManager`)**: Copy (`Cmd + C`) and paste (`Cmd + V`) rectangular tab-delimited (TSV) ranges seamlessly between Smart Grid and external tools like Microsoft Excel or Google Sheets.
 - **Transactional Undo / Redo (`dirtyStateManager`)**: Multi-level undo and redo history (`Cmd + Z` / `Cmd + Shift + Z`) tracking in-memory draft changes before committing to the database.
 - **Interactive Column Management (`columnHeaderMenuManager`, `columnWidthCalculator`)**: Drag-and-drop column reordering, auto-fitting column widths to content, and pinning columns to the left or right margins.
+- **Ergonomic Two-Row Toolbar**: Clean, responsive two-tier toolbar design ensuring action buttons (Transpose, Export, Filter, Data Assistant, Analytics, and Settings) remain perfectly aligned without viewport overflow.
 
 ### 2. Specialized In-Cell Polymorphic Editors
 
@@ -70,7 +72,8 @@ Standard Salesforce datatables restrict complex field types to read-only views. 
 - **Axis Inversion**: Invert standard row-based data so that **fields appear as rows and records appear as columns**, ideal for horizontal comparisons across accounts, opportunities, or product tiers.
 - **Sticky Field Header**: The left-hand Field Label column remains pinned while users scroll horizontally across dozens of records.
 - **"Differences Only" Discrepancy Filter**: A single toggle hides all identical rows, isolating variations across records for rapid deduplication, vendor evaluations, and contract reviews.
-- **In-Matrix Inline Editing**: Edit field values directly within the matrix cells with real-time dirty state tracking and pre-flight validation.
+- **In-Matrix Inline Editing**: Edit field values directly within transposed matrix cells! Cells display a hover edit pencil indicator, click-to-edit inline inputs, real-time draft status badges, and a docked Save/Cancel bar with full pre-flight validation.
+- **Independent Multi-Record Selection**: Easily select multiple rows in standard view and click Transpose to compare them side-by-side without interference from side panels.
 
 ### 4. Pre-Flight DML Review & Visual Diff Verification (`smartGridDmlConfirmModal`)
 
@@ -89,13 +92,16 @@ Standard Salesforce datatables restrict complex field types to read-only views. 
 
 - **3-Level Hierarchical Grouping**: Group grid records dynamically by up to three simultaneous fields with accordion expand/collapse controls.
 - **Metadata-Aware Ordering**: Preserves standard picklist display ordering rather than falling back to alphabetical sorting.
-- **Server-Side Aggregate Summaries**: Calculates real-time rollups for `Count`, `Sum`, `Average`, `Minimum`, and `Maximum` across grouped categories and dataset totals.
+- **Server-Side Aggregate Summaries**: Calculates real-time rollups for `Count`, `Sum`, `Average`, `Minimum`, and `Maximum` across grouped categories.
 
-### 7. Docked Real-Time SVG Analytics & Dynamic Charts (`smartGridChartPanel`)
+### 7. Docked Real-Time Bottom Analytics Panel (`smartGridChartPanel`)
 
+- **Full-Width Bottom Placement**: Embedded seamlessly inside the card directly beneath the datatable with smooth auto-scroll, eliminating intrusive side drawers and preserving full workspace visibility.
 - **Native SVG Visualizations**: Integrated **Donut**, **Horizontal Bar**, and **Funnel** charts rendered dynamically via vector SVG.
-- **Summary KPI Metric Tiles**: Real-time aggregate metric cards displaying grand totals, averages, and counts.
-- **Filter-Aware Reactivity**: Charts automatically recalculate and re-render as users apply quick filters, type search criteria, or stage draft edits.
+- **Summary KPI Metric Tiles**: Real-time aggregate metric cards displaying grand totals, volume counts, and distinct group counts.
+- **Category Breakdown Legend**: Interactive category list with record counts, percentage distributions, and matching color indicators.
+- **Instant Dismissal**: Dedicated **"Cancel"** button and **"✕"** close button to immediately dismiss the panel and return to the full datatable view.
+- **Maximized Grid Real Estate**: Persistent, screen-cluttering column totals footer bars are eliminated in favor of this on-demand, interactive visual analytics panel.
 
 ### 8. Bulk CSV Import with Transactional Rollback Token (`smartGridImportModal`, `SmartGridImportService`)
 
@@ -279,18 +285,27 @@ When licensing commercial grid products, software expenditures scale linearly wi
 
 ## 🧪 Testing & Quality Assurance
 
-Smart Grid is maintained with comprehensive automated test coverage and static analysis verification:
+Smart Grid is maintained with comprehensive automated test coverage across unit, static analysis, and end-to-end browser tiers:
 
 ```bash
-# Execute the complete LWC Jest unit test suite (37 test suites, 208 tests, 100% pass rate)
+# Execute the complete LWC Jest unit test suite (37 test suites, 211 tests, 100% pass rate)
 npm run test:unit
 
 # Execute ESLint static code analysis
 npx eslint force-app/main/default/lwc/**/*.js
+
+# Execute Playwright End-to-End browser verification on Salesforce sandbox
+npx playwright test
+
+# Or execute specific headless scenario verifications:
+node e2e-tests/verify-bottom-analytics.js   # Validates bottom panel, charts, dismissal, and no totals
+node e2e-tests/verify-user-fixes.js         # Validates transpose editing, 2-row toolbar, and clean assistant
+node e2e-tests/verify-chart-panel.js        # Validates donut, bar, and funnel visual rendering
 ```
 
-- **LWC Test Coverage**: 37 comprehensive test suites covering all 39 components with 208 passing unit tests (100% pass rate).
+- **LWC Test Coverage**: 37 comprehensive test suites covering all 39 components with **211 passing unit tests (100% pass rate)**.
 - **Apex Test Coverage**: All backend Apex domain services maintain code coverage exceeding 90%.
+- **Playwright E2E Automation**: Automated browser scenarios verifying real Salesforce session logins, multi-object switching, inline editing in transpose view, bottom SVG analytics charts, and keyboard shortcuts.
 - **Multi-Persona Security Verification**: `SmartGridPersonaSecurityTest.cls` and `SmartGridNonAdminPersonaTest.cls` validate access privileges across Standard User, Power User, AI Premium, and Administrator personas using `System.runAs`.
 - **Static Analysis Compliance**: Verified 0 High/Critical violations using Salesforce Code Analyzer (PMD).
 

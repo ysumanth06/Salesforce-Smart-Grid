@@ -559,7 +559,7 @@ public with sharing class GridQueryBuilder {
   /**
    * @description Shared helper that constructs where clauses across single, count, and aggregate queries.
    */
-  private static List<String> buildStandardWhereClauses(
+  public static List<String> buildStandardWhereClauses(
     SObjectType sObjType,
     FilterExpression expr,
     String filterJson,

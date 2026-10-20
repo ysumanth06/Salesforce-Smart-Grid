@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomMetadata
+  xmlns="http://soap.sforce.com/2006/04/metadata"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+>
+    <label>Account Demo Grid AI Config</label>
+    <protected>false</protected>
+    <values>
+        <field>Grid_Config__c</field>
+        <value xsi:type="xsd:string">Account_Demo_Grid</value>
+    </values>
+    <values>
+        <field>Enable_NLP__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Enable_Chat__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Enable_Suggestions__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Provider_Type__c</field>
+        <value xsi:type="xsd:string">OpenAI_Compatible</value>
+    </values>
+    <values>
+        <field>Named_Credential__c</field>
+        <value xsi:type="xsd:string">OpenAI_API</value>
+    </values>
+    <values>
+        <field>Model_Identifier__c</field>
+        <value xsi:type="xsd:string">gpt-4o-mini</value>
+    </values>
+    <values>
+        <field>Max_Tokens__c</field>
+        <value xsi:type="xsd:double">500</value>
+    </values>
+    <values>
+        <field>Confidence_Threshold__c</field>
+        <value xsi:type="xsd:double">0.7</value>
+    </values>
+</CustomMetadata>

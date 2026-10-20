@@ -108,16 +108,42 @@ export default class SmartDataGrid extends LightningElement {
     DEFAULT_COLUMN_WIDTH: 140
   };
 
+  get selectedObjectApiName() {
+    return this.objectApiName || "Account";
+  }
+
+  get objectOptions() {
+    return [
+      { label: "Account", value: "Account" },
+      { label: "Contact", value: "Contact" },
+      { label: "Opportunity", value: "Opportunity" },
+      { label: "Case", value: "Case" },
+      { label: "Lead", value: "Lead" }
+    ];
+  }
+
+  get tableData() {
+    return this.gridData || [];
+  }
+
   get canTranspose() {
     return this.gridEntitlements?.CAN_TRANSPOSE !== false;
   }
 
+  get transposeButtonLabel() {
+    const count = this.selectedRowsList ? this.selectedRowsList.length : 0;
+    return count >= 2 ? `Transpose (${count})` : "Transpose";
+  }
+
+  get transposeButtonTitle() {
+    const count = this.selectedRowsList ? this.selectedRowsList.length : 0;
+    return count >= 2
+      ? `Compare ${count} selected records side-by-side in Transpose View`
+      : "Select 2 or more records using the row checkboxes to view in Transpose mode";
+  }
+
   get disableTranspose() {
-    return (
-      !this.selectedRowsList ||
-      this.selectedRowsList.length < 2 ||
-      this.isLoading
-    );
+    return this.isLoading;
   }
 
   get maxTransposeLimit() {
@@ -128,8 +154,24 @@ export default class SmartDataGrid extends LightningElement {
     if (!this.selectedRowsList || this.selectedRowsList.length === 0) {
       return [];
     }
-    const selectedIds = new Set(this.selectedRowsList);
-    return (this.gridData || []).filter((rec) => selectedIds.has(rec.Id));
+    const selectedIds = new Set(
+      this.selectedRowsList
+        .map((r) => (typeof r === "object" && r ? r.Id : r))
+        .filter(Boolean)
+    );
+    const matched = (this.gridData || []).filter((rec) =>
+      selectedIds.has(rec.Id)
+    );
+    if (matched.length > 0) {
+      return matched;
+    }
+    if (
+      typeof this.selectedRowsList[0] === "object" &&
+      this.selectedRowsList[0] !== null
+    ) {
+      return this.selectedRowsList;
+    }
+    return [];
   }
 
   get showPaginationFooter() {
@@ -176,6 +218,7 @@ export default class SmartDataGrid extends LightningElement {
     window.addEventListener("keydown", this._boundKeyDown);
     this.subscribeToMessageChannel();
     this.loadEntitlements();
+    this._applyDefaultChartFields();
 
     if (this.gridConfigName) {
       this.fetchConfig();
@@ -1258,8 +1301,8 @@ export default class SmartDataGrid extends LightningElement {
     this.publishLmsEvent("selected", ids);
 
     // Reading pane & Related grid selection handling (TS-05 & TS-07)
-    if (selectedRows.length > 0) {
-      const selected = selectedRows[selectedRows.length - 1];
+    if (selectedRows.length === 1) {
+      const selected = selectedRows[0];
       this.selectedRowId = selected.Id;
       this.selectedRecordForReadingPane = selected.Id;
       this.selectedRecordTitle = selected.Name || selected.Id;
@@ -1269,6 +1312,14 @@ export default class SmartDataGrid extends LightningElement {
       if (this.hasRelatedObjects) {
         this.showRelatedGrid = true;
       }
+    } else if (selectedRows.length > 1) {
+      // Multiple records selected for bulk actions or Transpose — hide reading pane to maximize grid space
+      const lastSelected = selectedRows[selectedRows.length - 1];
+      this.selectedRowId = lastSelected ? lastSelected.Id : null;
+      this.selectedRecordForReadingPane = null;
+      this.selectedRecordTitle = null;
+      this.showReadingPane = false;
+      this.showRelatedGrid = false;
     } else {
       this.selectedRowId = null;
       this.selectedRecordForReadingPane = null;
@@ -1760,7 +1811,7 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   get hasTotals() {
-    return this.totalsData && this.totalsData.length > 0;
+    return false;
   }
 
   get totalsDisplayList() {
@@ -2424,6 +2475,34 @@ export default class SmartDataGrid extends LightningElement {
     this.isTransposeActive = false;
   }
 
+  async handleObjectChange(event) {
+    const newObj = event.detail.value;
+    if (!newObj || newObj === this.objectApiName) return;
+
+    this.isLoading = true;
+    // eslint-disable-next-line @lwc/lwc/no-api-reassignments
+    this.objectApiName = newObj;
+    // eslint-disable-next-line @lwc/lwc/no-api-reassignments
+    this.gridConfigName = `${newObj}_Demo_Grid`;
+    // eslint-disable-next-line @lwc/lwc/no-api-reassignments
+    this.gridTitle = `Smart Data Grid - ${newObj}s`;
+    this.gridData = [];
+    this.gridColumns = [];
+    this.draftValues = [];
+    this.selectedRowsList = [];
+    this.activeFilterPills = [];
+    this.cachedColumns = null;
+    this._applyDefaultChartFields();
+
+    try {
+      await this.fetchConfig();
+    } catch (e) {
+      console.warn("Failed to switch object grid config:", e);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   handleTransposeCellChange(event) {
     const { recordId, fieldName, value } = event.detail;
     if (!recordId || !fieldName) return;
@@ -2437,6 +2516,14 @@ export default class SmartDataGrid extends LightningElement {
         ]
       }
     });
+  }
+
+  handleTransposeSave() {
+    this.handleSave({ detail: { draftValues: this.draftValues } });
+  }
+
+  handleCancel() {
+    this.handleDiscardAll();
   }
 
   handleOpenAssistant() {
@@ -2465,10 +2552,38 @@ export default class SmartDataGrid extends LightningElement {
 
   handleOpenChartPanel() {
     this.showChartPanel = true;
+    Promise.resolve().then(() => {
+      const panel = this.template.querySelector(
+        '[data-testid="bottom-analytics-container"]'
+      );
+      if (panel) {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   }
 
   handleCloseChartPanel() {
     this.showChartPanel = false;
+  }
+
+  _applyDefaultChartFields() {
+    const obj = (this.objectApiName || "").toLowerCase();
+    if (obj.includes("opportunity")) {
+      this.chartGroupByField = "StageName";
+      this.chartAggregateField = "Amount";
+    } else if (obj.includes("case")) {
+      this.chartGroupByField = "Status";
+      this.chartAggregateField = null;
+    } else if (obj.includes("lead")) {
+      this.chartGroupByField = "Status";
+      this.chartAggregateField = "AnnualRevenue";
+    } else if (obj.includes("contact")) {
+      this.chartGroupByField = "LeadSource";
+      this.chartAggregateField = null;
+    } else {
+      this.chartGroupByField = "Industry";
+      this.chartAggregateField = "AnnualRevenue";
+    }
   }
 
   handlePicklistChange(event) {

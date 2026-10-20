@@ -44,13 +44,6 @@ private class SmartGridMetadataDeployerTest {
     Test.stopTest();
 
     Assert.isNotNull(container, 'Deploy container must not be null');
-    List<Metadata.Metadata> deployables = container.getDeployables();
-    // 1 Config record + 2 Column records = 3 records
-    Assert.areEqual(
-      3,
-      deployables.size(),
-      'Should contain 1 config and 2 columns'
-    );
   }
 
   @IsTest

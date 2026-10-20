@@ -12,7 +12,7 @@
         ></lightning-button>
 
         <!-- View Filter Mode Buttons -->
-        <lightning-button-group>
+        <lightning-button-group class="slds-m-left_x-small">
           <lightning-button
             label={allFieldsButtonLabel}
             variant={allFilterVariant}
@@ -37,12 +37,38 @@
         >
           {summaryText}
         </span>
+
+        <!-- Save / Cancel Toolbar Actions if Drafts Exist -->
+        <template lwc:if={hasDraftValues}>
+          <div
+            class="slds-m-right_small slds-grid slds-grid_vertical-align-center"
+          >
+            <span class="slds-badge slds-theme_warning slds-m-right_x-small">
+              {draftCountBadgeLabel}
+            </span>
+            <lightning-button
+              label="Cancel"
+              variant="neutral"
+              onclick={handleCancel}
+              class="slds-m-right_xx-small"
+              data-testid="transpose-cancel-btn"
+            ></lightning-button>
+            <lightning-button
+              label="Save"
+              variant="brand"
+              onclick={handleSave}
+              data-testid="transpose-save-btn"
+            ></lightning-button>
+          </div>
+        </template>
+
         <lightning-button-icon
           icon-name="utility:chevronleft"
           alternative-text="Scroll Left"
           title="Scroll Left"
           variant="border-filled"
           onclick={handleScrollLeft}
+          data-testid="transpose-scroll-left"
         ></lightning-button-icon>
         <lightning-button-icon
           icon-name="utility:chevronright"
@@ -50,6 +76,7 @@
           title="Scroll Right"
           variant="border-filled"
           onclick={handleScrollRight}
+          data-testid="transpose-scroll-right"
         ></lightning-button-icon>
       </div>
     </div>
@@ -147,14 +174,39 @@
                   </template>
                   <template lwc:else>
                     <div
-                      class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate"
+                      class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-has-flexi-truncate cell-wrapper"
                     >
-                      <span class="slds-truncate" title={cell.displayValue}>
+                      <span
+                        class="slds-truncate cell-value"
+                        title={cell.displayValue}
+                      >
                         {cell.displayValue}
                       </span>
-                      <template lwc:if={cell.isDraft}>
-                        <span class="dirty-dot" title="Unsaved change">•</span>
-                      </template>
+                      <div
+                        class="slds-grid slds-grid_vertical-align-center slds-no-flex"
+                      >
+                        <template lwc:if={cell.isDraft}>
+                          <span class="dirty-dot" title="Unsaved change"
+                            >•</span
+                          >
+                        </template>
+                        <template lwc:if={cell.isEditable}>
+                          <button
+                            class="slds-button slds-button_icon cell-edit-btn"
+                            title="Edit this field (or double-click cell)"
+                            onclick={handleEditIconClick}
+                            data-record-id={cell.recordId}
+                            data-field={cell.fieldName}
+                          >
+                            <lightning-icon
+                              icon-name="utility:edit"
+                              size="xx-small"
+                              class="cell-edit-icon"
+                            ></lightning-icon>
+                            <span class="slds-assistive-text">Edit</span>
+                          </button>
+                        </template>
+                      </div>
                     </div>
                   </template>
                 </td>
@@ -169,5 +221,29 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Sticky Bottom Save / Cancel Bar for Transpose Mode -->
+    <template lwc:if={hasDraftValues}>
+      <div
+        class="transpose-footer-dock slds-grid slds-grid_align-center slds-grid_vertical-align-center"
+      >
+        <span class="slds-m-right_medium slds-text-body_regular font-semibold">
+          You have unsaved changes ({draftCount})
+        </span>
+        <lightning-button
+          label="Cancel"
+          variant="neutral"
+          onclick={handleCancel}
+          class="slds-m-right_x-small"
+          data-testid="transpose-dock-cancel-btn"
+        ></lightning-button>
+        <lightning-button
+          label="Save Changes"
+          variant="brand"
+          onclick={handleSave}
+          data-testid="transpose-dock-save-btn"
+        ></lightning-button>
+      </div>
+    </template>
   </div>
 </template>

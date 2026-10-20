@@ -19,6 +19,14 @@
         <enabled>true</enabled>
         <name>Smart_Grid_Format_Rule__mdt</name>
     </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_Admin_Setting__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Smart_Grid_License__mdt</name>
+    </customMetadataTypeAccesses>
     <fieldPermissions>
         <editable>true</editable>
         <field>Smart_Grid_User_Pref__c.Preferences_JSON__c</field>

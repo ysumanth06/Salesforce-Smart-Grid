@@ -574,7 +574,8 @@ public class SmartGridControllerTest {
 
   @IsTest
   static void testSaveRecordsWithAudit() {
-    Account acc = [SELECT Id, Name, Industry FROM Account LIMIT 1];
+    Account acc = new Account(Name = 'Audit Test Acc', Industry = 'Technology');
+    insert acc;
     acc.Industry = 'Healthcare';
 
     List<Map<String, Object>> changes = new List<Map<String, Object>>{

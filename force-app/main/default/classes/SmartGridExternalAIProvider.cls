@@ -76,10 +76,19 @@ public with sharing class SmartGridExternalAIProvider implements ISmartGridAIPro
   ) {
     SmartGridNLPEngine.AssistantResult res = new SmartGridNLPEngine.AssistantResult();
 
+    String dataContext = buildDataContext(request);
+
     String systemPrompt =
       'You are an intelligent data copilot analyzing ' +
       request.objectApiName +
-      ' records in Salesforce Smart Grid. Provide concise answers, statistical summaries, and actionable advice.';
+      ' records in Salesforce Smart Grid.\n\n' +
+      dataContext +
+      '\n' +
+      'INSTRUCTIONS:\n' +
+      '1. You have direct access to the live dataset metrics provided above. Use them to answer questions accurately and authoritatively.\n' +
+      '2. When asked for total revenue, record counts, averages, or high/low metrics, reference the exact figures from the LIVE GRID DATASET CONTEXT.\n' +
+      '3. NEVER state that you do not have access to the records or ask the user to provide the data.\n' +
+      '4. Keep answers concise, factual, and actionable with practical business insights.';
 
     try {
       String rawResponse = executeLLMCallout(
@@ -90,31 +99,183 @@ public with sharing class SmartGridExternalAIProvider implements ISmartGridAIPro
       if (String.isNotBlank(rawResponse)) {
         res.answer = rawResponse;
         res.isSuccess = true;
-
-        // Contextual action chips for the response
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Open Analytics Charts',
-            'chart',
-            null
-          )
-        );
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Switch to Transpose View',
-            'transpose',
-            null
-          )
-        );
       } else {
-        res.errorMessage = 'Assistant received an empty response from the AI provider.';
+        // Fallback to deterministic mock provider if external response was blank
+        return new SmartGridMockAIProvider(config).answerQuestion(request);
       }
     } catch (Exception ex) {
-      res.isSuccess = false;
-      res.errorMessage = 'Assistant callout failed: ' + ex.getMessage();
+      System.debug(
+        LoggingLevel.WARN,
+        'External LLM failed, falling back to local engine: ' + ex.getMessage()
+      );
+      try {
+        return new SmartGridMockAIProvider(config).answerQuestion(request);
+      } catch (Exception fallbackEx) {
+        res.isSuccess = false;
+        res.errorMessage = 'Assistant callout failed: ' + ex.getMessage();
+      }
     }
 
     return res;
+  }
+
+  private String buildDataContext(SmartGridNLPEngine.AssistantRequest request) {
+    String sObjName = String.isNotBlank(request.objectApiName)
+      ? request.objectApiName
+      : 'Account';
+    Schema.SObjectType sType = Schema.getGlobalDescribe().get(sObjName);
+    if (sType == null || !sType.getDescribe().isAccessible()) {
+      return '';
+    }
+
+    Map<String, Schema.SObjectField> fieldMap = sType.getDescribe()
+      .fields.getMap();
+    String numericField = null;
+    String numericLabel = null;
+    String groupField = null;
+
+    List<String> preferredNumerics = new List<String>{
+      'annualrevenue',
+      'amount',
+      'expectedrevenue',
+      'totalprice',
+      'unitprice',
+      'numberofemployees'
+    };
+    for (String pref : preferredNumerics) {
+      if (fieldMap.containsKey(pref)) {
+        Schema.DescribeFieldResult dfr = fieldMap.get(pref).getDescribe();
+        if (dfr.isAccessible()) {
+          numericField = dfr.getName();
+          numericLabel = dfr.getLabel();
+          break;
+        }
+      }
+    }
+
+    List<String> preferredGroups = new List<String>{
+      'industry',
+      'stagename',
+      'type',
+      'status',
+      'rating',
+      'leadsource'
+    };
+    for (String pref : preferredGroups) {
+      if (fieldMap.containsKey(pref)) {
+        Schema.DescribeFieldResult dfr = fieldMap.get(pref).getDescribe();
+        if (dfr.isAccessible()) {
+          groupField = dfr.getName();
+          break;
+        }
+      }
+    }
+
+    Integer count = 0;
+    Decimal total = 0;
+    Decimal avg = 0;
+    Decimal minVal = 0;
+    Decimal maxVal = 0;
+
+    try {
+      List<String> whereClauses = GridQueryBuilder.buildStandardWhereClauses(
+        sType,
+        null,
+        request.activeFilters,
+        null,
+        null,
+        null,
+        null
+      );
+      String countQuery =
+        'SELECT COUNT() FROM ' + String.escapeSingleQuotes(sObjName);
+      if (!whereClauses.isEmpty()) {
+        countQuery += ' WHERE ' + String.join(whereClauses, ' AND ');
+      }
+      count = Database.countQuery(countQuery, AccessLevel.USER_MODE);
+
+      if (numericField != null && count > 0) {
+        String aggQuery =
+          'SELECT SUM(' +
+          String.escapeSingleQuotes(numericField) +
+          ') totalSum, ' +
+          'AVG(' +
+          String.escapeSingleQuotes(numericField) +
+          ') avgVal, ' +
+          'MIN(' +
+          String.escapeSingleQuotes(numericField) +
+          ') minVal, ' +
+          'MAX(' +
+          String.escapeSingleQuotes(numericField) +
+          ') maxVal ' +
+          'FROM ' +
+          String.escapeSingleQuotes(sObjName);
+        if (!whereClauses.isEmpty()) {
+          aggQuery += ' WHERE ' + String.join(whereClauses, ' AND ');
+        }
+        List<AggregateResult> aggResults = Database.query(
+          aggQuery,
+          AccessLevel.USER_MODE
+        );
+        if (!aggResults.isEmpty()) {
+          Object sumObj = aggResults[0].get('totalSum');
+          Object avgObj = aggResults[0].get('avgVal');
+          Object minObj = aggResults[0].get('minVal');
+          Object maxObj = aggResults[0].get('maxVal');
+          if (sumObj != null)
+            total = (Decimal) sumObj;
+          if (avgObj != null)
+            avg = ((Decimal) avgObj).setScale(2);
+          if (minObj != null)
+            minVal = (Decimal) minObj;
+          if (maxObj != null)
+            maxVal = (Decimal) maxObj;
+        }
+      }
+    } catch (Exception ex) {
+      System.debug(
+        LoggingLevel.WARN,
+        'Could not query data context for AI: ' + ex.getMessage()
+      );
+    }
+
+    String contextText =
+      'LIVE GRID DATASET CONTEXT FOR ' +
+      sObjName.toUpperCase() +
+      ':\n';
+    contextText += '- Total Record Count: ' + count + ' records\n';
+    if (numericField != null) {
+      contextText +=
+        '- Primary Metric Field: ' +
+        numericLabel +
+        ' (' +
+        numericField +
+        ')\n';
+      contextText += '- Total ' + numericLabel + ': $' + total.format() + '\n';
+      contextText += '- Average ' + numericLabel + ': $' + avg.format() + '\n';
+      contextText +=
+        '- Minimum ' +
+        numericLabel +
+        ': $' +
+        minVal.format() +
+        '\n';
+      contextText +=
+        '- Maximum ' +
+        numericLabel +
+        ': $' +
+        maxVal.format() +
+        '\n';
+    }
+    if (groupField != null) {
+      contextText += '- Primary Grouping Category: ' + groupField + '\n';
+    }
+    if (request.visibleFields != null && !request.visibleFields.isEmpty()) {
+      contextText +=
+        '- Visible Grid Columns: ' +
+        String.join(request.visibleFields, ', ') +
+        '\n';
+    }
+    return contextText;
   }
 
   private String executeLLMCallout(

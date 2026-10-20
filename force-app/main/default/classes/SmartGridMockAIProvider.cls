@@ -35,11 +35,14 @@ public with sharing class SmartGridMockAIProvider implements ISmartGridAIProvide
 
     // 1. Rating / Status match
     Pattern ratingPattern = Pattern.compile(
-      '(?i)(?:rating|status|stage)\\s*(?:is|=|equals)?\\s*[\'"]?([a-zA-Z0-9_\\s]+)[\'"]?'
+      '(?i)(?:rating|status|stage)\\s*(?:is|=|equals)?\\s*(?:[\'"]([^\'"]+)[\'"]|([a-zA-Z0-9_]+))'
     );
     Matcher ratingMatcher = ratingPattern.matcher(request.prompt);
     if (ratingMatcher.find()) {
-      String rawVal = ratingMatcher.group(1).trim();
+      String rawVal = (ratingMatcher.group(1) != null
+          ? ratingMatcher.group(1)
+          : ratingMatcher.group(2))
+        .trim();
       String targetPickField = null;
       if (fieldMap.containsKey('rating')) {
         targetPickField = 'Rating';
@@ -335,13 +338,6 @@ public with sharing class SmartGridMockAIProvider implements ISmartGridAIProvide
             )
           );
         }
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Switch to Transpose View',
-            'transpose',
-            null
-          )
-        );
       } else if (
         q.contains('how many') ||
         q.contains('count') ||
@@ -354,29 +350,6 @@ public with sharing class SmartGridMockAIProvider implements ISmartGridAIProvide
           sObjName +
           ' records in this view.';
         res.computedValue = String.valueOf(count);
-        if (groupField != null) {
-          res.actions.add(
-            new SmartGridNLPEngine.AssistantAction(
-              'Group by ' + groupField,
-              'group',
-              groupField
-            )
-          );
-        }
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Open Analytics Charts',
-            'chart',
-            null
-          )
-        );
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Switch to Transpose View',
-            'transpose',
-            null
-          )
-        );
       } else if (
         q.contains('summarize') ||
         q.contains('summary') ||
@@ -398,34 +371,11 @@ public with sharing class SmartGridMockAIProvider implements ISmartGridAIProvide
               ').'
             : '');
         res.computedValue = String.valueOf(count);
-        if (groupField != null) {
-          res.actions.add(
-            new SmartGridNLPEngine.AssistantAction(
-              'Group by ' + groupField,
-              'group',
-              groupField
-            )
-          );
-        }
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Open Analytics Charts',
-            'chart',
-            null
-          )
-        );
-        res.actions.add(
-          new SmartGridNLPEngine.AssistantAction(
-            'Switch to Transpose View',
-            'transpose',
-            null
-          )
-        );
       } else {
         res.answer =
-          'I am configured to assist with ' +
+          'I am configured to assist exclusively with your grid data and analytics for ' +
           sObjName +
-          ' records and analytics. You can ask for summary totals, averages, counts, or group distributions.';
+          '. You can ask for summary totals, averages, counts, or group distributions.';
         res.computedValue = null;
         if (groupField != null) {
           res.actions.add(

@@ -8,16 +8,79 @@ const COLOR_PALETTE = [
   "#e91e63",
   "#3296ed",
   "#4caf50",
-  "#ff5722"
+  "#ff5722",
+  "#0284c7",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6"
 ];
 
 export default class SmartGridChartPanel extends LightningElement {
   @api data = [];
-  @api groupByField = "Industry";
-  @api aggregateField = "AnnualRevenue";
+  @api columns = [];
+  @api objectApiName = "Account";
   @api isOpen = false;
 
+  @track _groupByField = "Industry";
+  @track _aggregateField = "AnnualRevenue";
+  @track selectedGroupBy = null;
   @track chartType = "DONUT"; // 'DONUT' | 'BAR' | 'FUNNEL'
+
+  @api
+  get groupByField() {
+    return this._groupByField || "Industry";
+  }
+  set groupByField(val) {
+    if (val) {
+      this._groupByField = val;
+    }
+  }
+
+  @api
+  get aggregateField() {
+    return this._aggregateField || "AnnualRevenue";
+  }
+  set aggregateField(val) {
+    this._aggregateField = val;
+  }
+
+  get currentGroupByField() {
+    return this.selectedGroupBy || this.groupByField;
+  }
+
+  get objectSubtitle() {
+    return `${this.objectApiName || "Dataset"} Aggregation`;
+  }
+
+  get groupByOptions() {
+    if (this.columns && this.columns.length > 0) {
+      const opts = this.columns
+        .filter((col) => col.fieldName && col.fieldName !== "Id")
+        .map((col) => ({
+          label: col.label || col.fieldName,
+          value: col.fieldName
+        }));
+      if (opts.length > 0) return opts;
+    }
+    if (this.data && this.data.length > 0) {
+      const sample = this.data[0];
+      return Object.keys(sample)
+        .filter(
+          (k) =>
+            k !== "Id" && k !== "attributes" && typeof sample[k] !== "object"
+        )
+        .map((k) => ({ label: k, value: k }));
+    }
+    return [
+      { label: "Industry", value: "Industry" },
+      { label: "Rating", value: "Rating" },
+      { label: "Type", value: "Type" }
+    ];
+  }
+
+  handleGroupByChange(event) {
+    this.selectedGroupBy = event.detail.value;
+  }
 
   get isDonut() {
     return this.chartType === "DONUT";
@@ -43,9 +106,6 @@ export default class SmartGridChartPanel extends LightningElement {
     return this.isFunnel ? "brand" : "neutral";
   }
 
-  /**
-   * @description Aggregates dataset records by groupByField and sums aggregateField
-   */
   get chartData() {
     if (!this.data || this.data.length === 0) {
       return [];
@@ -53,12 +113,22 @@ export default class SmartGridChartPanel extends LightningElement {
 
     const groupMap = new Map();
     let grandSum = 0;
+    let hasNumericValues = false;
 
     this.data.forEach((item) => {
-      const groupVal = item[this.groupByField] || "(Unassigned)";
-      const rawNum = item[this.aggregateField];
-      const numVal =
-        typeof rawNum === "number" ? rawNum : parseFloat(rawNum) || 0;
+      const groupVal = item[this.currentGroupByField] || "(Unassigned)";
+      const rawNum = this.aggregateField ? item[this.aggregateField] : 0;
+      let numVal = 0;
+      if (typeof rawNum === "number") {
+        numVal = rawNum;
+        hasNumericValues = true;
+      } else if (rawNum !== undefined && rawNum !== null && rawNum !== "") {
+        const parsed = parseFloat(rawNum);
+        if (!isNaN(parsed)) {
+          numVal = parsed;
+          hasNumericValues = true;
+        }
+      }
 
       const current = groupMap.get(groupVal) || { count: 0, sum: 0 };
       current.count += 1;
@@ -69,15 +139,21 @@ export default class SmartGridChartPanel extends LightningElement {
 
     const list = [];
     let colorIdx = 0;
+    const totalRecords = this.data.length;
 
     groupMap.forEach((val, label) => {
       const color = COLOR_PALETTE[colorIdx % COLOR_PALETTE.length];
       colorIdx++;
 
-      const percentage =
-        grandSum > 0 ? Math.round((val.sum / grandSum) * 100) : 0;
-      let formattedVal = `$${val.sum.toLocaleString()}`;
-      if (val.sum === 0) {
+      let percentage = 0;
+      let formattedVal = "";
+
+      if (grandSum > 0 && hasNumericValues) {
+        percentage = Math.round((val.sum / grandSum) * 100);
+        formattedVal = `$${Math.round(val.sum).toLocaleString()}`;
+      } else {
+        percentage =
+          totalRecords > 0 ? Math.round((val.count / totalRecords) * 100) : 0;
         formattedVal = `${val.count} recs`;
       }
 
@@ -89,12 +165,16 @@ export default class SmartGridChartPanel extends LightningElement {
         formattedValue: formattedVal,
         color,
         dotStyle: `background-color: ${color};`,
-        barFillStyle: `width: ${percentage}%; background-color: ${color};`
+        barFillStyle: `width: ${Math.max(percentage, 4)}%; background-color: ${color};`
       });
     });
 
-    // Sort descending by sum
-    list.sort((a, b) => b.sum - a.sum);
+    // Sort descending by sum if positive, else by count
+    if (grandSum > 0 && hasNumericValues) {
+      list.sort((a, b) => b.sum - a.sum);
+    } else {
+      list.sort((a, b) => b.count - a.count);
+    }
     return list;
   }
 
@@ -108,28 +188,62 @@ export default class SmartGridChartPanel extends LightningElement {
 
   get formattedTotalSum() {
     const total = this.chartData.reduce((acc, item) => acc + item.sum, 0);
-    return `$${Math.round(total).toLocaleString()}`;
+    if (total > 0) {
+      return `$${Math.round(total).toLocaleString()}`;
+    }
+    return `${this.totalRecordCount} Total`;
   }
 
-  /**
-   * @description Computes SVG donut path segments
-   */
+  get volumeKpiLabel() {
+    const total = this.chartData.reduce((acc, item) => acc + item.sum, 0);
+    return total > 0 ? "Total Volume" : "Volume Count";
+  }
+
+  get donutCenterText() {
+    return this.totalRecordCount;
+  }
+
   get donutSlices() {
     const items = this.chartData;
-    const total = items.reduce((acc, i) => acc + i.sum, 0) || items.length;
+    if (items.length === 0) {
+      return [];
+    }
+
+    const hasSum = items.some((i) => i.sum > 0);
+    const total = hasSum
+      ? items.reduce((acc, i) => acc + i.sum, 0)
+      : items.reduce((acc, i) => acc + i.count, 0);
+
     if (total === 0) {
       return [];
     }
 
-    let startAngle = 0;
     const cx = 100;
     const cy = 100;
     const rOuter = 80;
     const rInner = 45;
 
+    // Single group edge case (SVG arc cannot do full 360 circle in one path)
+    if (items.length === 1 || items[0].percentage === 100) {
+      const item = items[0];
+      const pathData = [
+        `M ${cx} ${cy - rOuter}`,
+        `A ${rOuter} ${rOuter} 0 1 1 ${cx} ${cy + rOuter}`,
+        `A ${rOuter} ${rOuter} 0 1 1 ${cx} ${cy - rOuter}`,
+        `M ${cx} ${cy - rInner}`,
+        `A ${rInner} ${rInner} 0 1 0 ${cx} ${cy + rInner}`,
+        `A ${rInner} ${rInner} 0 1 0 ${cx} ${cy - rInner}`,
+        "Z"
+      ].join(" ");
+      return [{ ...item, pathData }];
+    }
+
+    let startAngle = -Math.PI / 2;
+
     return items.map((item) => {
-      const sliceVal = item.sum || item.count || 1;
-      const angle = (sliceVal / total) * 2 * Math.PI;
+      const sliceVal = hasSum ? item.sum : item.count;
+      const rawAngle = (sliceVal / total) * 2 * Math.PI;
+      const angle = Math.min(rawAngle, 1.999 * Math.PI);
       const endAngle = startAngle + angle;
 
       const x1 = cx + rOuter * Math.cos(startAngle);
@@ -161,18 +275,37 @@ export default class SmartGridChartPanel extends LightningElement {
     });
   }
 
-  /**
-   * @description Computes SVG polygon points for Funnel stages
-   */
   get funnelTrapezoids() {
-    const items = this.chartData;
+    let items = this.chartData;
     if (items.length === 0) return [];
 
-    const totalHeight = 160;
+    // If there are more than 7 categories, take top 6 and aggregate remainder into 'Other'
+    if (items.length > 7) {
+      const topItems = items.slice(0, 6);
+      const rest = items.slice(6);
+      const otherCount = rest.reduce((sum, i) => sum + i.count, 0);
+      const otherSum = rest.reduce((sum, i) => sum + i.sum, 0);
+      const otherPct = rest.reduce((sum, i) => sum + i.percentage, 0);
+      topItems.push({
+        label: `Other (${rest.length} groups)`,
+        count: otherCount,
+        sum: otherSum,
+        percentage: otherPct,
+        formattedValue:
+          otherSum > 0
+            ? `$${Math.round(otherSum).toLocaleString()}`
+            : `${otherCount} recs`,
+        color: "#64748b"
+      });
+      items = topItems;
+    }
+
+    const totalHeight = 170;
     const stepHeight = totalHeight / items.length;
-    const maxWidth = 220;
-    const minWidth = 60;
-    const widthStep = (maxWidth - minWidth) / items.length;
+    const maxWidth = 260;
+    const minWidth = 80;
+    const widthStep =
+      items.length > 1 ? (maxWidth - minWidth) / items.length : 0;
 
     return items.map((item, idx) => {
       const topY = idx * stepHeight + 10;
@@ -181,16 +314,18 @@ export default class SmartGridChartPanel extends LightningElement {
       const topW = maxWidth - idx * widthStep;
       const botW = maxWidth - (idx + 1) * widthStep;
 
-      const x1 = (240 - topW) / 2;
-      const x2 = (240 + topW) / 2;
-      const x3 = (240 + botW) / 2;
-      const x4 = (240 - botW) / 2;
+      const x1 = (280 - topW) / 2;
+      const x2 = (280 + topW) / 2;
+      const x3 = (280 + botW) / 2;
+      const x4 = (280 - botW) / 2;
 
       const points = `${x1},${topY} ${x2},${topY} ${x3},${botY} ${x4},${botY}`;
+      const textY = (topY + botY) / 2 + 4;
 
       return {
         ...item,
-        points
+        points,
+        textY
       };
     });
   }

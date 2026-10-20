@@ -165,7 +165,14 @@ When comparing multiple accounts, opportunities, or custom records, standard hor
 
 1. **Sticky Field Column**: The leftmost column containing Field Labels stays locked in place while you scroll horizontally across dozens of records.
 2. **"Differences Only" Filter**: Click the **"Differences Only"** toggle in the toolbar. Smart Grid instantly collapses all rows where the records share identical values, displaying only fields with discrepancies (ideal for deduplication and contract reviews).
-3. **In-Matrix Editing**: Edit values directly inside the matrix cells. Changes link back to the underlying record and stage in the global Save Bar.
+3. **In-Matrix Inline Editing**:
+   - **Hover**: Hover over any editable cell in the matrix to display an edit pencil icon (`utility:edit`).
+   - **Click to Edit**: Click on the cell to open the inline text/number editor.
+   - **Commit Cell**: Type the new value and press `Enter` or click the green checkmark (`✓`). Press `Escape` or click `✕` to revert without staging.
+   - **Draft Indicator**: Staged cells display a vibrant **"Draft"** badge and highlight in yellow.
+   - **Sticky Save Dock**: A docked action bar appears at the bottom of the matrix showing pending changes count, **"Cancel"**, and **"Save"** buttons. Clicking Save triggers the pre-flight visual diff confirmation modal before committing to Salesforce.
+4. **Independent Multi-Record Selection**: Select any combination of records using row checkboxes in standard view and click **Transpose** to isolate and compare them side by side without side-drawer preview interference.
+5. **Horizontal Pagination & Navigation**: Use the Next (`>`) and Previous (`<`) navigation buttons in the transpose header to page smoothly across comparison records.
 
 ---
 
@@ -203,21 +210,16 @@ When comparing multiple accounts, opportunities, or custom records, standard hor
 - Picklists group in their configured Salesforce administrative order rather than alphabetical order.
 - Expand (`▶`) or collapse (`▼`) individual groups.
 
-### Server-Side Rollup Aggregates
+### Full-Width Bottom Analytics Panel
 
-- Group header rows display server-calculated rollups:
-  - **Count**: Number of records in the branch.
-  - **Sum**: Total currency or numeric amounts.
-  - **Average**: Mean values for percentages and quantities.
-  - **Min / Max**: Boundary values (e.g., earliest Close Date, highest Amount).
-
-### Docked SVG Chart Drawer
-
-- Click the **Charts** icon in the toolbar to slide out the real-time visual analytics panel:
-  - **Donut Chart**: Distribution breakdown across stages or categories.
-  - **Horizontal Bar Chart**: Ranked volume or revenue per account executive.
+- Click the **Analytics** (`utility:chart`) icon in the grid toolbar to open the interactive analytics workspace docked directly at the bottom of the card below the datatable:
+  - **Donut Chart**: Distribution breakdown across stages or categories with vector SVG slices and center totals.
+  - **Horizontal Bar Chart**: Ranked volume or revenue per category.
   - **Funnel Chart**: Pipeline conversion across qualification phases.
-- Charts react instantly as you apply filters or change values in the grid.
+- **Top Metric Cards**: Displays real-time summary KPI cards including **Total Records**, **Total Volume Count**, and **Distinct Groups**.
+- **Interactive Category Breakdown**: Displays category legends with color dots, record counts, and percentage distributions.
+- **Instant Dismissal**: Dismiss the analytics panel at any time by clicking either the dedicated **"Cancel"** button or the **"✕"** close button in the panel header, immediately returning to the full-height datatable view.
+- **Clean Table Layout**: Persistent, screen-wasting column totals footer bars have been replaced with this on-demand analytics panel, maximizing the vertical view of your Salesforce records.
 
 ### Conditional Formatting & Data Bars
 
@@ -284,15 +286,13 @@ Click the **Heartbeat** icon in the toolbar to inspect dataset hygiene:
 
 ### Action-Oriented Conversational Copilot
 
-Click the **Sparkle** icon in the toolbar to slide out the conversational assistant:
+Click the **Data Assistant** (`utility:chat`) icon in the toolbar to slide out the conversational assistant:
 
+- **Clean, Direct Answers**: Provides clear, conversational explanations of metrics, totals, and distributions without cluttering the chat with repetitive action buttons.
 - **Context-Aware Analytics**: Understands the exact records and filtered subset currently on your screen across any standard or custom object.
-- **Interactive Action Chips**: In addition to natural language narrative answers, the Copilot provides one-click action buttons inside the chat thread:
-  - `[🔍 Filter Records > Avg]` &rarr; Filters grid to high-value items in one click.
-  - `[📊 Group by Category]` &rarr; Groups active rows in the Analytics drawer.
-  - `[📑 Switch to Transpose View]` &rarr; Pivots the dataset into matrix comparison mode.
-  - `[📈 Open Analytics Charts]` &rarr; Opens real-time vector SVG charts.
-- **Multi-Turn Conversational Memory**: The Copilot remembers recent questions in your session, allowing you to ask follow-up questions naturally (e.g. _"What is our total pipeline?"_ followed by _"How many of those are in California?"_).
+- **Live Database Calculations**: Accurately computes totals, averages, and group counts against the live database using `WITH USER_MODE` security.
+- **Multi-Turn Conversational Memory**: The Copilot remembers recent questions in your session, allowing you to ask follow-up questions naturally (e.g. _"What is our total revenue?"_ followed by _"How many accounts are in Technology?"_).
+- **Fast Object Switching**: Use the Object dropdown selector in the top toolbar to switch between **Account**, **Opportunity**, **Contact**, **Case**, and **Lead** workspaces on the fly. The Assistant immediately recalibrates to the selected object's metadata schema.
 
 ### Interactive Onboarding Tour
 

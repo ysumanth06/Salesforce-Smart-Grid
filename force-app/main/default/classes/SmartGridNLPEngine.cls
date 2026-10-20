@@ -366,6 +366,28 @@ public with sharing class SmartGridNLPEngine {
       ];
     }
 
+    if (configs.isEmpty()) {
+      configs = [
+        SELECT
+          Id,
+          DeveloperName,
+          Enable_NLP__c,
+          Enable_Suggestions__c,
+          Enable_Chat__c,
+          Provider_Type__c,
+          Named_Credential__c,
+          Custom_Provider_Class__c,
+          Prompt_Template__c,
+          Model_Identifier__c,
+          Max_Tokens__c,
+          Confidence_Threshold__c
+        FROM Smart_Grid_AI_Config__mdt
+        WHERE Enable_NLP__c = TRUE
+        WITH USER_MODE
+        LIMIT 1
+      ];
+    }
+
     return configs.isEmpty() ? null : configs[0];
   }
 }

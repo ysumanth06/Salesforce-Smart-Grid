@@ -1,7 +1,24 @@
 <!-- sldsValidatorIgnore -->
 <template>
   <lightning-card title={gridTitle}>
-    <div slot="actions" class="slds-grid slds-grid_vertical-align-center">
+    <div
+      slot="actions"
+      class="slds-grid slds-grid_vertical-align-center slds-wrap"
+    >
+      <!-- Object Switcher Combobox -->
+      <lightning-combobox
+        name="objectSelector"
+        label="Select Object"
+        variant="label-hidden"
+        value={selectedObjectApiName}
+        options={objectOptions}
+        onchange={handleObjectChange}
+        placeholder="Select Object"
+        class="slds-var-m-right_x-small object-selector-combobox"
+        style="width: 140px"
+        disabled={isLoading}
+        data-testid="object-selector-combobox"
+      ></lightning-combobox>
       <c-smart-grid-view-selector
         object-api-name={objectApiName}
         current-config={currentGridConfig}
@@ -90,133 +107,147 @@
         disabled={disableFillDown}
         class="slds-var-m-left_x-small"
       ></lightning-button>
-      <!-- Transpose Grid View Button -->
-      <template lwc:if={canTranspose}>
-        <lightning-button
-          label="Transpose"
-          icon-name="utility:table"
-          onclick={handleOpenTranspose}
-          disabled={disableTranspose}
-          class="slds-var-m-left_x-small"
-          data-testid="toolbar-transpose-btn"
-        ></lightning-button>
-      </template>
-      <!-- Export Options Menu (TS-06) -->
-      <template lwc:if={canExport}>
-        <lightning-button-menu
-          alternative-text="Export Options"
-          title="Export Data"
-          icon-name="utility:download"
-          disabled={isLoading}
-          class="slds-var-m-left_x-small"
-          menu-alignment="right"
-          data-testid="export-menu"
-        >
-          <lightning-menu-item
-            value="csv"
-            label="Export as CSV (.csv)"
-            prefix-icon-name="utility:download"
-            onclick={handleExportCSV}
-            data-testid="export-csv-item"
-          ></lightning-menu-item>
-          <lightning-menu-item
-            value="excel"
-            label="Export as Formatted Excel (.xls)"
-            prefix-icon-name="utility:table"
-            onclick={handleExportExcel}
-            data-testid="export-excel-item"
-          ></lightning-menu-item>
-        </lightning-button-menu>
-      </template>
-      <!-- Refresh Grid (bypasses cache) (TS-04) -->
-      <lightning-button-icon
-        icon-name="utility:refresh"
-        alternative-text="Refresh Data"
-        title="Refresh Data (bypass cache)"
-        onclick={handleRefresh}
-        disabled={isLoading}
-        class="slds-var-m-left_x-small"
-        variant="border-filled"
-        data-testid="toolbar-refresh-btn"
-      ></lightning-button-icon>
-      <template lwc:if={canFilter}>
+    </div>
+
+    <!-- Secondary Grid Operations & Intelligence Toolbar (Row 2) -->
+    <div
+      class="grid-secondary-toolbar slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-var-p-horizontal_medium slds-var-p-vertical_xx-small slds-var-m-bottom_x-small slds-border_bottom"
+    >
+      <!-- Left Operational Controls -->
+      <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+        <!-- Transpose Grid View Button -->
+        <template lwc:if={canTranspose}>
+          <lightning-button
+            label={transposeButtonLabel}
+            icon-name="utility:table"
+            onclick={handleOpenTranspose}
+            disabled={disableTranspose}
+            title={transposeButtonTitle}
+            class="slds-var-m-right_x-small"
+            data-testid="toolbar-transpose-btn"
+          ></lightning-button>
+        </template>
+        <!-- Export Options Menu (TS-06) -->
+        <template lwc:if={canExport}>
+          <lightning-button-menu
+            alternative-text="Export Options"
+            title="Export Data"
+            icon-name="utility:download"
+            disabled={isLoading}
+            class="slds-var-m-right_x-small"
+            menu-alignment="left"
+            data-testid="export-menu"
+          >
+            <lightning-menu-item
+              value="csv"
+              label="Export as CSV (.csv)"
+              prefix-icon-name="utility:download"
+              onclick={handleExportCSV}
+              data-testid="export-csv-item"
+            ></lightning-menu-item>
+            <lightning-menu-item
+              value="excel"
+              label="Export as Formatted Excel (.xls)"
+              prefix-icon-name="utility:table"
+              onclick={handleExportExcel}
+              data-testid="export-excel-item"
+            ></lightning-menu-item>
+          </lightning-button-menu>
+        </template>
+        <!-- Refresh Grid (bypasses cache) (TS-04) -->
         <lightning-button-icon
-          icon-name="utility:filterList"
-          alternative-text="Toggle Quick Filters"
-          title="Toggle Quick Filters"
-          onclick={toggleFilterPanel}
+          icon-name="utility:refresh"
+          alternative-text="Refresh Data"
+          title="Refresh Data (bypass cache)"
+          onclick={handleRefresh}
+          disabled={isLoading}
+          class="slds-var-m-right_x-small"
+          variant="border-filled"
+          data-testid="toolbar-refresh-btn"
+        ></lightning-button-icon>
+        <template lwc:if={canFilter}>
+          <lightning-button-icon
+            icon-name="utility:filterList"
+            alternative-text="Toggle Quick Filters"
+            title="Toggle Quick Filters"
+            onclick={toggleFilterPanel}
+            class="slds-var-m-right_x-small"
+            variant="border-filled"
+          ></lightning-button-icon>
+          <lightning-button
+            label="Advanced Filter"
+            icon-name="utility:filter"
+            onclick={handleOpenAdvancedFilter}
+            disabled={isLoading}
+            class="slds-var-m-right_x-small"
+          ></lightning-button>
+        </template>
+      </div>
+
+      <!-- Right Feature & Intelligence Tools -->
+      <div class="slds-grid slds-grid_vertical-align-center">
+        <!-- AI Command Palette Trigger (Cmd+K) (Phase 3) -->
+        <template lwc:if={canUseCommandPalette}>
+          <lightning-button-icon
+            icon-name="utility:einstein"
+            alternative-text="AI Command Palette (Cmd+K)"
+            title="AI Command Palette (Cmd+K)"
+            onclick={handleOpenCommandPalette}
+            disabled={isLoading}
+            class="slds-var-m-left_x-small"
+            variant="border-filled"
+            data-testid="toolbar-ai-command-btn"
+          ></lightning-button-icon>
+        </template>
+        <!-- Data Quality Health Inspector Trigger -->
+        <template lwc:if={canUseDataQuality}>
+          <lightning-button-icon
+            icon-name="utility:heart"
+            alternative-text="Dataset Health & Data Quality"
+            title="Dataset Health & Duplicate Inspector"
+            onclick={handleOpenDataQuality}
+            disabled={isLoading}
+            class="slds-var-m-left_x-small"
+            variant="border-filled"
+            data-testid="toolbar-data-quality-btn"
+          ></lightning-button-icon>
+        </template>
+        <!-- Conversational AI Assistant Trigger -->
+        <template lwc:if={canUseAssistant}>
+          <lightning-button-icon
+            icon-name="utility:chat"
+            alternative-text="Conversational AI Assistant"
+            title="Conversational AI Assistant"
+            onclick={handleOpenAssistant}
+            disabled={isLoading}
+            class="slds-var-m-left_x-small"
+            variant="border-filled"
+            data-testid="toolbar-assistant-btn"
+          ></lightning-button-icon>
+        </template>
+        <!-- Analytics Charts Panel Trigger -->
+        <lightning-button-icon
+          icon-name="utility:chart"
+          alternative-text="Analytics Charts Panel"
+          title="Analytics Charts Panel"
+          onclick={handleOpenChartPanel}
+          disabled={isLoading}
           class="slds-var-m-left_x-small"
           variant="border-filled"
+          data-testid="toolbar-chart-btn"
         ></lightning-button-icon>
-        <lightning-button
-          label="Advanced Filter"
-          icon-name="utility:filter"
-          onclick={handleOpenAdvancedFilter}
-          disabled={isLoading}
-          class="slds-var-m-left_x-small"
-        ></lightning-button>
-      </template>
-      <!-- AI Command Palette Trigger (Cmd+K) (Phase 3) -->
-      <template lwc:if={canUseCommandPalette}>
+        <!-- Grid Guide & Walkthrough Trigger -->
         <lightning-button-icon
-          icon-name="utility:einstein"
-          alternative-text="AI Command Palette (Cmd+K)"
-          title="AI Command Palette (Cmd+K)"
-          onclick={handleOpenCommandPalette}
+          icon-name="utility:help"
+          alternative-text="Grid Guide & Walkthrough"
+          title="Grid Guide & Walkthrough"
+          onclick={handleOpenOnboarding}
           disabled={isLoading}
           class="slds-var-m-left_x-small"
           variant="border-filled"
-          data-testid="toolbar-ai-command-btn"
+          data-testid="toolbar-help-btn"
         ></lightning-button-icon>
-      </template>
-      <!-- Data Quality Health Inspector Trigger -->
-      <template lwc:if={canUseDataQuality}>
-        <lightning-button-icon
-          icon-name="utility:heart"
-          alternative-text="Dataset Health & Data Quality"
-          title="Dataset Health & Duplicate Inspector"
-          onclick={handleOpenDataQuality}
-          disabled={isLoading}
-          class="slds-var-m-left_x-small"
-          variant="border-filled"
-          data-testid="toolbar-data-quality-btn"
-        ></lightning-button-icon>
-      </template>
-      <!-- Conversational AI Assistant Trigger -->
-      <template lwc:if={canUseAssistant}>
-        <lightning-button-icon
-          icon-name="utility:chat"
-          alternative-text="Conversational AI Assistant"
-          title="Conversational AI Assistant"
-          onclick={handleOpenAssistant}
-          disabled={isLoading}
-          class="slds-var-m-left_x-small"
-          variant="border-filled"
-          data-testid="toolbar-assistant-btn"
-        ></lightning-button-icon>
-      </template>
-      <!-- Analytics Charts Panel Trigger -->
-      <lightning-button-icon
-        icon-name="utility:chart"
-        alternative-text="Analytics Charts Panel"
-        title="Analytics Charts Panel"
-        onclick={handleOpenChartPanel}
-        disabled={isLoading}
-        class="slds-var-m-left_x-small"
-        variant="border-filled"
-        data-testid="toolbar-chart-btn"
-      ></lightning-button-icon>
-      <!-- Grid Guide & Walkthrough Trigger -->
-      <lightning-button-icon
-        icon-name="utility:help"
-        alternative-text="Grid Guide & Walkthrough"
-        title="Grid Guide & Walkthrough"
-        onclick={handleOpenOnboarding}
-        disabled={isLoading}
-        class="slds-var-m-left_x-small"
-        variant="border-filled"
-        data-testid="toolbar-help-btn"
-      ></lightning-button-icon>
+      </div>
     </div>
     <!-- Active Filter Pills Bar (TS-01) -->
     <c-smart-grid-filter-bar
@@ -334,6 +365,8 @@
               draft-values={draftValues}
               max-transpose-limit={maxTransposeLimit}
               oncellchange={handleTransposeCellChange}
+              onsave={handleTransposeSave}
+              oncancel={handleCancel}
               onclose={handleCloseTranspose}
             ></c-smart-grid-transpose-table>
           </div>
@@ -360,67 +393,6 @@
                 >
                 </c-smart-grid-datatable>
               </div>
-              <!-- Sticky Column Totals Footer (TS-02) -->
-              <template lwc:if={hasTotals}>
-                <div
-                  class="smart-grid-totals-container slds-var-p-around_x-small"
-                >
-                  <div
-                    class="slds-grid slds-grid_vertical-align-center slds-wrap slds-gutters_x-small"
-                  >
-                    <div
-                      class="slds-col slds-size_12-of-12 slds-var-m-bottom_xx-small"
-                    >
-                      <span class="slds-badge slds-theme_shade">
-                        <lightning-icon
-                          icon-name="utility:table"
-                          size="xx-small"
-                          class="slds-var-m-right_xx-small"
-                        ></lightning-icon>
-                        <strong>Aggregates & Column Totals</strong>
-                      </span>
-                    </div>
-                    <template for:each={totalsDisplayList} for:item="total">
-                      <div
-                        key={total.fieldName}
-                        class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4 slds-var-m-vertical_xx-small"
-                      >
-                        <div
-                          class="slds-box slds-box_x-small slds-theme_default smart-grid-total-card"
-                        >
-                          <div class="smart-grid-totals-label">
-                            {total.label}
-                          </div>
-                          <div
-                            class="slds-grid slds-gutters_xx-small slds-var-m-top_xx-small slds-text-body_small"
-                          >
-                            <div class="slds-col">
-                              <span>Sum:</span>
-                              <strong>{total.sumFormatted}</strong>
-                            </div>
-                            <div class="slds-col">
-                              <span>Avg:</span>
-                              <strong>{total.avgFormatted}</strong>
-                            </div>
-                          </div>
-                          <div
-                            class="slds-grid slds-gutters_xx-small slds-text-body_small"
-                          >
-                            <div class="slds-col">
-                              <span>Min:</span>
-                              <strong>{total.minFormatted}</strong>
-                            </div>
-                            <div class="slds-col">
-                              <span>Max:</span>
-                              <strong>{total.maxFormatted}</strong>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-                  </div>
-                </div>
-              </template>
             </div>
             <template lwc:if={showReadingPane}>
               <div
@@ -495,6 +467,24 @@
         depth={depth}
         onclose={handleCloseRelatedGrid}
       ></c-smart-grid-related-grid>
+    </template>
+
+    <!-- Full-Screen Width Analytics Panel at Bottom (Rendered with Data) -->
+    <template lwc:if={showChartPanel}>
+      <div
+        class="slds-var-m-top_medium slds-var-p-horizontal_small slds-var-p-bottom_medium"
+        data-testid="bottom-analytics-container"
+      >
+        <c-smart-grid-chart-panel
+          is-open={showChartPanel}
+          data={tableData}
+          columns={gridColumns}
+          object-api-name={objectApiName}
+          group-by-field={chartGroupByField}
+          aggregate-field={chartAggregateField}
+          onclose={handleCloseChartPanel}
+        ></c-smart-grid-chart-panel>
+      </div>
     </template>
   </lightning-card>
 
@@ -575,13 +565,4 @@
     is-open={showOnboarding}
     onclose={handleCloseOnboarding}
   ></c-smart-grid-onboarding>
-
-  <!-- Analytics Chart Panel Drawer -->
-  <c-smart-grid-chart-panel
-    is-open={showChartPanel}
-    data={tableData}
-    group-by-field={chartGroupByField}
-    aggregate-field={chartAggregateField}
-    onclose={handleCloseChartPanel}
-  ></c-smart-grid-chart-panel>
 </template>
