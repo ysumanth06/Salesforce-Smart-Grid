@@ -2,7 +2,7 @@
 
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v65.0-blue.svg)](https://developer.salesforce.com)
 [![Apex Tests](https://img.shields.io/badge/Apex%20Tests-100%25%20Passing-success.svg)]()
-[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-211%2F211%20Passing%20(37%20Suites)-success.svg>)]()
+[![LWC Jest](<https://img.shields.io/badge/LWC%20Jest-212%2F212%20Passing%20(37%20Suites)-success.svg>)]()
 [![E2E Playwright](https://img.shields.io/badge/E2E%20Playwright-Automated%20Browser%20Tests-success.svg)]()
 [![Static Analysis](https://img.shields.io/badge/PMD%20Code%20Analyzer-0%20High%20Violations-brightgreen.svg)]()
 [![Security](https://img.shields.io/badge/Security-USER__MODE%20%7C%20stripInaccessible%20%7C%20FormulaShield-green.svg)]()
@@ -115,14 +115,13 @@ Standard Salesforce datatables restrict complex field types to read-only views. 
 - **Visual Conditional Formatting Rule Builder**: Configure cell color highlights, text badges, bold/italic font styling, and horizontal data bars based on threshold criteria.
 - **Programmatic Metadata Deployment**: Leverages the Apex Metadata API (`Metadata.Operations.enqueueDeployment`) to save configurations directly to Custom Metadata (`__mdt`) without requiring external CLI tools, VS Code, or manual XML editing.
 
-### 10. AI Copilot, Command Palette & Agentforce Interface
+### 10. Unified Smart Grid AI (⌘K) & Agentforce Interface
 
-- **Universal Object-Agnostic & Filter-Aware Intelligence**: Dynamic schema inspection for any standard or custom object. Numeric rollups, picklist distributions, and statistical heuristics automatically adapt to the target object's metadata schema and respect active grid filter clauses with `WITH USER_MODE` security.
-- **Action-Oriented Conversational Copilot (`smartGridAssistant`)**: A side-docked conversational copilot featuring multi-turn conversation memory (`historyJson`). Assistant responses return interactive action chips (`filter`, `group`, `transpose`, `chart`) that execute actions directly in the parent grid with a single click.
-- **Natural Language Bulk DML via ⌘K (`smartGridCommandPalette`, `SmartGridNLPDMLHandler`)**: Execute natural language data updates and deletions (e.g., _"set rating to Hot"_, _"delete selected records"_) complete with pre-flight visual diff confirmation modals, before/after strikethroughs, and atomic chunked DML execution.
+- **Unified Omnibar Experience (Option A)**: Merges conversational Q&A and operational grid commands into a single, high-polish spotlight modal triggered via `Cmd+K` or the toolbar Agent icon (`utility:einstein`). Users can ask analytical questions (e.g., _"What is our total revenue?"_), request executive summaries, or execute operational commands (e.g., _"Sort by AnnualRevenue desc"_, _"Transpose records"_, _"Set rating to Hot"_) in one seamless interface.
+- **Smart Intent Routing**: Automatically classifies inputs: direct workflow actions execute immediately; natural language updates/deletes present a pre-flight visual diff confirmation; analytical inquiries query the live database and return rich narrative insights with recommended action chips.
+- **Shield-Protected Data Quality Inspector (`smartGridDataQuality`)**: Accessed via the Shield icon (`utility:shield`), evaluates dataset hygiene (0–100 score), auditing missing critical fields, anomalous outliers, date hygiene violations, and duplicates with one-click grid isolation.
+- **Pluggable Multi-Provider AI Architecture (`ISmartGridAIProvider`)**: Extensible provider interface supporting external LLMs via Named Credentials (OpenAI ChatGPT, Anthropic Claude, Google Gemini), native Salesforce Einstein 1 Platform Models, and zero-egress deterministic on-platform heuristics (`SmartGridMockAIProvider`).
 - **Autonomous Agentforce Invocable Actions**: Standard invocable Apex actions for Salesforce Agentforce agents — `SmartGridAgentSummaryService` (automated dataset executive summaries), `SmartGridAgentHealthService` (automated data hygiene audits), and `SmartGridAgentQueryService` (natural language query conversion).
-- **Comprehensive Data Quality & Hygiene Engine (`smartGridDataQuality`, `SmartGridDataQualityService`)**: Computes a 0–100 dataset hygiene rating with one-click grid filtering. Audits missing values, invalid formats, statistical outliers, fuzzy duplicates, date hygiene violations (`CloseDate < TODAY`), and inactive record owners (`Owner.IsActive = false`).
-- **Pluggable Multi-Provider AI Architecture (`ISmartGridAIProvider`)**: Extensible provider interface supporting Salesforce Einstein 1 Platform Models, external LLMs via Named Credentials (with native formatting for OpenAI, Anthropic Claude, and Google Gemini API schemas), and zero-egress deterministic on-platform heuristics (`SmartGridMockAIProvider`).
 
 ### 11. Master-Detail Reading Pane & Linked Child Grids (`smartGridReadingPane`, `smartGridRelatedGrid`)
 

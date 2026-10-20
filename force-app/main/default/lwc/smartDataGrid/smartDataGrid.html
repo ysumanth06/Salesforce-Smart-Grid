@@ -186,12 +186,12 @@
 
       <!-- Right Feature & Intelligence Tools -->
       <div class="slds-grid slds-grid_vertical-align-center">
-        <!-- AI Command Palette Trigger (Cmd+K) (Phase 3) -->
+        <!-- Unified Smart Grid AI Trigger (Cmd+K) (Option A) -->
         <template lwc:if={canUseCommandPalette}>
           <lightning-button-icon
             icon-name="utility:einstein"
-            alternative-text="AI Command Palette (Cmd+K)"
-            title="AI Command Palette (Cmd+K)"
+            alternative-text="Smart Grid AI (Cmd+K)"
+            title="Smart Grid AI (Cmd+K)"
             onclick={handleOpenCommandPalette}
             disabled={isLoading}
             class="slds-var-m-left_x-small"
@@ -199,30 +199,17 @@
             data-testid="toolbar-ai-command-btn"
           ></lightning-button-icon>
         </template>
-        <!-- Data Quality Health Inspector Trigger -->
+        <!-- Data Quality & Health Inspector Trigger -->
         <template lwc:if={canUseDataQuality}>
           <lightning-button-icon
-            icon-name="utility:heart"
-            alternative-text="Dataset Health & Data Quality"
-            title="Dataset Health & Duplicate Inspector"
+            icon-name="utility:shield"
+            alternative-text="Data Quality & Health Inspector"
+            title="Data Quality & Health Inspector"
             onclick={handleOpenDataQuality}
             disabled={isLoading}
             class="slds-var-m-left_x-small"
             variant="border-filled"
             data-testid="toolbar-data-quality-btn"
-          ></lightning-button-icon>
-        </template>
-        <!-- Conversational AI Assistant Trigger -->
-        <template lwc:if={canUseAssistant}>
-          <lightning-button-icon
-            icon-name="utility:chat"
-            alternative-text="Conversational AI Assistant"
-            title="Conversational AI Assistant"
-            onclick={handleOpenAssistant}
-            disabled={isLoading}
-            class="slds-var-m-left_x-small"
-            variant="border-filled"
-            data-testid="toolbar-assistant-btn"
           ></lightning-button-icon>
         </template>
         <!-- Analytics Charts Panel Trigger -->
@@ -527,7 +514,7 @@
     onsave={handleReviewSave}
   ></c-smart-grid-review-modal>
 
-  <!-- Smart Grid Command Palette Modal (Phase 3) -->
+  <!-- Unified Smart Grid AI Modal (Option A) -->
   <c-smart-grid-command-palette
     is-open={showCommandPalette}
     object-api-name={objectApiName}
@@ -537,6 +524,7 @@
     active-filters={activeFilterJson}
     onapplyfilters={handleApplyAIFilters}
     onapplydml={handleApplyAIDml}
+    onassistantaction={handleAssistantAction}
     onclose={handleCloseCommandPalette}
   ></c-smart-grid-command-palette>
 

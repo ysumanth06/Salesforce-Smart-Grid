@@ -2,6 +2,7 @@ import { createElement } from "@lwc/engine-dom";
 import SmartGridCommandPalette from "c/smartGridCommandPalette";
 import processPrompt from "@salesforce/apex/SmartGridNLPEngine.processPrompt";
 import previewDML from "@salesforce/apex/SmartGridNLPDMLHandler.previewDML";
+import askAssistant from "@salesforce/apex/SmartGridNLPEngine.askAssistant";
 
 jest.mock(
   "@salesforce/apex/SmartGridNLPEngine.processPrompt",
@@ -13,6 +14,14 @@ jest.mock(
 
 jest.mock(
   "@salesforce/apex/SmartGridNLPDMLHandler.previewDML",
+  () => ({
+    default: jest.fn()
+  }),
+  { virtual: true }
+);
+
+jest.mock(
+  "@salesforce/apex/SmartGridNLPEngine.askAssistant",
   () => ({
     default: jest.fn()
   }),
@@ -112,6 +121,67 @@ describe("c-smart-grid-command-palette", () => {
     const eventDetail = applyHandler.mock.calls[0][0].detail;
     expect(eventDetail.explanation).toBe("Rating equals Hot");
     expect(eventDetail.filters[0].field).toBe("Rating");
+  });
+
+  it("calls askAssistant when user enters a question and renders AI answer card", async () => {
+    askAssistant.mockResolvedValue({
+      isSuccess: true,
+      answer: "The total annual revenue across 48 accounts is $4,850,000.",
+      suggestedActions: [
+        { label: "Open Analytics", actionType: "chart", payload: "" }
+      ]
+    });
+
+    const element = createElement("c-smart-grid-command-palette", {
+      is: SmartGridCommandPalette
+    });
+    element.isOpen = true;
+    document.body.appendChild(element);
+
+    const input = element.shadowRoot.querySelector(
+      '[data-testid="palette-input"]'
+    );
+    input.value = "What is the total revenue?";
+    input.dispatchEvent(new CustomEvent("input"));
+
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Enter"
+      })
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(askAssistant).toHaveBeenCalledWith({
+      question: "What is the total revenue?",
+      objectApiName: "Account",
+      activeFilterJson: "",
+      historyJson: "[]",
+      configDevName: ""
+    });
+
+    const answerCard = element.shadowRoot.querySelector(
+      '[data-testid="ai-answer-card"]'
+    );
+    expect(answerCard).not.toBeNull();
+
+    const answerText = element.shadowRoot.querySelector(
+      '[data-testid="ai-answer-text"]'
+    );
+    expect(answerText.textContent).toContain("$4,850,000");
+
+    const actionChip = element.shadowRoot.querySelector(
+      '[data-testid="ai-action-chip"]'
+    );
+    expect(actionChip).not.toBeNull();
+
+    const actionHandler = jest.fn();
+    element.addEventListener("assistantaction", actionHandler);
+    actionChip.click();
+
+    expect(actionHandler).toHaveBeenCalled();
+    expect(actionHandler.mock.calls[0][0].detail.actionType).toBe("chart");
   });
 
   it("handles Escape key to close modal", () => {

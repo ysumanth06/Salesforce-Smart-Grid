@@ -119,9 +119,9 @@ The Salesforce Smart Grid is built with an enterprise three-tier architecture th
 │  ├── c-smart-grid-resolution-modal (Step-by-step DML error wizard)    │
 │  ├── c-smart-grid-reading-pane (Split-view record detail inspector)   │
 │  ├── c-smart-grid-related-grid (Tabbed parent-child sub-grids)        │
-│  ├── c-smart-grid-command-palette (Cmd+K natural language SOQL search)│
-│  ├── c-smart-grid-assistant (Conversational AI analytics drawer)      │
-│  ├── c-smart-grid-data-quality (Health score & duplicate inspector)   │
+│  ├── c-smart-grid-command-palette (Unified Smart Grid AI Omnibar - Cmd+K & Q&A)│
+│  ├── c-smart-grid-assistant (Conversational AI analytics backend engine)│
+│  ├── c-smart-grid-data-quality (Health score & duplicate inspector - Shield)   │
 │  └── c-smart-grid-onboarding (4-step interactive guided tour)         │
 │  Shared LWC Client Utilities:                                         │
 │  ├── dirtyStateManager (Undo/Redo stack, draft diffing, fill down)    │
@@ -501,8 +501,18 @@ sf org assign permset --name Smart_Grid_AI_Premium --target-org my-org
 
 The Smart Grid AI Engine employs the **Universal AI Provider Pattern** (`SmartGridNLPEngine`), routing requests dynamically based on `Smart_Grid_AI_Config__mdt`.
 
+### Unified AI Experience Architecture (Option A: Smart Grid AI Omnibar)
+
+In release v2.4+, the AI user interface is unified into a single, high-performance Omnibar (`c-smart-grid-command-palette`), triggered either by the keyboard shortcut `Cmd+K` / `Ctrl+K` or the toolbar **Smart Grid AI** agent button (`utility:einstein`).
+
+- **Smart Intent Routing**: The Omnibar automatically classifies user inputs:
+  - **Conversational Inquiries**: Questions like _"What is the total revenue?"_ or _"Summarize dataset"_ route directly to `SmartGridNLPEngine.askAssistant`, rendering an interactive **AI Answer Card** with formatted totals, live database rollups (`WITH USER_MODE`), copy-to-clipboard buttons, and recommended action chips.
+  - **Workflow Shortcuts**: Commands like _"Transpose"_ or _"Show chart"_ trigger immediate grid layout actions without leaving the keyboard.
+  - **Pre-Flight DML Commands**: Updates like _"Set Rating to Hot"_ invoke `SmartGridNLPDMLHandler.previewDML`, presenting a visual diff preview for user confirmation before committing database changes.
+- **Data Quality Decoupling (Shield Icon)**: Data hygiene, duplicate candidate identification, and outlier checks are decoupled into the dedicated **Data Quality & Health Score** inspector accessible via the **Shield** icon (`utility:shield`) on the secondary toolbar.
+
 ```
-User Prompt (Cmd+K) or Chat Question
+User Prompt (Cmd+K Omnibar or Toolbar Agent Icon)
                │
                ▼
  SmartGridNLPEngine.getProvider(configDevName)
@@ -1254,6 +1264,7 @@ The repository includes pre-built end-to-end verification scripts that generate 
 
 | Script Name                  | Target Scenarios & Verified Assertions                                                                                                                                                                                                                      |
 | :--------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-unified-ai.js`       | Validates the single unified Smart Grid AI (Cmd+K / Einstein icon) omnibar, conversational Q&A answer card rendering with live database rollups, command preview execution, and the Data Quality shield (`utility:shield`) icon.                            |
 | `verify-bottom-analytics.js` | Validates complete removal of sticky column totals footer, opening of full-width bottom analytics panel, SVG Donut/Bar/Funnel rendering with live data, and dual dismissal via **Cancel** and **✕** buttons.                                                |
 | `verify-user-fixes.js`       | Validates the ergonomic 2-row toolbar alignment, multi-record selection without side drawer intrusion, in-place inline editing in Transpose View (hover pencil, click-to-edit, draft badge, and sticky save dock), and conversational AI assistant replies. |
 | `verify-chart-panel.js`      | Deep visual validation of all chart rendering states, legend color matching, and metric calculations across different record counts.                                                                                                                        |
@@ -1268,6 +1279,7 @@ sf org login web -a sandbox-org
 npx playwright test
 
 # Or execute specific headless scenario scripts directly
+node e2e-tests/verify-unified-ai.js
 node e2e-tests/verify-bottom-analytics.js
 node e2e-tests/verify-user-fixes.js
 node e2e-tests/verify-chart-panel.js

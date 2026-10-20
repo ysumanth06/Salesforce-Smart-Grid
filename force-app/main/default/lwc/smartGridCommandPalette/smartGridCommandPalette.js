@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from "lwc";
 import processPrompt from "@salesforce/apex/SmartGridNLPEngine.processPrompt";
 import previewDML from "@salesforce/apex/SmartGridNLPDMLHandler.previewDML";
+import askAssistant from "@salesforce/apex/SmartGridNLPEngine.askAssistant";
 
 const RECENT_STORAGE_KEY = "smartgrid_recent_prompts";
 
@@ -25,6 +26,10 @@ export default class SmartGridCommandPalette extends LightningElement {
   @track errorMessage = "";
   @track translationResult = null;
   @track dmlPreviewResult = null;
+  @track aiAnswer = null;
+  @track aiActionChips = [];
+  @track copySuccess = false;
+  @track conversationHistory = [];
   @track recentPrompts = [];
 
   _boundGlobalKeyHandler = null;
@@ -55,6 +60,9 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.errorMessage = "";
     this.translationResult = null;
     this.dmlPreviewResult = null;
+    this.aiAnswer = null;
+    this.aiActionChips = [];
+    this.copySuccess = false;
     this.loadRecentPrompts();
   }
 
@@ -65,11 +73,26 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.errorMessage = "";
     this.translationResult = null;
     this.dmlPreviewResult = null;
+    this.aiAnswer = null;
+    this.aiActionChips = [];
+    this.copySuccess = false;
     this.dispatchEvent(new CustomEvent("close"));
   }
 
   get computedPlaceholder() {
-    return `Ask AI anything (e.g., "Show high revenue accounts in CA" or "Set Rating to Hot")...`;
+    return `Ask AI anything (e.g., "What is the total revenue?" or "Sort by AnnualRevenue desc")...`;
+  }
+
+  get hasAiAnswer() {
+    return Boolean(this.aiAnswer);
+  }
+
+  get hasActionChips() {
+    return this.aiActionChips && this.aiActionChips.length > 0;
+  }
+
+  get copyIconName() {
+    return this.copySuccess ? "utility:check" : "utility:copy";
   }
 
   get hasResult() {
@@ -138,12 +161,12 @@ export default class SmartGridCommandPalette extends LightningElement {
 
   get suggestedPrompts() {
     return [
+      "What is the total revenue?",
+      "Summarize current view",
       "Transpose selected records",
-      "Group by Industry",
-      "Show analytics chart",
-      "Rating is Hot in California",
       "Accounts with revenue > 1M",
-      "Order by AnnualRevenue desc top 15"
+      "Order by AnnualRevenue desc top 15",
+      "Group by Industry"
     ];
   }
 
@@ -194,7 +217,35 @@ export default class SmartGridCommandPalette extends LightningElement {
   handleClearResult() {
     this.translationResult = null;
     this.dmlPreviewResult = null;
+    this.aiAnswer = null;
+    this.aiActionChips = [];
     this.promptText = "";
+    this.copySuccess = false;
+  }
+
+  async handleCopyAnswer() {
+    if (!this.aiAnswer) return;
+    try {
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(this.aiAnswer);
+        this.copySuccess = true;
+      }
+    } catch {
+      // clipboard fallback
+    }
+  }
+
+  handleActionChipClick(event) {
+    const actionType = event.currentTarget.dataset.actionType;
+    const payload = event.currentTarget.dataset.payload;
+    const label = event.currentTarget.dataset.label;
+
+    this.dispatchEvent(
+      new CustomEvent("assistantaction", {
+        detail: { actionType, payload, label }
+      })
+    );
+    this.closeModal();
   }
 
   async executePrompt() {
@@ -207,6 +258,8 @@ export default class SmartGridCommandPalette extends LightningElement {
     this.errorMessage = "";
     this.translationResult = null;
     this.dmlPreviewResult = null;
+    this.aiAnswer = null;
+    this.aiActionChips = [];
 
     // Direct Workflow Command Matchers
     if (/\btranspose\b/i.test(text)) {
@@ -275,6 +328,53 @@ export default class SmartGridCommandPalette extends LightningElement {
       return;
     }
 
+    // Question & Conversational Analytical Inquiries
+    const isQuestion =
+      /^(what|how|why|who|when|where|summarize|explain|tell|is there|are there|calculate|count|average|total|sum|give me|show me)\b/i.test(
+        text
+      ) || /\?$/.test(text);
+
+    if (isQuestion) {
+      try {
+        const recentHistory = (this.conversationHistory || [])
+          .slice(-4)
+          .map((m) => ({
+            isAssistant: m.isAssistant,
+            text: m.text
+          }));
+
+        const res = await askAssistant({
+          question: text,
+          objectApiName: this.objectApiName || "Account",
+          activeFilterJson: this.activeFilters || "",
+          historyJson: JSON.stringify(recentHistory),
+          configDevName: this.configDevName || ""
+        });
+
+        if (res && res.isSuccess) {
+          this.aiAnswer = res.answer;
+          this.aiActionChips = res.suggestedActions || [];
+          this.conversationHistory = [
+            ...this.conversationHistory,
+            { text, isAssistant: false },
+            { text: res.answer, isAssistant: true }
+          ];
+          this.saveRecentPrompt(text);
+        } else {
+          this.errorMessage =
+            (res && res.errorMessage) ||
+            "Could not process question. Please try rephrasing.";
+        }
+      } catch (err) {
+        this.errorMessage =
+          err?.body?.message || err?.message || "Failed to get AI answer.";
+      } finally {
+        this.isLoading = false;
+      }
+      return;
+    }
+
+    // Default: Structured Filter/Sort Query with fallback to conversational AI
     try {
       const result = await processPrompt({
         prompt: text,
@@ -290,9 +390,23 @@ export default class SmartGridCommandPalette extends LightningElement {
         this.translationResult = result;
         this.saveRecentPrompt(text);
       } else {
-        this.errorMessage =
-          (result && result.errorMessage) ||
-          "Could not understand command. Please refine your prompt.";
+        // Fallback to conversational question routing
+        const res = await askAssistant({
+          question: text,
+          objectApiName: this.objectApiName || "Account",
+          activeFilterJson: this.activeFilters || "",
+          historyJson: "[]",
+          configDevName: this.configDevName || ""
+        });
+        if (res && res.isSuccess) {
+          this.aiAnswer = res.answer;
+          this.aiActionChips = res.suggestedActions || [];
+          this.saveRecentPrompt(text);
+        } else {
+          this.errorMessage =
+            (result && result.errorMessage) ||
+            "Could not understand command. Please refine your prompt.";
+        }
       }
     } catch (err) {
       this.errorMessage =

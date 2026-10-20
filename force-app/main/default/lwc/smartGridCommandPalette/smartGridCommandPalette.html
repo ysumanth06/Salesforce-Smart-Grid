@@ -59,6 +59,90 @@
 
         <!-- Palette Body -->
         <div class="palette-body slds-var-p-around_medium">
+          <!-- Conversational AI Analysis Card -->
+          <template lwc:if={hasAiAnswer}>
+            <div
+              class="result-card ai-answer-card slds-var-p-around_medium slds-var-m-bottom_small"
+              data-testid="ai-answer-card"
+            >
+              <div
+                class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-var-m-bottom_x-small"
+              >
+                <div class="slds-grid slds-grid_vertical-align-center">
+                  <lightning-icon
+                    icon-name="utility:einstein"
+                    size="x-small"
+                    class="ai-answer-icon slds-var-m-right_xx-small"
+                  ></lightning-icon>
+                  <span class="result-title slds-text-title_bold"
+                    >Smart Grid AI Analysis</span
+                  >
+                </div>
+                <button
+                  class="slds-button slds-button_icon slds-button_icon-border-filled slds-button_icon-x-small"
+                  title="Copy Answer"
+                  onclick={handleCopyAnswer}
+                  data-testid="copy-answer-btn"
+                >
+                  <lightning-icon
+                    icon-name={copyIconName}
+                    size="xx-small"
+                  ></lightning-icon>
+                  <span class="slds-assistive-text">Copy Answer</span>
+                </button>
+              </div>
+
+              <!-- Narrative text answer -->
+              <div
+                class="ai-answer-text slds-var-p-vertical_xx-small slds-text-body_regular"
+                data-testid="ai-answer-text"
+              >
+                {aiAnswer}
+              </div>
+
+              <!-- Recommended Actions (if any) -->
+              <template lwc:if={hasActionChips}>
+                <div class="slds-var-m-top_small">
+                  <span
+                    class="section-heading slds-var-m-bottom_xx-small"
+                    style="display: block"
+                    >Recommended Actions:</span
+                  >
+                  <div class="slds-grid slds-wrap">
+                    <template for:each={aiActionChips} for:item="chip">
+                      <button
+                        key={chip.label}
+                        class="ai-action-btn slds-var-m-right_xx-small slds-var-m-bottom_xx-small"
+                        data-action-type={chip.actionType}
+                        data-payload={chip.payload}
+                        data-label={chip.label}
+                        onclick={handleActionChipClick}
+                        data-testid="ai-action-chip"
+                      >
+                        <lightning-icon
+                          icon-name="utility:play"
+                          size="xx-small"
+                          class="slds-var-m-right_xxx-small"
+                        ></lightning-icon>
+                        {chip.label}
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </template>
+
+              <div class="slds-grid slds-grid_align-end slds-var-m-top_small">
+                <button
+                  class="slds-button slds-button_neutral"
+                  onclick={handleClearResult}
+                  data-testid="clear-answer-btn"
+                >
+                  Ask Another Question
+                </button>
+              </div>
+            </div>
+          </template>
+
           <!-- Translation Success / Preview Banner -->
           <template lwc:if={hasResult}>
             <div
@@ -205,7 +289,7 @@
 
           <!-- Suggested Quick Prompts -->
           <div class="palette-section slds-var-m-bottom_small">
-            <span class="section-heading">Suggested Prompts</span>
+            <span class="section-heading">Suggested Prompts &amp; Actions</span>
             <div
               class="prompt-chips slds-grid slds-wrap slds-var-m-top_xx-small"
             >

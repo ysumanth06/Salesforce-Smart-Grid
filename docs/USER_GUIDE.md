@@ -41,9 +41,8 @@ Welcome to the **Salesforce Smart Grid** user guide. This document explains how 
    - [Formula Shield (Neutralizing Formula Injections)](#formula-shield-neutralizing-formula-injections)
    - [Field-Level Change Audit History](#field-level-change-audit-history)
 9. [AI Copilot & Natural Language Features](#9-ai-copilot--natural-language-features)
-   - [NLP Command Palette (Cmd+K / Ctrl+K)](#nlp-command-palette-cmdk--ctrlk)
-   - [Data Quality & Health Score Drawer](#data-quality--health-score-drawer)
-   - [Conversational Smart Grid Assistant](#conversational-smart-grid-assistant)
+   - [Unified Smart Grid AI Omnibar (Cmd+K / Einstein Icon)](#unified-smart-grid-ai-omnibar-cmdk--einstein-icon)
+   - [Data Quality & Health Score Drawer (Shield Icon)](#data-quality--health-score-drawer-shield-icon)
    - [Interactive Onboarding Tour](#interactive-onboarding-tour)
 10. [Master Keyboard Shortcuts Cheat Sheet](#10-master-keyboard-shortcuts-cheat-sheet)
 
@@ -71,7 +70,7 @@ Your Salesforce Administrator controls feature availability through Permission S
 | :-------------------------- | :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`SmartGrid_User`**        | All Standard Users & Sales Reps        | Standard grid navigation, inline cell editing, quick filters, CSV export, column resizing, field picker, personal saved views.                |
 | **`SmartGrid_Power_User`**  | Team Leads, Sales Ops, Analysts        | Unlocks Transpose Matrix editing, 2D range fill down, Excel range copy/paste, bulk CSV import with rollback tokens, and private view sharing. |
-| **`Smart_Grid_AI_Premium`** | Power Users, Executives, Data Stewards | Unlocks the `Cmd+K` NLP Command Palette, Dataset Health & Duplicate Inspector, and Conversational Assistant drawer.                           |
+| **`Smart_Grid_AI_Premium`** | Power Users, Executives, Data Stewards | Unlocks the `Cmd+K` Unified Smart Grid AI Omnibar (Einstein icon), and Dataset Health & Duplicate Inspector (Shield icon).                    |
 | **`SmartGrid_Admin`**       | Salesforce Administrators              | Full access including Visual Admin Studio, programmatic metadata deployment, and global grid overrides.                                       |
 
 ---
@@ -265,34 +264,40 @@ Whenever you click **"Save All"**, Smart Grid presents a safety pre-flight revie
 
 _(Requires `Smart_Grid_AI_Premium` Permission Set)_
 
-### NLP Command Palette (`Cmd + K` / `Ctrl + K`)
+### Unified Smart Grid AI Omnibar (`Cmd + K` / Einstein Icon)
 
-Press `Cmd + K` (Mac) or `Ctrl + K` (Windows) from anywhere inside the grid to open the global command palette:
+Press `Cmd + K` (Mac) or `Ctrl + K` (Windows) anywhere inside the grid, or click the **Smart Grid AI** agent icon (`utility:einstein`) in the toolbar to open the unified AI modal.
 
-- **Natural Language Filtering**: Type _"Show high-priority cases from last week"_ &rarr; Applies the corresponding date and priority filters automatically.
-- **Natural Language Bulk DML**: Type _"Set Rating to Hot for selected rows"_ or _"Update Status to Closed"_ &rarr; Smart Grid generates a pre-flight visual diff showing previous values with red strike-through and new values in green before committing changes safely via `WITH USER_MODE`.
-- **Workflow Shortcuts**: Type _"Transpose"_ &rarr; Swings into Matrix comparison mode.
-- **Analytical Actions**: Type _"Group by Stage and show chart"_ &rarr; Groups rows and opens the pipeline chart drawer.
+The Unified Omnibar blends **direct grid command execution** and **conversational analytical inquiries** into one seamless dialogue:
 
-### Data Quality & Health Score Drawer
+- **Conversational Inquiries & Metric Summaries**:
+  - Ask questions naturally: _"What is the total revenue?"_, _"How many accounts are in California?"_, or _"Summarize this dataset"_.
+  - Smart Grid AI computes real-time database rollups with `WITH USER_MODE` and renders a clean **AI Answer Card** featuring formatted metrics (e.g. `$14,078,203,000`).
+  - **One-Click Copy**: Click the **Copy Answer** button to copy metrics and explanations straight to your clipboard.
+  - **Contextual Action Chips**: Quick-pivot chips let you drill deeper or swing views with a single click.
+  - **Multi-Turn Context**: Remembers previous questions within your session for smooth conversational follow-ups.
 
-Click the **Heartbeat** icon in the toolbar to inspect dataset hygiene:
+- **Natural Language Command Execution**:
+  - Type direct workflow shortcuts: _"Transpose"_ &rarr; Swings into Matrix comparison mode.
+  - Type analytical actions: _"Group by Stage and show chart"_ &rarr; Groups records and slides out the bottom analytics drawer.
+  - Natural Language Sorting: _"Order by AnnualRevenue desc"_ &rarr; Re-sorts grid records immediately.
+
+- **Pre-Flight Safe Bulk DML Updates**:
+  - Type: _"Set Rating to Hot for selected rows"_ or _"Update Status to Closed"_.
+  - Smart Grid displays an immediate visual diff preview showing previous values with red strike-through and proposed values in green before committing any changes to the database.
+
+- **Cross-Object Intelligence**:
+  - Switch objects instantly from the top toolbar dropdown (**Account**, **Opportunity**, **Contact**, **Case**, **Lead**). Smart Grid AI immediately inspects the active schema and contextualizes all calculations and commands.
+
+### Data Quality & Health Score Drawer (Shield Icon)
+
+Click the **Shield** icon (`utility:shield` - _Data Quality & Health Inspector_) in the toolbar to inspect dataset hygiene:
 
 - **Overall Health Score (0 - 100)**: Evaluates missing critical fields, anomalous outliers, date hygiene, and potential duplicates.
 - **One-Click "Filter Grid to Review"**: Click the action button on any detected issue card to immediately filter the grid to affected records (e.g. isolate rows missing phone numbers, or review accounts with overdue close dates).
 - **Duplicate Candidates**: Identifies records sharing identical email domains, phone numbers, or normalized names.
 - **Date Hygiene & Inactive Owners**: Flags open records with expired target dates or records assigned to inactive user accounts.
 - **Outlier Detection**: Highlights numeric values that deviate significantly from segment averages (e.g., an Opportunity amount 4x above average).
-
-### Action-Oriented Conversational Copilot
-
-Click the **Data Assistant** (`utility:chat`) icon in the toolbar to slide out the conversational assistant:
-
-- **Clean, Direct Answers**: Provides clear, conversational explanations of metrics, totals, and distributions without cluttering the chat with repetitive action buttons.
-- **Context-Aware Analytics**: Understands the exact records and filtered subset currently on your screen across any standard or custom object.
-- **Live Database Calculations**: Accurately computes totals, averages, and group counts against the live database using `WITH USER_MODE` security.
-- **Multi-Turn Conversational Memory**: The Copilot remembers recent questions in your session, allowing you to ask follow-up questions naturally (e.g. _"What is our total revenue?"_ followed by _"How many accounts are in Technology?"_).
-- **Fast Object Switching**: Use the Object dropdown selector in the top toolbar to switch between **Account**, **Opportunity**, **Contact**, **Case**, and **Lead** workspaces on the fly. The Assistant immediately recalibrates to the selected object's metadata schema.
 
 ### Interactive Onboarding Tour
 
