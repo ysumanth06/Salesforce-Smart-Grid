@@ -100,7 +100,7 @@ Standard Salesforce datatables restrict complex field types to read-only views. 
 - **Native SVG Visualizations**: Integrated **Donut**, **Horizontal Bar**, and **Funnel** charts rendered dynamically via vector SVG.
 - **Summary KPI Metric Tiles**: Real-time aggregate metric cards displaying grand totals, volume counts, and distinct group counts.
 - **Category Breakdown Legend**: Interactive category list with record counts, percentage distributions, and matching color indicators.
-- **Instant Dismissal**: Dedicated **"Cancel"** button and **"✕"** close button to immediately dismiss the panel and return to the full datatable view.
+- **Instant Dismissal**: Streamlined **"✕"** close button to immediately dismiss the panel and return to the full datatable view.
 - **Maximized Grid Real Estate**: Persistent, screen-cluttering column totals footer bars are eliminated in favor of this on-demand, interactive visual analytics panel.
 
 ### 8. Bulk CSV Import with Transactional Rollback Token (`smartGridImportModal`, `SmartGridImportService`)

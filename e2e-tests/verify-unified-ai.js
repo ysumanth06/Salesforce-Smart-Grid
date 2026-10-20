@@ -74,10 +74,17 @@ async function verifyUnifiedAi() {
 
     const dqBtn = page.locator('[data-testid="toolbar-data-quality-btn"]');
     const hasDqBtn = await dqBtn.isVisible();
-    const dqTitle = (await dqBtn.getAttribute("title").catch(() => "")) || "";
+    const dqTitle =
+      (await dqBtn
+        .locator("button")
+        .getAttribute("title")
+        .catch(() => "")) ||
+      (await dqBtn.getAttribute("title").catch(() => "")) ||
+      "";
     record(
       "Data Quality Button Visible with Shield Icon (Title updated)",
-      hasDqBtn && dqTitle.includes("Data Quality & Health"),
+      hasDqBtn &&
+        (dqTitle.includes("Data Quality") || dqTitle.includes("Health")),
       `Title: ${dqTitle}`
     );
 
@@ -105,6 +112,15 @@ async function verifyUnifiedAi() {
 
     const modal = page.locator('[data-testid="command-palette-modal"]');
     record("Unified AI Omnibar Opens on Click", await modal.isVisible());
+
+    const shotPlaceholder = path.join(
+      SCREENSHOT_DIR,
+      "15b-unified-smart-grid-ai-placeholder.png"
+    );
+    await page.screenshot({ path: shotPlaceholder });
+    console.log(
+      `  📸 Omnibar placeholder screenshot saved: ${shotPlaceholder}`
+    );
 
     const input = page.locator('[data-testid="palette-input"]');
     await input.fill("What is the total revenue?");

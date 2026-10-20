@@ -66,7 +66,7 @@ This guide is designed for Salesforce System Administrators, Technical Architect
     - [Architecture & Placement](#architecture--placement)
     - [Supported Visualizations (Donut, Bar, Funnel)](#supported-visualizations)
     - [Real-Time Metric Tiles & Category Legend](#real-time-metric-tiles--category-legend)
-    - [Dual Dismissal Mechanics (Cancel & ✕)](#dual-dismissal-mechanics)
+    - [Dismissal Mechanics (✕ Button)](#dismissal-mechanics)
 11. [Client-Side Virtual Formula Evaluator](#11-client-side-virtual-formula-evaluator)
     - [Formula Engine Architecture (Shunting-Yard / RPN)](#formula-engine-architecture)
     - [Real-Time Reactive Recalculation on Draft Edits](#real-time-reactive-recalculation)
@@ -941,14 +941,13 @@ In modern enterprise workspaces, fixed bottom aggregate rows waste valuable vert
   - Color-coded indicator dots matching the SVG chart slices.
   - Exact record counts and percentage distribution per category.
 
-### Dual Dismissal Mechanics
+### Dismissal Mechanics
 
 Users can close the analytics workspace at any time via:
 
-1. **"Cancel" Button** (`data-testid="chart-cancel-btn"`): Explicit button in the panel header.
-2. **"✕" Close Button** (`data-testid="chart-close-btn"`): Standard top-right dismiss icon.
+- **"✕" Close Button** (`data-testid="chart-close-btn"`): Streamlined top-right dismiss icon in the panel header.
 
-Both buttons immediately dispatch a `close` event to `c-smart-data-grid`, resetting `showChartPanel = false` and restoring maximum vertical space for datatable rows.
+Clicking the button immediately dispatches a `close` event to `c-smart-data-grid`, resetting `showChartPanel = false` and restoring maximum vertical space for datatable rows.
 
 ---
 
@@ -1265,7 +1264,7 @@ The repository includes pre-built end-to-end verification scripts that generate 
 | Script Name                  | Target Scenarios & Verified Assertions                                                                                                                                                                                                                      |
 | :--------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `verify-unified-ai.js`       | Validates the single unified Smart Grid AI (Cmd+K / Einstein icon) omnibar, conversational Q&A answer card rendering with live database rollups, command preview execution, and the Data Quality shield (`utility:shield`) icon.                            |
-| `verify-bottom-analytics.js` | Validates complete removal of sticky column totals footer, opening of full-width bottom analytics panel, SVG Donut/Bar/Funnel rendering with live data, and dual dismissal via **Cancel** and **✕** buttons.                                                |
+| `verify-bottom-analytics.js` | Validates complete removal of sticky column totals footer, opening of full-width bottom analytics panel, SVG Donut/Bar/Funnel rendering with live data, removal of redundant Cancel button, and clean dismissal via the **✕** button.                       |
 | `verify-user-fixes.js`       | Validates the ergonomic 2-row toolbar alignment, multi-record selection without side drawer intrusion, in-place inline editing in Transpose View (hover pencil, click-to-edit, draft badge, and sticky save dock), and conversational AI assistant replies. |
 | `verify-chart-panel.js`      | Deep visual validation of all chart rendering states, legend color matching, and metric calculations across different record counts.                                                                                                                        |
 

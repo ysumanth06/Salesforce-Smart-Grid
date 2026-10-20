@@ -46,10 +46,19 @@
   padding: var(--lwc-spacingSmall, 0.875rem) var(--lwc-spacingMedium, 1.25rem);
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: var(--lwc-colorTextInverse, #ffffff);
+  display: flex;
+  align-items: center;
 }
 
 .ai-icon {
   --slds-c-icon-color-foreground-default: #38bdf8;
+  flex-shrink: 0;
+}
+
+.palette-input-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 0.75rem;
 }
 
 .palette-input {
@@ -57,14 +66,22 @@
   background: transparent;
   border: none;
   color: var(--lwc-colorTextInverse, #ffffff);
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
   font-weight: 500;
   outline: none;
+  box-sizing: border-box;
 }
 
 .palette-input::placeholder {
   color: #94a3b8;
   font-weight: var(--lwc-fontWeightRegular, 400);
+}
+
+.palette-badges {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .shortcut-pill {

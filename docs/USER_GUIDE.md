@@ -217,7 +217,7 @@ When comparing multiple accounts, opportunities, or custom records, standard hor
   - **Funnel Chart**: Pipeline conversion across qualification phases.
 - **Top Metric Cards**: Displays real-time summary KPI cards including **Total Records**, **Total Volume Count**, and **Distinct Groups**.
 - **Interactive Category Breakdown**: Displays category legends with color dots, record counts, and percentage distributions.
-- **Instant Dismissal**: Dismiss the analytics panel at any time by clicking either the dedicated **"Cancel"** button or the **"✕"** close button in the panel header, immediately returning to the full-height datatable view.
+- **Instant Dismissal**: Dismiss the analytics panel at any time by clicking the **"✕"** close button in the panel header, immediately returning to the full-height datatable view.
 - **Clean Table Layout**: Persistent, screen-wasting column totals footer bars have been replaced with this on-demand analytics panel, maximizing the vertical view of your Salesforce records.
 
 ### Conditional Formatting & Data Bars

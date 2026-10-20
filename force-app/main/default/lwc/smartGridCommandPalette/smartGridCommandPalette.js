@@ -80,7 +80,7 @@ export default class SmartGridCommandPalette extends LightningElement {
   }
 
   get computedPlaceholder() {
-    return `Ask AI anything (e.g., "What is the total revenue?" or "Sort by AnnualRevenue desc")...`;
+    return "Ask AI a question or type a command...";
   }
 
   get hasAiAnswer() {

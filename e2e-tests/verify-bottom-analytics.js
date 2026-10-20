@@ -121,23 +121,14 @@ async function verifyBottomAnalytics() {
       `  📸 Bottom full-width analytics screenshot saved: ${shotBottomAnalytics}`
     );
 
-    // 4. Test "Cancel" button
-    console.log("\n--- 4. Testing Cancel Button ---");
+    // 4. Test that redundant "Cancel" button is removed
+    console.log("\n--- 4. Verifying Redundant Cancel Button Removed ---");
     const cancelBtn = page.locator('[data-testid="chart-cancel-btn"]');
-    await cancelBtn.click();
-    await page.waitForTimeout(1000);
-
-    const isGoneAfterCancel = !(await bottomContainer
-      .isVisible()
-      .catch(() => false));
-    record("Cancel Button Closes Analytics Panel", isGoneAfterCancel);
+    const isCancelAbsent = !(await cancelBtn.isVisible().catch(() => false));
+    record("Redundant Cancel Button Removed from Header", isCancelAbsent);
 
     // 5. Test "✕" close button
     console.log("\n--- 5. Testing Close ✕ Button ---");
-    await chartBtn.click();
-    await page.waitForTimeout(1000);
-    record("Re-opened Analytics Panel", await bottomContainer.isVisible());
-
     const closeBtn = page.locator('[data-testid="chart-close-btn"]');
     await closeBtn.click();
     await page.waitForTimeout(1000);
