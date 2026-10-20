@@ -4,6 +4,14 @@
   >Grants full administrative access to Smart Grid Admin Studio, Global Settings, and Audit Logs.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>SmartGrid Admin</label>
+    <tabSettings>
+        <tab>Smart_Grid_Admin_Studio</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Smart_Grid_Explorer</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Smart_Grid_Config__mdt</name>

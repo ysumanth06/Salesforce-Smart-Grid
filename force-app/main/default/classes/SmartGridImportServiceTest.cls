@@ -111,4 +111,38 @@ private class SmartGridImportServiceTest {
     Assert.isFalse(res2.isSuccess, 'Empty ID list must fail');
     Test.stopTest();
   }
+
+  @IsTest
+  static void testExecuteRollback_ExpiredToken() {
+    Account acc = new Account(Name = 'Test Expiry Account');
+    insert acc;
+
+    // Token generated 25 hours ago (25 * 3600 * 1000 ms ago)
+    Long pastTimestamp = System.currentTimeMillis() - (25 * 3600 * 1000L);
+    String expiredToken =
+      'ROLLBACK_' +
+      String.valueOf(pastTimestamp) +
+      '_987654';
+
+    Test.startTest();
+    SmartGridImportService.RollbackResult result = SmartGridImportService.executeRollback(
+      expiredToken,
+      new List<Id>{ acc.Id }
+    );
+    Test.stopTest();
+
+    Assert.isFalse(result.isSuccess, 'Expired token rollback should fail');
+    Assert.isTrue(
+      result.errorMessages[0].contains('ROLLBACK_EXPIRED'),
+      'Should return ROLLBACK_EXPIRED error'
+    );
+
+    // Verify record was NOT deleted
+    List<Account> accounts = [SELECT Id FROM Account WHERE Id = :acc.Id];
+    Assert.areEqual(
+      1,
+      accounts.size(),
+      'Account should remain intact after expired rollback'
+    );
+  }
 }

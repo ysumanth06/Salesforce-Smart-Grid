@@ -137,4 +137,57 @@ describe("c-smart-data-grid formatColumn", () => {
     expect(formatted.editable).toBe(true);
     expect(formatted.typeAttributes.options).toHaveLength(2);
   });
+
+  it("calculates draftStats and saveButtonLabel accurately for new rows", () => {
+    document.body.appendChild(element);
+    element.setDraftValues([{ Id: "new-123" }]);
+
+    expect(element.draftStats.totalRecords).toBe(1);
+    expect(element.draftStats.newRowsCount).toBe(1);
+    expect(element.draftStats.totalChanges).toBe(0);
+    expect(element.saveButtonLabel).toBe("Save (1 new row)");
+  });
+
+  it("triggers preflight review modal when draftStats exceeds threshold (> 3 records)", async () => {
+    document.body.appendChild(element);
+    element.setDraftValues([
+      { Id: "001000000000001", Name: "A" },
+      { Id: "001000000000002", Name: "B" },
+      { Id: "001000000000003", Name: "C" },
+      { Id: "001000000000004", Name: "D" }
+    ]);
+
+    expect(element.isReviewModalOpen).toBe(false);
+    await element.triggerToolbarSave();
+    expect(element.isReviewModalOpen).toBe(true);
+  });
+
+  it("toggles bottom analytics chart panel bi-directionally", () => {
+    document.body.appendChild(element);
+    expect(element.isChartPanelOpen).toBe(false);
+
+    element.triggerChartPanel();
+    expect(element.isChartPanelOpen).toBe(true);
+
+    element.triggerChartPanel();
+    expect(element.isChartPanelOpen).toBe(false);
+  });
+
+  it("opens and closes CSV Import modal", () => {
+    document.body.appendChild(element);
+    expect(element.isImportModalOpen).toBe(false);
+
+    element.triggerImportModal();
+    expect(element.isImportModalOpen).toBe(true);
+
+    element.closeImportModal();
+    expect(element.isImportModalOpen).toBe(false);
+  });
+
+  it("dispatches warning toast when transpose is triggered with fewer than 2 records", () => {
+    document.body.appendChild(element);
+    element.setSelectedRows(["001000000000001"]);
+    element.triggerTranspose();
+    expect(element.isChartPanelOpen).toBe(false);
+  });
 });

@@ -149,17 +149,27 @@
               class="result-card slds-var-p-around_small slds-var-m-bottom_small"
             >
               <div
-                class="slds-grid slds-grid_vertical-align-center slds-var-m-bottom_x-small"
+                class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-var-m-bottom_x-small"
               >
-                <lightning-icon
-                  icon-name="utility:success"
-                  size="x-small"
-                  variant="success"
-                  class="slds-var-m-right_xx-small"
-                ></lightning-icon>
-                <span class="result-title slds-text-title_bold"
-                  >{resultExplanation}</span
-                >
+                <div class="slds-grid slds-grid_vertical-align-center">
+                  <lightning-icon
+                    icon-name="utility:success"
+                    size="x-small"
+                    variant="success"
+                    class="slds-var-m-right_xx-small"
+                  ></lightning-icon>
+                  <span class="result-title slds-text-title_bold"
+                    >{resultExplanation}</span
+                  >
+                </div>
+                <template lwc:if={isFallbackMode}>
+                  <span
+                    class="slds-badge slds-theme_warning"
+                    title="Executed safely via offline deterministic engine"
+                    data-testid="ai-fallback-badge"
+                    >⚡ Offline Engine</span
+                  >
+                </template>
               </div>
 
               <!-- Filter Chips Preview -->

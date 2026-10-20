@@ -23,20 +23,54 @@ public with sharing class SmartGridEinsteinAIProvider implements ISmartGridAIPro
     if (config != null && String.isNotBlank(config.Prompt_Template__c)) {
       try {
         // ConnectApi / PromptTemplate execution pattern:
-        // In sandboxes or scratch orgs where Einstein GenAI is not licensed,
-        // we fall back gracefully to the deterministic mock provider.
-        return fallbackProvider.translateQuery(request);
+        // In sandboxes, developer orgs, or scratch orgs without Einstein GenAI credits,
+        // we catch exceptions gracefully and fall back to the deterministic offline mock provider.
+        SmartGridNLPEngine.TranslationResult res = fallbackProvider.translateQuery(
+          request
+        );
+        res.isFallback = true;
+        res.providerUsed = 'Offline_Mock';
+        if (String.isNotBlank(res.explanation)) {
+          res.explanation += ' (Heuristic fallback: Einstein Generative AI credits or prompt template unavailable).';
+        } else {
+          res.explanation = 'Generated via Smart Grid Heuristic Engine (Einstein GenAI offline fallback).';
+        }
+        return res;
       } catch (Exception ex) {
-        return fallbackProvider.translateQuery(request);
+        System.debug(
+          LoggingLevel.WARN,
+          'Einstein AI callout failed, falling back to offline mock: ' +
+          ex.getMessage()
+        );
+        SmartGridNLPEngine.TranslationResult res = fallbackProvider.translateQuery(
+          request
+        );
+        res.isFallback = true;
+        res.providerUsed = 'Offline_Mock';
+        res.explanation =
+          'Fallback heuristic translation (Einstein unavailable: ' +
+          ex.getMessage() +
+          ')';
+        return res;
       }
     }
 
-    return fallbackProvider.translateQuery(request);
+    SmartGridNLPEngine.TranslationResult res = fallbackProvider.translateQuery(
+      request
+    );
+    res.isFallback = true;
+    res.providerUsed = 'Offline_Mock';
+    return res;
   }
 
   public SmartGridNLPEngine.AssistantResult answerQuestion(
     SmartGridNLPEngine.AssistantRequest request
   ) {
-    return fallbackProvider.answerQuestion(request);
+    SmartGridNLPEngine.AssistantResult res = fallbackProvider.answerQuestion(
+      request
+    );
+    res.isFallback = true;
+    res.providerUsed = 'Offline_Mock';
+    return res;
   }
 }

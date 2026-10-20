@@ -311,7 +311,20 @@ Used for audit tracking, user engagement analytics, and security compliance.
 ### Custom Tabs & Flexipages
 
 - **Custom Tab**: `Smart_Grid_Explorer` (`/lightning/n/Smart_Grid_Explorer`) allows users to access the grid as a primary workspace navigation tab.
+- **Custom Tab**: `Smart_Grid_Admin_Studio` (`/lightning/n/Smart_Grid_Admin_Studio`) provides administrators with an interactive visual studio to configure, design, and deploy grid metadata without writing code. Assigned to the `SmartGrid_Admin` Permission Set.
 - **Master Flexipage**: `Smart_Grid_Demo` hosts the master grid component and provides an out-of-the-box interactive environment.
+
+---
+
+### Data Mobility & Audit Retention Governance
+
+- **24-Hour Rollback Safety Window**: Transactional rollback tokens issued during CSV import (`SmartGridImportService`) remain active for exactly 24 hours. Once the 24-hour window elapses, the rollback token automatically expires to protect downstream referential integrity.
+- **90-Day Audit Retention Policy**: All import events, field-level inline edits, and rollback operations are permanently recorded in `Smart_Grid_Edit_Log__c` and retained for 90 days. Administrators can schedule `SmartGridAuditPruneBatch` to automate audit pruning.
+- **Preflight Review Mode**: Configurable via `Preflight_Review_Mode__c` on `Smart_Grid_Config__mdt` or `preflight-review-mode` LWC attribute:
+  - `Adaptive_Bulk_Only` _(Default: 1-click Save for $\le 3$ records; auto-opens review modal when $> 3$ records or Fill-Down modified)_
+  - `Always_Mandatory` _(Enforces visual diff confirmation modal on all saves; recommended for financial or compliance objects)_
+  - `Optional` _(Direct 1-click save always; review modal triggered manually via toolbar eyeball icon)_
+- **Resilient AI Graceful Degradation**: When `Provider_Type__c` is set to `Einstein`, if active Einstein 1 Generative AI credits are absent or Prompt Builder templates are unconfigured, `SmartGridEinsteinAIProvider` automatically degrades to `Offline_Mock`, displaying a `⚡ Offline Engine` badge rather than generating unhandled exceptions.
 
 ---
 

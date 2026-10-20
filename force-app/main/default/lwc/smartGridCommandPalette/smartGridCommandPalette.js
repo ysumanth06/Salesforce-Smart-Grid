@@ -174,6 +174,13 @@ export default class SmartGridCommandPalette extends LightningElement {
     return this.recentPrompts && this.recentPrompts.length > 0;
   }
 
+  get isFallbackMode() {
+    return (
+      (this.translationResult && Boolean(this.translationResult.isFallback)) ||
+      false
+    );
+  }
+
   get hasAvailableFields() {
     return this.availableFields && this.availableFields.length > 0;
   }

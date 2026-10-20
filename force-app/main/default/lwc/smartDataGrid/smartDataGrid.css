@@ -64,3 +64,16 @@
   border-bottom: 1px solid #e2e8f0;
   min-height: 44px;
 }
+
+/* Responsive Toolbar Wrapping (<1400px) */
+@media (max-width: 1400px) {
+  .object-selector-combobox {
+    width: 125px !important;
+  }
+  .grid-secondary-toolbar {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}

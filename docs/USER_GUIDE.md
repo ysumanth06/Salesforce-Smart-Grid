@@ -231,22 +231,26 @@ When comparing multiple accounts, opportunities, or custom records, standard hor
 
 ## 8. Data Mobility, Safety & Change Auditing
 
-### Pre-Flight Bulk DML Visual Diff Confirmation Modal
+### Adaptive Pre-Flight Diff Confirmation & Review Modal
 
-Whenever you click **"Save All"**, Smart Grid presents a safety pre-flight review modal:
+Smart Grid employs an **Adaptive Safety Policy** to balance rapid data entry ergonomics with enterprise data protection:
 
-1. **Summary Badges**: Displays total records affected, operation type (Update, Insert, Delete), and modified fields.
-2. **Visual Diff Table**: Displays a side-by-side comparison of every changed field:
-   - Current Value: Shown in red strike-through (`$50,000`).
-   - New Value: Shown in bold green (`$75,000`).
-3. **Per-Field Revert**: Revert unintended individual field edits directly from the modal before applying changes.
+1. **Micro-Edits ($\le 3$ Records)**: Clicking the toolbar **"Save"** button or pressing `Cmd+S` / `Ctrl+S` commits modifications directly in 1 click, delivering instantaneous spreadsheet speed.
+2. **Bulk Edits ($> 3$ Records or Fill-Down)**: Modifying more than 3 records automatically triggers the **Pre-Flight Diff Confirmation Modal** before any database commit occurs.
+3. **On-Demand Visual Diff**: You can manually inspect pending changes at any time by clicking the **Preview Eyeball Icon** (`utility:preview`) next to the Save button.
+4. **Summary Badges & Per-Field Revert**:
+   - Displays total records affected, operation type (Update, Insert, Delete), and modified fields.
+   - Side-by-side comparison: Current values in red strike-through (`$50,000`) &rarr; Proposed values in bold green (`$75,000`).
+   - Click the revert icon on any cell to discard an accidental edit without cancelling the remaining batch.
 
-### Bulk CSV Import with Transactional Rollback ("Undo Import")
+### Bulk CSV Import with 24-Hour Transactional Rollback
 
-- Click **"Import Data"** &rarr; **"Upload CSV"**.
-- The importer automatically detects column headers and maps them to Salesforce fields.
-- Preview the first 10 rows and verify data types.
-- Upon completion, Smart Grid generates an **Audit Rollback Token**. If you discover that the CSV contained incorrect data, click **"Undo Import"** to purge the newly created batch in one transaction.
+- Click the Export dropdown menu &rarr; **"Import CSV Dataset..."** to launch the 3-step import wizard:
+  1. **Upload**: Drag and drop your `.csv` file. Smart Grid automatically parses headers and previews sample rows.
+  2. **Mapping**: Review and adjust automatic column-to-field mappings with live sample value inspection.
+  3. **Execute & Rollback Token**: Smart Grid performs chunked insertion with FLS sanitization and returns an **Audit Rollback Token**.
+- **24-Hour Safety Rollback Window**: If you discover that an import batch contained corrupt data, click **"Undo Import"** within 24 hours to delete all created records in a single transaction. After 24 hours, rollback capabilities are locked to prevent orphaning downstream child workflows.
+- **Audit Retention**: All import events and rollback actions are permanently logged to `Smart_Grid_Edit_Log__c` and retained for 90 days.
 
 ### Formula Shield
 

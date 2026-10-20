@@ -152,6 +152,14 @@
               onclick={handleExportExcel}
               data-testid="export-excel-item"
             ></lightning-menu-item>
+            <lightning-menu-divider></lightning-menu-divider>
+            <lightning-menu-item
+              value="import_csv"
+              label="Import CSV Dataset..."
+              prefix-icon-name="utility:upload"
+              onclick={handleOpenImportModal}
+              data-testid="import-csv-item"
+            ></lightning-menu-item>
           </lightning-button-menu>
         </template>
         <!-- Refresh Grid (bypasses cache) (TS-04) -->
@@ -513,6 +521,16 @@
     ondiscardall={handleDiscardAll}
     onsave={handleReviewSave}
   ></c-smart-grid-review-modal>
+
+  <!-- CSV Import Wizard Modal (BUG-03) -->
+  <template lwc:if={showImportModal}>
+    <c-smart-grid-import-modal
+      object-api-name={objectApiName}
+      available-fields={gridColumns}
+      onclose={handleCloseImportModal}
+      onimportsuccess={handleImportSuccess}
+    ></c-smart-grid-import-modal>
+  </template>
 
   <!-- Unified Smart Grid AI Modal (Option A) -->
   <c-smart-grid-command-palette

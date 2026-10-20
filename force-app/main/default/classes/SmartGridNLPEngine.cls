@@ -56,9 +56,15 @@ public with sharing class SmartGridNLPEngine {
     public String explanation { get; set; }
     @AuraEnabled
     public String errorMessage { get; set; }
+    @AuraEnabled
+    public Boolean isFallback { get; set; }
+    @AuraEnabled
+    public String providerUsed { get; set; }
 
     public TranslationResult() {
       this.isSuccess = false;
+      this.isFallback = false;
+      this.providerUsed = 'Offline_Mock';
       this.fields = new List<String>();
       this.filters = new List<GridQueryBuilder.FilterCondition>();
       this.confidenceScore = 1.00;
@@ -122,9 +128,15 @@ public with sharing class SmartGridNLPEngine {
     public List<AssistantAction> actions { get; set; }
     @AuraEnabled
     public String errorMessage { get; set; }
+    @AuraEnabled
+    public Boolean isFallback { get; set; }
+    @AuraEnabled
+    public String providerUsed { get; set; }
 
     public AssistantResult() {
       this.isSuccess = false;
+      this.isFallback = false;
+      this.providerUsed = 'Offline_Mock';
       this.actions = new List<AssistantAction>();
     }
   }

@@ -46,6 +46,7 @@ export default class SmartDataGrid extends LightningElement {
   @api depth = 0;
   @api parentRecordId;
   @api parentRelationshipField;
+  @api preflightReviewMode = "Adaptive_Bulk_Only";
 
   @track gridColumns;
   @track gridData = [];
@@ -65,6 +66,7 @@ export default class SmartDataGrid extends LightningElement {
   // Sprint 4 features state
   @track showAdvancedFilterModal = false;
   @track showReviewModal = false;
+  @track showImportModal = false;
   @track activeFilterExpression;
   @track activeFilterJson;
   @track selectedRecordForReadingPane;
@@ -879,28 +881,92 @@ export default class SmartDataGrid extends LightningElement {
     return this.draftValues && this.draftValues.length > 0;
   }
 
+  @api
   get draftStats() {
     if (!this.hasDrafts) {
-      return { totalChanges: 0, totalRecords: 0 };
+      return { totalChanges: 0, totalRecords: 0, newRowsCount: 0 };
     }
     let totalChanges = 0;
+    let newRowsCount = 0;
     this.draftValues.forEach((d) => {
+      if (d.Id && String(d.Id).startsWith("new-")) {
+        newRowsCount++;
+      }
       const keys = Object.keys(d).filter(
         (k) => k !== "Id" && !k.startsWith("_")
       );
       totalChanges += keys.length;
     });
-    return { totalChanges, totalRecords: this.draftValues.length };
+    return {
+      totalChanges,
+      totalRecords: this.draftValues.length,
+      newRowsCount
+    };
   }
 
+  @api
   get saveButtonLabel() {
     const stats = this.draftStats;
-    if (stats.totalChanges === 0) {
+    if (stats.totalRecords === 0) {
       return "Save";
+    }
+    if (stats.totalChanges === 0 && stats.newRowsCount > 0) {
+      const rowWord = stats.newRowsCount === 1 ? "new row" : "new rows";
+      return `Save (${stats.newRowsCount} ${rowWord})`;
     }
     const changeWord = stats.totalChanges === 1 ? "change" : "changes";
     const rowWord = stats.totalRecords === 1 ? "row" : "rows";
     return `Save (${stats.totalChanges} ${changeWord} across ${stats.totalRecords} ${rowWord})`;
+  }
+
+  @api
+  setDraftValues(vals) {
+    this.draftValues = vals || [];
+  }
+
+  @api
+  setSelectedRows(rows) {
+    this.selectedRowsList = rows || [];
+  }
+
+  @api
+  get isReviewModalOpen() {
+    return this.showReviewModal;
+  }
+
+  @api
+  get isImportModalOpen() {
+    return this.showImportModal;
+  }
+
+  @api
+  get isChartPanelOpen() {
+    return this.showChartPanel;
+  }
+
+  @api
+  triggerChartPanel() {
+    this.handleOpenChartPanel();
+  }
+
+  @api
+  triggerImportModal() {
+    this.handleOpenImportModal();
+  }
+
+  @api
+  closeImportModal() {
+    this.handleCloseImportModal();
+  }
+
+  @api
+  triggerTranspose() {
+    this.handleOpenTranspose();
+  }
+
+  @api
+  triggerToolbarSave() {
+    return this.handleToolbarSave();
   }
 
   handleOpenReviewModal() {
@@ -913,12 +979,24 @@ export default class SmartDataGrid extends LightningElement {
 
   async handleToolbarSave() {
     if (!this.hasDrafts) return;
+
+    const stats = this.draftStats;
+    const isBulk = stats.totalRecords > 3;
+    const shouldReview =
+      this.preflightReviewMode === "Always_Mandatory" ||
+      (this.preflightReviewMode !== "Optional" && isBulk);
+
+    if (shouldReview) {
+      this.showReviewModal = true;
+      return;
+    }
+
     await this.handleSave({ detail: { draftValues: this.draftValues } });
   }
 
   async handleReviewSave() {
     this.showReviewModal = false;
-    await this.handleToolbarSave();
+    await this.handleSave({ detail: { draftValues: this.draftValues } });
   }
 
   handleDiscardAll() {
@@ -2462,8 +2540,9 @@ export default class SmartDataGrid extends LightningElement {
       this.dispatchEvent(
         new ShowToastEvent({
           title: "Transpose Selection",
-          message: "Please select at least 2 records to transpose.",
-          variant: "info"
+          message:
+            "Please select at least 2 records to compare in Transpose Matrix mode.",
+          variant: "warning"
         })
       );
       return;
@@ -2478,6 +2557,29 @@ export default class SmartDataGrid extends LightningElement {
   async handleObjectChange(event) {
     const newObj = event.detail.value;
     if (!newObj || newObj === this.objectApiName) return;
+
+    if (this.hasDrafts) {
+      const confirmDiscard = await LightningConfirm.open({
+        message:
+          "You have unsaved changes. Switching objects will discard pending edits. Do you wish to proceed?",
+        theme: "warning",
+        label: "Unsaved Changes Warning"
+      });
+      if (!confirmDiscard) {
+        const combobox = this.template.querySelector(
+          ".object-selector-combobox"
+        );
+        if (combobox) {
+          combobox.value = this.objectApiName;
+        }
+        return;
+      }
+    }
+
+    if (this.dirtyStateManager) {
+      this.dirtyStateManager.clear();
+      this.updateUndoRedoState();
+    }
 
     this.isLoading = true;
     // eslint-disable-next-line @lwc/lwc/no-api-reassignments
@@ -2551,6 +2653,10 @@ export default class SmartDataGrid extends LightningElement {
   }
 
   handleOpenChartPanel() {
+    if (this.showChartPanel) {
+      this.showChartPanel = false;
+      return;
+    }
     this.showChartPanel = true;
     Promise.resolve().then(() => {
       const panel = this.template.querySelector(
@@ -2564,6 +2670,28 @@ export default class SmartDataGrid extends LightningElement {
 
   handleCloseChartPanel() {
     this.showChartPanel = false;
+  }
+
+  handleOpenImportModal() {
+    this.showImportModal = true;
+  }
+
+  handleCloseImportModal() {
+    this.showImportModal = false;
+  }
+
+  async handleImportSuccess(event) {
+    this.showImportModal = false;
+    const detail = event.detail;
+    const inserted = detail ? detail.totalInserted || 0 : 0;
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title: "Import Successful",
+        message: `Successfully imported ${inserted} record(s). Refreshing grid...`,
+        variant: "success"
+      })
+    );
+    await this.handleRefresh();
   }
 
   _applyDefaultChartFields() {

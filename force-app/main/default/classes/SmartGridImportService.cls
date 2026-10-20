@@ -118,13 +118,21 @@ public with sharing class SmartGridImportService {
 
     result.isSuccess = (result.totalInserted > 0);
     result.rollbackToken =
-      'ROLLBACK_' + String.valueOf(Crypto.getRandomInteger()).replace('-', '');
+      'ROLLBACK_' +
+      String.valueOf(System.currentTimeMillis()) +
+      '_' +
+      String.valueOf(Crypto.getRandomInteger()).replace('-', '');
 
     return result;
   }
 
+  @TestVisible
+  public static Long maxRollbackAgeSeconds = 86400; // 24 Hours
+  @TestVisible
+  public static Long mockCurrentTimeMillis;
+
   /**
-   * @description Executes safety rollback by deleting records created by an import token
+   * @description Executes safety rollback by deleting records created by an import token within the 24-hour retention window
    * @param rollbackToken Verification token from executeImport
    * @param recordIds List of record IDs to remove
    * @return RollbackResult summary
@@ -148,6 +156,25 @@ public with sharing class SmartGridImportService {
         'Invalid rollback request: Token or Record ID list is missing.'
       );
       return result;
+    }
+
+    // 24-Hour Expiration Retention Policy Check
+    Long nowMillis = (mockCurrentTimeMillis != null)
+      ? mockCurrentTimeMillis
+      : System.currentTimeMillis();
+
+    if (rollbackToken.startsWith('ROLLBACK_')) {
+      String[] parts = rollbackToken.split('_');
+      if (parts.size() >= 2 && parts[1].isNumeric()) {
+        Long tokenMillis = Long.valueOf(parts[1]);
+        Long elapsedSeconds = (nowMillis - tokenMillis) / 1000;
+        if (elapsedSeconds > maxRollbackAgeSeconds) {
+          result.errorMessages.add(
+            'ROLLBACK_EXPIRED: The 24-hour safety rollback window has elapsed. Records are now permanent. Please consult your Salesforce Administrator or use Mass Delete.'
+          );
+          return result;
+        }
+      }
     }
 
     // Verify delete access on target SObject
@@ -178,6 +205,34 @@ public with sharing class SmartGridImportService {
     }
 
     result.isSuccess = (result.totalDeleted > 0);
+
+    // Audit trail logging for rollback operations
+    if (
+      result.isSuccess &&
+      Schema.sObjectType.Smart_Grid_Edit_Log__c.isCreateable()
+    ) {
+      try {
+        List<Smart_Grid_Edit_Log__c> auditLogs = new List<Smart_Grid_Edit_Log__c>();
+        Id currentUserId = UserInfo.getUserId();
+        for (Id deletedId : recordIds) {
+          Smart_Grid_Edit_Log__c log = new Smart_Grid_Edit_Log__c();
+          log.Grid_Name__c = 'CSV_IMPORT_ROLLBACK';
+          log.Record_Id__c = String.valueOf(deletedId);
+          log.Field_Name__c = 'STATUS';
+          log.Old_Value__c = rollbackToken;
+          log.New_Value__c = 'DELETED_VIA_ROLLBACK';
+          log.Changed_By__c = currentUserId;
+          auditLogs.add(log);
+        }
+        Database.insert(auditLogs, false, AccessLevel.USER_MODE);
+      } catch (Exception ex) {
+        System.debug(
+          LoggingLevel.WARN,
+          'Could not write rollback audit log: ' + ex.getMessage()
+        );
+      }
+    }
+
     return result;
   }
 
